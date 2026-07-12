@@ -1,9 +1,24 @@
 @import "tailwindcss";
 
-:root { --ink:#132f2c; --green:#0b6f62; --deep:#075248; --mint:#d9f1e9; --cream:#f7f5ee; --coral:#ff6c5c; --line:#dfe7e2; --muted:#647774; --white:#fff; }
+:root {
+  --ink:#25243f;
+  --green:#167d3b;
+  --deep:#3f3f9b;
+  --mint:#e8fae8;
+  --cream:#faf8fb;
+  --coral:#d94b28;
+  --line:#e4e1ec;
+  --muted:#6d6b7d;
+  --white:#fff;
+  --brand-green:#5cdd63;
+  --brand-orange:#ff7048;
+  --brand-rose:#d98a9d;
+  --brand-violet:#7878e8;
+  --brand-violet-deep:#302f70;
+}
 * { box-sizing:border-box; }
 html { scroll-behavior:smooth; }
-body { margin:0; background:#fbfcf9; color:var(--ink); font-family:var(--font-sans),sans-serif; }
+body { margin:0; overflow-x:hidden; background:#fdfcfe; color:var(--ink); font-family:var(--font-sans),sans-serif; }
 button,input { font:inherit; }
 button,a { -webkit-tap-highlight-color:transparent; }
 button { color:inherit; }
@@ -11,7 +26,7 @@ a { color:inherit; text-decoration:none; }
 .site-header { height:76px; padding:0 clamp(22px,5vw,78px); display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #e8ece7; background:rgba(255,255,255,.92); backdrop-filter:blur(14px); position:sticky; top:0; z-index:50; }
 .brand { display:flex; align-items:center; gap:10px; font:800 20px/1 var(--font-display),sans-serif; letter-spacing:-.6px; }
 .brand>span:last-child>span { color:var(--coral); }
-.brand-mark { width:34px; height:34px; border-radius:11px; color:white; display:grid; place-items:center; background:var(--green); transform:rotate(-4deg); box-shadow:0 7px 18px rgba(11,111,98,.22); }
+.brand-mark { width:34px; height:34px; border-radius:11px; color:var(--ink); display:grid; place-items:center; background:conic-gradient(from -8deg,var(--brand-green) 0 25%,var(--brand-orange) 0 50%,var(--brand-violet) 0 75%,var(--brand-rose) 0); transform:rotate(-4deg); box-shadow:0 7px 18px rgba(63,63,155,.22); }
 .site-header nav { display:flex; gap:34px; align-items:center; margin-left:auto; margin-right:30px; }
 .site-header nav a,.nav-link { font-weight:650; font-size:14px; background:none; border:0; padding:10px 0; cursor:pointer; color:#405552; }
 .site-header nav a:hover,.nav-link:hover { color:var(--green); }
@@ -222,6 +237,28 @@ footer>small { grid-column:1/-1; border-top:1px solid rgba(255,255,255,.08); pad
 @media (max-width:430px) { .hero h1{font-size:43px}.hero-stage{transform:scale(.76);width:116%;margin-left:-8%;margin-bottom:-95px}.product-grid{grid-template-columns:1fr 1fr}.product-card:nth-child(n+7){display:none}.product-image-wrap{height:115px}.product-visual{transform:rotate(-4deg) scale(.72)}.steps{grid-template-columns:1fr}.steps>div{min-height:auto}.cart-item{grid-template-columns:48px 1fr}.quantity{grid-column:2;width:max-content}.portal-metrics{grid-template-columns:1fr}.portal-metrics>div:last-child{grid-column:auto}.request-list article{grid-template-columns:1fr auto}.request-list article>div:nth-child(2){display:none} }
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
 
+/* MED250 palette derived from the supplied four-colour brand mark. */
+.site-header { border-bottom-color:#e9e5ef; }
+.pharmacy-signin { background:#eeeeff; color:var(--brand-violet-deep); }
+.bag-button,.mobile-toggle { background:var(--brand-violet-deep); }
+.bag-button b { background:var(--brand-orange); color:var(--ink); }
+.hero {
+  background:
+    radial-gradient(circle at 88% 12%,rgba(120,120,232,.18) 0,transparent 29%),
+    radial-gradient(circle at 12% 80%,rgba(92,221,99,.13) 0,transparent 28%),
+    linear-gradient(145deg,#fff 0%,#fbf7fb 100%);
+}
+.hero-stage:before { background:linear-gradient(145deg,rgba(92,221,99,.42),rgba(120,120,232,.18) 54%,rgba(217,138,157,.24)); }
+.orbit { border-color:rgba(120,120,232,.2); }
+.hero-badge { background:var(--brand-violet-deep); box-shadow:0 14px 30px rgba(48,47,112,.25); }
+.hero-badge>span { background:var(--brand-orange); color:var(--ink); }
+.category-row button.active { background:var(--brand-violet-deep); border-color:var(--brand-violet-deep); }
+.product-card:nth-child(4n + 1) .product-image-wrap { background:#f0fbef; }
+.product-card:nth-child(4n + 2) .product-image-wrap { background:#fff1ec; }
+.product-card:nth-child(4n + 3) .product-image-wrap { background:#fbf0f3; }
+.product-card:nth-child(4n) .product-image-wrap { background:#f0f0ff; }
+.footer-brand .brand-mark,.portal-sidebar>.brand .brand-mark { background:conic-gradient(from -8deg,var(--brand-green) 0 25%,var(--brand-orange) 0 50%,var(--brand-violet) 0 75%,var(--brand-rose) 0); color:var(--ink); }
+
 /* Commerce-first marketplace shell */
 .site-header { gap:18px; }
 .site-header .brand { flex:none; }
@@ -403,6 +440,13 @@ select,textarea { font:inherit; }
 
 @media (max-width:760px) {
   .preview-banner { align-items:flex-start; text-align:left; }
+  .preview-banner,.marketplace-note,.market-banner { width:100%; max-width:100vw; }
+  .preview-banner span,.marketplace-note p { min-width:0; flex:1; max-width:calc(100vw - 72px); overflow-wrap:anywhere; }
+  .market-banner>div { width:100%; min-width:0; max-width:calc(100vw - 40px); }
+  .market-banner>div>p { width:100%; max-width:100%; overflow-wrap:anywhere; }
+  .market-banner h1 { max-width:100%; font-size:35px; letter-spacing:-1.8px; }
+  .market-banner h1 em { display:block; width:min(330px,100%); max-width:100%; white-space:normal; overflow-wrap:break-word; }
+  .market-banner-stats,.market-banner-stats>div { min-width:0; max-width:100%; }
   .compliance-strip,.selected-contact { align-items:flex-start; flex-direction:column; }
   .compliance-strip>a { align-self:flex-start; }
   .selected-contact>div:last-child { align-items:stretch; flex-direction:column; width:100%; }
@@ -420,3 +464,34 @@ select,textarea { font:inherit; }
   .selected-order-list article { grid-template-columns:1fr 1fr; }
   .selected-order-list article>div:nth-child(4) { display:flex; }
 }
+
+/* Final brand-theme layer: keep the marketplace shell on the supplied palette. */
+.commerce-nav,.network-strip,.portal-sidebar,footer,.selected-contact { background:var(--brand-violet-deep); }
+.commerce-nav a:last-child,.network-icon { color:var(--brand-green); }
+.header-search:focus-within { border-color:var(--brand-violet); box-shadow:0 0 0 3px rgba(120,120,232,.16); }
+.header-search a,.network-strip>button,.primary-wide { background:var(--brand-orange); color:var(--ink); }
+.market-banner {
+  background:
+    radial-gradient(circle at 84% 18%,rgba(120,120,232,.2),transparent 31%),
+    radial-gradient(circle at 68% 90%,rgba(217,138,157,.22),transparent 26%),
+    linear-gradient(135deg,rgba(92,221,99,.13),rgba(255,112,72,.08) 54%,#fff);
+  border-bottom-color:#e6e1ed;
+}
+.market-banner-stats>div { border-color:#e3deeb; box-shadow:0 8px 24px rgba(48,47,112,.07); }
+.market-banner-stats>div:nth-child(2) b { color:var(--coral); }
+.market-banner-stats>div:nth-child(3) b { color:var(--brand-violet-deep); }
+.pharmacy-directory,.how-section { background:#f7f5fb; }
+.directory-status,.estimate { background:var(--brand-violet-deep); }
+.preview-banner { color:#603a44; background:#fff0f3; border-bottom-color:#e9c3cc; }
+.preview-banner svg { color:#a34860; }
+.marketplace-note {
+  color:var(--ink);
+  background:linear-gradient(90deg,rgba(92,221,99,.18),rgba(255,112,72,.14) 35%,rgba(217,138,157,.17) 68%,rgba(120,120,232,.17));
+  border-bottom-color:#ddd8e9;
+}
+.marketplace-note svg { color:var(--brand-violet-deep); }
+.portal-overlay { background:#e8e6f2; }
+.portal-sidebar nav button b { background:var(--brand-orange); color:var(--ink); }
+.portal-user>span { background:var(--brand-green); color:var(--ink); }
+.price-contribution { background:#fff1ec; border-color:#ffc9b8; }
+.price-contribution>div>span { color:var(--coral); }
