@@ -21,6 +21,8 @@ test("server-renders the MED250 marketplace", async () => {
   assert.match(html, /Find products for one request/);
   assert.match(html, /Check licensed pharmacy records/);
   assert.match(html, /Connected private preview/);
+  assert.match(html, /marketplace—not a simple pharmacy website/);
+  assert.match(html, /comparable to Amazon/);
   assert.match(html, /Pharmacy portal/);
   assert.match(html, /og:image/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/);

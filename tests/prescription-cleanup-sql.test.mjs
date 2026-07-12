@@ -224,6 +224,10 @@ test("restrictive Storage policies override a pre-existing permissive policy", a
       $$;
       create function storage.foldername(p_name text) returns text[]
       language sql immutable as $$ select string_to_array(p_name, '/') $$;
+      create function dawanear_private.dawanear_selected_pharmacy_can_read(p_name text)
+      returns boolean language sql stable security definer as $$
+        select coalesce(current_setting('test.selected_pharmacy', true), '') = 'true'
+      $$;
       create table public.dawanear_orders (
         id uuid primary key default gen_random_uuid(),
         user_id uuid not null,
@@ -258,6 +262,8 @@ test("restrictive Storage policies override a pre-existing permissive policy", a
         to authenticated;
       grant execute on function dawanear_private.dawanear_customer_can_delete_prescription(text)
         to authenticated;
+      grant execute on function dawanear_private.dawanear_selected_pharmacy_can_read(text)
+        to authenticated;
       create policy preexisting_broad_storage_policy
         on storage.objects for all to anon, authenticated
         using (true) with check (true);
@@ -267,12 +273,20 @@ test("restrictive Storage policies override a pre-existing permissive policy", a
       "drop policy if exists dawanear_prescriptions_owner_select",
     ));
     await db.exec(sqlRange(
+      "drop policy if exists dawanear_prescriptions_owner_select",
+      "drop policy if exists dawanear_prescriptions_owner_delete",
+    ));
+    await db.exec(sqlRange(
       "drop policy if exists dawanear_prescriptions_owner_delete",
       "-- Restrictive policies make these invariants survive composition",
     ));
     await db.exec(sqlRange(
       "drop policy if exists dawanear_prescriptions_anon_insert_guard",
       "drop policy if exists dawanear_prescriptions_selected_pharmacy_select",
+    ));
+    await db.exec(sqlRange(
+      "drop policy if exists dawanear_prescriptions_selected_pharmacy_select",
+      "-- Explicit Data API grants",
     ));
     await db.query(`
       insert into storage.objects(bucket_id, name, owner_id)
@@ -297,6 +311,15 @@ test("restrictive Storage policies override a pre-existing permissive policy", a
       insert into storage.objects(bucket_id, name, owner_id)
       values ('dawanear-prescriptions', $1, $2)
     `, [`${userId}/safe`, userId]);
+    const ownerVisibleRows = (await db.query(`
+      select name from storage.objects
+      where bucket_id = 'dawanear-prescriptions'
+      order by name
+    `)).rows;
+    assert.deepEqual(ownerVisibleRows, [
+      { name: `${userId}/active` },
+      { name: `${userId}/safe` },
+    ]);
     const updatedTargetRows = (await db.query(`
       update storage.objects set owner_id = 'replaced'
       where bucket_id = 'dawanear-prescriptions' and name = $1
@@ -320,6 +343,9 @@ test("restrictive Storage policies override a pre-existing permissive policy", a
       insert into storage.objects(bucket_id, name, owner_id)
       values ('unrelated-bucket', 'object', $1)
     `, [userId]);
+    assert.deepEqual((await db.query(`
+      select name from storage.objects where bucket_id = 'unrelated-bucket'
+    `)).rows, [{ name: "object" }]);
     await db.exec(`
       update storage.objects set owner_id = owner_id
       where bucket_id = 'unrelated-bucket' and name = 'object';
@@ -327,9 +353,23 @@ test("restrictive Storage policies override a pre-existing permissive policy", a
       where bucket_id = 'unrelated-bucket' and name = 'object';
     `);
 
+    const unrelatedUser = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+    await db.query("select set_config('request.jwt.claim.sub', $1, false)", [unrelatedUser]);
+    assert.deepEqual((await db.query(`
+      select name from storage.objects where bucket_id = 'dawanear-prescriptions'
+    `)).rows, []);
+    await db.query("select set_config('test.selected_pharmacy', 'true', false)");
+    assert.deepEqual((await db.query(`
+      select name from storage.objects where bucket_id = 'dawanear-prescriptions'
+    `)).rows, [{ name: `${userId}/active` }]);
+    await db.query("select set_config('test.selected_pharmacy', 'false', false)");
+
     await db.exec("reset role");
     await db.query("select set_config('request.jwt.claim.sub', '', false)");
     await db.exec("set role anon");
+    assert.deepEqual((await db.query(`
+      select name from storage.objects where bucket_id = 'dawanear-prescriptions'
+    `)).rows, []);
     await assert.rejects(
       db.query(`
         insert into storage.objects(bucket_id, name, owner_id)

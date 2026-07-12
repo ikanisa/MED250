@@ -930,6 +930,8 @@ export default function Marketplace() {
 
       {previewMode ? <div className="preview-banner"><ShieldCheck size={16} /><span><b>Connected private preview.</b> The catalogue and pharmacy directory are live on Supabase; customer ordering remains off until products, licensed partners, GPS locations, data permissions, and Rwanda regulatory approvals are confirmed.</span></div> : null}
 
+      <aside className="marketplace-note" aria-label="Marketplace model note"><Store size={19} /><p><b>MED250 is a marketplace—not a simple pharmacy website.</b> Its commerce model is comparable to Amazon: customers build one basket, multiple independent pharmacies can respond with offers, and the customer compares and chooses the seller. MED250 is not affiliated with or endorsed by Amazon.</p></aside>
+
       <div className="commerce-nav" id="top">
         <a href="#marketplace"><Menu size={16} /> All departments</a>
         {categories.slice(1).map((item) => <button key={item} onClick={() => { setCategory(item); setVisibleCount(24); document.querySelector("#marketplace")?.scrollIntoView(); }}>{item}</button>)}

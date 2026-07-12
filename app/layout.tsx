@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const image = `${protocol}://${host}/og.png`;
   return {
     title: "MED250 — Rwanda pharmacy marketplace launch candidate",
-    description: "A privacy-first launch candidate for requesting itemised offers from approved online pharmacies in Rwanda.",
+    description: "An Amazon-style multi-pharmacy marketplace for building one basket, comparing itemised offers, and choosing a licensed pharmacy in Rwanda.",
     openGraph: { title: "MED250", description: "A privacy-first Rwanda pharmacy marketplace launch candidate.", images: [{ url: image, width: 1200, height: 630 }] },
     twitter: { card: "summary_large_image", title: "MED250", description: "A privacy-first Rwanda pharmacy marketplace launch candidate.", images: [image] },
   };

@@ -312,6 +312,9 @@ button:disabled { cursor:not-allowed; }
 select,textarea { font:inherit; }
 .preview-banner { min-height:42px; padding:9px clamp(20px,5vw,78px); display:flex; align-items:center; justify-content:center; gap:9px; color:#6c4a18; background:#fff4d7; border-bottom:1px solid #efd79a; font-size:10px; line-height:1.45; text-align:center; }
 .preview-banner svg { flex:none; color:#a86b13; }
+.marketplace-note { display:flex; align-items:center; gap:12px; padding:12px clamp(20px,5vw,78px); background:#fff8ec; color:#46351e; border-bottom:1px solid #ead8b9; }
+.marketplace-note svg { flex:0 0 auto; color:var(--green); }
+.marketplace-note p { margin:0; font-size:12px; line-height:1.5; }
 .dosage-art { width:150px; height:108px; border-radius:20px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; color:#166a5d; background:linear-gradient(145deg,#e2f2eb,#f4f8f5); border:1px solid rgba(18,89,78,.1); box-shadow:0 12px 28px rgba(23,66,59,.08); }
 .dosage-art span { max-width:122px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#52716b; font-size:8px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; }
 .dosage-art img { width:100%; height:100%; object-fit:contain; border-radius:inherit; }
