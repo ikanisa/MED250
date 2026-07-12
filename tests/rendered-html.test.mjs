@@ -243,6 +243,8 @@ test("coordinates cleanup for every order sharing one prescription path", async 
   assert.match(migration, /create policy dawanear_prescriptions_authenticated_insert_guard[\s\S]*as restrictive for insert[\s\S]*dawanear_customer_can_insert_prescription\(name\)/);
   assert.match(migration, /create policy dawanear_prescriptions_authenticated_delete_guard[\s\S]*as restrictive for delete[\s\S]*dawanear_customer_can_delete_prescription\(name\)/);
   assert.match(migration, /create policy dawanear_prescriptions_no_client_update[\s\S]*as restrictive for update[\s\S]*bucket_id <> 'dawanear-prescriptions'/);
+  assert.match(migration, /create policy dawanear_prescriptions_anon_select_guard[\s\S]*as restrictive for select[\s\S]*bucket_id <> 'dawanear-prescriptions'/);
+  assert.match(migration, /create policy dawanear_prescriptions_authenticated_select_guard[\s\S]*as restrictive for select[\s\S]*dawanear_selected_pharmacy_can_read\(name\)/);
 
   const recoveryCall = cleanup.indexOf('"dawanear_recover_expired_prescription_cleanup_claims"');
   const claimCall = cleanup.indexOf('"dawanear_claim_prescription_cleanup"');

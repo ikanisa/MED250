@@ -3193,6 +3193,25 @@ using (
   and dawanear_private.dawanear_selected_pharmacy_can_read(name)
 );
 
+-- SELECT policies are permissive too, so the same composition rule is needed
+-- to keep an unrelated broad policy from exposing private prescription keys.
+drop policy if exists dawanear_prescriptions_anon_select_guard on storage.objects;
+create policy dawanear_prescriptions_anon_select_guard
+on storage.objects as restrictive for select to anon
+using (bucket_id <> 'dawanear-prescriptions');
+
+drop policy if exists dawanear_prescriptions_authenticated_select_guard on storage.objects;
+create policy dawanear_prescriptions_authenticated_select_guard
+on storage.objects as restrictive for select to authenticated
+using (
+  bucket_id <> 'dawanear-prescriptions'
+  or (
+    owner_id::text = (select auth.uid())::text
+    and (storage.foldername(name))[1] = (select auth.uid())::text
+  )
+  or dawanear_private.dawanear_selected_pharmacy_can_read(name)
+);
+
 -- Explicit Data API grants (required by the 2026 Supabase exposure defaults). --
 
 grant usage on schema public to anon, authenticated, service_role;
