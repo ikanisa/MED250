@@ -1,0 +1,423 @@
+{
+  "generated_at": "2026-07-12T12:54:37.215Z",
+  "retail_pharmacies": {
+    "official_total": 766,
+    "parsed": 766,
+    "review": 0,
+    "source": "work/fda/retail-pharmacies-may-2026.txt",
+    "source_name": "Rwanda FDA - Licensed Human Retail Pharmacies May 2026",
+    "source_url": "https://rwandafda.gov.rw/medicines-inspection-licensed-premises/",
+    "completeness_checks": {
+      "every_source_row_parsed": true,
+      "sequential_source_serials": true,
+      "all_required_fields_present": true,
+      "all_dates_valid": true
+    },
+    "completeness": "complete",
+    "duplicate_professional_registration_numbers": [
+      {
+        "value": "NPC/A0560",
+        "source_serials": [
+          8,
+          295
+        ]
+      },
+      {
+        "value": "NPC/A0258",
+        "source_serials": [
+          26,
+          650
+        ]
+      },
+      {
+        "value": "NPC/A1343",
+        "source_serials": [
+          30,
+          624
+        ]
+      },
+      {
+        "value": "NPC/A1233",
+        "source_serials": [
+          32,
+          71
+        ]
+      },
+      {
+        "value": "NPC/A1210",
+        "source_serials": [
+          34,
+          301
+        ]
+      },
+      {
+        "value": "NPC/A1352",
+        "source_serials": [
+          36,
+          271
+        ]
+      },
+      {
+        "value": "NPC/A1284",
+        "source_serials": [
+          43,
+          212
+        ]
+      },
+      {
+        "value": "NPC/A1348",
+        "source_serials": [
+          44,
+          412
+        ]
+      },
+      {
+        "value": "NPC/A1326",
+        "source_serials": [
+          55,
+          137
+        ]
+      },
+      {
+        "value": "NPC/A0883",
+        "source_serials": [
+          60,
+          533
+        ]
+      },
+      {
+        "value": "NPC/A1335",
+        "source_serials": [
+          61,
+          190
+        ]
+      },
+      {
+        "value": "NPC/A0490",
+        "source_serials": [
+          74,
+          237
+        ]
+      },
+      {
+        "value": "NPC/A0569",
+        "source_serials": [
+          77,
+          116
+        ]
+      },
+      {
+        "value": "NPC/A0966",
+        "source_serials": [
+          78,
+          749
+        ]
+      },
+      {
+        "value": "NPC/A0976",
+        "source_serials": [
+          83,
+          89
+        ]
+      },
+      {
+        "value": "NPC/A0380",
+        "source_serials": [
+          86,
+          374
+        ]
+      },
+      {
+        "value": "NPC/A0401",
+        "source_serials": [
+          90,
+          542
+        ]
+      },
+      {
+        "value": "NPC/A1382",
+        "source_serials": [
+          91,
+          126
+        ]
+      },
+      {
+        "value": "NPC/A0757",
+        "source_serials": [
+          93,
+          712
+        ]
+      },
+      {
+        "value": "NPC/A1149",
+        "source_serials": [
+          101,
+          218,
+          291
+        ]
+      },
+      {
+        "value": "NPC/A1307",
+        "source_serials": [
+          109,
+          764
+        ]
+      },
+      {
+        "value": "NPC/A1002",
+        "source_serials": [
+          114,
+          296
+        ]
+      },
+      {
+        "value": "NPC/A0080",
+        "source_serials": [
+          131,
+          383
+        ]
+      },
+      {
+        "value": "NPC/A1020",
+        "source_serials": [
+          159,
+          714
+        ]
+      },
+      {
+        "value": "NPC/A1172",
+        "source_serials": [
+          167,
+          210
+        ]
+      },
+      {
+        "value": "NPC/A0566",
+        "source_serials": [
+          185,
+          496
+        ]
+      },
+      {
+        "value": "NPC/A0229",
+        "source_serials": [
+          187,
+          444
+        ]
+      },
+      {
+        "value": "NPC/A1384",
+        "source_serials": [
+          188,
+          318
+        ]
+      },
+      {
+        "value": "NPC/A1043",
+        "source_serials": [
+          222,
+          393
+        ]
+      },
+      {
+        "value": "NPC/A1351",
+        "source_serials": [
+          235,
+          236
+        ]
+      },
+      {
+        "value": "NPC/A1116",
+        "source_serials": [
+          243,
+          424
+        ]
+      },
+      {
+        "value": "NPC/A1287",
+        "source_serials": [
+          244,
+          489
+        ]
+      },
+      {
+        "value": "NPC/A0617",
+        "source_serials": [
+          263,
+          328,
+          676
+        ]
+      },
+      {
+        "value": "NPC/A0450",
+        "source_serials": [
+          264,
+          705
+        ]
+      },
+      {
+        "value": "NPC/A1164",
+        "source_serials": [
+          277,
+          433
+        ]
+      },
+      {
+        "value": "NPC/A1015",
+        "source_serials": [
+          323,
+          720
+        ]
+      },
+      {
+        "value": "NPC/A1365",
+        "source_serials": [
+          403,
+          763
+        ]
+      },
+      {
+        "value": "NPC/A0179",
+        "source_serials": [
+          428,
+          525
+        ]
+      },
+      {
+        "value": "NPC/A1214",
+        "source_serials": [
+          465,
+          548
+        ]
+      },
+      {
+        "value": "NPC/A0189",
+        "source_serials": [
+          491,
+          577
+        ]
+      },
+      {
+        "value": "NPC/A1191",
+        "source_serials": [
+          519,
+          752
+        ]
+      },
+      {
+        "value": "NPC/A0426",
+        "source_serials": [
+          526,
+          531
+        ]
+      },
+      {
+        "value": "NPC/A0078",
+        "source_serials": [
+          530,
+          688
+        ]
+      },
+      {
+        "value": "NPC/A0035",
+        "source_serials": [
+          547,
+          641
+        ]
+      }
+    ]
+  },
+  "online_pharmacies": {
+    "official_total": 3,
+    "extracted": 3,
+    "source_name": "Rwanda FDA - Licensed Online Pharmacies May 2026",
+    "source_url": "https://rwandafda.gov.rw/monitoring-tool/documents-management/uploads/1/Licensed-Premises/1781787371_5.%20%20LIST%20OF%20LICENSED%20ONLINE%20PHARMACIES-MAY%2020261.pdf",
+    "completeness_checks": {
+      "expected_row_count": true,
+      "sequential_source_serials": true,
+      "all_required_fields_present": true,
+      "all_dates_valid": true
+    },
+    "completeness": "complete"
+  },
+  "public_health_chemical_products_january_2026": {
+    "official_total": 314,
+    "official_pages": 34,
+    "imported": 0,
+    "status": "identified_not_imported",
+    "scope_note": "Public Health Chemical Products Register; includes medicated cosmetics and non-cosmetic chemicals and is not a cosmetics-only register.",
+    "source_name": "Rwanda FDA - Public Health Chemical Products Register January 2026",
+    "source_url": "https://rwandafda.gov.rw/wp-content/uploads/2026/02/eRWANDA-FDA-PUBLIC-HEALTH-CHEMICAL-PRODUCTS-REGISTER-JANUARY-2026-2.pdf",
+    "reason_not_imported": "Awaiting a complete official snapshot plus written data-reuse and product-marketing clearance."
+  },
+  "products": {
+    "official_total": 2480,
+    "official_valid": 2430,
+    "official_expiring_soon": 29,
+    "official_grace_period": 21,
+    "extracted": 2480,
+    "unique_registration_numbers": 2474,
+    "status_counts": {
+      "valid": 2430,
+      "expiring_soon": 29,
+      "grace_period": 21
+    },
+    "source": "work/fda/products-register.html",
+    "source_name": "Rwanda FDA - Registered Pharmaceutical Products July 2026",
+    "source_url": "https://rwandafda.gov.rw/register/monitoring_preview_register",
+    "completeness_checks": {
+      "expected_row_count": true,
+      "sequential_source_serials": true,
+      "all_rows_have_registration_numbers": true,
+      "all_rows_have_product_names": true,
+      "all_dates_valid": true,
+      "expected_status_counts": true,
+      "every_html_row_parsed": true
+    },
+    "completeness": "complete",
+    "duplicate_registration_numbers": [
+      {
+        "value": "RWANDA FDA-HMP-MA-1915",
+        "source_serials": [
+          592,
+          813
+        ]
+      },
+      {
+        "value": "RWANDA FDA-HMP-MA-2086",
+        "source_serials": [
+          710,
+          773
+        ]
+      },
+      {
+        "value": "RWANDA FDA-HMP-MA-1853",
+        "source_serials": [
+          811,
+          915
+        ]
+      },
+      {
+        "value": "RWANDA FDA-HMP-MA-1566",
+        "source_serials": [
+          827,
+          910
+        ]
+      },
+      {
+        "value": "RWANDA FDA-HMP-MA-1539",
+        "source_serials": [
+          997,
+          1469
+        ]
+      },
+      {
+        "value": "RWANDA FDA-HMP-MA-1188",
+        "source_serials": [
+          1278,
+          1289
+        ]
+      }
+    ]
+  }
+}

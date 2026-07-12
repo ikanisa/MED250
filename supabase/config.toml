@@ -1,0 +1,11 @@
+project_id = "dawanear-marketplace"
+
+# These administrative functions perform their own constant-time secret check.
+# Disabling the gateway JWT check is required for cron/admin callers that send
+# only the dedicated custom token header. The handlers still reject every
+# request without the corresponding Edge Function secret.
+[functions.geocode-pharmacies]
+verify_jwt = false
+
+[functions.cleanup-prescriptions]
+verify_jwt = false

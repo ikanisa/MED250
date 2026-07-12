@@ -1,0 +1,1272 @@
+import type { Session, User } from "@supabase/supabase-js";
+
+import { customerSupabase, pharmacySupabase } from "./supabase";
+
+const PRESCRIPTION_BUCKET = "dawanear-prescriptions";
+const MAX_PRESCRIPTION_BYTES = 10 * 1024 * 1024;
+const MAX_PAGE_SIZE = 1_000;
+
+const PRESCRIPTION_TYPES: Readonly<Record<string, string>> = {
+  "application/pdf": "pdf",
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+};
+
+type JsonRecord = Record<string, unknown>;
+
+export type Product = {
+  id: string;
+  brand: string;
+  generic: string;
+  strength: string;
+  form: string;
+  packSize: string;
+  category: string;
+  productType: string;
+  prescriptionStatus: string;
+  regulatoryStatus: string;
+  min: number;
+  max: number;
+  priceContributors: number;
+  imageUrl: string | null;
+  isOrderable: boolean;
+  accent?: string;
+};
+
+export type DirectoryPharmacy = {
+  id: string;
+  registryEntryKey: string;
+  registryType: string;
+  name: string;
+  responsibleProfessional: string;
+  responsibleProfessionalRegistration: string;
+  province: string;
+  district: string;
+  area: string;
+  licenseExpiresOn: string | null;
+  onlineLicenseVerified: boolean;
+  licenseNumber?: string;
+  sector?: string;
+  cell?: string;
+  address?: string;
+  googleMapsUrl?: string | null;
+  whatsapp?: string | null;
+  momoCode?: string | null;
+  rating?: number | null;
+  reviewCount?: number;
+  latitude?: number | null;
+  longitude?: number | null;
+  isVerified?: boolean;
+  sourceUrl?: string | null;
+};
+
+export type CartItem = Product & {
+  quantity: number;
+  customerMinRwf?: number | null;
+  customerMaxRwf?: number | null;
+  substitutesAllowed?: boolean;
+};
+
+export type CustomerProfile = {
+  userId: string;
+  whatsapp: string | null;
+  preferredLanguage: string;
+  createdAt: string | null;
+  updatedAt: string | null;
+};
+
+export type OfferItem = {
+  id: string;
+  orderItemId: string;
+  offeredProductId: string | null;
+  available: boolean;
+  isSubstitute: boolean;
+  unitPriceRwf: number | null;
+  quantity: number | null;
+  note: string | null;
+  product: Product | null;
+};
+
+export type OrderOffer = {
+  id: string;
+  orderId: string;
+  pharmacyId: string;
+  status: string;
+  complete: boolean;
+  totalRwf: number;
+  readyInMinutes: number | null;
+  note: string | null;
+  createdAt: string;
+  pharmacyName: string;
+  distanceM: number;
+  pharmacy: DirectoryPharmacy | null;
+  items: OfferItem[];
+};
+
+export type PharmacyMembership = {
+  membershipId: string | null;
+  pharmacyId: string;
+  pharmacyName: string;
+  licenseNumber: string;
+  role: string;
+  status: string;
+  whatsapp: string | null;
+  momoCode: string | null;
+  onlineLicenseVerified: boolean;
+};
+
+export type PharmacyRequestItem = {
+  orderItemId: string;
+  productId: string;
+  productName: string;
+  brand: string;
+  generic: string;
+  strength: string;
+  form: string;
+  packSize: string;
+  quantity: number;
+  customerMinRwf: number | null;
+  customerMaxRwf: number | null;
+  substitutesAllowed: boolean;
+};
+
+export type PharmacyRequest = {
+  orderId: string;
+  reference: string;
+  status: string;
+  distanceM: number;
+  createdAt: string;
+  expiresAt: string;
+  deliveryPreference: "pickup" | "delivery" | "either";
+  substitutesAllowed: boolean;
+  locationAccuracyM: number | null;
+  hasPrescription: boolean;
+  itemCount: number;
+  items: PharmacyRequestItem[];
+};
+
+export type OfferItemDraft = {
+  orderItemId: string;
+  available: boolean;
+  offeredProductId?: string | null;
+  isSubstitute?: boolean;
+  unitPriceRwf?: number | null;
+  quantity?: number | null;
+  note?: string | null;
+};
+
+export type OfferDraft = {
+  pharmacyId: string;
+  orderId: string;
+  readyInMinutes?: number | null;
+  note?: string | null;
+  items: OfferItemDraft[];
+};
+
+export type CreateOrderInput = {
+  clientRequestId: string;
+  latitude: number;
+  longitude: number;
+  locationAccuracyM?: number | null;
+  whatsapp?: string | null;
+  deliveryPreference?: "pickup" | "delivery" | "either";
+  substitutesAllowed?: boolean;
+  prescriptionPath?: string | null;
+  items: CreateOrderItem[];
+};
+
+export type CreateOrderItem = {
+  productId: string;
+  quantity: number;
+  customerMinRwf?: number | null;
+  customerMaxRwf?: number | null;
+  substitutesAllowed?: boolean;
+};
+
+export type CreateOrderResult = {
+  orderId: string;
+  recipientCount: number;
+};
+
+export type CloseOrderResult = {
+  orderId: string;
+  status: "completed" | "cancelled";
+  closedAt: string;
+};
+
+export type SubmitOfferResult = {
+  offerId: string;
+  totalRwf: number;
+  complete: boolean;
+};
+
+export type PriceContributionResult = {
+  productId: string;
+  min: number;
+  max: number;
+  priceContributors: number;
+};
+
+export type PharmacyClaimInput = {
+  pharmacyId: string;
+  contactEmail: string;
+  contactPhone?: string | null;
+  note?: string | null;
+};
+
+export type PharmacyClaim = {
+  id: string;
+  pharmacyId: string;
+  status: string;
+  contactEmail: string;
+  contactPhone: string | null;
+  note: string | null;
+  createdAt: string;
+};
+
+export type SelectedPharmacyContact = {
+  orderId: string;
+  offerId: string;
+  pharmacyId: string;
+  pharmacyName: string;
+  whatsapp: string | null;
+  momoCode: string | null;
+};
+
+export type ActiveOrder = {
+  orderId: string;
+  reference: string;
+  status: string;
+  createdAt: string;
+  expiresAt: string;
+  updatedAt: string;
+  deliveryPreference: "pickup" | "delivery" | "either";
+  substitutesAllowed: boolean;
+  recipientCount: number;
+  offerCount: number;
+  selectedOfferId: string | null;
+};
+
+export type PharmacySelectedOrder = {
+  orderId: string;
+  reference: string;
+  customerWhatsapp: string | null;
+  deliveryPreference: "pickup" | "delivery" | "either";
+  prescriptionPath: string | null;
+  prescriptionUrl: string | null;
+  prescriptionAccessSecondsRemaining: number | null;
+  selectedAt: string;
+  updatedAt: string;
+};
+
+/** True only when both isolated browser auth clients were created. */
+export const backendConfigured = customerSupabase !== null && pharmacySupabase !== null;
+
+function isRecord(value: unknown): value is JsonRecord {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function firstValue(record: JsonRecord, ...keys: string[]): unknown {
+  for (const key of keys) {
+    if (record[key] !== undefined && record[key] !== null) return record[key];
+  }
+  return null;
+}
+
+function stringValue(record: JsonRecord, ...keys: string[]): string {
+  const value = firstValue(record, ...keys);
+  return typeof value === "string" ? value.trim() : value == null ? "" : String(value).trim();
+}
+
+function catalogueText(record: JsonRecord, ...keys: string[]): string {
+  const value = stringValue(record, ...keys);
+  return !value || /^(?:—+|-+|n\/?a|null)$/i.test(value) ? "" : value;
+}
+
+function nullableString(record: JsonRecord, ...keys: string[]): string | null {
+  const value = stringValue(record, ...keys);
+  return value || null;
+}
+
+function numericValue(record: JsonRecord, ...keys: string[]): number | null {
+  const value = firstValue(record, ...keys);
+  if (value === "" || value == null) return null;
+  const number = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+function booleanValue(record: JsonRecord, fallback: boolean, ...keys: string[]): boolean {
+  const value = firstValue(record, ...keys);
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value !== 0;
+  if (typeof value === "string") {
+    if (["true", "t", "1", "yes"].includes(value.toLowerCase())) return true;
+    if (["false", "f", "0", "no"].includes(value.toLowerCase())) return false;
+  }
+  return fallback;
+}
+
+function requiredString(record: JsonRecord, label: string, ...keys: string[]): string {
+  const value = stringValue(record, ...keys);
+  if (!value) throw new Error(`The backend returned a ${label} without its required identifier.`);
+  return value;
+}
+
+function asRows(data: unknown): JsonRecord[] {
+  if (Array.isArray(data)) return data.filter(isRecord);
+  return isRecord(data) ? [data] : [];
+}
+
+function parseJsonRows(value: unknown): JsonRecord[] {
+  if (Array.isArray(value)) return value.filter(isRecord);
+  if (typeof value === "string") {
+    try {
+      const parsed: unknown = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed.filter(isRecord) : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
+function cleanContext(context: string): string {
+  return context.replace(/[.:\s]+$/, "");
+}
+
+/** Converts Supabase/PostgREST/Storage/Auth errors into concise, actionable UI errors. */
+export function normalizeDawaNearError(error: unknown, context = "MED250 request failed"): Error {
+  if (error instanceof Error && error.name === "DawaNearError") return error;
+
+  const record = isRecord(error) ? error : null;
+  const rawMessage = error instanceof Error
+    ? error.message
+    : record
+      ? stringValue(record, "message", "error_description", "details", "hint", "error")
+      : typeof error === "string"
+        ? error
+        : "Unknown backend error";
+  const code = record ? stringValue(record, "code", "statusCode", "status") : "";
+  const lower = `${code} ${rawMessage}`.toLowerCase();
+
+  let message = rawMessage || "Unknown backend error";
+  if (/failed to fetch|fetcherror|networkerror|network request failed/.test(lower)) {
+    message = "Could not reach MED250. Check your internet connection and try again.";
+  } else if (/anonymous.*(disabled|not enabled)|anonymous_provider_disabled/.test(lower)) {
+    message = "Guest checkout is not enabled yet. Enable Anonymous Sign-Ins in Supabase Auth.";
+  } else if (/invalid login credentials|email not confirmed/.test(lower)) {
+    message = "The pharmacy sign-in could not be verified. Request a new email code and try again.";
+  } else if (/rate.?limit|over_email_send_rate_limit|429/.test(lower)) {
+    message = "Too many attempts were made. Wait a moment, then try again.";
+  } else if (/jwt.*expired|refresh_token.*(invalid|not found)|session.*expired/.test(lower)) {
+    message = "Your session expired. Sign in again, then retry this action.";
+  } else if (/row-level security|violates row-level|permission denied|42501|unauthorized|403/.test(lower)) {
+    message = "You do not have permission for this action. Check that you are signed in with the correct account.";
+  } else if (/pgrst202|42883|function .* does not exist|could not find the function/.test(lower)) {
+    message = "This marketplace action is not installed in the configured Supabase project. Apply the MED250 marketplace migration and retry.";
+  } else if (/42p01|relation .* does not exist|could not find the table/.test(lower)) {
+    message = "The MED250 database schema is missing from the configured Supabase project.";
+  } else if (/23505|duplicate key|already exists/.test(lower)) {
+    message = "That record already exists. Refresh the page before trying again.";
+  } else if (/payload too large|file.*too large|413/.test(lower)) {
+    message = "The prescription file is too large. Upload a file no larger than 10 MB.";
+  }
+
+  const normalized = new Error(`${cleanContext(context)}: ${message}`);
+  normalized.name = "DawaNearError";
+  return normalized;
+}
+
+export function readableDawaNearError(error: unknown): string {
+  return normalizeDawaNearError(error).message;
+}
+
+function requireCustomerBackend() {
+  if (!customerSupabase) {
+    throw normalizeDawaNearError(
+      "Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, then restart the site.",
+      "MED250 customer backend is not configured",
+    );
+  }
+  return customerSupabase;
+}
+
+function requirePharmacyBackend() {
+  if (!pharmacySupabase) {
+    throw normalizeDawaNearError(
+      "Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, then restart the site.",
+      "MED250 pharmacy backend is not configured",
+    );
+  }
+  return pharmacySupabase;
+}
+
+function rethrow(context: string, error: unknown): never {
+  throw normalizeDawaNearError(error, context);
+}
+
+function requireNonEmpty(value: string, label: string): string {
+  const cleaned = value.trim();
+  if (!cleaned) throw new Error(`${label} is required.`);
+  return cleaned;
+}
+
+function requireInteger(value: number, label: string, minimum: number, maximum: number): number {
+  if (!Number.isInteger(value) || value < minimum || value > maximum) {
+    throw new Error(`${label} must be a whole number between ${minimum} and ${maximum}.`);
+  }
+  return value;
+}
+
+function normalizeRwandaWhatsapp(value: string | null | undefined): string | null {
+  if (!value?.trim()) return null;
+  let digits = value.replace(/\D/g, "");
+  if (digits.startsWith("0")) digits = `250${digits.slice(1)}`;
+  else if (digits.length === 9 && digits.startsWith("7")) digits = `250${digits}`;
+  if (!/^2507[2389]\d{7}$/.test(digits)) {
+    throw new Error("Enter a valid Rwanda mobile number, for example +250 788 123 456.");
+  }
+  return digits;
+}
+
+function normalizeEmail(value: string): string {
+  const email = value.trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new Error("Enter a valid pharmacy email address.");
+  }
+  return email;
+}
+
+async function customerSession(context: string): Promise<Session | null> {
+  const client = requireCustomerBackend();
+  const { data, error } = await client.auth.getSession();
+  if (error) rethrow(context, error);
+  return data.session;
+}
+
+async function pharmacySession(context: string): Promise<Session | null> {
+  const client = requirePharmacyBackend();
+  const { data, error } = await client.auth.getSession();
+  if (error) rethrow(context, error);
+  return data.session;
+}
+
+async function requirePermanentPharmacyUser(context: string): Promise<User> {
+  const session = await pharmacySession(context);
+  if (!session) throw new Error(`${context}: Sign in with your pharmacy email first.`);
+  if (session.user.is_anonymous === true) {
+    throw new Error(`${context}: Guest sessions cannot access the pharmacy portal. Sign in with your pharmacy email first.`);
+  }
+  return session.user;
+}
+
+export async function ensureAnonymousCustomer(): Promise<User> {
+  const client = requireCustomerBackend();
+  const { data: sessionData, error: sessionError } = await client.auth.getSession();
+  if (sessionError) rethrow("Could not restore your customer session", sessionError);
+  if (sessionData.session?.user) {
+    if (sessionData.session.user.is_anonymous !== true) {
+      throw new Error("Customer session isolation failed: the customer auth store contains a permanent identity.");
+    }
+    return sessionData.session.user;
+  }
+
+  const { data, error } = await client.auth.signInAnonymously();
+  if (error) rethrow("Could not start a private guest session", error);
+  if (!data.session || !data.user) {
+    throw new Error("Could not start a private guest session: Supabase returned no authenticated user.");
+  }
+  return data.user;
+}
+
+export async function loadCustomerProfile(): Promise<CustomerProfile | null> {
+  const user = await ensureAnonymousCustomer();
+  const client = requireCustomerBackend();
+  const { data, error } = await client
+    .from("dawanear_customer_profiles")
+    .select("user_id,whatsapp,preferred_language,created_at,updated_at")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (error) rethrow("Could not load your MED250 profile", error);
+  if (!isRecord(data)) return null;
+  return {
+    userId: requiredString(data, "profile", "user_id"),
+    whatsapp: nullableString(data, "whatsapp"),
+    preferredLanguage: stringValue(data, "preferred_language") || "en",
+    createdAt: nullableString(data, "created_at"),
+    updatedAt: nullableString(data, "updated_at"),
+  };
+}
+
+function pageSize(value: number): number {
+  if (!Number.isInteger(value) || value < 1 || value > MAX_PAGE_SIZE) {
+    throw new Error(`Page size must be a whole number between 1 and ${MAX_PAGE_SIZE}.`);
+  }
+  return value;
+}
+
+async function loadAllRows(table: string, orderColumn: string, requestedPageSize: number): Promise<JsonRecord[]> {
+  const client = requireCustomerBackend();
+  const size = pageSize(requestedPageSize);
+  const rows: JsonRecord[] = [];
+
+  for (let from = 0; ; from += size) {
+    const { data, error } = await client
+      .from(table)
+      .select("*")
+      .order(orderColumn, { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, from + size - 1);
+    if (error) rethrow(`Could not load ${table.replaceAll("_", " ")}`, error);
+    const page = asRows(data);
+    rows.push(...page);
+    if (page.length < size) return rows;
+  }
+}
+
+function mapProduct(row: JsonRecord): Product {
+  const id = requiredString(row, "catalogue product", "id", "product_id");
+  const registration = catalogueText(row, "registration_number");
+  const generic = catalogueText(row, "generic", "generic_name");
+  const brand = catalogueText(row, "brand", "brand_name") || generic || registration || `Product ${id}`;
+  const prescriptionStatus = stringValue(row, "prescription_status")
+    || (booleanValue(row, false, "prescription_required") ? "prescription" : "unclassified");
+  const regulatoryStatus = stringValue(row, "regulatory_status") || "unclassified";
+  const rawMin = numericValue(row, "min", "price_min_rwf");
+  const rawMax = numericValue(row, "max", "price_max_rwf");
+  const min = Math.max(0, Math.round(rawMin ?? rawMax ?? 0));
+  const max = Math.max(min, Math.round(rawMax ?? rawMin ?? 0));
+  const defaultOrderable = !["expired", "withdrawn", "suspended"].includes(regulatoryStatus.toLowerCase());
+
+  return {
+    id,
+    brand,
+    generic,
+    strength: catalogueText(row, "strength"),
+    form: catalogueText(row, "form", "dosage_form") || "Registered product",
+    packSize: catalogueText(row, "pack_size", "packSize"),
+    category: stringValue(row, "category") || "Medicines",
+    productType: stringValue(row, "product_type", "productType") || "medicine",
+    prescriptionStatus,
+    regulatoryStatus,
+    min,
+    max,
+    priceContributors: Math.max(0, Math.round(numericValue(row, "price_contributors", "priceContributors") ?? 0)),
+    imageUrl: nullableString(row, "image_url", "imageUrl"),
+    isOrderable: booleanValue(row, defaultOrderable, "is_orderable", "isOrderable"),
+  };
+}
+
+function mapDirectoryPharmacy(row: JsonRecord): DirectoryPharmacy {
+  const id = requiredString(row, "directory pharmacy", "id", "pharmacy_id");
+  const registryType = stringValue(row, "registry_type", "registryType") || "retail";
+  return {
+    id,
+    registryEntryKey: stringValue(row, "registry_entry_key", "registryEntryKey") || id,
+    registryType,
+    name: stringValue(row, "name", "pharmacy_name") || "Licensed pharmacy",
+    responsibleProfessional: stringValue(row, "responsible_professional", "technician"),
+    responsibleProfessionalRegistration: stringValue(
+      row,
+      "responsible_professional_registration",
+      "council_registration_number",
+    ),
+    province: stringValue(row, "province"),
+    district: stringValue(row, "district"),
+    area: stringValue(row, "area", "sector_cell_raw", "sector"),
+    licenseExpiresOn: nullableString(row, "license_expires_on", "license_expiration_date"),
+    onlineLicenseVerified: booleanValue(
+      row,
+      registryType === "online",
+      "online_license_verified",
+      "onlineLicenseVerified",
+    ),
+    licenseNumber: stringValue(row, "license_number", "council_registration_number"),
+    sector: stringValue(row, "sector"),
+    cell: stringValue(row, "cell"),
+    address: stringValue(row, "address", "google_formatted_address", "sector_cell_raw"),
+    googleMapsUrl: nullableString(row, "google_maps_url"),
+    whatsapp: nullableString(row, "whatsapp"),
+    momoCode: nullableString(row, "momo_code"),
+    rating: numericValue(row, "rating"),
+    reviewCount: Math.max(0, Math.round(numericValue(row, "review_count") ?? 0)),
+    latitude: numericValue(row, "latitude", "lat"),
+    longitude: numericValue(row, "longitude", "lng", "lon"),
+    isVerified: booleanValue(row, stringValue(row, "geocode_status") === "verified", "is_verified"),
+    sourceUrl: nullableString(row, "source_url"),
+  };
+}
+
+export async function loadCatalogue(requestedPageSize = MAX_PAGE_SIZE): Promise<Product[]> {
+  const rows = await loadAllRows("dawanear_product_catalog", "brand_name", requestedPageSize);
+  return rows.map(mapProduct);
+}
+
+export async function loadPharmacyDirectory(requestedPageSize = MAX_PAGE_SIZE): Promise<DirectoryPharmacy[]> {
+  const rows = await loadAllRows("dawanear_pharmacy_directory", "name", requestedPageSize);
+  return rows.map(mapDirectoryPharmacy);
+}
+
+export async function uploadPrescription(file: File): Promise<string> {
+  if (!file || typeof file.name !== "string" || typeof file.size !== "number" || typeof file.type !== "string") {
+    throw new Error("Choose a prescription PDF or image before uploading.");
+  }
+  if (file.size < 1) throw new Error("The selected prescription file is empty.");
+  if (file.size > MAX_PRESCRIPTION_BYTES) {
+    throw new Error("The prescription file is too large. Upload a file no larger than 10 MB.");
+  }
+  const contentType = file.type.toLowerCase().split(";")[0].trim();
+  const extension = PRESCRIPTION_TYPES[contentType];
+  if (!extension) {
+    throw new Error("Unsupported prescription file. Upload a PDF, JPG, PNG, or WebP image.");
+  }
+
+  const user = await ensureAnonymousCustomer();
+  if (!globalThis.crypto?.randomUUID) {
+    throw new Error("Secure file naming is unavailable in this browser. Update your browser and try again.");
+  }
+  const path = `${user.id}/${globalThis.crypto.randomUUID()}.${extension}`;
+  const client = requireCustomerBackend();
+  const { data, error } = await client.storage.from(PRESCRIPTION_BUCKET).upload(path, file, {
+    cacheControl: "3600",
+    contentType,
+    upsert: false,
+  });
+  if (error) rethrow("Could not upload the prescription", error);
+  if (!data?.path) throw new Error("Could not upload the prescription: Supabase returned no private file path.");
+  return data.path;
+}
+
+/** Removes a newly uploaded prescription that was not attached to a matched order. */
+export async function deletePrescription(path: string): Promise<void> {
+  const cleanedPath = requireNonEmpty(path, "Prescription path");
+  const user = await ensureAnonymousCustomer();
+  if (!cleanedPath.startsWith(`${user.id}/`)) {
+    throw new Error("The prescription can only be removed from the customer session that uploaded it.");
+  }
+  const client = requireCustomerBackend();
+  const { error } = await client.storage.from(PRESCRIPTION_BUCKET).remove([cleanedPath]);
+  if (error) rethrow("Could not remove the unused prescription upload", error);
+}
+
+function orderItemsPayload(items: CreateOrderItem[], defaultSubstitutesAllowed: boolean): JsonRecord[] {
+  if (!Array.isArray(items) || items.length === 0) throw new Error("Add at least one product before sending your request.");
+  const seen = new Set<string>();
+  return items.map((item, index) => {
+    const productId = requireNonEmpty(item.productId, `Product ${index + 1}`);
+    if (seen.has(productId)) throw new Error(`Product ${productId} appears more than once in the request.`);
+    seen.add(productId);
+    const quantity = requireInteger(item.quantity, `Product ${index + 1} quantity`, 1, 99);
+    const min = item.customerMinRwf ?? null;
+    const max = item.customerMaxRwf ?? null;
+    if (min != null && (!Number.isInteger(min) || min < 0)) throw new Error(`Product ${index + 1} minimum price must be a positive whole RWF amount.`);
+    if (max != null && (!Number.isInteger(max) || max < 0)) throw new Error(`Product ${index + 1} maximum price must be a positive whole RWF amount.`);
+    if (min != null && max != null && min > max) throw new Error(`Product ${index + 1} minimum price cannot exceed its maximum price.`);
+    return {
+      product_id: productId,
+      quantity,
+      customer_min_rwf: min,
+      customer_max_rwf: max,
+      substitutes_allowed: item.substitutesAllowed ?? defaultSubstitutesAllowed,
+    };
+  });
+}
+
+export async function createOrder(input: CreateOrderInput): Promise<CreateOrderResult> {
+  const clientRequestId = requireNonEmpty(input.clientRequestId, "Client request ID");
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(clientRequestId)) {
+    throw new Error("Client request ID must be a valid UUID.");
+  }
+  if (!Number.isFinite(input.latitude) || input.latitude < -3 || input.latitude > -0.8) {
+    throw new Error("The shared latitude is outside MED250's Rwanda service area.");
+  }
+  if (!Number.isFinite(input.longitude) || input.longitude < 28.7 || input.longitude > 30.9) {
+    throw new Error("The shared longitude is outside MED250's Rwanda service area.");
+  }
+  const accuracy = input.locationAccuracyM ?? null;
+  if (accuracy == null || !Number.isFinite(accuracy) || accuracy <= 0 || accuracy > 5_000) {
+    throw new Error("Location accuracy must be between 1 and 5,000 metres.");
+  }
+  const deliveryPreference = input.deliveryPreference ?? "either";
+  if (!["pickup", "delivery", "either"].includes(deliveryPreference)) {
+    throw new Error("Delivery preference must be pickup, delivery, or either.");
+  }
+  const substitutesAllowed = input.substitutesAllowed
+    ?? input.items.some((item) => item.substitutesAllowed === true);
+  const items = orderItemsPayload(input.items, substitutesAllowed);
+  const whatsapp = normalizeRwandaWhatsapp(input.whatsapp);
+  const user = await ensureAnonymousCustomer();
+  const prescriptionPath = input.prescriptionPath?.trim() || null;
+  if (prescriptionPath && !prescriptionPath.startsWith(`${user.id}/`)) {
+    throw new Error("The prescription must be uploaded from the current customer session.");
+  }
+
+  const client = requireCustomerBackend();
+  const { data, error } = await client.rpc("dawanear_create_order", {
+    p_client_request_id: clientRequestId,
+    p_latitude: input.latitude,
+    p_longitude: input.longitude,
+    p_location_accuracy_m: accuracy,
+    p_whatsapp: whatsapp,
+    p_delivery_preference: deliveryPreference,
+    p_substitutes_allowed: substitutesAllowed,
+    p_prescription_path: prescriptionPath,
+    p_items: items,
+  });
+  if (error) rethrow("Could not send your request to nearby pharmacies", error);
+  const row = asRows(data)[0];
+  if (!row) throw new Error("Could not create the order: the backend returned no order receipt.");
+  const recipientCount = numericValue(row, "recipient_count");
+  if (recipientCount == null || recipientCount < 0) {
+    throw new Error("Could not create the order: the backend returned an invalid pharmacy recipient count.");
+  }
+  return {
+    orderId: requiredString(row, "created order", "order_id"),
+    recipientCount: Math.round(recipientCount),
+  };
+}
+
+/** Closes a customer-owned request after off-platform completion or cancellation. */
+export async function closeOrder(orderId: string, outcome: "completed" | "cancelled"): Promise<CloseOrderResult> {
+  await ensureAnonymousCustomer();
+  if (outcome !== "completed" && outcome !== "cancelled") {
+    throw new Error("Order outcome must be completed or cancelled.");
+  }
+  const client = requireCustomerBackend();
+  const { data, error } = await client.rpc("dawanear_close_order", {
+    p_order_id: requireNonEmpty(orderId, "Order ID"),
+    p_outcome: outcome,
+  });
+  if (error) rethrow(`Could not mark the order ${outcome}`, error);
+  const row = asRows(data)[0];
+  if (!row) throw new Error("Could not close the order: the backend returned no receipt.");
+  const status = stringValue(row, "status");
+  if (status !== "completed" && status !== "cancelled") {
+    throw new Error("Could not close the order: the backend returned an invalid status.");
+  }
+  return {
+    orderId: requiredString(row, "closed order", "order_id"),
+    status,
+    closedAt: requiredString(row, "closed order", "closed_at"),
+  };
+}
+
+function mapActiveOrder(row: JsonRecord): ActiveOrder {
+  const preference = stringValue(row, "delivery_preference");
+  return {
+    orderId: requiredString(row, "active order", "order_id"),
+    reference: stringValue(row, "reference") || requiredString(row, "active order", "order_id"),
+    status: stringValue(row, "status") || "broadcast",
+    createdAt: requiredString(row, "active order", "created_at"),
+    expiresAt: requiredString(row, "active order", "expires_at"),
+    updatedAt: requiredString(row, "active order", "updated_at"),
+    deliveryPreference: preference === "pickup" || preference === "delivery" ? preference : "either",
+    substitutesAllowed: booleanValue(row, false, "substitutes_allowed"),
+    recipientCount: Math.max(0, Math.round(numericValue(row, "recipient_count") ?? 0)),
+    offerCount: Math.max(0, Math.round(numericValue(row, "offer_count") ?? 0)),
+    selectedOfferId: nullableString(row, "selected_offer_id"),
+  };
+}
+
+/** Restores the current customer's unexpired request state after a reload. */
+export async function loadMyActiveOrders(): Promise<ActiveOrder[]> {
+  await ensureAnonymousCustomer();
+  const client = requireCustomerBackend();
+  const { data, error } = await client.rpc("dawanear_my_active_orders");
+  if (error) rethrow("Could not restore your active requests", error);
+  return asRows(data)
+    .map(mapActiveOrder)
+    .toSorted((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt));
+}
+
+function mapOfferItem(row: JsonRecord, products: Map<string, Product>): OfferItem {
+  const offeredProductId = nullableString(row, "offered_product_id");
+  return {
+    id: requiredString(row, "offer item", "id"),
+    orderItemId: requiredString(row, "offer item", "order_item_id"),
+    offeredProductId,
+    available: booleanValue(row, false, "available"),
+    isSubstitute: booleanValue(row, false, "is_substitute"),
+    unitPriceRwf: numericValue(row, "unit_price_rwf"),
+    quantity: numericValue(row, "quantity"),
+    note: nullableString(row, "note"),
+    product: offeredProductId ? products.get(offeredProductId) ?? null : null,
+  };
+}
+
+export async function loadOffers(orderId: string): Promise<OrderOffer[]> {
+  const cleanedOrderId = requireNonEmpty(orderId, "Order ID");
+  const session = await customerSession("Could not load pharmacy offers");
+  if (!session) throw new Error("Could not load pharmacy offers: your customer session is unavailable.");
+  const client = requireCustomerBackend();
+  const { data: offerData, error: offerError } = await client
+    .from("dawanear_offers")
+    .select("id,order_id,pharmacy_id,status,complete,total_rwf,ready_in_minutes,note,distance_m,created_at")
+    .eq("order_id", cleanedOrderId)
+    .order("created_at", { ascending: false });
+  if (offerError) rethrow("Could not load pharmacy offers", offerError);
+  const offerRows = asRows(offerData);
+  if (offerRows.length === 0) return [];
+
+  const offerIds = [...new Set(offerRows.map((row) => requiredString(row, "offer", "id")))];
+  const pharmacyIds = [...new Set(offerRows.map((row) => requiredString(row, "offer", "pharmacy_id")))];
+  const [itemResponse, pharmacyResponse] = await Promise.all([
+    client
+      .from("dawanear_offer_items")
+      .select("id,offer_id,order_item_id,offered_product_id,available,is_substitute,unit_price_rwf,quantity,note")
+      .in("offer_id", offerIds),
+    client.from("dawanear_pharmacy_directory").select("*").in("id", pharmacyIds),
+  ]);
+  if (itemResponse.error) rethrow("Could not load offer line items", itemResponse.error);
+  if (pharmacyResponse.error) rethrow("Could not load responding pharmacy details", pharmacyResponse.error);
+
+  const itemRows = asRows(itemResponse.data);
+  const productIds = [...new Set(itemRows.map((row) => nullableString(row, "offered_product_id")).filter((id): id is string => Boolean(id)))];
+  let products = new Map<string, Product>();
+  if (productIds.length > 0) {
+    const { data: productData, error: productError } = await client
+      .from("dawanear_product_catalog")
+      .select("*")
+      .in("id", productIds);
+    if (productError) rethrow("Could not load offered product details", productError);
+    products = new Map(asRows(productData).map((row) => {
+      const product = mapProduct(row);
+      return [product.id, product];
+    }));
+  }
+
+  const pharmacies = new Map(asRows(pharmacyResponse.data).map((row) => {
+    const pharmacy = mapDirectoryPharmacy(row);
+    return [pharmacy.id, pharmacy];
+  }));
+  const itemsByOffer = new Map<string, OfferItem[]>();
+  for (const row of itemRows) {
+    const offerId = requiredString(row, "offer item", "offer_id");
+    const current = itemsByOffer.get(offerId) ?? [];
+    current.push(mapOfferItem(row, products));
+    itemsByOffer.set(offerId, current);
+  }
+
+  return offerRows.map((row) => {
+    const id = requiredString(row, "offer", "id");
+    const pharmacyId = requiredString(row, "offer", "pharmacy_id");
+    const totalRwf = numericValue(row, "total_rwf");
+    if (totalRwf == null || totalRwf < 0) throw new Error(`Offer ${id} has an invalid total.`);
+    const pharmacy = pharmacies.get(pharmacyId) ?? null;
+    return {
+      id,
+      orderId: requiredString(row, "offer", "order_id"),
+      pharmacyId,
+      status: stringValue(row, "status") || "submitted",
+      complete: booleanValue(row, false, "complete"),
+      totalRwf: Math.round(totalRwf),
+      readyInMinutes: numericValue(row, "ready_in_minutes"),
+      note: nullableString(row, "note"),
+      createdAt: requiredString(row, "offer", "created_at"),
+      pharmacyName: stringValue(row, "pharmacy_name") || pharmacy?.name || "Licensed pharmacy",
+      distanceM: numericValue(row, "distance_m") ?? 0,
+      pharmacy,
+      items: itemsByOffer.get(id) ?? [],
+    };
+  });
+}
+
+export async function selectOffer(orderId: string, offerId: string): Promise<SelectedPharmacyContact> {
+  const client = requireCustomerBackend();
+  const cleanedOrderId = requireNonEmpty(orderId, "Order ID");
+  const { data, error } = await client.rpc("dawanear_select_offer", {
+    p_order_id: cleanedOrderId,
+    p_offer_id: requireNonEmpty(offerId, "Offer ID"),
+  });
+  if (error) rethrow("Could not select this pharmacy offer", error);
+  if (asRows(data).length === 0) {
+    throw new Error("Could not select this pharmacy offer: the backend returned no selection receipt.");
+  }
+  return loadSelectedContact(cleanedOrderId);
+}
+
+export async function loadSelectedContact(orderId: string): Promise<SelectedPharmacyContact> {
+  const client = requireCustomerBackend();
+  const { data, error } = await client.rpc("dawanear_selected_contact", {
+    p_order_id: requireNonEmpty(orderId, "Order ID"),
+  });
+  if (error) rethrow("Could not load the selected pharmacy contact", error);
+  const row = asRows(data)[0];
+  if (!row) throw new Error("No pharmacy contact is available until an offer has been selected.");
+  return {
+    orderId: requiredString(row, "selected order", "order_id"),
+    offerId: requiredString(row, "selected offer", "offer_id"),
+    pharmacyId: requiredString(row, "selected pharmacy", "pharmacy_id"),
+    pharmacyName: stringValue(row, "pharmacy_name", "name") || "Selected pharmacy",
+    whatsapp: nullableString(row, "whatsapp"),
+    momoCode: nullableString(row, "momo_code"),
+  };
+}
+
+let offerSubscriptionSequence = 0;
+
+export function subscribeToOffers(
+  orderId: string,
+  onOffers: (offers: OrderOffer[]) => void,
+  onError?: (error: Error) => void,
+): () => void {
+  const cleanedOrderId = requireNonEmpty(orderId, "Order ID");
+  const client = requireCustomerBackend();
+  let closed = false;
+  let refreshSequence = 0;
+
+  const refresh = () => {
+    const sequence = ++refreshSequence;
+    void loadOffers(cleanedOrderId)
+      .then((offers) => {
+        if (!closed && sequence === refreshSequence) onOffers(offers);
+      })
+      .catch((error: unknown) => {
+        if (!closed) onError?.(normalizeDawaNearError(error, "Could not refresh pharmacy offers"));
+      });
+  };
+
+  const channel = client
+    .channel(`dawanear-offers-${cleanedOrderId}-${++offerSubscriptionSequence}`)
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "dawanear_offers",
+        filter: `order_id=eq.${cleanedOrderId}`,
+      },
+      refresh,
+    )
+    .subscribe((status) => {
+      if (status === "SUBSCRIBED") refresh();
+      if (!closed && (status === "CHANNEL_ERROR" || status === "TIMED_OUT")) {
+        onError?.(new Error("Live pharmacy offers disconnected. Check your connection and refresh."));
+      }
+    });
+
+  return () => {
+    closed = true;
+    refreshSequence += 1;
+    void client.removeChannel(channel);
+  };
+}
+
+export async function signInPharmacyWithEmailOtp(email: string, emailRedirectTo?: string): Promise<void> {
+  const client = requirePharmacyBackend();
+  const session = await pharmacySession("Could not prepare pharmacy sign-in");
+  if (session?.user.is_anonymous === true) {
+    const { error: signOutError } = await client.auth.signOut({ scope: "local" });
+    if (signOutError) rethrow("Could not close the guest session before pharmacy sign-in", signOutError);
+  }
+
+  const options: { shouldCreateUser: boolean; emailRedirectTo?: string } = { shouldCreateUser: true };
+  if (emailRedirectTo) {
+    try {
+      options.emailRedirectTo = new URL(emailRedirectTo).toString();
+    } catch {
+      throw new Error("The pharmacy sign-in return URL is invalid.");
+    }
+  }
+  const { error } = await client.auth.signInWithOtp({ email: normalizeEmail(email), options });
+  if (error) rethrow("Could not send the pharmacy email code", error);
+}
+
+export const requestPharmacyEmailOtp = signInPharmacyWithEmailOtp;
+
+/** Ends only the permanent pharmacy session; the anonymous customer session is preserved. */
+export async function signOutPharmacy(): Promise<void> {
+  const client = requirePharmacyBackend();
+  const { error } = await client.auth.signOut({ scope: "local" });
+  if (error) rethrow("Could not sign out of the pharmacy portal", error);
+}
+
+export async function verifyPharmacyEmailOtp(email: string, token: string): Promise<User> {
+  const client = requirePharmacyBackend();
+  const cleanedToken = token.replace(/\s/g, "");
+  if (!/^\d{6,8}$/.test(cleanedToken)) throw new Error("Enter the complete code from your pharmacy email.");
+  const { data, error } = await client.auth.verifyOtp({
+    email: normalizeEmail(email),
+    token: cleanedToken,
+    type: "email",
+  });
+  if (error) rethrow("Could not verify the pharmacy email code", error);
+  if (!data.session || !data.user || data.user.is_anonymous === true) {
+    throw new Error("Could not verify the pharmacy email code: no permanent user session was returned.");
+  }
+  return data.user;
+}
+
+function mapMembership(row: JsonRecord): PharmacyMembership {
+  return {
+    membershipId: nullableString(row, "membership_id", "id"),
+    pharmacyId: requiredString(row, "pharmacy membership", "pharmacy_id"),
+    pharmacyName: stringValue(row, "pharmacy_name", "name") || "Licensed pharmacy",
+    licenseNumber: stringValue(row, "license_number"),
+    role: stringValue(row, "role") || "staff",
+    status: stringValue(row, "status", "membership_status") || "active",
+    whatsapp: nullableString(row, "whatsapp"),
+    momoCode: nullableString(row, "momo_code"),
+    onlineLicenseVerified: booleanValue(row, false, "online_license_verified", "onlineLicenseVerified"),
+  };
+}
+
+export async function loadMyPharmacies(): Promise<PharmacyMembership[]> {
+  await requirePermanentPharmacyUser("Could not load your pharmacies");
+  const client = requirePharmacyBackend();
+  const { data, error } = await client.rpc("dawanear_my_pharmacies");
+  if (error) rethrow("Could not load your pharmacies", error);
+  return asRows(data).map(mapMembership);
+}
+
+function mapRequestItem(row: JsonRecord): PharmacyRequestItem {
+  const brand = stringValue(row, "brand", "brand_name", "product_name") || "Registered product";
+  return {
+    orderItemId: requiredString(row, "request item", "order_item_id", "id"),
+    productId: requiredString(row, "request product", "product_id"),
+    productName: brand,
+    brand,
+    generic: stringValue(row, "generic", "generic_name"),
+    strength: stringValue(row, "strength"),
+    form: stringValue(row, "form", "dosage_form"),
+    packSize: stringValue(row, "pack_size", "packSize"),
+    quantity: Math.round(numericValue(row, "quantity") ?? 0),
+    customerMinRwf: numericValue(row, "customer_min_rwf"),
+    customerMaxRwf: numericValue(row, "customer_max_rwf"),
+    substitutesAllowed: booleanValue(row, true, "substitutes_allowed"),
+  };
+}
+
+function mapPharmacyRequest(row: JsonRecord): PharmacyRequest {
+  const items = parseJsonRows(firstValue(row, "items", "order_items")).map(mapRequestItem);
+  const preference = stringValue(row, "delivery_preference");
+  return {
+    orderId: requiredString(row, "pharmacy request", "order_id", "id"),
+    reference: stringValue(row, "reference", "order_reference") || stringValue(row, "order_id", "id"),
+    status: stringValue(row, "status") || "broadcast",
+    distanceM: numericValue(row, "distance_m") ?? 0,
+    createdAt: requiredString(row, "pharmacy request", "created_at"),
+    expiresAt: requiredString(row, "pharmacy request", "expires_at"),
+    deliveryPreference: preference === "pickup" || preference === "delivery" ? preference : "either",
+    substitutesAllowed: booleanValue(row, true, "substitutes_allowed"),
+    locationAccuracyM: numericValue(row, "location_accuracy_m"),
+    hasPrescription: booleanValue(row, false, "has_prescription"),
+    itemCount: Math.round(numericValue(row, "item_count") ?? items.length),
+    items,
+  };
+}
+
+export async function loadPharmacyRequests(pharmacyId: string): Promise<PharmacyRequest[]> {
+  await requirePermanentPharmacyUser("Could not load nearby requests");
+  const client = requirePharmacyBackend();
+  const { data, error } = await client.rpc("dawanear_pharmacy_requests", {
+    p_pharmacy_id: requireNonEmpty(pharmacyId, "Pharmacy ID"),
+  });
+  if (error) rethrow("Could not load nearby pharmacy requests", error);
+  const requests = asRows(data).map(mapPharmacyRequest);
+  const productIds = [...new Set(requests.flatMap((request) => request.items.map((item) => item.productId)))];
+  if (productIds.length === 0 || requests.every((request) => request.items.every((item) => item.packSize))) {
+    return requests;
+  }
+  const { data: productData, error: productError } = await client
+    .from("dawanear_product_catalog")
+    .select("id,pack_size")
+    .in("id", productIds);
+  if (productError) rethrow("Could not load request product pack sizes", productError);
+  const packSizes = new Map(asRows(productData).map((row) => [
+    requiredString(row, "request product", "id"),
+    catalogueText(row, "pack_size"),
+  ]));
+  return requests.map((request) => ({
+    ...request,
+    items: request.items.map((item) => ({
+      ...item,
+      packSize: item.packSize || packSizes.get(item.productId) || "",
+    })),
+  }));
+}
+
+function mapPharmacySelectedOrder(row: JsonRecord): Omit<PharmacySelectedOrder, "prescriptionUrl"> {
+  const preference = stringValue(row, "delivery_preference");
+  return {
+    orderId: requiredString(row, "selected pharmacy order", "order_id"),
+    reference: stringValue(row, "reference") || requiredString(row, "selected pharmacy order", "order_id"),
+    customerWhatsapp: nullableString(row, "customer_whatsapp"),
+    deliveryPreference: preference === "pickup" || preference === "delivery" ? preference : "either",
+    prescriptionPath: nullableString(row, "prescription_path"),
+    prescriptionAccessSecondsRemaining: numericValue(row, "prescription_access_seconds_remaining"),
+    selectedAt: requiredString(row, "selected pharmacy order", "selected_at"),
+    updatedAt: requiredString(row, "selected pharmacy order", "updated_at"),
+  };
+}
+
+/** Loads orders that selected this pharmacy and signs any private prescription link briefly. */
+export async function loadPharmacySelectedOrders(pharmacyId: string): Promise<PharmacySelectedOrder[]> {
+  await requirePermanentPharmacyUser("Could not load selected customer orders");
+  const client = requirePharmacyBackend();
+  const { data, error } = await client.rpc("dawanear_pharmacy_selected_orders", {
+    p_pharmacy_id: requireNonEmpty(pharmacyId, "Pharmacy ID"),
+  });
+  if (error) rethrow("Could not load selected customer orders", error);
+  const rows = asRows(data).map(mapPharmacySelectedOrder);
+  return Promise.all(rows.map(async (row) => {
+    if (!row.prescriptionPath) return { ...row, prescriptionUrl: null };
+    const selectedAtMs = Date.parse(row.selectedAt);
+    const serverRemaining = row.prescriptionAccessSecondsRemaining;
+    const remainingSeconds = serverRemaining == null
+      ? Number.isFinite(selectedAtMs)
+        ? Math.floor((selectedAtMs + 24 * 60 * 60 * 1_000 - Date.now()) / 1_000)
+        : 0
+      : Math.floor(serverRemaining);
+    const expiresIn = Math.min(10 * 60, remainingSeconds);
+    if (expiresIn <= 0) return { ...row, prescriptionUrl: null };
+    const { data: signed, error: signedError } = await client.storage
+      .from(PRESCRIPTION_BUCKET)
+      .createSignedUrl(row.prescriptionPath, expiresIn);
+    if (signedError) rethrow("Could not open the selected customer's prescription", signedError);
+    return { ...row, prescriptionUrl: signed?.signedUrl ?? null };
+  }));
+}
+
+let pharmacyNotificationSubscriptionSequence = 0;
+
+/** Refresh signal for open requests and customer selections assigned to one pharmacy. */
+export function subscribeToPharmacyNotifications(
+  pharmacyId: string,
+  onChange: () => void,
+  onError?: (error: Error) => void,
+): () => void {
+  const cleanedPharmacyId = requireNonEmpty(pharmacyId, "Pharmacy ID");
+  const client = requirePharmacyBackend();
+  let closed = false;
+  const channel = client
+    .channel(`dawanear-pharmacy-notifications-${cleanedPharmacyId}-${++pharmacyNotificationSubscriptionSequence}`)
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "dawanear_pharmacy_notifications",
+        filter: `pharmacy_id=eq.${cleanedPharmacyId}`,
+      },
+      () => {
+        if (!closed) onChange();
+      },
+    )
+    .subscribe((status) => {
+      if (!closed && (status === "CHANNEL_ERROR" || status === "TIMED_OUT")) {
+        onError?.(new Error("Live pharmacy request updates disconnected. Check your connection and refresh."));
+      }
+    });
+
+  return () => {
+    closed = true;
+    void client.removeChannel(channel);
+  };
+}
+
+function offerItemsPayload(items: OfferItemDraft[]): JsonRecord[] {
+  if (!Array.isArray(items) || items.length === 0) throw new Error("Review every requested item before submitting an offer.");
+  const seen = new Set<string>();
+  return items.map((item, index) => {
+    const orderItemId = requireNonEmpty(item.orderItemId, `Offer item ${index + 1}`);
+    if (seen.has(orderItemId)) throw new Error(`Request item ${orderItemId} appears more than once in the offer.`);
+    seen.add(orderItemId);
+    const quantity = item.quantity == null ? null : requireInteger(item.quantity, `Offer item ${index + 1} quantity`, 1, 99);
+    const unitPrice = item.available ? item.unitPriceRwf ?? null : null;
+    if (item.available && (!Number.isInteger(unitPrice) || (unitPrice ?? 0) <= 0)) {
+      throw new Error(`Add a positive unit price for available offer item ${index + 1}.`);
+    }
+    const offeredProductId = item.available ? item.offeredProductId?.trim() || null : null;
+    if (item.available && item.isSubstitute && !offeredProductId) {
+      throw new Error(`Choose the substitute product for offer item ${index + 1}.`);
+    }
+    return {
+      order_item_id: orderItemId,
+      offered_product_id: offeredProductId,
+      available: item.available,
+      is_substitute: item.available && (item.isSubstitute ?? false),
+      unit_price_rwf: unitPrice,
+      quantity,
+      note: item.note?.trim() || null,
+    };
+  });
+}
+
+export async function submitOffer(draft: OfferDraft): Promise<SubmitOfferResult> {
+  await requirePermanentPharmacyUser("Could not submit the pharmacy offer");
+  const readyInMinutes = draft.readyInMinutes == null
+    ? null
+    : requireInteger(draft.readyInMinutes, "Preparation time", 0, 1_440);
+  const client = requirePharmacyBackend();
+  const { data, error } = await client.rpc("dawanear_submit_offer", {
+    p_pharmacy_id: requireNonEmpty(draft.pharmacyId, "Pharmacy ID"),
+    p_order_id: requireNonEmpty(draft.orderId, "Order ID"),
+    p_ready_in_minutes: readyInMinutes,
+    p_note: draft.note?.trim() || null,
+    p_items: offerItemsPayload(draft.items),
+  });
+  if (error) rethrow("Could not submit the pharmacy offer", error);
+  const row = asRows(data)[0];
+  if (!row) throw new Error("Could not submit the pharmacy offer: the backend returned no offer receipt.");
+  const totalRwf = numericValue(row, "total_rwf");
+  if (totalRwf == null || totalRwf < 0) throw new Error("The backend returned an invalid offer total.");
+  return {
+    offerId: requiredString(row, "submitted offer", "offer_id", "id"),
+    totalRwf: Math.round(totalRwf),
+    complete: booleanValue(row, false, "complete"),
+  };
+}
+
+export async function contributePrice(pharmacyId: string, productId: string, priceRwf: number): Promise<PriceContributionResult> {
+  await requirePermanentPharmacyUser("Could not contribute this product price");
+  const client = requirePharmacyBackend();
+  const { data, error } = await client.rpc("dawanear_contribute_price", {
+    p_pharmacy_id: requireNonEmpty(pharmacyId, "Pharmacy ID"),
+    p_product_id: requireNonEmpty(productId, "Product ID"),
+    p_price_rwf: requireInteger(priceRwf, "Product price", 1, 100_000_000),
+  });
+  if (error) rethrow("Could not contribute this product price", error);
+  const row = asRows(data)[0];
+  if (!row) throw new Error("Could not contribute this product price: the backend returned no updated range.");
+  const min = numericValue(row, "price_min_rwf", "min");
+  const max = numericValue(row, "price_max_rwf", "max");
+  const contributors = numericValue(row, "price_contributors");
+  if (min == null || max == null || contributors == null) {
+    throw new Error("Could not contribute this product price: the backend returned an invalid updated range.");
+  }
+  return {
+    productId: stringValue(row, "product_id") || productId,
+    min: Math.round(min),
+    max: Math.round(max),
+    priceContributors: Math.round(contributors),
+  };
+}
+
+export async function submitPharmacyClaim(input: PharmacyClaimInput): Promise<PharmacyClaim> {
+  await requirePermanentPharmacyUser("Could not submit the pharmacy claim");
+  const client = requirePharmacyBackend();
+  const payload = {
+    pharmacy_id: requireNonEmpty(input.pharmacyId, "Pharmacy ID"),
+    contact_email: normalizeEmail(input.contactEmail),
+    contact_phone: normalizeRwandaWhatsapp(input.contactPhone),
+    note: input.note?.trim() || null,
+  };
+  const { data, error } = await client
+    .from("dawanear_pharmacy_claims")
+    .insert(payload)
+    .select("*")
+    .single();
+  if (error) rethrow("Could not submit the pharmacy claim", error);
+  if (!isRecord(data)) throw new Error("Could not submit the pharmacy claim: the backend returned no claim receipt.");
+  return {
+    id: requiredString(data, "pharmacy claim", "id"),
+    pharmacyId: requiredString(data, "pharmacy claim", "pharmacy_id"),
+    status: stringValue(data, "status") || "pending",
+    contactEmail: requiredString(data, "pharmacy claim", "contact_email"),
+    contactPhone: nullableString(data, "contact_phone"),
+    note: nullableString(data, "note"),
+    createdAt: requiredString(data, "pharmacy claim", "created_at"),
+  };
+}
