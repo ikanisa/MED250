@@ -1231,7 +1231,7 @@ export default function Marketplace({
         </section>
       </>}
 
-      <section className="network-strip" id="pharmacies"><div><span className="network-icon"><Store size={27} /></span><div><b>Represent an eligible pharmacy?</b><p>Permanent staff sign-in and operator approval are required before any request is visible.</p></div></div><button onClick={openPortal}>Open pharmacy portal <ArrowRight size={17} /></button></section>
+      <section className="network-strip" id="pharmacies"><div><span className="network-icon"><Store size={27} /></span><div><b>Represent an eligible pharmacy?</b></div></div><button onClick={openPortal}>Open pharmacy portal <ArrowRight size={17} /></button></section>
 
       <footer><Link className="brand footer-brand" href="/" aria-label="med+250 home"><BrandLogo /></Link><p>MED+250 does not diagnose, prescribe, advertise prescription medicines, or replace a qualified health professional.</p><div><a href="/categories">Catalogue</a><a href="/pharmacies">Pharmacies</a><button onClick={openPortal}>Pharmacy portal</button></div></footer>
 
