@@ -17,8 +17,8 @@ test("server-renders the MED+250 marketplace", async () => {
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
   const html = await response.text();
   assert.match(html, /<title>MED\+250/);
-  assert.match(html, /One request/);
-  assert.match(html, /Frequently requested today/);
+  assert.match(html, /One order/);
+  assert.match(html, /Popular products today/);
   assert.match(html, /All Categories/);
   assert.doesNotMatch(html, /Check licensed pharmacy records/);
   assert.doesNotMatch(html, /Connected private preview/);
@@ -50,6 +50,23 @@ test("keeps product cards free of verification status labels", async () => {
 
   assert.doesNotMatch(marketplace, /className=\{`rx-badge/);
   assert.doesNotMatch(marketplace, />VERIFY<|>REGISTERED</);
+});
+
+test("uses order language and only the four MED+250 brand accents", async () => {
+  const [marketplace, css] = await Promise.all([
+    readFile(new URL("../app/marketplace.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(marketplace, /> Add to order<\/button>/);
+  assert.match(marketplace, />Order basket<\/span>/);
+  assert.match(marketplace, /One order\./);
+  assert.doesNotMatch(marketplace, /> Add to request<\/button>|>Request basket<\/span>|One request\./);
+  assert.match(css, /--brand-green:#5cdd63/);
+  assert.match(css, /--brand-orange:#ff7048/);
+  assert.match(css, /--brand-rose:#d98a9d/);
+  assert.match(css, /--brand-violet:#7878e8/);
+  assert.doesNotMatch(css, /#091747|#18275f|#302f70|#2042c7|#2544cc|#14853e|#167d3b|#df4b26|#ce3f1e|#7377d9|#3f3f9b|#d94b28|brand-violet-deep/);
 });
 
 test("keeps the pharmacy portal callout concise", async () => {
@@ -95,7 +112,7 @@ test("keeps the launch candidate honest, connected, and free of simulated fulfil
   assert.match(marketplace, /NEXT_PUBLIC_MARKETPLACE_MODE/);
   assert.match(marketplace, /recipientCount/);
   assert.match(marketplace, /pendingOrderAttempt/);
-  assert.match(marketplace, /Retry the same secure request/);
+  assert.match(marketplace, /Retry the same secure order/);
   assert.match(marketplace, /if \(!locationConsent\)/);
   assert.match(marketplace, /pendingOrderAttempt\?\.rpcAttempted/);
   assert.match(marketplace, /isCompatibleSubstitute/);
@@ -211,7 +228,7 @@ test("uses WhatsApp Cloud OTP only for pharmacy portal access", async () => {
   assert.match(marketplace, /WhatsApp number not registered/);
   assert.match(marketplace, /250795588248/);
   assert.match(marketplace, /Contact admin on WhatsApp/);
-  assert.match(marketplace, /Request a WhatsApp update/);
+  assert.match(marketplace, /Submit a WhatsApp update/);
   assert.doesNotMatch(marketplace, /Email me a sign-in link|Email address|Already signed in but not linked|Submit a claim/);
   assert.doesNotMatch(marketplace, /Customers use anonymous sessions; pharmacy staff use a permanent email identity/);
   assert.match(migration, /dawanear_pharmacy_otp_challenges/);

@@ -336,7 +336,7 @@ function cleanContext(context: string): string {
 }
 
 /** Converts Supabase/PostgREST/Storage/Auth errors into concise, actionable UI errors. */
-export function normalizeDawaNearError(error: unknown, context = "MED250 request failed"): Error {
+export function normalizeDawaNearError(error: unknown, context = "MED+250 order failed"): Error {
   if (error instanceof Error && error.name === "DawaNearError") return error;
 
   const record = isRecord(error) ? error : null;
@@ -356,7 +356,7 @@ export function normalizeDawaNearError(error: unknown, context = "MED250 request
   } else if (/anonymous.*(disabled|not enabled)|anonymous_provider_disabled/.test(lower)) {
     message = "Guest checkout is not enabled yet. Enable Anonymous Sign-Ins in Supabase Auth.";
   } else if (/invalid login credentials|email not confirmed/.test(lower)) {
-    message = "The pharmacy sign-in could not be verified. Request a new email code and try again.";
+    message = "The pharmacy sign-in could not be verified. Send a new WhatsApp code and try again.";
   } else if (/rate.?limit|over_email_send_rate_limit|429/.test(lower)) {
     message = "Too many attempts were made. Wait a moment, then try again.";
   } else if (/jwt.*expired|refresh_token.*(invalid|not found)|session.*expired/.test(lower)) {
@@ -651,11 +651,11 @@ export async function deletePrescription(path: string): Promise<void> {
 }
 
 function orderItemsPayload(items: CreateOrderItem[], defaultSubstitutesAllowed: boolean): JsonRecord[] {
-  if (!Array.isArray(items) || items.length === 0) throw new Error("Add at least one product before sending your request.");
+  if (!Array.isArray(items) || items.length === 0) throw new Error("Add at least one product before sending your order.");
   const seen = new Set<string>();
   return items.map((item, index) => {
     const productId = requireNonEmpty(item.productId, `Product ${index + 1}`);
-    if (seen.has(productId)) throw new Error(`Product ${productId} appears more than once in the request.`);
+    if (seen.has(productId)) throw new Error(`Product ${productId} appears more than once in the order.`);
     seen.add(productId);
     const quantity = requireInteger(item.quantity, `Product ${index + 1} quantity`, 1, 99);
     const min = item.customerMinRwf ?? null;
@@ -674,9 +674,9 @@ function orderItemsPayload(items: CreateOrderItem[], defaultSubstitutesAllowed: 
 }
 
 export async function createOrder(input: CreateOrderInput): Promise<CreateOrderResult> {
-  const clientRequestId = requireNonEmpty(input.clientRequestId, "Client request ID");
+  const clientRequestId = requireNonEmpty(input.clientRequestId, "Client order ID");
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(clientRequestId)) {
-    throw new Error("Client request ID must be a valid UUID.");
+    throw new Error("Client order ID must be a valid UUID.");
   }
   if (!Number.isFinite(input.latitude) || input.latitude < -3 || input.latitude > -0.8) {
     throw new Error("The shared latitude is outside MED250's Rwanda service area.");
@@ -714,7 +714,7 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
     p_prescription_path: prescriptionPath,
     p_items: items,
   });
-  if (error) rethrow("Could not send your request to nearby pharmacies", error);
+  if (error) rethrow("Could not send your order to nearby pharmacies", error);
   const row = asRows(data)[0];
   if (!row) throw new Error("Could not create the order: the backend returned no order receipt.");
   const recipientCount = numericValue(row, "recipient_count");
@@ -774,7 +774,7 @@ export async function loadMyActiveOrders(): Promise<ActiveOrder[]> {
   await ensureAnonymousCustomer();
   const client = requireCustomerBackend();
   const { data, error } = await client.rpc("dawanear_my_active_orders");
-  if (error) rethrow("Could not restore your active requests", error);
+  if (error) rethrow("Could not restore your active orders", error);
   return asRows(data)
     .map(mapActiveOrder)
     .toSorted((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt));
@@ -1008,7 +1008,7 @@ export async function verifyPharmacyWhatsappOtp(phone: string, challengeId: stri
   if (!/^\d{6}$/.test(cleanedToken)) throw new Error("Enter the complete 6-digit WhatsApp code.");
   const normalizedPhone = normalizeRwandaWhatsapp(phone);
   if (!normalizedPhone) throw new Error("Enter the pharmacy WhatsApp number.");
-  if (!/^[0-9a-f-]{36}$/i.test(challengeId)) throw new Error("Request a new WhatsApp code.");
+  if (!/^[0-9a-f-]{36}$/i.test(challengeId)) throw new Error("Send a new WhatsApp code.");
 
   const { data, error } = await client.functions.invoke<PharmacyWhatsappOtpSession>(
     "dawanear-pharmacy-verify-otp",
@@ -1056,8 +1056,8 @@ export async function loadMyPharmacies(): Promise<PharmacyMembership[]> {
 function mapRequestItem(row: JsonRecord): PharmacyRequestItem {
   const brand = stringValue(row, "brand", "brand_name", "product_name") || "Registered product";
   return {
-    orderItemId: requiredString(row, "request item", "order_item_id", "id"),
-    productId: requiredString(row, "request product", "product_id"),
+    orderItemId: requiredString(row, "order item", "order_item_id", "id"),
+    productId: requiredString(row, "order product", "product_id"),
     productName: brand,
     brand,
     generic: stringValue(row, "generic", "generic_name"),
@@ -1075,12 +1075,12 @@ function mapPharmacyRequest(row: JsonRecord): PharmacyRequest {
   const items = parseJsonRows(firstValue(row, "items", "order_items")).map(mapRequestItem);
   const preference = stringValue(row, "delivery_preference");
   return {
-    orderId: requiredString(row, "pharmacy request", "order_id", "id"),
+    orderId: requiredString(row, "pharmacy order", "order_id", "id"),
     reference: stringValue(row, "reference", "order_reference") || stringValue(row, "order_id", "id"),
     status: stringValue(row, "status") || "broadcast",
     distanceM: numericValue(row, "distance_m") ?? 0,
-    createdAt: requiredString(row, "pharmacy request", "created_at"),
-    expiresAt: requiredString(row, "pharmacy request", "expires_at"),
+    createdAt: requiredString(row, "pharmacy order", "created_at"),
+    expiresAt: requiredString(row, "pharmacy order", "expires_at"),
     deliveryPreference: preference === "pickup" || preference === "delivery" ? preference : "either",
     substitutesAllowed: booleanValue(row, true, "substitutes_allowed"),
     locationAccuracyM: numericValue(row, "location_accuracy_m"),
@@ -1091,12 +1091,12 @@ function mapPharmacyRequest(row: JsonRecord): PharmacyRequest {
 }
 
 export async function loadPharmacyRequests(pharmacyId: string): Promise<PharmacyRequest[]> {
-  await requirePermanentPharmacyUser("Could not load nearby requests");
+  await requirePermanentPharmacyUser("Could not load nearby orders");
   const client = requirePharmacyBackend();
   const { data, error } = await client.rpc("dawanear_pharmacy_requests", {
     p_pharmacy_id: requireNonEmpty(pharmacyId, "Pharmacy ID"),
   });
-  if (error) rethrow("Could not load nearby pharmacy requests", error);
+  if (error) rethrow("Could not load nearby pharmacy orders", error);
   const requests = asRows(data).map(mapPharmacyRequest);
   const productIds = [...new Set(requests.flatMap((request) => request.items.map((item) => item.productId)))];
   if (productIds.length === 0 || requests.every((request) => request.items.every((item) => item.packSize))) {
@@ -1106,9 +1106,9 @@ export async function loadPharmacyRequests(pharmacyId: string): Promise<Pharmacy
     .from("dawanear_product_catalog")
     .select("id,pack_size")
     .in("id", productIds);
-  if (productError) rethrow("Could not load request product pack sizes", productError);
+  if (productError) rethrow("Could not load order product pack sizes", productError);
   const packSizes = new Map(asRows(productData).map((row) => [
-    requiredString(row, "request product", "id"),
+    requiredString(row, "order product", "id"),
     catalogueText(row, "pack_size"),
   ]));
   return requests.map((request) => ({
@@ -1189,7 +1189,7 @@ export function subscribeToPharmacyNotifications(
     )
     .subscribe((status) => {
       if (!closed && (status === "CHANNEL_ERROR" || status === "TIMED_OUT")) {
-        onError?.(new Error("Live pharmacy request updates disconnected. Check your connection and refresh."));
+        onError?.(new Error("Live pharmacy order updates disconnected. Check your connection and refresh."));
       }
     });
 
@@ -1200,11 +1200,11 @@ export function subscribeToPharmacyNotifications(
 }
 
 function offerItemsPayload(items: OfferItemDraft[]): JsonRecord[] {
-  if (!Array.isArray(items) || items.length === 0) throw new Error("Review every requested item before submitting an offer.");
+  if (!Array.isArray(items) || items.length === 0) throw new Error("Review every ordered item before submitting an offer.");
   const seen = new Set<string>();
   return items.map((item, index) => {
     const orderItemId = requireNonEmpty(item.orderItemId, `Offer item ${index + 1}`);
-    if (seen.has(orderItemId)) throw new Error(`Request item ${orderItemId} appears more than once in the offer.`);
+    if (seen.has(orderItemId)) throw new Error(`Order item ${orderItemId} appears more than once in the offer.`);
     seen.add(orderItemId);
     const quantity = item.quantity == null ? null : requireInteger(item.quantity, `Offer item ${index + 1} quantity`, 1, 99);
     const unitPrice = item.available ? item.unitPriceRwf ?? null : null;
@@ -1278,7 +1278,7 @@ export async function contributePrice(pharmacyId: string, productId: string, pri
 }
 
 export async function requestPharmacyWhatsappEdit(pharmacyId: string, whatsapp: string, note?: string): Promise<string> {
-  await requirePermanentPharmacyUser("Could not request the pharmacy contact update");
+  await requirePermanentPharmacyUser("Could not submit the pharmacy contact update");
   const client = requirePharmacyBackend();
   const normalized = normalizeRwandaWhatsapp(whatsapp);
   if (!normalized) throw new Error("Enter a valid Rwanda WhatsApp number.");
@@ -1290,9 +1290,9 @@ export async function requestPharmacyWhatsappEdit(pharmacyId: string, whatsapp: 
     p_requested_e164: normalized,
     p_note: note?.trim() || "Add or replace this pharmacy WhatsApp number",
   });
-  if (error) rethrow("Could not request the pharmacy contact update", error);
+  if (error) rethrow("Could not submit the pharmacy contact update", error);
   if (typeof data !== "string" || !/^[0-9a-f-]{36}$/i.test(data)) {
-    throw new Error("Could not request the pharmacy contact update: no request receipt was returned.");
+    throw new Error("Could not submit the pharmacy contact update: no update receipt was returned.");
   }
   return data;
 }
