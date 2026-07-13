@@ -45,6 +45,13 @@ test("server-renders every dedicated marketplace route", async () => {
   }
 });
 
+test("keeps product cards free of verification status labels", async () => {
+  const marketplace = await readFile(new URL("../app/marketplace.tsx", import.meta.url), "utf8");
+
+  assert.doesNotMatch(marketplace, /className=\{`rx-badge/);
+  assert.doesNotMatch(marketplace, />VERIFY<|>REGISTERED</);
+});
+
 test("keeps the launch candidate honest, connected, and free of simulated fulfilment", async () => {
   const [page, marketplace, client, migration, layout, css, packageJson, pharmacyCsv, geocoder, cleanup, productReview] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),

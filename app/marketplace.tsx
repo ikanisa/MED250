@@ -1218,8 +1218,8 @@ export default function Marketplace({
           {filtered.length ? <div className="product-grid">
             {filtered.slice(0, visibleCount).map((product) => (
               <article className="product-card" key={product.id}>
-                <div className="product-image-wrap"><ProductVisual product={product} /><span className={`rx-badge ${product.prescriptionStatus === "unclassified" ? "verify" : ""}`}>{product.prescriptionStatus === "prescription" ? "Rx" : product.prescriptionStatus === "non_prescription" ? "OTC" : product.prescriptionStatus === "pharmacist_only" ? "ASK" : "VERIFY"}</span></div>
-                <div className="product-meta"><span>{product.category}</span><small>{product.regulatoryStatus === "expiring_soon" ? "EXPIRING SOON" : "REGISTERED"}</small></div>
+                <div className="product-image-wrap"><ProductVisual product={product} /></div>
+                <div className="product-meta"><span>{product.category}</span></div>
                 <h3>{product.brand} <span>{product.strength}</span></h3>
                 <p>{product.generic}</p>
                 <div className="form-label">{product.form}{product.packSize ? ` · ${product.packSize}` : ""}</div>

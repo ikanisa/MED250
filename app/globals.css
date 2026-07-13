@@ -104,7 +104,6 @@ a { color:inherit; text-decoration:none; }
 .product-card { border:1px solid #e3e9e5; border-radius:17px; padding:12px 12px 16px; transition:.22s ease; background:white; min-width:0; }
 .product-card:hover { transform:translateY(-4px); box-shadow:0 18px 35px rgba(19,60,53,.09); border-color:#cddbd4; }
 .product-image-wrap { height:160px; border-radius:12px; background:#f5f6f1; position:relative; overflow:hidden; display:grid; place-items:center; }
-.rx-badge { position:absolute; right:10px; top:10px; height:26px; min-width:28px; border-radius:7px; padding:0 7px; display:grid; place-items:center; background:#183a36; color:white; font:800 11px var(--font-display); }
 .product-meta { display:flex; justify-content:space-between; align-items:center; margin-top:13px; }
 .product-meta>span { font-size:10px; color:#71827f; }
 .product-meta small { padding:4px 6px; border-radius:4px; color:#187964; background:#e8f6ef; font-size:7px; font-weight:850; letter-spacing:.4px; }
@@ -550,7 +549,6 @@ select,textarea { font:inherit; }
 .dosage-art.violet { color:#66549b; background:linear-gradient(145deg,#ebe7f7,#faf9ff); }
 .dosage-art.amber { color:#a4741a; background:linear-gradient(145deg,#fff0c9,#fffaf0); }
 .dosage-art.small { width:48px; height:48px; border-radius:10px; gap:0; }
-.rx-badge.verify { color:#5c584b; background:#f3eee2; font-size:7px; letter-spacing:.3px; }
 .price-line button:disabled { opacity:.45; background:#edf0ee; color:#85918e; }
 .online-licensed,.registry-only { min-height:34px; margin-top:12px; padding:8px 9px; display:flex; align-items:center; gap:6px; border-radius:8px; font-size:8px; font-weight:800; }
 .online-licensed { color:#146c59; background:#e4f5ed; }
@@ -777,8 +775,6 @@ body { background:#fff; }
 .product-meta { margin-top:6px; }
 .product-meta>span { color:#626a7b; font-size:8px; }
 .product-meta small { padding:3px 5px; color:#167d3b; background:#e7f7e8; font-size:6px; }
-.rx-badge { top:5px; right:5px; height:22px; min-width:25px; background:#f8dbe5; color:#a22755; font-size:8px; }
-.rx-badge.verify { color:#574c21; background:#fff1b8; }
 .product-card h3 { height:31px; margin:6px 0 2px; overflow:hidden; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; white-space:normal; font-size:11px; line-height:1.3; }
 .product-card>p,.form-label { display:none; }
 .price-line { margin-top:6px; padding-top:6px; display:flex; align-items:stretch; flex-direction:column; gap:6px; }
