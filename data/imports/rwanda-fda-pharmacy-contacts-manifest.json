@@ -1,0 +1,12 @@
+{
+  "generated_at": "2026-07-13T09:40:59.023022+00:00",
+  "source_page": "https://rwandafda.gov.rw/human-retail-pharmacy-duty-rosters-2/",
+  "roster_period": "July-September 2026",
+  "roster_pdfs_processed": 11,
+  "unique_valid_roster_contacts": 372,
+  "matched_contact_rows": 288,
+  "matched_pharmacies": 267,
+  "review_rows": 99,
+  "authentication_rule": "Only rows in the matched CSV may be imported as source-verified phone and default WhatsApp login contacts.",
+  "google_places_rule": "Google Places candidates are not imported as authentication contacts without separate pharmacy or admin verification."
+}

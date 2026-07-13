@@ -91,6 +91,15 @@ Deno.serve(async (request: Request) => {
       .eq("user_id", userId);
     if (identityUpdateError) throw identityUpdateError;
 
+    const { error: contactLoginError } = await client
+      .from("dawanear_pharmacy_contacts")
+      .update({ last_login_at: now })
+      .eq("contact_type", "whatsapp")
+      .eq("e164", phone)
+      .eq("is_login_enabled", true)
+      .in("verification_status", ["source_verified", "admin_verified"]);
+    if (contactLoginError) throw contactLoginError;
+
     const { error: membershipError } = await client.from("dawanear_pharmacy_memberships").upsert(
       pharmacies.map((pharmacy) => ({
         pharmacy_id: pharmacy.id,

@@ -47,6 +47,11 @@ Deno.serve(async (request: Request) => {
     const pharmacies = await eligiblePharmacies(client, phone);
     if (!pharmacies.length) {
       await client.from("dawanear_pharmacy_otp_challenges").update({ delivery_status: "suppressed" }).eq("id", challenge.id);
+      return json(request, {
+        registered: false,
+        adminWhatsapp: "250795588248",
+        message: "This WhatsApp number is not registered to a pharmacy.",
+      });
     } else {
       try {
         await sendWhatsappOtp(phone, code);
@@ -58,9 +63,10 @@ Deno.serve(async (request: Request) => {
     }
 
     return json(request, {
+      registered: true,
       challengeId: challenge.id,
       expiresAt,
-      message: "If this number is linked to an approved pharmacy, a WhatsApp code has been sent.",
+      message: "A WhatsApp verification code has been sent.",
     });
   } catch (error) {
     console.error("dawanear-pharmacy-send-otp", error instanceof Error ? error.message : error);

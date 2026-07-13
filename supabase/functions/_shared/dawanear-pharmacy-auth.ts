@@ -191,15 +191,23 @@ export async function enforceOtpRateLimits(client: SupabaseClient, phone: string
 export type EligiblePharmacy = { id: string; name: string };
 
 export async function eligiblePharmacies(client: SupabaseClient, phone: string): Promise<EligiblePharmacy[]> {
+  const { data: contacts, error: contactError } = await client
+    .from("dawanear_pharmacy_contacts")
+    .select("pharmacy_id")
+    .eq("contact_type", "whatsapp")
+    .eq("e164", phone)
+    .eq("is_login_enabled", true)
+    .in("verification_status", ["source_verified", "admin_verified"]);
+  if (contactError) throw contactError;
+  const pharmacyIds = [...new Set((contacts ?? []).map((contact) => contact.pharmacy_id as string).filter(Boolean))];
+  if (!pharmacyIds.length) return [];
+
   const today = new Date().toISOString().slice(0, 10);
   const { data, error } = await client
     .from("dawanear_pharmacies")
     .select("id, name")
-    .eq("whatsapp", phone)
+    .in("id", pharmacyIds)
     .eq("is_active", true)
-    .eq("marketplace_approved", true)
-    .eq("online_license_verified", true)
-    .eq("geocode_status", "verified")
     .gte("license_expires_on", today);
   if (error) throw error;
   return (data ?? []) as EligiblePharmacy[];

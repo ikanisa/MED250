@@ -954,8 +954,14 @@ export function subscribeToOffers(
 }
 
 export type PharmacyWhatsappOtpChallenge = {
+  registered: true;
   challengeId: string;
   expiresAt: string;
+};
+
+export type PharmacyWhatsappNotRegistered = {
+  registered: false;
+  adminWhatsapp: string;
 };
 
 type PharmacyWhatsappOtpSession = {
@@ -964,7 +970,7 @@ type PharmacyWhatsappOtpSession = {
   error?: string;
 };
 
-export async function requestPharmacyWhatsappOtp(phone: string): Promise<PharmacyWhatsappOtpChallenge> {
+export async function requestPharmacyWhatsappOtp(phone: string): Promise<PharmacyWhatsappOtpChallenge | PharmacyWhatsappNotRegistered> {
   const client = requirePharmacyBackend();
   const session = await pharmacySession("Could not prepare pharmacy sign-in");
   if (session?.user.is_anonymous === true) {
@@ -974,16 +980,19 @@ export async function requestPharmacyWhatsappOtp(phone: string): Promise<Pharmac
 
   const normalizedPhone = normalizeRwandaWhatsapp(phone);
   if (!normalizedPhone) throw new Error("Enter the pharmacy WhatsApp number.");
-  const { data, error } = await client.functions.invoke<PharmacyWhatsappOtpChallenge & { error?: string }>(
+  const { data, error } = await client.functions.invoke<(PharmacyWhatsappOtpChallenge | PharmacyWhatsappNotRegistered) & { error?: string }>(
     "dawanear-pharmacy-send-otp",
     { body: { phone: normalizedPhone } },
   );
   if (error) rethrow("Could not send the pharmacy WhatsApp code", error);
   if (data?.error) throw new Error(data.error);
+  if (data?.registered === false) {
+    return { registered: false, adminWhatsapp: data.adminWhatsapp || "250795588248" };
+  }
   if (!data?.challengeId || !data.expiresAt) {
     throw new Error("Could not start WhatsApp verification. Please try again.");
   }
-  return { challengeId: data.challengeId, expiresAt: data.expiresAt };
+  return { registered: true, challengeId: data.challengeId, expiresAt: data.expiresAt };
 }
 
 /** Ends only the permanent pharmacy session; the anonymous customer session is preserved. */
@@ -1266,6 +1275,26 @@ export async function contributePrice(pharmacyId: string, productId: string, pri
     max: Math.round(max),
     priceContributors: Math.round(contributors),
   };
+}
+
+export async function requestPharmacyWhatsappEdit(pharmacyId: string, whatsapp: string, note?: string): Promise<string> {
+  await requirePermanentPharmacyUser("Could not request the pharmacy contact update");
+  const client = requirePharmacyBackend();
+  const normalized = normalizeRwandaWhatsapp(whatsapp);
+  if (!normalized) throw new Error("Enter a valid Rwanda WhatsApp number.");
+  const { data, error } = await client.rpc("dawanear_request_pharmacy_contact_edit", {
+    p_pharmacy_id: requireNonEmpty(pharmacyId, "Pharmacy ID"),
+    p_requested_action: "add",
+    p_requested_contact_type: "whatsapp",
+    p_contact_id: null,
+    p_requested_e164: normalized,
+    p_note: note?.trim() || "Add or replace this pharmacy WhatsApp number",
+  });
+  if (error) rethrow("Could not request the pharmacy contact update", error);
+  if (typeof data !== "string" || !/^[0-9a-f-]{36}$/i.test(data)) {
+    throw new Error("Could not request the pharmacy contact update: no request receipt was returned.");
+  }
+  return data;
 }
 
 export async function submitPharmacyClaim(input: PharmacyClaimInput): Promise<PharmacyClaim> {

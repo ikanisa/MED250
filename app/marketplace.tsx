@@ -51,6 +51,7 @@ import {
   loadSelectedContact,
   normalizeDawaNearError,
   requestPharmacyWhatsappOtp,
+  requestPharmacyWhatsappEdit,
   selectOffer,
   signOutPharmacy,
   submitOffer,
@@ -95,6 +96,8 @@ type PendingOrderAttempt = {
   rpcAttempted: boolean;
   payload: Omit<CreateOrderInput, "clientRequestId" | "prescriptionPath">;
 };
+
+const MED250_ADMIN_WHATSAPP = "250795588248";
 
 const categories = ["All products", "Medicines", "Pain & fever", "Digestive health", "Allergy", "Diabetes care", "Personal care", "Baby & family", "Wellness"];
 const departmentNav = [
@@ -402,6 +405,7 @@ export default function Marketplace({
   const [pharmacyWhatsapp, setPharmacyWhatsapp] = useState("");
   const [pharmacyOtp, setPharmacyOtp] = useState("");
   const [pharmacyOtpChallengeId, setPharmacyOtpChallengeId] = useState("");
+  const [unregisteredPharmacyWhatsapp, setUnregisteredPharmacyWhatsapp] = useState("");
   const [activeMembership, setActiveMembership] = useState<PharmacyMembership | null>(null);
   const [pharmacyRequests, setPharmacyRequests] = useState<PharmacyRequest[]>([]);
   const [pharmacySelectedOrders, setPharmacySelectedOrders] = useState<PharmacySelectedOrder[]>([]);
@@ -415,6 +419,8 @@ export default function Marketplace({
   const [priceProductId, setPriceProductId] = useState("");
   const [priceValue, setPriceValue] = useState("");
   const [priceSearch, setPriceSearch] = useState("");
+  const [contactEditWhatsapp, setContactEditWhatsapp] = useState("");
+  const [contactEditNote, setContactEditNote] = useState("");
   const activePharmacyId = activeMembership?.pharmacyId ?? null;
 
   useEffect(() => {
@@ -928,6 +934,7 @@ export default function Marketplace({
     setPortalOpen(true);
     setPortalError("");
     setPortalMessage("");
+    setUnregisteredPharmacyWhatsapp("");
     if (!backendConfigured) {
       setPortalStage("signin");
       setPortalError("The Supabase project is not connected to this deployment yet.");
@@ -968,6 +975,7 @@ export default function Marketplace({
   async function sendPharmacyCode() {
     setPortalError("");
     setPortalMessage("");
+    setUnregisteredPharmacyWhatsapp("");
     if (!/^7[2389]\d{7}$/.test(pharmacyWhatsapp)) {
       setPortalError("Enter a valid Rwanda WhatsApp number.");
       return;
@@ -975,10 +983,14 @@ export default function Marketplace({
     setPortalLoading(true);
     try {
       const challenge = await requestPharmacyWhatsappOtp(`250${pharmacyWhatsapp}`);
+      if (!challenge.registered) {
+        setUnregisteredPharmacyWhatsapp(challenge.adminWhatsapp || MED250_ADMIN_WHATSAPP);
+        return;
+      }
       setPharmacyOtpChallengeId(challenge.challengeId);
       setPharmacyOtp("");
       setPortalStage("otp");
-      setPortalMessage("If this number is linked to an approved pharmacy, the 6-digit code is now in WhatsApp.");
+      setPortalMessage("The 6-digit verification code is now in WhatsApp.");
     } catch (error) {
       setPortalError(errorMessage(error));
     } finally {
@@ -1011,6 +1023,27 @@ export default function Marketplace({
       setPharmacyRequests(requests);
       setPharmacySelectedOrders(selectedOrders);
       setPortalMessage("Pharmacy access verified.");
+    } catch (error) {
+      setPortalError(errorMessage(error));
+    } finally {
+      setPortalLoading(false);
+    }
+  }
+
+  async function requestContactEdit() {
+    if (!activeMembership) return;
+    setPortalError("");
+    setPortalMessage("");
+    if (!/^7[2389]\d{7}$/.test(contactEditWhatsapp)) {
+      setPortalError("Enter a valid Rwanda WhatsApp number for the contact request.");
+      return;
+    }
+    setPortalLoading(true);
+    try {
+      await requestPharmacyWhatsappEdit(activeMembership.pharmacyId, `250${contactEditWhatsapp}`, contactEditNote);
+      setContactEditWhatsapp("");
+      setContactEditNote("");
+      setPortalMessage("Contact update requested. MED+250 will verify it before changing login access.");
     } catch (error) {
       setPortalError(errorMessage(error));
     } finally {
@@ -1238,6 +1271,7 @@ export default function Marketplace({
         {portalStage !== "workspace" ? <section className="portal-auth"><button className="portal-close" onClick={() => setPortalOpen(false)} aria-label="Close pharmacy portal"><X size={20} /></button><Link className="brand" href="/"><BrandLogo /></Link><h2>{portalStage === "signin" ? "Sign in with registered WhatsApp number" : "Enter your WhatsApp code"}</h2>
           {portalStage === "signin" ? <><label>WhatsApp number<div className="portal-phone-input"><span>+250</span><input value={pharmacyWhatsapp} onChange={(event) => setPharmacyWhatsapp(event.target.value.replace(/\D/g, "").slice(0, 9))} placeholder="78 000 0000" inputMode="tel" autoComplete="tel" /></div></label><button className="primary-wide" onClick={sendPharmacyCode} disabled={portalLoading}><MessageCircle size={17} /> {portalLoading ? "Sending code…" : "Send code on WhatsApp"}</button></> : <><small className="portal-otp-note">Use the 6-digit code sent to +250 {pharmacyWhatsapp}.</small><label>Verification code<input value={pharmacyOtp} onChange={(event) => setPharmacyOtp(event.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="000000" inputMode="numeric" autoComplete="one-time-code" maxLength={6} /></label><button className="primary-wide" onClick={verifyPharmacyCode} disabled={portalLoading}>{portalLoading ? "Verifying…" : "Verify and open pharmacy portal"} <ArrowRight size={17} /></button><button className="text-action" onClick={() => { setPortalStage("signin"); setPharmacyOtp(""); setPharmacyOtpChallengeId(""); setPortalError(""); setPortalMessage(""); }} disabled={portalLoading}>Use another WhatsApp number</button></>}
           {portalMessage ? <p className="form-success"><CircleCheck size={15} /> {portalMessage}</p> : null}{portalError ? <p className="form-error"><CircleAlert size={15} /> {portalError}</p> : null}
+          {unregisteredPharmacyWhatsapp ? <div className="portal-exception-backdrop" role="presentation"><div className="portal-exception" role="alertdialog" aria-modal="true" aria-labelledby="unregistered-whatsapp-title"><button onClick={() => setUnregisteredPharmacyWhatsapp("")} aria-label="Close"><X size={18} /></button><span><CircleAlert size={22} /></span><h3 id="unregistered-whatsapp-title">WhatsApp number not registered</h3><p>This number is not linked to a licensed pharmacy in MED+250. Contact the administrator to register the pharmacy or request a contact correction.</p><a className="primary-wide" href={`https://wa.me/${unregisteredPharmacyWhatsapp}?text=${encodeURIComponent(`Hello MED+250 admin, please help register or correct pharmacy WhatsApp number +250${pharmacyWhatsapp}.`)}`} target="_blank" rel="noreferrer"><MessageCircle size={17} /> Contact admin on WhatsApp</a><button className="text-action" onClick={() => setUnregisteredPharmacyWhatsapp("")}>Try another number</button></div></div> : null}
         </section> : <section className="portal-shell">
           <aside className="portal-sidebar"><Link className="brand" href="/"><BrandLogo /></Link><small>PHARMACY DESK</small><nav><button className={portalTab === "requests" ? "active" : ""} onClick={() => setPortalTab("requests")}><Bell size={18} /> Nearby requests {pharmacyRequests.length ? <b>{pharmacyRequests.length}</b> : null}</button><button className={portalTab === "prices" ? "active" : ""} onClick={() => setPortalTab("prices")}><Banknote size={18} /> Product prices</button><button className={portalTab === "profile" ? "active" : ""} onClick={() => setPortalTab("profile")}><HeartPulse size={18} /> Pharmacy profile</button></nav><div className="portal-user"><span>{activeMembership?.pharmacyName.slice(0, 2).toUpperCase()}</span><div><b>{activeMembership?.pharmacyName}</b><small>{activeMembership?.role} · verified membership</small></div></div><button className="text-action" onClick={leavePharmacyPortal} disabled={portalLoading}>Sign out of pharmacy portal</button></aside>
           <div className="portal-main"><div className="portal-top"><div><span>PHARMACY PORTAL</span><h2>{portalTab === "requests" ? "Nearby requests" : portalTab === "prices" ? "Contribute current prices" : "Verified pharmacy profile"}</h2><p>Only data allowed by pharmacy membership and request-recipient policies is shown.</p></div><button onClick={() => setPortalOpen(false)} aria-label="Close pharmacy portal"><X size={20} /></button></div>
@@ -1250,7 +1284,7 @@ export default function Marketplace({
               {pharmacySelectedOrders.length ? <div className="request-list selected-order-list">{pharmacySelectedOrders.map((order) => <article key={order.orderId}><div className="request-id"><span className="new">SELECTED</span><b>{order.reference}</b><small>{formatDate(order.selectedAt)}</small></div><div><b>{order.deliveryPreference}</b><small>Arrange pickup or delivery directly</small></div><div>{whatsappUrl(order.customerWhatsapp, `Hello, I’m contacting you from ${activeMembership?.pharmacyName ?? "the pharmacy"} about MED+250 request ${order.reference}. Please confirm fulfilment details.`) ? <a href={whatsappUrl(order.customerWhatsapp, `Hello, I’m contacting you from ${activeMembership?.pharmacyName ?? "the pharmacy"} about MED+250 request ${order.reference}. Please confirm fulfilment details.`) ?? undefined} target="_blank" rel="noreferrer"><MessageCircle size={14} /> Contact on WhatsApp</a> : <b>WhatsApp not provided</b>}<small>Medication details are not included in the message</small></div><div>{order.prescriptionUrl ? <a href={order.prescriptionUrl} target="_blank" rel="noreferrer"><FileText size={14} /> Open private prescription</a> : <b>No prescription attached or access window ended</b>}<small>{order.prescriptionUrl ? "Signed link expires within 10 minutes and never beyond the 24-hour selection window" : "No private file is available to review"}</small></div></article>)}</div> : <div className="portal-empty"><ShieldCheck size={29} /><b>No customer has chosen this pharmacy yet</b><p>Contact details and prescriptions stay unavailable until an offer is selected.</p></div>}
             </> : null}
             {portalTab === "prices" ? <section className="portal-form"><div className="price-policy"><Sparkles size={19} /><p>Every price is tied to a verified pharmacy and observation time. A contribution is rejected if it would make the range wider than its minimum price.</p></div><label>Find product<input value={priceSearch} onChange={(event) => setPriceSearch(event.target.value)} placeholder="Brand or generic name" /></label><label>Product<select value={priceProductId} onChange={(event) => setPriceProductId(event.target.value)}><option value="">Choose a product</option>{filteredPriceProducts.map((product) => <option value={product.id} key={product.id}>{product.brand} {product.strength}</option>)}</select></label><label>Selling price (RWF)<input value={priceValue} onChange={(event) => setPriceValue(event.target.value.replace(/\D/g, ""))} inputMode="numeric" placeholder="e.g. 2500" /></label><button className="primary-wide" onClick={addPriceContribution} disabled={portalLoading}>Save verified price <ArrowRight size={17} /></button></section> : null}
-            {portalTab === "profile" ? <section className="portal-form profile-summary"><div><BadgeCheck size={22} /><span><b>{activeMembership?.pharmacyName}</b><small>{activeMembership?.onlineLicenseVerified ? "Online licence verified" : "Online licence verification required"}</small></span></div><dl><div><dt>Your role</dt><dd>{activeMembership?.role}</dd></div><div><dt>WhatsApp</dt><dd>{activeMembership?.whatsapp || "Not configured"}</dd></div><div><dt>MoMo merchant code</dt><dd>{activeMembership?.momoCode || "Not configured"}</dd></div></dl><p>Contact and merchant details are released only after a customer selects the pharmacy. Automated payment remains off until a licensed PSP integration is configured.</p></section> : null}
+            {portalTab === "profile" ? <section className="portal-form profile-summary"><div><BadgeCheck size={22} /><span><b>{activeMembership?.pharmacyName}</b><small>{activeMembership?.onlineLicenseVerified ? "Online licence verified" : "Online licence verification required"}</small></span></div><dl><div><dt>Your role</dt><dd>{activeMembership?.role}</dd></div><div><dt>WhatsApp</dt><dd>{activeMembership?.whatsapp || "Not configured"}</dd></div><div><dt>MoMo merchant code</dt><dd>{activeMembership?.momoCode || "Not configured"}</dd></div></dl><p>Contact and merchant details are released only after a customer selects the pharmacy. Automated payment remains off until a licensed PSP integration is configured.</p><div className="contact-edit-panel"><h3>Request a WhatsApp update</h3><p>Add a new registered number or tell MED+250 which contact should be replaced. Login access changes only after review.</p><label>New WhatsApp number<div className="portal-phone-input"><span>+250</span><input value={contactEditWhatsapp} onChange={(event) => setContactEditWhatsapp(event.target.value.replace(/\D/g, "").slice(0, 9))} placeholder="78 000 0000" inputMode="tel" /></div></label><label>Update note<textarea value={contactEditNote} onChange={(event) => setContactEditNote(event.target.value)} maxLength={1000} placeholder="Example: replace the former manager's number" /></label><button className="primary-wide" onClick={requestContactEdit} disabled={portalLoading}>{portalLoading ? "Submitting…" : "Request contact update"}<ArrowRight size={17} /></button></div></section> : null}
           </div>
         </section>}
         {selectedRequest ? <section className="offer-editor"><div className="offers-head"><div><span>ITEMISED OFFER</span><h2>Respond to {selectedRequest.orderId.slice(0, 8).toUpperCase()}</h2><p>Use requested products unless a substitute is explicitly allowed and clearly identified.</p></div><button onClick={() => setSelectedRequest(null)} aria-label="Close offer editor"><X size={20} /></button></div><div className="offer-items">{selectedRequest.items.map((item) => <article key={item.orderItemId}><div><b>{item.productName}</b><small>Qty {item.quantity}{item.packSize ? ` · Pack ${item.packSize}` : " · Pack size unavailable"} · {item.substitutesAllowed ? "Customer permits an explicit substitute proposal" : "Exact product only"}</small></div><label><input type="checkbox" checked={offerAvailability[item.orderItemId] ?? false} onChange={(event) => setOfferAvailability((current) => ({ ...current, [item.orderItemId]: event.target.checked }))} /> Available</label>{item.substitutesAllowed ? <label><input type="checkbox" checked={offerSubstitutes[item.orderItemId] ?? false} onChange={(event) => { const checked = event.target.checked; setOfferSubstitutes((current) => ({ ...current, [item.orderItemId]: checked })); setOfferProductIds((current) => ({ ...current, [item.orderItemId]: checked ? "" : item.productId })); }} /> Offer a substitute</label> : null}{offerSubstitutes[item.orderItemId] ? <label>Substitute product<select value={offerProductIds[item.orderItemId] ?? ""} onChange={(event) => setOfferProductIds((current) => ({ ...current, [item.orderItemId]: event.target.value }))}><option value="">Choose a matching active, orderable product</option>{orderableCatalogue.filter((product) => product.id !== item.productId && isCompatibleSubstitute(product, item)).map((product) => <option value={product.id} key={product.id}>{product.brand} {product.strength} · {product.generic} · Pack {product.packSize}</option>)}</select></label> : null}<label>Unit price<input value={offerPrices[item.orderItemId] ?? ""} onChange={(event) => setOfferPrices((current) => ({ ...current, [item.orderItemId]: event.target.value.replace(/\D/g, "") }))} inputMode="numeric" placeholder="RWF" disabled={!(offerAvailability[item.orderItemId] ?? false)} /></label></article>)}</div><div className="offer-meta"><label>Ready in minutes<input value={offerReadyMinutes} onChange={(event) => setOfferReadyMinutes(event.target.value.replace(/\D/g, ""))} /></label><label>Note<textarea value={offerNote} onChange={(event) => setOfferNote(event.target.value)} placeholder="Optional fulfilment note" /></label></div><button className="primary-wide" onClick={sendOffer} disabled={portalLoading}>Send itemised offer <ArrowRight size={17} /></button></section> : null}

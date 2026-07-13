@@ -178,12 +178,14 @@ test("isolates anonymous customer auth from permanent pharmacy auth", async () =
 });
 
 test("uses WhatsApp Cloud OTP only for pharmacy portal access", async () => {
-  const [marketplace, migration, sendOtp, verifyOtp, shared] = await Promise.all([
+  const [marketplace, migration, contactsMigration, sendOtp, verifyOtp, shared, contactManifest] = await Promise.all([
     readFile(new URL("../app/marketplace.tsx", import.meta.url), "utf8"),
     readFile(new URL("../supabase/migrations/20260713084601_pharmacy_whatsapp_otp_auth.sql", import.meta.url), "utf8"),
+    readFile(new URL("../supabase/migrations/20260713093604_pharmacy_contacts.sql", import.meta.url), "utf8"),
     readFile(new URL("../supabase/functions/dawanear-pharmacy-send-otp/index.ts", import.meta.url), "utf8"),
     readFile(new URL("../supabase/functions/dawanear-pharmacy-verify-otp/index.ts", import.meta.url), "utf8"),
     readFile(new URL("../supabase/functions/_shared/dawanear-pharmacy-auth.ts", import.meta.url), "utf8"),
+    readFile(new URL("../data/imports/rwanda-fda-pharmacy-contacts-manifest.json", import.meta.url), "utf8"),
   ]);
 
   assert.match(marketplace, /Send code on WhatsApp/);
@@ -191,15 +193,27 @@ test("uses WhatsApp Cloud OTP only for pharmacy portal access", async () => {
   assert.doesNotMatch(marketplace, /SECURE PHARMACY ACCESS/);
   assert.match(marketplace, /Enter your WhatsApp code/);
   assert.match(marketplace, /autoComplete="one-time-code"/);
+  assert.match(marketplace, /WhatsApp number not registered/);
+  assert.match(marketplace, /250795588248/);
+  assert.match(marketplace, /Contact admin on WhatsApp/);
+  assert.match(marketplace, /Request a WhatsApp update/);
   assert.doesNotMatch(marketplace, /Email me a sign-in link|Email address|Already signed in but not linked|Submit a claim/);
   assert.doesNotMatch(marketplace, /Customers use anonymous sessions; pharmacy staff use a permanent email identity/);
   assert.match(migration, /dawanear_pharmacy_otp_challenges/);
   assert.match(migration, /code_hash/);
   assert.match(migration, /for update/);
   assert.match(migration, /revoke all[\s\S]*from public, anon, authenticated/);
+  assert.match(contactsMigration, /dawanear_pharmacy_contacts/);
+  assert.match(contactsMigration, /phone_numbers text\[\]/);
+  assert.match(contactsMigration, /whatsapp_numbers text\[\]/);
+  assert.match(contactsMigration, /is_login_enabled/);
+  assert.match(contactsMigration, /dawanear_request_pharmacy_contact_edit/);
+  assert.match(contactsMigration, /revoke all on table public\.dawanear_pharmacy_contacts from public, anon, authenticated/);
   assert.match(sendOtp, /enforceOtpRateLimits/);
   assert.match(sendOtp, /eligiblePharmacies/);
   assert.match(sendOtp, /sendWhatsappOtp/);
+  assert.match(sendOtp, /registered: false/);
+  assert.match(sendOtp, /adminWhatsapp: "250795588248"/);
   assert.match(verifyOtp, /dawanear_consume_pharmacy_otp/);
   assert.match(verifyOtp, /whatsapp_cloud_otp/);
   assert.match(verifyOtp, /signInWithPassword/);
@@ -207,6 +221,11 @@ test("uses WhatsApp Cloud OTP only for pharmacy portal access", async () => {
   assert.match(shared, /WHATSAPP_TEMPLATE_NAME/);
   assert.match(shared, /WHATSAPP_TEMPLATE_URL_BUTTON_INDEX/);
   assert.match(shared, /crypto\.getRandomValues/);
+  assert.match(shared, /from\("dawanear_pharmacy_contacts"\)/);
+  const manifest = JSON.parse(contactManifest);
+  assert.equal(manifest.roster_pdfs_processed, 11);
+  assert.equal(manifest.matched_contact_rows, 288);
+  assert.equal(manifest.matched_pharmacies, 267);
   assert.doesNotMatch(sendOtp, /console\.log\([^\n]*code/);
 });
 

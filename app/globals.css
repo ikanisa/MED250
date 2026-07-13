@@ -591,6 +591,13 @@ select,textarea { font:inherit; }
 .selected-contact a,.momo-code { min-height:38px; padding:0 11px; display:flex; align-items:center; gap:6px; border-radius:9px; color:#0c5b4f; background:#fff; font-size:9px; font-weight:800; }
 .selected-contact>div:last-child>span:not(.momo-code) { color:#abc2bc; font-size:9px; }
 .portal-auth { width:min(500px,calc(100vw - 32px)); margin:5vh auto; padding:36px; position:relative; background:white; border-radius:18px; box-shadow:0 28px 80px rgba(18,59,54,.18); }
+.portal-exception-backdrop { position:absolute; inset:0; z-index:3; display:grid; place-items:center; padding:22px; border-radius:inherit; background:rgba(17,24,55,.48); backdrop-filter:blur(3px); }
+.portal-exception { width:100%; position:relative; padding:25px 22px 20px; border-radius:15px; background:white; box-shadow:0 24px 65px rgba(16,31,61,.25); text-align:center; }
+.portal-exception>button:first-child { position:absolute; top:11px; right:11px; width:34px; height:34px; display:grid; place-items:center; border:1px solid var(--line); border-radius:9px; background:white; color:var(--ink); cursor:pointer; }
+.portal-exception>span { width:45px; height:45px; margin:0 auto 13px; display:grid; place-items:center; border-radius:50%; background:#ffebe7; color:var(--brand-orange); }
+.portal-exception h3 { margin:0; font:800 22px/1.08 var(--font-display); letter-spacing:-.6px; }
+.portal-exception p { margin:10px auto 0; max-width:360px; color:#61736f; font-size:11px; line-height:1.55; }
+.portal-exception .text-action { margin-top:12px; }
 .portal-auth>.brand { margin-bottom:32px; }
 .portal-close { position:absolute; top:18px; right:18px; width:38px; height:38px; display:grid; place-items:center; border:1px solid var(--line); border-radius:10px; background:white; cursor:pointer; }
 .portal-auth h2 { margin:8px 0; font:800 30px/1.08 var(--font-display); letter-spacing:-1px; }
@@ -617,6 +624,9 @@ select,textarea { font:inherit; }
 .profile-summary dl>div { padding:12px 0; display:flex; justify-content:space-between; gap:15px; border-bottom:1px solid var(--line); }
 .profile-summary dt { color:#738480; font-size:9px; }.profile-summary dd { margin:0; font-size:10px; font-weight:800; }
 .profile-summary>p { color:#6f817d; font-size:9px; line-height:1.55; }
+.contact-edit-panel { margin-top:22px; padding-top:20px; border-top:1px solid var(--line); }
+.contact-edit-panel h3 { margin:0; font:800 18px/1.15 var(--font-display); }
+.contact-edit-panel>p { margin:6px 0 2px; color:#71817e; font-size:10px; line-height:1.55; }
 .offer-editor { position:fixed; inset:7vh max(20px,12vw); z-index:105; padding:26px; overflow:auto; background:#f8faf7; border:1px solid white; border-radius:18px; box-shadow:0 30px 90px rgba(6,37,33,.4); }
 .offer-items { margin:20px 0; overflow:hidden; background:white; border:1px solid var(--line); border-radius:12px; }
 .offer-items article { padding:12px 14px; display:grid; grid-template-columns:1fr 120px 150px; align-items:center; gap:15px; border-bottom:1px solid #e7ece8; }
