@@ -1189,15 +1189,15 @@ export default function Marketplace({
         <div><h1>One pharmacy portal for nearby marketplace demand.</h1><p>Verified pharmacy teams can review eligible orders, submit itemised offers, contribute current product prices, and continue fulfilment with the customer after selection.</p><button onClick={openPortal}>Open pharmacy portal <ArrowRight size={18} /></button></div>
         <div className="pharmacy-route-panel"><Store size={34} /><h2>Permanent staff identity</h2><p>Access requires email sign-in and an operator-approved membership linked to a listed pharmacy.</p><span><ShieldCheck size={16} /> Customer contact remains locked until selection</span><span><LocateFixed size={16} /> Nearby orders use the customer&apos;s consented location</span></div>
       </section> : <>
-        {pageTitle ? <section className="category-route-banner">
+        {pageTitle && !showDepartments ? <section className="category-route-banner">
           <div><h1>{pageTitle}</h1><p>{pageDescription}</p><button onClick={() => requestNativeLocation(true)}><LocateFixed size={18} /> {coordinates ? "Location ready" : "Use my location"}</button></div>
           <Image src={pageImage ?? "/marketplace/hero-pharmacy-still-life.png"} alt="" width={620} height={330} priority unoptimized />
-        </section> : <section className="market-banner">
+        </section> : !pageTitle ? <section className="market-banner">
           <div className="market-banner-copy"><h1>One order. <em>Nearby pharmacy offers.</em></h1><p>Build an order from regulator-derived source data, compare offers from licensed pharmacies near you, and choose with confidence.</p><a className="shop-button" href="#marketplace">Browse registered products <ArrowRight size={18} /></a></div>
           <div className="market-banner-art"><Image src="/marketplace/hero-pharmacy-still-life.png" alt="Pharmacy and wellness products arranged in the med+250 brand colours" width={760} height={340} priority unoptimized /></div>
-        </section>}
+        </section> : null}
 
-        {(!pageTitle || showDepartments) ? <section className="department-cards" aria-label="Shop pharmacy departments">
+        {(!pageTitle || showDepartments) ? <section className={`department-cards${pageTitle && showDepartments ? " category-index-departments" : ""}`} aria-label="Shop pharmacy departments">
           <article><div><h2>Medicines &amp;<br />pain relief</h2><p>Find relief from pain, fever, cough, allergies and more.</p><a href="/category/medicines">Shop medicines <ArrowRight size={15} /></a></div><Image src="/marketplace/category-medicines.png" alt="Medicine box and blister pack" width={210} height={150} unoptimized /></article>
           <article><div><h2>Personal care</h2><p>Everyday essentials for you and your family.</p><a href="/category/personal-care">Shop personal care <ArrowRight size={15} /></a></div><Image src="/marketplace/category-personal-care.png" alt="Personal care products" width={210} height={150} unoptimized /></article>
           <article><div><h2>Baby &amp; family</h2><p>Trusted care for babies and growing families.</p><a href="/category/baby-family">Shop baby &amp; family <ArrowRight size={15} /></a></div><Image src="/marketplace/category-baby-family.png" alt="Baby and family care products" width={210} height={150} unoptimized /></article>

@@ -31,7 +31,7 @@ test("server-renders the MED+250 marketplace", async () => {
 
 test("server-renders every dedicated marketplace route", async () => {
   const routes = [
-    ["/categories", /All pharmacy categories/],
+    ["/categories", /Explore products/],
     ["/category/medicines", /Search by brand, generic name, symptom/],
     ["/category/personal-care", /Browse everyday hygiene, oral care, skin care/],
     ["/category/baby-family", /infant, child, and family care products/],
@@ -43,6 +43,17 @@ test("server-renders every dedicated marketplace route", async () => {
     assert.equal(response.status, 200, pathname);
     assert.match(await response.text(), expected, pathname);
   }
+});
+
+test("keeps the category index free of a duplicate promotional hero", async () => {
+  const categoriesResponse = await render("/categories");
+  const categoriesHtml = await categoriesResponse.text();
+  assert.match(categoriesHtml, /Explore products/);
+  assert.match(categoriesHtml, /category-index-departments/);
+  assert.doesNotMatch(categoriesHtml, /category-route-banner|All pharmacy categories/);
+
+  const medicinesResponse = await render("/category/medicines");
+  assert.match(await medicinesResponse.text(), /category-route-banner/);
 });
 
 test("keeps product cards free of verification status labels", async () => {
