@@ -16,7 +16,7 @@ export const pharmacySupabase = url && key ? createClient(url, key, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
-    detectSessionInUrl: true,
+    detectSessionInUrl: false,
     storageKey: "dawanear-pharmacy-auth",
   },
 }) : null;

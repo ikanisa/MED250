@@ -151,26 +151,61 @@ test("isolates anonymous customer auth from permanent pharmacy auth", async () =
   assert.match(supabaseModule, /storageKey: "dawanear-customer-auth"/);
   assert.match(supabaseModule, /customerSupabase[\s\S]*detectSessionInUrl: false/);
   assert.match(supabaseModule, /storageKey: "dawanear-pharmacy-auth"/);
-  assert.match(supabaseModule, /pharmacySupabase[\s\S]*detectSessionInUrl: true/);
+  assert.match(supabaseModule, /pharmacySupabase[\s\S]*persistSession: true[\s\S]*autoRefreshToken: true[\s\S]*detectSessionInUrl: false/);
   assert.doesNotMatch(supabaseModule, /export const supabase\s*=/);
   assert.match(client, /backendConfigured = customerSupabase !== null && pharmacySupabase !== null/);
 
   const customerSessionSection = client.slice(
     client.indexOf("export async function ensureAnonymousCustomer"),
-    client.indexOf("export async function signInPharmacyWithEmailOtp"),
+    client.indexOf("export async function requestPharmacyWhatsappOtp"),
   );
-  const pharmacySessionSection = client.slice(client.indexOf("export async function signInPharmacyWithEmailOtp"));
+  const pharmacySessionSection = client.slice(client.indexOf("export async function requestPharmacyWhatsappOtp"));
   assert.match(customerSessionSection, /requireCustomerBackend/);
   assert.doesNotMatch(customerSessionSection, /requirePharmacyBackend/);
   assert.match(pharmacySessionSection, /requirePharmacyBackend/);
   assert.doesNotMatch(client, /customerSupabase[\s\S]{0,80}signOut/);
   const pharmacySignOutSection = client.slice(
     client.indexOf("export async function signOutPharmacy"),
-    client.indexOf("export async function verifyPharmacyEmailOtp"),
+    client.indexOf("export async function verifyPharmacyWhatsappOtp"),
   );
   assert.match(pharmacySignOutSection, /requirePharmacyBackend/);
   assert.match(pharmacySignOutSection, /signOut\(\{ scope: "local" \}\)/);
   assert.doesNotMatch(pharmacySignOutSection, /requireCustomerBackend|customerSupabase/);
+  assert.match(pharmacySessionSection, /dawanear-pharmacy-send-otp/);
+  assert.match(pharmacySessionSection, /dawanear-pharmacy-verify-otp/);
+  assert.match(pharmacySessionSection, /auth\.setSession/);
+  assert.doesNotMatch(pharmacySessionSection, /signInWithOtp|verifyOtp/);
+});
+
+test("uses WhatsApp Cloud OTP only for pharmacy portal access", async () => {
+  const [marketplace, migration, sendOtp, verifyOtp, shared] = await Promise.all([
+    readFile(new URL("../app/marketplace.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../supabase/migrations/20260713084601_pharmacy_whatsapp_otp_auth.sql", import.meta.url), "utf8"),
+    readFile(new URL("../supabase/functions/dawanear-pharmacy-send-otp/index.ts", import.meta.url), "utf8"),
+    readFile(new URL("../supabase/functions/dawanear-pharmacy-verify-otp/index.ts", import.meta.url), "utf8"),
+    readFile(new URL("../supabase/functions/_shared/dawanear-pharmacy-auth.ts", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(marketplace, /Send code on WhatsApp/);
+  assert.match(marketplace, /Enter your WhatsApp code/);
+  assert.match(marketplace, /autoComplete="one-time-code"/);
+  assert.doesNotMatch(marketplace, /Email me a sign-in link|Email address|Already signed in but not linked|Submit a claim/);
+  assert.doesNotMatch(marketplace, /Customers use anonymous sessions; pharmacy staff use a permanent email identity/);
+  assert.match(migration, /dawanear_pharmacy_otp_challenges/);
+  assert.match(migration, /code_hash/);
+  assert.match(migration, /for update/);
+  assert.match(migration, /revoke all[\s\S]*from public, anon, authenticated/);
+  assert.match(sendOtp, /enforceOtpRateLimits/);
+  assert.match(sendOtp, /eligiblePharmacies/);
+  assert.match(sendOtp, /sendWhatsappOtp/);
+  assert.match(verifyOtp, /dawanear_consume_pharmacy_otp/);
+  assert.match(verifyOtp, /whatsapp_cloud_otp/);
+  assert.match(verifyOtp, /signInWithPassword/);
+  assert.match(shared, /WHATSAPP_ACCESS_TOKEN/);
+  assert.match(shared, /WHATSAPP_TEMPLATE_NAME/);
+  assert.match(shared, /WHATSAPP_TEMPLATE_URL_BUTTON_INDEX/);
+  assert.match(shared, /crypto\.getRandomValues/);
+  assert.doesNotMatch(sendOtp, /console\.log\([^\n]*code/);
 });
 
 test("coordinates cleanup for every order sharing one prescription path", async () => {

@@ -9,3 +9,12 @@ verify_jwt = false
 
 [functions.cleanup-prescriptions]
 verify_jwt = false
+
+# These are intentionally callable before a pharmacy session exists. Each
+# handler validates origin and input, rate-limits requests, and the verifier
+# exchanges a one-time WhatsApp code for a permanent Supabase session.
+[functions.dawanear-pharmacy-send-otp]
+verify_jwt = false
+
+[functions.dawanear-pharmacy-verify-otp]
+verify_jwt = false

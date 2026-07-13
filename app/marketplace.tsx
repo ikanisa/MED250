@@ -17,7 +17,6 @@ import {
   FileText,
   HeartPulse,
   LocateFixed,
-  Mail,
   MapPin,
   Menu,
   MessageCircle,
@@ -51,13 +50,13 @@ import {
   loadPharmacySelectedOrders,
   loadSelectedContact,
   normalizeDawaNearError,
-  requestPharmacyEmailOtp,
+  requestPharmacyWhatsappOtp,
   selectOffer,
   signOutPharmacy,
   submitOffer,
-  submitPharmacyClaim,
   subscribeToOffers,
   subscribeToPharmacyNotifications,
+  verifyPharmacyWhatsappOtp,
   uploadPrescription,
   type ActiveOrder,
   type DirectoryPharmacy,
@@ -363,7 +362,7 @@ export default function Marketplace({
   const [formFilter, setFormFilter] = useState("all");
   const [availabilityFilter, setAvailabilityFilter] = useState("all");
   const [catalogue, setCatalogue] = useState<Product[]>([]);
-  const [pharmacies, setPharmacies] = useState<DirectoryPharmacy[]>([]);
+  const [, setPharmacies] = useState<DirectoryPharmacy[]>([]);
   const [sort, setSort] = useState("relevance");
   const [dataSource, setDataSource] = useState("Loading official Rwanda FDA source snapshots…");
   const [visibleCount, setVisibleCount] = useState(24);
@@ -398,9 +397,11 @@ export default function Marketplace({
   const [portalLoading, setPortalLoading] = useState(false);
   const [portalError, setPortalError] = useState("");
   const [portalMessage, setPortalMessage] = useState("");
-  const [portalStage, setPortalStage] = useState<"signin" | "claim" | "workspace">("signin");
+  const [portalStage, setPortalStage] = useState<"signin" | "otp" | "workspace">("signin");
   const [portalTab, setPortalTab] = useState<PortalTab>("requests");
-  const [pharmacyEmail, setPharmacyEmail] = useState("");
+  const [pharmacyWhatsapp, setPharmacyWhatsapp] = useState("");
+  const [pharmacyOtp, setPharmacyOtp] = useState("");
+  const [pharmacyOtpChallengeId, setPharmacyOtpChallengeId] = useState("");
   const [activeMembership, setActiveMembership] = useState<PharmacyMembership | null>(null);
   const [pharmacyRequests, setPharmacyRequests] = useState<PharmacyRequest[]>([]);
   const [pharmacySelectedOrders, setPharmacySelectedOrders] = useState<PharmacySelectedOrder[]>([]);
@@ -411,9 +412,6 @@ export default function Marketplace({
   const [offerProductIds, setOfferProductIds] = useState<Record<string, string>>({});
   const [offerReadyMinutes, setOfferReadyMinutes] = useState("20");
   const [offerNote, setOfferNote] = useState("");
-  const [claimPharmacyId, setClaimPharmacyId] = useState("");
-  const [claimPhone, setClaimPhone] = useState("");
-  const [claimNote, setClaimNote] = useState("");
   const [priceProductId, setPriceProductId] = useState("");
   const [priceValue, setPriceValue] = useState("");
   const [priceSearch, setPriceSearch] = useState("");
@@ -943,10 +941,11 @@ export default function Marketplace({
         setPortalStage("signin");
         return;
       }
-      setPharmacyEmail(data.session.user.email ?? "");
       const rows = await loadMyPharmacies();
       if (!rows.length) {
-        setPortalStage("claim");
+        await signOutPharmacy();
+        setPortalError("This WhatsApp number is not linked to an approved pharmacy.");
+        setPortalStage("signin");
         return;
       }
       const membership = rows[0];
@@ -966,17 +965,52 @@ export default function Marketplace({
     }
   }
 
-  async function sendPharmacyLink() {
+  async function sendPharmacyCode() {
     setPortalError("");
     setPortalMessage("");
-    if (!pharmacyEmail.includes("@")) {
-      setPortalError("Enter the pharmacy staff email address.");
+    if (!/^7[2389]\d{7}$/.test(pharmacyWhatsapp)) {
+      setPortalError("Enter a valid Rwanda WhatsApp number.");
       return;
     }
     setPortalLoading(true);
     try {
-      await requestPharmacyEmailOtp(pharmacyEmail, window.location.origin);
-      setPortalMessage("Check your email for the secure sign-in link, then return here.");
+      const challenge = await requestPharmacyWhatsappOtp(`250${pharmacyWhatsapp}`);
+      setPharmacyOtpChallengeId(challenge.challengeId);
+      setPharmacyOtp("");
+      setPortalStage("otp");
+      setPortalMessage("If this number is linked to an approved pharmacy, the 6-digit code is now in WhatsApp.");
+    } catch (error) {
+      setPortalError(errorMessage(error));
+    } finally {
+      setPortalLoading(false);
+    }
+  }
+
+  async function verifyPharmacyCode() {
+    setPortalError("");
+    setPortalMessage("");
+    if (!/^\d{6}$/.test(pharmacyOtp)) {
+      setPortalError("Enter the complete 6-digit WhatsApp code.");
+      return;
+    }
+    setPortalLoading(true);
+    try {
+      await verifyPharmacyWhatsappOtp(`250${pharmacyWhatsapp}`, pharmacyOtpChallengeId, pharmacyOtp);
+      const rows = await loadMyPharmacies();
+      if (!rows.length) {
+        await signOutPharmacy();
+        throw new Error("This WhatsApp number is not linked to an approved pharmacy.");
+      }
+      const membership = rows[0];
+      setActiveMembership(membership);
+      setPortalStage("workspace");
+      const [requests, selectedOrders] = await Promise.all([
+        loadPharmacyRequests(membership.pharmacyId),
+        loadPharmacySelectedOrders(membership.pharmacyId),
+      ]);
+      setPharmacyRequests(requests);
+      setPharmacySelectedOrders(selectedOrders);
+      setPortalMessage("Pharmacy access verified.");
     } catch (error) {
       setPortalError(errorMessage(error));
     } finally {
@@ -996,25 +1030,10 @@ export default function Marketplace({
       setSelectedRequest(null);
       setPortalTab("requests");
       setPortalStage("signin");
-      setPharmacyEmail("");
+      setPharmacyWhatsapp("");
+      setPharmacyOtp("");
+      setPharmacyOtpChallengeId("");
       setPortalMessage("Signed out of the pharmacy portal. The customer request session remains separate.");
-    } catch (error) {
-      setPortalError(errorMessage(error));
-    } finally {
-      setPortalLoading(false);
-    }
-  }
-
-  async function claimPharmacy() {
-    setPortalError("");
-    if (!claimPharmacyId) {
-      setPortalError("Choose the pharmacy you represent.");
-      return;
-    }
-    setPortalLoading(true);
-    try {
-      await submitPharmacyClaim({ pharmacyId: claimPharmacyId, contactEmail: pharmacyEmail, contactPhone: claimPhone, note: claimNote });
-      setPortalMessage("Claim submitted. An operator must verify the premises and online-pharmacy licence before orders can be received.");
     } catch (error) {
       setPortalError(errorMessage(error));
     } finally {
@@ -1216,9 +1235,9 @@ export default function Marketplace({
       </section> : null}
 
       {portalOpen ? <div className="portal-overlay">
-        {portalStage !== "workspace" ? <section className="portal-auth"><button className="portal-close" onClick={() => setPortalOpen(false)} aria-label="Close pharmacy portal"><X size={20} /></button><Link className="brand" href="/"><BrandLogo /></Link><span className="portal-kicker">SECURE PHARMACY ACCESS</span><h2>{portalStage === "signin" ? "Sign in as verified pharmacy staff" : "Claim a listed pharmacy"}</h2><p>{portalStage === "signin" ? "Customers use anonymous sessions; pharmacy staff use a permanent email identity tied to an operator-approved membership." : "A claim never activates ordering automatically. The premises, online licence, staff identity and location must be verified."}</p>
-          {portalStage === "signin" ? <><label>Email address<input type="email" value={pharmacyEmail} onChange={(event) => setPharmacyEmail(event.target.value)} placeholder="name@pharmacy.rw" /></label><button className="primary-wide" onClick={sendPharmacyLink} disabled={portalLoading}><Mail size={17} /> {portalLoading ? "Sending secure link…" : "Email me a sign-in link"}</button></> : <><label>Pharmacy<select value={claimPharmacyId} onChange={(event) => setClaimPharmacyId(event.target.value)}><option value="">Choose a listed premises</option>{pharmacies.map((pharmacy) => <option value={pharmacy.id} key={pharmacy.id}>{pharmacy.name} · {pharmacy.district}</option>)}</select></label><label>Business phone<input value={claimPhone} onChange={(event) => setClaimPhone(event.target.value)} placeholder="+250…" /></label><label>Verification note<textarea value={claimNote} onChange={(event) => setClaimNote(event.target.value)} placeholder="Your role and how the operator can verify it" /></label><button className="primary-wide" onClick={claimPharmacy} disabled={portalLoading}>Submit claim <ArrowRight size={17} /></button></>}
-          {portalMessage ? <p className="form-success"><CircleCheck size={15} /> {portalMessage}</p> : null}{portalError ? <p className="form-error"><CircleAlert size={15} /> {portalError}</p> : null}{portalStage === "signin" && !portalError ? <button className="text-action" onClick={() => setPortalStage("claim")}>Already signed in but not linked? Submit a claim</button> : null}
+        {portalStage !== "workspace" ? <section className="portal-auth"><button className="portal-close" onClick={() => setPortalOpen(false)} aria-label="Close pharmacy portal"><X size={20} /></button><Link className="brand" href="/"><BrandLogo /></Link><span className="portal-kicker">SECURE PHARMACY ACCESS</span><h2>{portalStage === "signin" ? "Sign in as verified pharmacy staff" : "Enter your WhatsApp code"}</h2>
+          {portalStage === "signin" ? <><label>WhatsApp number<div className="portal-phone-input"><span>+250</span><input value={pharmacyWhatsapp} onChange={(event) => setPharmacyWhatsapp(event.target.value.replace(/\D/g, "").slice(0, 9))} placeholder="78 000 0000" inputMode="tel" autoComplete="tel" /></div></label><button className="primary-wide" onClick={sendPharmacyCode} disabled={portalLoading}><MessageCircle size={17} /> {portalLoading ? "Sending code…" : "Send code on WhatsApp"}</button></> : <><small className="portal-otp-note">Use the 6-digit code sent to +250 {pharmacyWhatsapp}.</small><label>Verification code<input value={pharmacyOtp} onChange={(event) => setPharmacyOtp(event.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="000000" inputMode="numeric" autoComplete="one-time-code" maxLength={6} /></label><button className="primary-wide" onClick={verifyPharmacyCode} disabled={portalLoading}>{portalLoading ? "Verifying…" : "Verify and open pharmacy portal"} <ArrowRight size={17} /></button><button className="text-action" onClick={() => { setPortalStage("signin"); setPharmacyOtp(""); setPharmacyOtpChallengeId(""); setPortalError(""); setPortalMessage(""); }} disabled={portalLoading}>Use another WhatsApp number</button></>}
+          {portalMessage ? <p className="form-success"><CircleCheck size={15} /> {portalMessage}</p> : null}{portalError ? <p className="form-error"><CircleAlert size={15} /> {portalError}</p> : null}
         </section> : <section className="portal-shell">
           <aside className="portal-sidebar"><Link className="brand" href="/"><BrandLogo /></Link><small>PHARMACY DESK</small><nav><button className={portalTab === "requests" ? "active" : ""} onClick={() => setPortalTab("requests")}><Bell size={18} /> Nearby requests {pharmacyRequests.length ? <b>{pharmacyRequests.length}</b> : null}</button><button className={portalTab === "prices" ? "active" : ""} onClick={() => setPortalTab("prices")}><Banknote size={18} /> Product prices</button><button className={portalTab === "profile" ? "active" : ""} onClick={() => setPortalTab("profile")}><HeartPulse size={18} /> Pharmacy profile</button></nav><div className="portal-user"><span>{activeMembership?.pharmacyName.slice(0, 2).toUpperCase()}</span><div><b>{activeMembership?.pharmacyName}</b><small>{activeMembership?.role} · verified membership</small></div></div><button className="text-action" onClick={leavePharmacyPortal} disabled={portalLoading}>Sign out of pharmacy portal</button></aside>
           <div className="portal-main"><div className="portal-top"><div><span>PHARMACY PORTAL</span><h2>{portalTab === "requests" ? "Nearby requests" : portalTab === "prices" ? "Contribute current prices" : "Verified pharmacy profile"}</h2><p>Only data allowed by pharmacy membership and request-recipient policies is shown.</p></div><button onClick={() => setPortalOpen(false)} aria-label="Close pharmacy portal"><X size={20} /></button></div>

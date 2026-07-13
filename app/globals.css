@@ -598,6 +598,11 @@ select,textarea { font:inherit; }
 .portal-auth>p { margin:0 0 22px; color:#6f817d; font-size:11px; line-height:1.6; }
 .portal-auth>label,.portal-form>label,.offer-meta label { margin-top:13px; display:flex; flex-direction:column; gap:7px; color:#526762; font-size:10px; font-weight:750; }
 .portal-auth input,.portal-auth select,.portal-auth textarea,.portal-form input,.portal-form select,.offer-editor input,.offer-editor select,.offer-editor textarea { width:100%; min-height:43px; padding:9px 11px; border:1px solid var(--line); border-radius:9px; outline:0; color:var(--ink); background:white; }
+.portal-phone-input { display:flex; min-height:43px; border:1px solid var(--line); border-radius:9px; overflow:hidden; background:white; }
+.portal-phone-input:focus-within { border-color:var(--green); box-shadow:0 0 0 3px rgba(11,111,98,.1); }
+.portal-phone-input>span { display:grid; place-items:center; padding:0 13px; color:var(--ink); background:#f3f6f3; border-right:1px solid var(--line); font-size:12px; font-weight:800; }
+.portal-phone-input>input { min-width:0; border:0; border-radius:0; box-shadow:none!important; }
+.portal-otp-note { display:block; margin:2px 0 18px; color:#6f817d; font-size:11px; line-height:1.5; }
 .portal-auth textarea,.offer-editor textarea { min-height:85px; resize:vertical; }
 .portal-auth input:focus,.portal-auth select:focus,.portal-form input:focus,.portal-form select:focus,.offer-editor input:focus,.offer-editor select:focus,.offer-editor textarea:focus { border-color:var(--green); box-shadow:0 0 0 3px rgba(11,111,98,.1); }
 .text-action { margin:14px auto 0; display:block; border:0; background:none; color:var(--green); font-size:9px; font-weight:800; cursor:pointer; }

@@ -454,9 +454,9 @@ async function pharmacySession(context: string): Promise<Session | null> {
 
 async function requirePermanentPharmacyUser(context: string): Promise<User> {
   const session = await pharmacySession(context);
-  if (!session) throw new Error(`${context}: Sign in with your pharmacy email first.`);
+  if (!session) throw new Error(`${context}: Sign in with your pharmacy WhatsApp number first.`);
   if (session.user.is_anonymous === true) {
-    throw new Error(`${context}: Guest sessions cannot access the pharmacy portal. Sign in with your pharmacy email first.`);
+    throw new Error(`${context}: Guest sessions cannot access the pharmacy portal. Sign in with your pharmacy WhatsApp number first.`);
   }
   return session.user;
 }
@@ -953,7 +953,18 @@ export function subscribeToOffers(
   };
 }
 
-export async function signInPharmacyWithEmailOtp(email: string, emailRedirectTo?: string): Promise<void> {
+export type PharmacyWhatsappOtpChallenge = {
+  challengeId: string;
+  expiresAt: string;
+};
+
+type PharmacyWhatsappOtpSession = {
+  accessToken?: string;
+  refreshToken?: string;
+  error?: string;
+};
+
+export async function requestPharmacyWhatsappOtp(phone: string): Promise<PharmacyWhatsappOtpChallenge> {
   const client = requirePharmacyBackend();
   const session = await pharmacySession("Could not prepare pharmacy sign-in");
   if (session?.user.is_anonymous === true) {
@@ -961,19 +972,19 @@ export async function signInPharmacyWithEmailOtp(email: string, emailRedirectTo?
     if (signOutError) rethrow("Could not close the guest session before pharmacy sign-in", signOutError);
   }
 
-  const options: { shouldCreateUser: boolean; emailRedirectTo?: string } = { shouldCreateUser: true };
-  if (emailRedirectTo) {
-    try {
-      options.emailRedirectTo = new URL(emailRedirectTo).toString();
-    } catch {
-      throw new Error("The pharmacy sign-in return URL is invalid.");
-    }
+  const normalizedPhone = normalizeRwandaWhatsapp(phone);
+  if (!normalizedPhone) throw new Error("Enter the pharmacy WhatsApp number.");
+  const { data, error } = await client.functions.invoke<PharmacyWhatsappOtpChallenge & { error?: string }>(
+    "dawanear-pharmacy-send-otp",
+    { body: { phone: normalizedPhone } },
+  );
+  if (error) rethrow("Could not send the pharmacy WhatsApp code", error);
+  if (data?.error) throw new Error(data.error);
+  if (!data?.challengeId || !data.expiresAt) {
+    throw new Error("Could not start WhatsApp verification. Please try again.");
   }
-  const { error } = await client.auth.signInWithOtp({ email: normalizeEmail(email), options });
-  if (error) rethrow("Could not send the pharmacy email code", error);
+  return { challengeId: data.challengeId, expiresAt: data.expiresAt };
 }
-
-export const requestPharmacyEmailOtp = signInPharmacyWithEmailOtp;
 
 /** Ends only the permanent pharmacy session; the anonymous customer session is preserved. */
 export async function signOutPharmacy(): Promise<void> {
@@ -982,20 +993,33 @@ export async function signOutPharmacy(): Promise<void> {
   if (error) rethrow("Could not sign out of the pharmacy portal", error);
 }
 
-export async function verifyPharmacyEmailOtp(email: string, token: string): Promise<User> {
+export async function verifyPharmacyWhatsappOtp(phone: string, challengeId: string, token: string): Promise<User> {
   const client = requirePharmacyBackend();
   const cleanedToken = token.replace(/\s/g, "");
-  if (!/^\d{6,8}$/.test(cleanedToken)) throw new Error("Enter the complete code from your pharmacy email.");
-  const { data, error } = await client.auth.verifyOtp({
-    email: normalizeEmail(email),
-    token: cleanedToken,
-    type: "email",
-  });
-  if (error) rethrow("Could not verify the pharmacy email code", error);
-  if (!data.session || !data.user || data.user.is_anonymous === true) {
-    throw new Error("Could not verify the pharmacy email code: no permanent user session was returned.");
+  if (!/^\d{6}$/.test(cleanedToken)) throw new Error("Enter the complete 6-digit WhatsApp code.");
+  const normalizedPhone = normalizeRwandaWhatsapp(phone);
+  if (!normalizedPhone) throw new Error("Enter the pharmacy WhatsApp number.");
+  if (!/^[0-9a-f-]{36}$/i.test(challengeId)) throw new Error("Request a new WhatsApp code.");
+
+  const { data, error } = await client.functions.invoke<PharmacyWhatsappOtpSession>(
+    "dawanear-pharmacy-verify-otp",
+    { body: { phone: normalizedPhone, challengeId, code: cleanedToken } },
+  );
+  if (error) rethrow("Could not verify the pharmacy WhatsApp code", error);
+  if (data?.error) throw new Error(data.error);
+  if (!data?.accessToken || !data.refreshToken) {
+    throw new Error("Could not verify the pharmacy WhatsApp code: no permanent session was returned.");
   }
-  return data.user;
+
+  const { data: sessionData, error: sessionError } = await client.auth.setSession({
+    access_token: data.accessToken,
+    refresh_token: data.refreshToken,
+  });
+  if (sessionError) rethrow("Could not save the pharmacy session", sessionError);
+  if (!sessionData.user || sessionData.user.is_anonymous === true) {
+    throw new Error("Could not verify the pharmacy WhatsApp code: no permanent user was returned.");
+  }
+  return sessionData.user;
 }
 
 function mapMembership(row: JsonRecord): PharmacyMembership {

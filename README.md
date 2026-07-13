@@ -1,8 +1,8 @@
-# MED250
+# MED+250
 
-MED250 is a privacy-first launch candidate for a Rwanda pharmacy request marketplace. A customer can build one product list, explicitly consent to location use, and receive itemised offers from at most 20 approved online-pharmacy partners within 10 km. Contact details, exact coordinates, and prescription files stay private until the customer selects an offer.
+MED+250 is a privacy-first launch candidate for a Rwanda pharmacy request marketplace. A customer can build one product list, explicitly consent to location use, and receive itemised offers from at most 20 approved online-pharmacy partners within 10 km. Contact details, exact coordinates, and prescription files stay private until the customer selects an offer.
 
-The inherited `dawanear_*` database names and `lib/dawanear-client.ts` filename are retained as legacy technical identifiers so the audited migration and client remain compatible. Customer-facing branding is MED250.
+The inherited `dawanear_*` database names and `lib/dawanear-client.ts` filename are retained as legacy technical identifiers so the audited migration and client remain compatible. Customer-facing branding is med+250.
 
 The application defaults to `NEXT_PUBLIC_MARKETPLACE_MODE=preview`. Preview mode is intentional: it never fabricates order success or live pharmacy responses and it does not send customer health data.
 
@@ -21,7 +21,8 @@ Rwanda FDA does not state an open-data reuse licence on the register pages. Writ
 
 ## Marketplace safeguards
 
-- Supabase anonymous Auth for customers; permanent email identities and operator-approved memberships for pharmacy staff. Customer and pharmacy sessions use separate browser stores, and the pharmacy portal has an explicit sign-out path for shared devices.
+- Supabase anonymous Auth for customers; six-digit WhatsApp Cloud API OTP for pharmacy staff. The portal has no email sign-up or claim path. A pharmacy number must already be attached to an active, marketplace-approved, online-licence-verified, GPS-verified premises record. Successful OTP exchange creates a permanent Supabase session in a pharmacy-only browser store; it refreshes and persists until staff explicitly sign out.
+- Pharmacy OTPs expire after five minutes, are stored only as a purpose-bound salted hash, allow at most five attempts, invalidate older codes, and are rate-limited by phone, request source, and global volume. WhatsApp delivery reuses the project-level authentication template and server-only Cloud API credentials.
 - Atomic, idempotent order creation: a stable customer request UUID ensures retries return the same committed order while draft, line items, and location-based dispatch commit together. A database constraint permits only one active request per customer.
 - PostGIS `ST_DWithin` and KNN ordering, capped at 10 km and 20 eligible pharmacies.
 - Dispatch requires a current online licence, approved marketplace status, verified GPS coordinates, an active record, and an unexpired premises entry.
@@ -35,7 +36,7 @@ Rwanda FDA does not state an open-data reuse licence on the register pages. Writ
 
 ## Activation sequence
 
-MED250 is installed in Supabase project `uskfnszcdqpcfrhjxitl`. Its prefixed tables, views, functions, private prescription bucket, explicit grants, row-level policies, and Realtime publication entries are isolated from the pre-existing project data. The official source pack is imported, anonymous authentication is enabled, and the two administrative Edge Functions are deployed.
+MED+250 is installed in Supabase project `uskfnszcdqpcfrhjxitl`. Its prefixed tables, views, functions, private prescription bucket, explicit grants, row-level policies, and Realtime publication entries are isolated from the pre-existing project data. The official source pack is imported, anonymous customer authentication is enabled, and the geocoding, cleanup, pharmacy-OTP-send, and pharmacy-OTP-verify Edge Functions are deployed. The former public `env-dump` diagnostic is retired and JWT-protected because it exposed server environment variables.
 
 1. Add CAPTCHA/Turnstile and confirm suitable anonymous-sign-in rate limits. This is a project-wide Auth setting, so review every existing app before changing it.
 2. Keep the site in connected preview mode while products and partners remain non-orderable.
@@ -50,7 +51,7 @@ MED250 is installed in Supabase project `uskfnszcdqpcfrhjxitl`. Its prefixed tab
    ```
 
 5. Apply only authorised product classifications through the controlled review workflow below. The source importer always resets products to `unclassified` and non-orderable, so reviews must be revalidated after each register refresh.
-6. Verify pharmacy claims, current online licences, business WhatsApp/MoMo details, and precise premises coordinates. Only then set `marketplace_approved=true` and `geocode_status=verified` for participating records.
+6. Verify current online licences, business WhatsApp/MoMo details, staff authority, and precise premises coordinates outside the public portal. Only then set `marketplace_approved=true` and `geocode_status=verified` for participating records. The WhatsApp number in `dawanear_pharmacies.whatsapp` becomes the pharmacy login identity.
    Use the admin-token-protected `geocode-pharmacies` Edge Function to create candidates, then approve one premises at a time after manual review; it never infers WhatsApp from a public phone listing.
 7. Rebuild with `NEXT_PUBLIC_MARKETPLACE_MODE=preview`; the connected preview reads live catalogue and directory data but does not send customer or health data.
 8. Test customer, unrelated user, recipient-pharmacy staff, and selected-pharmacy access. Run Supabase security/performance advisors.
