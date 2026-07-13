@@ -21,9 +21,7 @@ import {
   Menu,
   MessageCircle,
   Minus,
-  Package,
   PackageCheck,
-  Pill,
   Plus,
   Search,
   ShieldCheck,
@@ -81,8 +79,16 @@ type PendingOrderAttempt = {
   payload: Omit<CreateOrderInput, "clientRequestId" | "prescriptionPath">;
 };
 
-const categories = ["All products", "Medicines", "Pain & fever", "Digestive health", "Allergy", "Diabetes care"];
+const categories = ["All products", "Medicines", "Pain & fever", "Digestive health", "Allergy", "Diabetes care", "Personal care", "Baby & family", "Wellness"];
+const departmentNav = ["Medicines", "Personal care", "Baby & family", "Wellness"];
 const accentClasses = ["coral", "blue", "mint", "violet", "amber"];
+const productPackImages: Record<string, string> = {
+  blue: "/marketplace/product-pack-blue.png",
+  coral: "/marketplace/product-pack-coral.png",
+  mint: "/marketplace/product-pack-mint.png",
+  violet: "/marketplace/product-pack-violet.png",
+  amber: "/marketplace/product-pack-amber.png",
+};
 const rwf = new Intl.NumberFormat("en-RW");
 const marketplaceMode = process.env.NEXT_PUBLIC_MARKETPLACE_MODE === "live" ? "live" : "preview";
 
@@ -98,6 +104,9 @@ function categoryFor(product: { brand_name?: string; generic_name?: string; dosa
   if (/cetirizine|loratadine|allerg/.test(text)) return "Allergy";
   if (/metformin|insulin|diabet/.test(text)) return "Diabetes care";
   if (/omeprazole|esomeprazole|antacid|digest/.test(text)) return "Digestive health";
+  if (/baby|infant|diaper|nappy/.test(text)) return "Baby & family";
+  if (/lotion|shampoo|tooth|skin|cosmetic|soap/.test(text)) return "Personal care";
+  if (/vitamin|supplement|monitor|device|thermometer/.test(text)) return "Wellness";
   return "Medicines";
 }
 
@@ -177,11 +186,10 @@ function fallbackPharmacy(row: Record<string, string>, online: boolean): Directo
 }
 
 function ProductVisual({ product, small = false }: { product: Product; small?: boolean }) {
-  const form = product.form.toLowerCase();
-  const Icon = /cream|gel|ointment|lotion/.test(form) ? Package : Pill;
+  const fallbackImage = productPackImages[product.accent ?? "mint"] ?? productPackImages.mint;
   return (
     <div className={`dosage-art ${product.accent ?? "mint"} ${small ? "small" : ""}`} aria-hidden="true">
-      {product.imageUrl ? <Image src={product.imageUrl} alt="" width={150} height={108} unoptimized /> : <Icon size={small ? 22 : 43} strokeWidth={1.7} />}
+      <Image src={product.imageUrl ?? fallbackImage} alt="" width={small ? 54 : 170} height={small ? 44 : 128} unoptimized />
       {!small ? <span>{product.form.split(" · ")[0] || "Registered product"}</span> : null}
     </div>
   );
@@ -911,40 +919,44 @@ export default function Marketplace() {
     <main>
       <header className="site-header">
         <a className="brand" href="#top" aria-label="MED250 home">
-          <span className="brand-mark"><Cross size={19} strokeWidth={3} /></span>
+          <span className="brand-mark"><Image src="/marketplace/med250-mark.png" alt="" width={34} height={34} priority unoptimized /></span>
           <span>MED<span>250</span></span>
         </a>
-        <div className="header-search"><Search size={19} /><input value={query} onChange={(event) => { setQuery(event.target.value); setVisibleCount(24); }} placeholder="Search registered products" aria-label="Search the marketplace" /><a href="#marketplace">Search</a></div>
-        <nav className={mobileMenu ? "open" : ""} aria-label="Main navigation">
-          <a href="#marketplace" onClick={() => setMobileMenu(false)}>Products</a>
-          <a href="#pharmacies" onClick={() => setMobileMenu(false)}>Pharmacies</a>
-          <a href="#how" onClick={() => setMobileMenu(false)}>How it works</a>
-        </nav>
+        <button className="delivery-location" onClick={() => setCartOpen(true)}><MapPin size={18} /><span><small>Deliver to</small><b>{location === "Location needed" ? "Kigali" : location}</b></span><ChevronDown size={13} /></button>
+        <div className="header-search"><select value={category} onChange={(event) => { setCategory(event.target.value); setVisibleCount(24); }} aria-label="Search department">{categories.map((item) => <option key={item} value={item}>{item === "All products" ? "All departments" : item}</option>)}</select><input value={query} onChange={(event) => { setQuery(event.target.value); setVisibleCount(24); }} placeholder="Search medicines and pharmacy products" aria-label="Search the marketplace" /><a href="#marketplace"><Search size={22} /><span>Search</span></a></div>
         <div className="header-actions">
-          <button className="location-button" onClick={() => setCartOpen(true)}><MapPin size={16} /><span>{location}</span><ChevronDown size={14} /></button>
-          <button className="pharmacy-signin" onClick={openPortal}>Pharmacy portal</button>
-          <button className="bag-button" onClick={() => setCartOpen(true)} aria-label={`Open request with ${basketCount} items`}><ShoppingBag size={20} /><b>{basketCount}</b></button>
+          <button className="header-utility" onClick={() => setCartOpen(true)}><PackageCheck size={19} /><span><small>My</small><b>Orders</b></span></button>
+          <button className="header-utility" onClick={openPortal}><Store size={19} /><span><small>Pharmacy</small><b>portal</b></span></button>
+          <button className="bag-button" onClick={() => setCartOpen(true)} aria-label={`Open request with ${basketCount} items`}><ShoppingBag size={22} /><span>Request basket</span><b>{basketCount}</b></button>
           <button className="mobile-toggle" onClick={() => setMobileMenu(!mobileMenu)} aria-label="Toggle navigation"><Menu size={22} /></button>
         </div>
       </header>
+
+      <div className="commerce-nav" id="top">
+        <a href="#marketplace"><Menu size={18} /> All departments</a>
+        {departmentNav.map((item) => <button key={item} onClick={() => { setCategory(item); setVisibleCount(24); document.querySelector("#marketplace")?.scrollIntoView(); }}>{item}</button>)}
+        <a href="#pharmacies">Pharmacies</a>
+        <a href="#pharmacies"><ShieldCheck size={16} /> Licensed pharmacies only</a>
+      </div>
 
       {previewMode ? <div className="preview-banner"><ShieldCheck size={16} /><span><b>Connected private preview.</b> The catalogue and pharmacy directory are live on Supabase; customer ordering remains off until products, licensed partners, GPS locations, data permissions, and Rwanda regulatory approvals are confirmed.</span></div> : null}
 
       <aside className="marketplace-note" aria-label="Marketplace model note"><Store size={19} /><p><b>MED250 is a marketplace—not a simple pharmacy website.</b> Its commerce model is comparable to Amazon: customers build one basket, multiple independent pharmacies can respond with offers, and the customer compares and chooses the seller. MED250 is not affiliated with or endorsed by Amazon.</p></aside>
 
-      <div className="commerce-nav" id="top">
-        <a href="#marketplace"><Menu size={16} /> All departments</a>
-        {categories.slice(1).map((item) => <button key={item} onClick={() => { setCategory(item); setVisibleCount(24); document.querySelector("#marketplace")?.scrollIntoView(); }}>{item}</button>)}
-        <a href="#pharmacies">Licensed premises</a>
-      </div>
-
       <section className="market-banner">
-        <div><div className="eyebrow"><span><Sparkles size={13} /></span> Rwanda pharmacy request marketplace</div><h1>One careful request. <em>Nearby licensed options.</em></h1><p>Build a list from regulator-derived source data, share location only with consent, and compare offers from approved online-pharmacy partners when the live service is activated.</p><a className="shop-button" href="#marketplace">Browse registered products <ArrowRight size={18} /></a></div>
-        <div className="market-banner-stats"><div><b>{catalogue.length.toLocaleString()}</b><span>current human-medicine records loaded</span></div><div><b>{pharmacies.filter((item) => item.registryType === "retail").length.toLocaleString()}</b><span>licensed retail premises in source register</span></div><div><b>{onlinePharmacyCount}</b><span>separately online-licensed operators found</span></div></div>
+        <div className="market-banner-copy"><div className="eyebrow">Rwanda pharmacy marketplace</div><h1>One request. <em>Nearby pharmacy offers.</em></h1><p>Build a request from regulator-derived source data, compare offers from licensed pharmacies near you, and choose with confidence.</p><a className="shop-button" href="#marketplace">Browse registered products <ArrowRight size={18} /></a></div>
+        <div className="market-banner-art"><Image src="/marketplace/hero-pharmacy-still-life.png" alt="Pharmacy and wellness products arranged in the MED250 brand colours" width={760} height={340} priority unoptimized /></div>
+      </section>
+
+      <section className="department-cards" aria-label="Shop pharmacy departments">
+        <article><div><h2>Medicines &amp;<br />pain relief</h2><p>Find relief from pain, fever, cough, allergies and more.</p><button onClick={() => setCategory("Medicines")}>Shop medicines <ArrowRight size={15} /></button></div><Image src="/marketplace/category-medicines.png" alt="Medicine box and blister pack" width={210} height={150} unoptimized /></article>
+        <article><div><h2>Personal care</h2><p>Everyday essentials for you and your family.</p><button onClick={() => setCategory("Personal care")}>Shop personal care <ArrowRight size={15} /></button></div><Image src="/marketplace/category-personal-care.png" alt="Personal care products" width={210} height={150} unoptimized /></article>
+        <article><div><h2>Baby &amp; family</h2><p>Trusted care for babies and growing families.</p><button onClick={() => setCategory("Baby & family")}>Shop baby &amp; family <ArrowRight size={15} /></button></div><Image src="/marketplace/category-baby-family.png" alt="Baby and family care products" width={210} height={150} unoptimized /></article>
+        <article><div><h2>Wellness &amp;<br />devices</h2><p>Support your health and monitor with confidence.</p><button onClick={() => setCategory("Wellness")}>Shop wellness <ArrowRight size={15} /></button></div><Image src="/marketplace/category-wellness-devices.png" alt="Digital health monitoring device" width={210} height={150} unoptimized /></article>
       </section>
 
       <section className="marketplace-section" id="marketplace">
-        <div className="section-heading"><div><span className="kicker">Regulator-derived catalogue snapshot</span><h2>Find products for one request</h2><p>Registration status is shown separately from prescription and order eligibility. Unclassified products are never presented as automatically OTC.</p></div><div className="catalogue-stat"><b>{catalogue.length.toLocaleString()}</b><span>active or expiring-soon<br />records loaded</span></div></div>
+        <div className="section-heading"><div><h2>Frequently requested today</h2><p>Price ranges from nearby pharmacies</p></div><button className="see-all" onClick={() => setVisibleCount((count) => count + 48)}>See all</button></div>
         <div className="category-row" role="list" aria-label="Product categories">{categories.map((item) => <button key={item} className={category === item ? "active" : ""} onClick={() => { setCategory(item); setVisibleCount(24); }}>{item}</button>)}</div>
         <div className="results-toolbar"><span><b>{filtered.length.toLocaleString()}</b> results · {dataSource}</span><label>Sort <select value={sort} onChange={(event) => { setSort(event.target.value); setVisibleCount(24); }}><option value="az">Name: A–Z</option><option value="za">Name: Z–A</option></select></label></div>
         <div className="product-grid">
@@ -955,7 +967,7 @@ export default function Marketplace() {
               <h3>{product.brand} <span>{product.strength}</span></h3>
               <p>{product.generic}</p>
               <div className="form-label">{product.form}{product.packSize ? ` · ${product.packSize}` : ""}</div>
-              <div className="price-line"><div><small>{product.priceContributors ? `${product.priceContributors} verified price contribution${product.priceContributors === 1 ? "" : "s"}` : "Price range"}</small><b>{product.min > 0 ? `RWF ${rwf.format(product.min)}–${rwf.format(product.max)}` : "Awaiting verified prices"}</b></div><button onClick={() => add(product)} disabled={!previewMode && !product.isOrderable} aria-label={`Add ${product.brand} to request`} title={!previewMode && !product.isOrderable ? "Not approved for online ordering" : "Add to request"}><Plus size={19} /></button></div>
+              <div className="price-line"><div><small>{product.priceContributors ? `${product.priceContributors} pharmacy price contribution${product.priceContributors === 1 ? "" : "s"}` : "Price range from pharmacies"}</small><b>{product.min > 0 ? `RWF ${rwf.format(product.min)}–${rwf.format(product.max)}` : "Awaiting verified prices"}</b></div><button onClick={() => add(product)} disabled={!previewMode && !product.isOrderable} aria-label={`Add ${product.brand} to request`} title={!previewMode && !product.isOrderable ? "Not approved for online ordering" : "Add to request"}><Plus size={16} /> Add to request</button></div>
             </article>
           ))}
         </div>
@@ -990,7 +1002,7 @@ export default function Marketplace() {
 
       <section className="network-strip"><div><span className="network-icon"><Store size={27} /></span><div><b>Represent an eligible pharmacy?</b><p>Permanent staff sign-in and operator approval are required before any request is visible.</p></div></div><button onClick={openPortal}>Open pharmacy portal <ArrowRight size={17} /></button></section>
 
-      <footer><a className="brand footer-brand" href="#top"><span className="brand-mark"><Cross size={17} /></span><span>MED<span>250</span></span></a><p>A pharmacy request and discovery platform preview. MED250 does not diagnose, prescribe, advertise prescription medicines, or replace a qualified health professional. Source-register inclusion does not by itself mean a product or pharmacy is enabled for online ordering.</p><div><a href="#marketplace">Catalogue</a><a href="#privacy">Privacy approach</a><button onClick={openPortal}>Pharmacy portal</button></div><small>Private launch candidate for Rwanda · Official-source permission and regulatory approvals required before public operation</small></footer>
+      <footer><a className="brand footer-brand" href="#top"><span className="brand-mark"><Image src="/marketplace/med250-mark.png" alt="" width={34} height={34} unoptimized /></span><span>MED<span>250</span></span></a><p>A pharmacy request and discovery platform preview. MED250 does not diagnose, prescribe, advertise prescription medicines, or replace a qualified health professional. Source-register inclusion does not by itself mean a product or pharmacy is enabled for online ordering.</p><div><a href="#marketplace">Catalogue</a><a href="#privacy">Privacy approach</a><button onClick={openPortal}>Pharmacy portal</button></div><small>Private launch candidate for Rwanda · Official-source permission and regulatory approvals required before public operation</small></footer>
 
       {cartOpen ? <div className="overlay" onMouseDown={(event) => event.target === event.currentTarget && setCartOpen(false)}>
         <aside className="drawer" aria-label="Your product request">
@@ -1025,11 +1037,11 @@ export default function Marketplace() {
       </section> : null}
 
       {portalOpen ? <div className="portal-overlay">
-        {portalStage !== "workspace" ? <section className="portal-auth"><button className="portal-close" onClick={() => setPortalOpen(false)} aria-label="Close pharmacy portal"><X size={20} /></button><a className="brand"><span className="brand-mark"><Cross size={17} /></span><span>MED<span>250</span></span></a><span className="portal-kicker">SECURE PHARMACY ACCESS</span><h2>{portalStage === "signin" ? "Sign in as verified pharmacy staff" : "Claim a listed pharmacy"}</h2><p>{portalStage === "signin" ? "Customers use anonymous sessions; pharmacy staff use a permanent email identity tied to an operator-approved membership." : "A claim never activates ordering automatically. The premises, online licence, staff identity and location must be verified."}</p>
+        {portalStage !== "workspace" ? <section className="portal-auth"><button className="portal-close" onClick={() => setPortalOpen(false)} aria-label="Close pharmacy portal"><X size={20} /></button><a className="brand"><span className="brand-mark"><Image src="/marketplace/med250-mark.png" alt="" width={34} height={34} unoptimized /></span><span>MED<span>250</span></span></a><span className="portal-kicker">SECURE PHARMACY ACCESS</span><h2>{portalStage === "signin" ? "Sign in as verified pharmacy staff" : "Claim a listed pharmacy"}</h2><p>{portalStage === "signin" ? "Customers use anonymous sessions; pharmacy staff use a permanent email identity tied to an operator-approved membership." : "A claim never activates ordering automatically. The premises, online licence, staff identity and location must be verified."}</p>
           {portalStage === "signin" ? <><label>Email address<input type="email" value={pharmacyEmail} onChange={(event) => setPharmacyEmail(event.target.value)} placeholder="name@pharmacy.rw" /></label><button className="primary-wide" onClick={sendPharmacyLink} disabled={portalLoading}><Mail size={17} /> {portalLoading ? "Sending secure link…" : "Email me a sign-in link"}</button></> : <><label>Pharmacy<select value={claimPharmacyId} onChange={(event) => setClaimPharmacyId(event.target.value)}><option value="">Choose a listed premises</option>{pharmacies.map((pharmacy) => <option value={pharmacy.id} key={pharmacy.id}>{pharmacy.name} · {pharmacy.district}</option>)}</select></label><label>Business phone<input value={claimPhone} onChange={(event) => setClaimPhone(event.target.value)} placeholder="+250…" /></label><label>Verification note<textarea value={claimNote} onChange={(event) => setClaimNote(event.target.value)} placeholder="Your role and how the operator can verify it" /></label><button className="primary-wide" onClick={claimPharmacy} disabled={portalLoading}>Submit claim <ArrowRight size={17} /></button></>}
           {portalMessage ? <p className="form-success"><CircleCheck size={15} /> {portalMessage}</p> : null}{portalError ? <p className="form-error"><CircleAlert size={15} /> {portalError}</p> : null}{portalStage === "signin" && !portalError ? <button className="text-action" onClick={() => setPortalStage("claim")}>Already signed in but not linked? Submit a claim</button> : null}
         </section> : <section className="portal-shell">
-          <aside className="portal-sidebar"><a className="brand"><span className="brand-mark"><Cross size={17} /></span><span>MED<span>250</span></span></a><small>PHARMACY DESK</small><nav><button className={portalTab === "requests" ? "active" : ""} onClick={() => setPortalTab("requests")}><Bell size={18} /> Nearby requests {pharmacyRequests.length ? <b>{pharmacyRequests.length}</b> : null}</button><button className={portalTab === "prices" ? "active" : ""} onClick={() => setPortalTab("prices")}><Banknote size={18} /> Product prices</button><button className={portalTab === "profile" ? "active" : ""} onClick={() => setPortalTab("profile")}><HeartPulse size={18} /> Pharmacy profile</button></nav><div className="portal-user"><span>{activeMembership?.pharmacyName.slice(0, 2).toUpperCase()}</span><div><b>{activeMembership?.pharmacyName}</b><small>{activeMembership?.role} · verified membership</small></div></div><button className="text-action" onClick={leavePharmacyPortal} disabled={portalLoading}>Sign out of pharmacy portal</button></aside>
+          <aside className="portal-sidebar"><a className="brand"><span className="brand-mark"><Image src="/marketplace/med250-mark.png" alt="" width={34} height={34} unoptimized /></span><span>MED<span>250</span></span></a><small>PHARMACY DESK</small><nav><button className={portalTab === "requests" ? "active" : ""} onClick={() => setPortalTab("requests")}><Bell size={18} /> Nearby requests {pharmacyRequests.length ? <b>{pharmacyRequests.length}</b> : null}</button><button className={portalTab === "prices" ? "active" : ""} onClick={() => setPortalTab("prices")}><Banknote size={18} /> Product prices</button><button className={portalTab === "profile" ? "active" : ""} onClick={() => setPortalTab("profile")}><HeartPulse size={18} /> Pharmacy profile</button></nav><div className="portal-user"><span>{activeMembership?.pharmacyName.slice(0, 2).toUpperCase()}</span><div><b>{activeMembership?.pharmacyName}</b><small>{activeMembership?.role} · verified membership</small></div></div><button className="text-action" onClick={leavePharmacyPortal} disabled={portalLoading}>Sign out of pharmacy portal</button></aside>
           <div className="portal-main"><div className="portal-top"><div><span>PHARMACY PORTAL</span><h2>{portalTab === "requests" ? "Nearby requests" : portalTab === "prices" ? "Contribute current prices" : "Verified pharmacy profile"}</h2><p>Only data allowed by pharmacy membership and request-recipient policies is shown.</p></div><button onClick={() => setPortalOpen(false)} aria-label="Close pharmacy portal"><X size={20} /></button></div>
             {portalMessage ? <p className="form-success"><CircleCheck size={15} /> {portalMessage}</p> : null}{portalError ? <p className="form-error"><CircleAlert size={15} /> {portalError}</p> : null}
             {portalTab === "requests" ? <>

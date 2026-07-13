@@ -17,8 +17,8 @@ test("server-renders the MED250 marketplace", async () => {
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
   const html = await response.text();
   assert.match(html, /<title>MED250/);
-  assert.match(html, /One careful request/);
-  assert.match(html, /Find products for one request/);
+  assert.match(html, /One request/);
+  assert.match(html, /Frequently requested today/);
   assert.match(html, /Check licensed pharmacy records/);
   assert.match(html, /Connected private preview/);
   assert.match(html, /marketplace—not a simple pharmacy website/);
