@@ -1,0 +1,13 @@
+{
+  "name": "MED+250 Rwanda Pharmacy Marketplace",
+  "short_name": "MED+250",
+  "description": "Search pharmacy products and request offers from eligible nearby pharmacies.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fffdf9",
+  "theme_color": "#091747",
+  "icons": [
+    { "src": "/brand/app-icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/brand/app-icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

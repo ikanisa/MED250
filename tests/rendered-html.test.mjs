@@ -2,21 +2,21 @@ import assert from "node:assert/strict";
 import { access, readFile } from "node:fs/promises";
 import test from "node:test";
 
-async function render() {
+async function render(pathname = "/") {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
   const { default: worker } = await import(workerUrl.href);
-  return worker.fetch(new Request("https://dawanear.rw/", { headers: { accept: "text/html" } }), {
+  return worker.fetch(new Request(`https://med250.rw${pathname}`, { headers: { accept: "text/html" } }), {
     ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) },
   }, { waitUntil() {}, passThroughOnException() {} });
 }
 
-test("server-renders the MED250 marketplace", async () => {
+test("server-renders the MED+250 marketplace", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
   const html = await response.text();
-  assert.match(html, /<title>MED250/);
+  assert.match(html, /<title>MED\+250/);
   assert.match(html, /One request/);
   assert.match(html, /Frequently requested today/);
   assert.match(html, /All Categories/);
@@ -27,6 +27,22 @@ test("server-renders the MED250 marketplace", async () => {
   assert.match(html, /Pharmacy portal/);
   assert.match(html, /og:image/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/);
+});
+
+test("server-renders every dedicated marketplace route", async () => {
+  const routes = [
+    ["/categories", /All pharmacy categories/],
+    ["/category/medicines", /Search by brand, generic name, symptom/],
+    ["/category/personal-care", /Browse everyday hygiene, oral care, skin care/],
+    ["/category/baby-family", /infant, child, and family care products/],
+    ["/category/wellness", /monitoring devices, and wellness products/],
+    ["/pharmacies", /One pharmacy portal for nearby marketplace demand/],
+  ];
+  for (const [pathname, expected] of routes) {
+    const response = await render(pathname);
+    assert.equal(response.status, 200, pathname);
+    assert.match(await response.text(), expected, pathname);
+  }
 });
 
 test("keeps the launch candidate honest, connected, and free of simulated fulfilment", async () => {
@@ -100,7 +116,7 @@ test("keeps the launch candidate honest, connected, and free of simulated fulfil
   assert.match(migration, /prescription_access_seconds_remaining/);
   assert.match(migration, /requested_product\.pack_size/);
   assert.match(migration, /selected_at > now\(\) - interval '24 hours'/);
-  assert.match(layout, /MED250/);
+  assert.match(layout, /MED\+250/);
   assert.match(layout, /og\.png/);
   assert.match(css, /@media \(max-width:760px\)/);
   assert.doesNotMatch(pharmacyCsv.split("\n", 1)[0], /google_|phone|whatsapp/i);
