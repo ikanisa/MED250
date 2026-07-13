@@ -665,6 +665,7 @@ select,textarea { font:inherit; }
 .commerce-nav a:last-child,.network-icon { color:var(--brand-green); }
 .header-search:focus-within { border-color:var(--brand-violet); box-shadow:0 0 0 3px rgba(120,120,232,.16); }
 .header-search a,.network-strip>button,.primary-wide { background:var(--brand-orange); color:var(--ink); }
+.portal-auth .primary-wide { color:#fff; }
 .market-banner {
   background:
     radial-gradient(circle at 84% 18%,rgba(120,120,232,.2),transparent 31%),

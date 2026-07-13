@@ -187,6 +187,7 @@ test("uses WhatsApp Cloud OTP only for pharmacy portal access", async () => {
   ]);
 
   assert.match(marketplace, /Send code on WhatsApp/);
+  assert.match(marketplace, /Sign in with registered WhatsApp number/);
   assert.match(marketplace, /Enter your WhatsApp code/);
   assert.match(marketplace, /autoComplete="one-time-code"/);
   assert.doesNotMatch(marketplace, /Email me a sign-in link|Email address|Already signed in but not linked|Submit a claim/);
