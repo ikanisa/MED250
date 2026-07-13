@@ -51,7 +51,7 @@ MED+250 is installed in Supabase project `uskfnszcdqpcfrhjxitl`. Its prefixed ta
    ```
 
 5. Apply only authorised product classifications through the controlled review workflow below. The source importer always resets products to `unclassified` and non-orderable, so reviews must be revalidated after each register refresh.
-6. Verify current online licences, business WhatsApp/MoMo details, staff authority, and precise premises coordinates outside the public portal. Only then set `marketplace_approved=true` and `geocode_status=verified` for participating records. The WhatsApp number in `dawanear_pharmacies.whatsapp` becomes the pharmacy login identity.
+6. Every source-imported pharmacy is marketplace-approved automatically. Separately verify current licences, business WhatsApp/MoMo details, staff authority, and precise premises coordinates before enabling location-based ordering. The WhatsApp number in `dawanear_pharmacies.whatsapp` becomes the pharmacy login identity.
    Use the admin-token-protected `geocode-pharmacies` Edge Function to create candidates, then approve one premises at a time after manual review; it never infers WhatsApp from a public phone listing.
 7. Rebuild with `NEXT_PUBLIC_MARKETPLACE_MODE=preview`; the connected preview reads live catalogue and directory data but does not send customer or health data.
 8. Test customer, unrelated user, recipient-pharmacy staff, and selected-pharmacy access. Run Supabase security/performance advisors.

@@ -121,7 +121,7 @@ function buildPharmacyRows(rows, registryType) {
       sector_cell_raw: requiredText(row.sector_cell_raw, `${registryType} pharmacy ${serial} sector/cell`),
       license_expires_on: requiredText(row.license_expiration_date, `${registryType} pharmacy ${serial} license expiration date`),
       online_license_verified: online,
-      marketplace_approved: false,
+      marketplace_approved: true,
       geocode_status: "pending",
       is_active: true,
       source_name: row.source_name?.trim() || (online ? "Rwanda FDA - Licensed Online Pharmacies May 2026" : "Rwanda FDA - Licensed Human Retail Pharmacies May 2026"),

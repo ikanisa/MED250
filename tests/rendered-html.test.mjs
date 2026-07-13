@@ -229,6 +229,18 @@ test("uses WhatsApp Cloud OTP only for pharmacy portal access", async () => {
   assert.doesNotMatch(sendOtp, /console\.log\([^\n]*code/);
 });
 
+test("automatically marketplace-approves every pharmacy", async () => {
+  const [migration, importer] = await Promise.all([
+    readFile(new URL("../supabase/migrations/20260713095523_approve_all_marketplace_pharmacies.sql", import.meta.url), "utf8"),
+    readFile(new URL("../scripts/import-data/load-supabase.mjs", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(migration, /alter column marketplace_approved set default true/);
+  assert.match(migration, /set marketplace_approved = true/);
+  assert.match(importer, /marketplace_approved: true/);
+  assert.doesNotMatch(importer, /marketplace_approved: false/);
+});
+
 test("coordinates cleanup for every order sharing one prescription path", async () => {
   const [migration, cleanup] = await Promise.all([
     readFile(new URL("../supabase/migrations/20260712130000_dawanear_marketplace.sql", import.meta.url), "utf8"),
