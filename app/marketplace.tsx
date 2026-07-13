@@ -236,7 +236,6 @@ export default function Marketplace() {
   const deferredQuery = useDeferredValue(query);
   const [catalogue, setCatalogue] = useState<Product[]>([]);
   const [pharmacies, setPharmacies] = useState<DirectoryPharmacy[]>([]);
-  const [pharmacyQuery, setPharmacyQuery] = useState("");
   const [sort, setSort] = useState("az");
   const [dataSource, setDataSource] = useState("Loading official Rwanda FDA source snapshots…");
   const [visibleCount, setVisibleCount] = useState(24);
@@ -458,11 +457,6 @@ export default function Marketplace() {
       .toSorted((a, b) => sort === "za" ? b.brand.localeCompare(a.brand) : a.brand.localeCompare(b.brand));
   }, [catalogue, category, deferredQuery, sort]);
 
-  const filteredPharmacies = useMemo(() => {
-    const normalized = pharmacyQuery.trim().toLowerCase();
-    return pharmacies.filter((pharmacy) => `${pharmacy.name} ${pharmacy.district} ${pharmacy.area}`.toLowerCase().includes(normalized));
-  }, [pharmacies, pharmacyQuery]);
-
   const filteredPriceProducts = useMemo(() => {
     const normalized = priceSearch.trim().toLowerCase();
     if (!normalized) return catalogue.slice(0, 30);
@@ -476,7 +470,6 @@ export default function Marketplace() {
   const basketCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   const basketMin = cart.reduce((sum, item) => sum + item.min * item.quantity, 0);
   const basketMax = cart.reduce((sum, item) => sum + item.max * item.quantity, 0);
-  const onlinePharmacyCount = pharmacies.filter((pharmacy) => pharmacy.onlineLicenseVerified).length;
   const cartRequiresPrescription = cart.some((item) => item.prescriptionStatus === "prescription");
   const selectionLocked = activeOrderSelected || selectedContact !== null || offers.some((offer) => offer.status === "selected");
   const requestLocked = pendingOrderAttempt !== null;
@@ -923,7 +916,7 @@ export default function Marketplace() {
           <span>MED<span>250</span></span>
         </a>
         <button className="delivery-location" onClick={() => setCartOpen(true)}><MapPin size={18} /><span><small>Deliver to</small><b>{location === "Location needed" ? "Kigali" : location}</b></span><ChevronDown size={13} /></button>
-        <div className="header-search"><select value={category} onChange={(event) => { setCategory(event.target.value); setVisibleCount(24); }} aria-label="Search department">{categories.map((item) => <option key={item} value={item}>{item === "All products" ? "All departments" : item}</option>)}</select><input value={query} onChange={(event) => { setQuery(event.target.value); setVisibleCount(24); }} placeholder="Search medicines and pharmacy products" aria-label="Search the marketplace" /><a href="#marketplace"><Search size={22} /><span>Search</span></a></div>
+        <div className="header-search"><select value={category} onChange={(event) => { setCategory(event.target.value); setVisibleCount(24); }} aria-label="Search category">{categories.map((item) => <option key={item} value={item}>{item === "All products" ? "All Categories" : item}</option>)}</select><input value={query} onChange={(event) => { setQuery(event.target.value); setVisibleCount(24); }} placeholder="Search medicines and pharmacy products" aria-label="Search the marketplace" /><a href="#marketplace"><Search size={22} /><span>Search</span></a></div>
         <div className="header-actions">
           <button className="header-utility" onClick={() => setCartOpen(true)}><PackageCheck size={19} /><span><small>My</small><b>Orders</b></span></button>
           <button className="header-utility" onClick={openPortal}><Store size={19} /><span><small>Pharmacy</small><b>portal</b></span></button>
@@ -933,18 +926,13 @@ export default function Marketplace() {
       </header>
 
       <div className="commerce-nav" id="top">
-        <a href="#marketplace"><Menu size={18} /> All departments</a>
+        <a href="#marketplace"><Menu size={18} /> All Categories</a>
         {departmentNav.map((item) => <button key={item} onClick={() => { setCategory(item); setVisibleCount(24); document.querySelector("#marketplace")?.scrollIntoView(); }}>{item}</button>)}
         <a href="#pharmacies">Pharmacies</a>
-        <a href="#pharmacies"><ShieldCheck size={16} /> Licensed pharmacies only</a>
       </div>
 
-      {previewMode ? <div className="preview-banner"><ShieldCheck size={16} /><span><b>Connected private preview.</b> The catalogue and pharmacy directory are live on Supabase; customer ordering remains off until products, licensed partners, GPS locations, data permissions, and Rwanda regulatory approvals are confirmed.</span></div> : null}
-
-      <aside className="marketplace-note" aria-label="Marketplace model note"><Store size={19} /><p><b>MED250 is a marketplace—not a simple pharmacy website.</b> Its commerce model is comparable to Amazon: customers build one basket, multiple independent pharmacies can respond with offers, and the customer compares and chooses the seller. MED250 is not affiliated with or endorsed by Amazon.</p></aside>
-
       <section className="market-banner">
-        <div className="market-banner-copy"><div className="eyebrow">Rwanda pharmacy marketplace</div><h1>One request. <em>Nearby pharmacy offers.</em></h1><p>Build a request from regulator-derived source data, compare offers from licensed pharmacies near you, and choose with confidence.</p><a className="shop-button" href="#marketplace">Browse registered products <ArrowRight size={18} /></a></div>
+        <div className="market-banner-copy"><h1>One request. <em>Nearby pharmacy offers.</em></h1><p>Build a request from regulator-derived source data, compare offers from licensed pharmacies near you, and choose with confidence.</p><a className="shop-button" href="#marketplace">Browse registered products <ArrowRight size={18} /></a></div>
         <div className="market-banner-art"><Image src="/marketplace/hero-pharmacy-still-life.png" alt="Pharmacy and wellness products arranged in the MED250 brand colours" width={760} height={340} priority unoptimized /></div>
       </section>
 
@@ -974,35 +962,9 @@ export default function Marketplace() {
         {filtered.length > visibleCount ? <button className="view-all" onClick={() => setVisibleCount((count) => count + 48)}>Show 48 more products <ArrowRight size={17} /></button> : null}
       </section>
 
-      <section className="pharmacy-directory" id="pharmacies">
-        <div className="directory-head"><div><span className="kicker">Official premises registers</span><h2>Check licensed pharmacy records</h2><p>Retail registration and online-pharmacy licensing are distinct. The directory does not publish unverified personal phone numbers, stale map data, or guessed GPS coordinates.</p></div><div className="directory-search"><Search size={18} /><input value={pharmacyQuery} onChange={(event) => setPharmacyQuery(event.target.value)} placeholder="Search pharmacy, district or area" /></div></div>
-        <div className="directory-status"><BadgeCheck size={18} /><span><b>{pharmacies.filter((item) => item.registryType === "retail").length.toLocaleString()} retail entries</b> from the May 2026 source register</span><span><b>{onlinePharmacyCount} online-licensed entries</b> identified separately</span></div>
-        <div className="pharmacy-grid">
-          {filteredPharmacies.slice(0, 16).map((pharmacy) => <article className="pharmacy-card" key={pharmacy.registryEntryKey}>
-            <div className="pharmacy-card-head"><span><Cross size={17} /></span><div><h3>{pharmacy.name}</h3><p>{pharmacy.onlineLicenseVerified ? "ONLINE PHARMACY REGISTER" : "HUMAN RETAIL REGISTER"}</p></div></div>
-            <p><MapPin size={14} /> {[pharmacy.area, pharmacy.district, pharmacy.province].filter(Boolean).join(", ")}</p>
-            <p><ShieldCheck size={14} /> Register expiry: {formatDate(pharmacy.licenseExpiresOn)}</p>
-            <span className={pharmacy.onlineLicenseVerified ? "online-licensed" : "registry-only"}>{pharmacy.onlineLicenseVerified ? <BadgeCheck size={14} /> : <FileText size={14} />}{pharmacy.onlineLicenseVerified ? "Online licence listed" : "Directory entry · not marketplace-approved"}</span>
-          </article>)}
-        </div>
-        {filteredPharmacies.length > 16 ? <p className="directory-more">Showing 16 of {filteredPharmacies.length.toLocaleString()} matches. Search for a specific premise.</p> : null}
-      </section>
+      <section className="network-strip" id="pharmacies"><div><span className="network-icon"><Store size={27} /></span><div><b>Represent an eligible pharmacy?</b><p>Permanent staff sign-in and operator approval are required before any request is visible.</p></div></div><button onClick={openPortal}>Open pharmacy portal <ArrowRight size={17} /></button></section>
 
-      <section className="how-section" id="how">
-        <div className="how-copy"><span className="kicker">Designed for minimum necessary sharing</span><h2>Compare offers without broadcasting your private details.</h2><p>Eligible pharmacy staff first see only request items, distance, and fulfilment preference. Exact location, prescription, and WhatsApp are withheld until the customer selects an offer.</p><button onClick={() => setCartOpen(true)}>Build a request <ArrowRight size={17} /></button></div>
-        <div className="steps">
-          <div><span>01</span><i><Search size={22} /></i><h3>Build your list</h3><p>Choose products, quantities, and whether a pharmacist may propose a substitute.</p></div>
-          <div><span>02</span><i><LocateFixed size={22} /></i><h3>Give consent</h3><p>Location is requested only after consent and used server-side for the 10 km match.</p></div>
-          <div><span>03</span><i><PackageCheck size={22} /></i><h3>Compare real offers</h3><p>Multiple approved pharmacies can submit complete or partial, itemised offers.</p></div>
-          <div><span>04</span><i><MessageCircle size={22} /></i><h3>Choose & arrange</h3><p>Only the selected pharmacy can receive contact details for a user-initiated handoff.</p></div>
-        </div>
-      </section>
-
-      <section className="compliance-strip" id="privacy"><div><ShieldCheck size={25} /><div><b>Launch safeguards are part of the product</b><p>Private prescriptions, explicit location consent, audit-ready offers, no automatic substitutions, no controlled-medicine workflow, and no platform custody of payments.</p></div></div><a href="https://rwandafda.gov.rw/regulated-registered-products/" target="_blank" rel="noreferrer">View Rwanda FDA sources <ArrowRight size={16} /></a></section>
-
-      <section className="network-strip"><div><span className="network-icon"><Store size={27} /></span><div><b>Represent an eligible pharmacy?</b><p>Permanent staff sign-in and operator approval are required before any request is visible.</p></div></div><button onClick={openPortal}>Open pharmacy portal <ArrowRight size={17} /></button></section>
-
-      <footer><a className="brand footer-brand" href="#top"><span className="brand-mark"><Image src="/marketplace/med250-mark.png" alt="" width={34} height={34} unoptimized /></span><span>MED<span>250</span></span></a><p>A pharmacy request and discovery platform preview. MED250 does not diagnose, prescribe, advertise prescription medicines, or replace a qualified health professional. Source-register inclusion does not by itself mean a product or pharmacy is enabled for online ordering.</p><div><a href="#marketplace">Catalogue</a><a href="#privacy">Privacy approach</a><button onClick={openPortal}>Pharmacy portal</button></div><small>Private launch candidate for Rwanda · Official-source permission and regulatory approvals required before public operation</small></footer>
+      <footer><a className="brand footer-brand" href="#top"><span className="brand-mark"><Image src="/marketplace/med250-mark.png" alt="" width={34} height={34} unoptimized /></span><span>MED<span>250</span></span></a><p>A pharmacy request and discovery platform preview. MED250 does not diagnose, prescribe, advertise prescription medicines, or replace a qualified health professional. Source-register inclusion does not by itself mean a product or pharmacy is enabled for online ordering.</p><div><a href="#marketplace">Catalogue</a><button onClick={openPortal}>Pharmacy portal</button></div><small>Private launch candidate for Rwanda · Official-source permission and regulatory approvals required before public operation</small></footer>
 
       {cartOpen ? <div className="overlay" onMouseDown={(event) => event.target === event.currentTarget && setCartOpen(false)}>
         <aside className="drawer" aria-label="Your product request">
