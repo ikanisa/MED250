@@ -8,6 +8,8 @@ The function also recursively paginates Storage, rotates work through a service-
 
 Set a strong `DAWANEAR_CRON_TOKEN` secret and invoke the function with `POST` plus `X-DawaNear-Cron-Token`. The batch size defaults to 50 and is capped at 200. Schedule it only after the DawaNear migration has been applied and the retention periods have been approved in the production privacy policy.
 
+Every invocation records only a low-cardinality `running`, `succeeded`, `degraded`, or `failed` health state plus aggregate counts through the service-only `dawanear_record_maintenance_run` RPC. Object paths and database/storage error messages are never copied into the monitoring table. `dawanear_operational_health()` marks cleanup stale after 26 hours without a new run, so a failed or missing schedule is visible without exposing prescription metadata.
+
 `supabase/config.toml` disables the gateway JWT check for this function because the handler performs its own dedicated-token authentication. Deploy with that configuration intact.
 
 Selected requests remain accessible only during the documented 24-hour selection window. The function transitions timed-out selections to `expired`, notifies recipients, then submits the shared path to the same protected cleanup flow.

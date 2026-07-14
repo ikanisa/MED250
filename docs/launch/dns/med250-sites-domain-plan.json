@@ -1,0 +1,67 @@
+{
+  "schema_version": "1",
+  "captured_at": "2026-07-14T09:55:07Z",
+  "classification": "provider-issued public DNS plan; pending zone-owner application and validation",
+  "sites_origin": "https://med250-rwanda.ikanisa.chatgpt.site",
+  "access_state": "owner-only preview",
+  "hostnames": [
+    {
+      "hostname": "med250.rw",
+      "status": "pending",
+      "ssl_status": "pending_validation",
+      "records": [
+        {
+          "type": "A",
+          "name": "med250.rw",
+          "values": ["162.159.143.30", "172.66.3.26"],
+          "purpose": "Sites apex routing"
+        },
+        {
+          "type": "TXT",
+          "name": "_openai-site-verification.med250.rw",
+          "values": ["openai-site-verification=hdwfhr_kO8pbl8D08DWmfPlMzYqOxxQdGZhNkO-z-w4"],
+          "purpose": "Sites domain ownership verification"
+        },
+        {
+          "type": "TXT",
+          "name": "_cf-custom-hostname.med250.rw",
+          "values": ["6ebd4b0f-59d8-48cc-ae44-11fd7cfd7e8a"],
+          "purpose": "Cloudflare custom-hostname certificate validation"
+        }
+      ]
+    },
+    {
+      "hostname": "www.med250.rw",
+      "status": "pending",
+      "ssl_status": "pending_validation",
+      "records": [
+        {
+          "type": "CNAME",
+          "name": "www.med250.rw",
+          "values": ["custom-domains.chatgpt.site"],
+          "purpose": "Sites subdomain routing"
+        },
+        {
+          "type": "TXT",
+          "name": "_openai-site-verification.www.med250.rw",
+          "values": ["openai-site-verification=Y50OT9UF-3NEF3IWJpgQdyGWJtEdtuH1Jh3WWATkmyU"],
+          "purpose": "Sites domain ownership verification"
+        },
+        {
+          "type": "TXT",
+          "name": "_cf-custom-hostname.www.med250.rw",
+          "values": ["437bac95-4523-4b4d-a548-06af4ee2038b"],
+          "purpose": "Cloudflare custom-hostname certificate validation"
+        }
+      ]
+    }
+  ],
+  "application_rules": [
+    "The DNS zone owner must review and apply these exact public records; this repository does not have zone credentials.",
+    "Do not change the Sites access policy or NEXT_PUBLIC_MARKETPLACE_MODE while DNS validation is pending.",
+    "Do not deploy the direct Wrangler production routes while these hostnames are attached to Sites; select one production routing owner before public launch.",
+    "After DNS propagation, refresh both Sites custom domains and require active provider and SSL status before any launch attestation.",
+    "Run npm run domain:dns:verify and then the authenticated deployment verifier against both hostnames.",
+    "Keep the domain launch gate pending until DNS, TLS, access control, redirects, headers, robots, sitemap and named infrastructure approval are all evidenced."
+  ]
+}

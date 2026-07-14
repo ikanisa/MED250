@@ -1,0 +1,172 @@
+{
+  "schema_version": "2",
+  "release": "med250-production",
+  "description": "Evidence registry for the fifteen fail-closed MED+250 production launch gates. A gate may be confirmed only after its referenced evidence exists and has a named approver and timezone-qualified approval timestamp.",
+  "gates": {
+    "MED250_GATE_GPS_READY": {
+      "title": "Authoritative pharmacy GPS readiness",
+      "owner": "MED+250 operations",
+      "required_evidence_types": ["operations_snapshot", "review_ledger"],
+      "status": "pending",
+      "acceptance": "The approved operating pharmacy set has authoritative premises coordinates with reviewer identity and durable source evidence, and strict operational health reports dispatch-ready coverage.",
+      "evidence": [],
+      "approved_by": null,
+      "approved_role": null,
+      "approved_at": null
+    },
+    "MED250_GATE_WHATSAPP_READY": {
+      "title": "Pharmacy WhatsApp readiness",
+      "owner": "MED+250 operations",
+      "required_evidence_types": ["operations_snapshot", "review_ledger"],
+      "status": "pending",
+      "acceptance": "The approved operating pharmacy set has current, pharmacy-authorised login-enabled WhatsApp contacts and the strict operational-health check passes.",
+      "evidence": [],
+      "approved_by": null,
+      "approved_role": null,
+      "approved_at": null
+    },
+    "MED250_GATE_PHARMACY_OPERATIONS_APPROVED": {
+      "title": "Pharmacy marketplace operations approval",
+      "owner": "MED+250 operations lead",
+      "required_evidence_types": ["signed_approval"],
+      "status": "pending",
+      "acceptance": "Named operational owners have approved dispatch, confirmation, escalation, expiry, cancellation, prescription and incident procedures for the production pharmacy set.",
+      "evidence": [],
+      "approved_by": null,
+      "approved_role": null,
+      "approved_at": null
+    },
+    "MED250_GATE_REGULATORY_APPROVED": {
+      "title": "Regulatory approval",
+      "owner": "MED+250 legal and compliance",
+      "required_evidence_types": ["signed_approval"],
+      "status": "pending",
+      "acceptance": "Written legal and regulatory review approves the exact production marketplace model and documents every applicable Rwanda FDA, RICA and health-sector condition.",
+      "evidence": [],
+      "approved_by": null,
+      "approved_role": null,
+      "approved_at": null
+    },
+    "MED250_GATE_DATA_REUSE_APPROVED": {
+      "title": "Source-data reuse approval",
+      "owner": "MED+250 data owner",
+      "required_evidence_types": ["signed_approval", "review_ledger"],
+      "status": "pending",
+      "acceptance": "Written permission and provenance records approve publication and operational reuse of every product, pharmacy and contact source used by the release.",
+      "evidence": [],
+      "approved_by": null,
+      "approved_role": null,
+      "approved_at": null
+    },
+    "MED250_GATE_DUPLICATE_REGISTER_REVIEWED": {
+      "title": "Duplicate-register review",
+      "owner": "MED+250 regulatory data reviewer",
+      "required_evidence_types": ["review_ledger"],
+      "status": "pending",
+      "acceptance": "The strict duplicate-register verifier passes with named, timestamped decisions for every synchronized product and pharmacy duplicate group.",
+      "evidence": [],
+      "approved_by": null,
+      "approved_role": null,
+      "approved_at": null
+    },
+    "MED250_GATE_CREDENTIALS_ROTATED": {
+      "title": "Privileged credential rotation",
+      "owner": "MED+250 security owner",
+      "required_evidence_types": ["deployment_receipt", "signed_approval"],
+      "status": "pending",
+      "acceptance": "Previously exposed Supabase service, database and personal credentials are revoked and replaced, with a redacted rotation receipt and no replacement secret in repository evidence.",
+      "evidence": [],
+      "approved_by": null,
+      "approved_role": null,
+      "approved_at": null
+    },
+    "MED250_GATE_SECURITY_HARDENING_DEPLOYED": {
+      "title": "Security-hardening migration deployment",
+      "owner": "MED+250 backend owner",
+      "required_evidence_types": ["deployment_receipt", "test_record"],
+      "status": "pending",
+      "acceptance": "The forward security migration and contract refresh are deployed using rotated credentials, and the privileged backend verifier returns contract 2026-07-14.1 with all invariants passing.",
+      "evidence": [],
+      "approved_by": null,
+      "approved_role": null,
+      "approved_at": null
+    },
+    "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED": {
+      "title": "Revised Edge Function deployment",
+      "owner": "MED+250 backend owner",
+      "required_evidence_types": ["deployment_receipt", "test_record"],
+      "status": "pending",
+      "acceptance": "The reviewed OTP, cleanup, geocoding and contact-review Edge Function versions are deployed and their protected-origin and least-privilege probes pass.",
+      "evidence": [],
+      "approved_by": null,
+      "approved_role": null,
+      "approved_at": null
+    },
+    "MED250_GATE_TURNSTILE_SERVER_VERIFIED": {
+      "title": "Turnstile server verification",
+      "owner": "MED+250 security owner",
+      "required_evidence_types": ["test_record"],
+      "status": "pending",
+      "acceptance": "Supabase Auth validates production Turnstile tokens and controlled tests prove invalid or missing tokens cannot create new customer identities.",
+      "evidence": [],
+      "approved_by": null,
+      "approved_role": null,
+      "approved_at": null
+    },
+    "MED250_GATE_AUTH_RATE_LIMITS_APPROVED": {
+      "title": "Anonymous-auth rate-limit approval",
+      "owner": "MED+250 security owner",
+      "required_evidence_types": ["signed_approval", "test_record"],
+      "status": "pending",
+      "acceptance": "Project-wide anonymous-auth limits are approved after impact review and controlled tests prove intended customers can order without weakening abuse controls.",
+      "evidence": [],
+      "approved_by": null,
+      "approved_role": null,
+      "approved_at": null
+    },
+    "MED250_GATE_PRESCRIPTION_RETENTION_APPROVED": {
+      "title": "Prescription-retention approval",
+      "owner": "MED+250 privacy owner",
+      "required_evidence_types": ["signed_approval", "test_record"],
+      "status": "pending",
+      "acceptance": "The privacy owner approves the implemented retention periods and cleanup schedule, and a controlled cleanup run produces a healthy, non-stale aggregate signal.",
+      "evidence": [],
+      "approved_by": null,
+      "approved_role": null,
+      "approved_at": null
+    },
+    "MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED": {
+      "title": "Cloudflare account verification",
+      "owner": "MED+250 infrastructure owner",
+      "required_evidence_types": ["account_verification", "signed_approval"],
+      "status": "pending",
+      "acceptance": "The intended Cloudflare account, least-privilege deploy token, Worker names, protected environments and route ownership are verified with a redacted account record.",
+      "evidence": [],
+      "approved_by": null,
+      "approved_role": null,
+      "approved_at": null
+    },
+    "MED250_GATE_DOMAIN_DNS_VERIFIED": {
+      "title": "Production domain and DNS verification",
+      "owner": "MED+250 infrastructure owner",
+      "required_evidence_types": ["domain_verification", "test_record"],
+      "status": "pending",
+      "acceptance": "med250.rw and www.med250.rw resolve through the intended Cloudflare zone, TLS is healthy, Worker routes are attached and the deployment verifier passes in live mode.",
+      "evidence": [],
+      "approved_by": null,
+      "approved_role": null,
+      "approved_at": null
+    },
+    "MED250_GATE_PHYSICAL_UAT_PASSED": {
+      "title": "Controlled physical-device UAT",
+      "owner": "MED+250 QA owner",
+      "required_evidence_types": ["signed_approval", "test_record"],
+      "status": "pending",
+      "acceptance": "Named test identities pass GPS consent, WhatsApp OTP, dispatch, realtime confirmation, selection, WhatsApp, MoMo, expiry, cancellation and prescription-access scenarios without contacting unintended pharmacies.",
+      "evidence": [],
+      "approved_by": null,
+      "approved_role": null,
+      "approved_at": null
+    }
+  }
+}

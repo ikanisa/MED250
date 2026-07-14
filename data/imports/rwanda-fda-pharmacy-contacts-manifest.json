@@ -9,4 +9,12 @@
   "review_rows": 99,
   "authentication_rule": "Only rows in the matched CSV may be imported as source-verified phone and default WhatsApp login contacts.",
   "google_places_rule": "Google Places candidates are not imported as authentication contacts without separate pharmacy or admin verification."
+  ,"retail_registry_sha256": "977b4d35036d178b45191f98de55e574e848755f1153df252a7a621665b583a9"
+  ,"matched_contacts_sha256": "05dbdbb8b279f3a1264d5a98afa2afe487e6e26d515e4baf68e48e2d8f1d3228"
+  ,"roster_sources": {
+    "review_required": {
+      "url": "https://rwandafda.gov.rw/human-retail-pharmacy-duty-rosters-2/",
+      "sha256": "regenerate-with-extract-rwanda-fda-duty-rosters-before-live-import"
+    }
+  }
 }

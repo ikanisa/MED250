@@ -1,0 +1,45 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "med250-marketplace-preview",
+  "compatibility_date": "2026-07-13",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "./worker/index.ts",
+  "workers_dev": true,
+  "vars": {
+    "MED250_RELEASE_MODE": "preview"
+  },
+  "assets": {
+    "directory": "dist/client",
+    "not_found_handling": "none",
+    "binding": "ASSETS"
+  },
+  "images": { "binding": "IMAGES" },
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "invocation_logs": true
+    },
+    "traces": { "enabled": false }
+  },
+  "env": {
+    "production": {
+      "name": "med250-marketplace",
+      "workers_dev": false,
+      "routes": [
+        { "pattern": "med250.rw/*", "zone_name": "med250.rw" },
+        { "pattern": "www.med250.rw/*", "zone_name": "med250.rw" }
+      ],
+      "vars": {
+        "MED250_RELEASE_MODE": "live"
+      },
+      "assets": {
+        "directory": "dist/client",
+        "not_found_handling": "none",
+        "binding": "ASSETS"
+      },
+      "images": { "binding": "IMAGES" }
+    }
+  }
+}

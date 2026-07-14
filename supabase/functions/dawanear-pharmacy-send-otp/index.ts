@@ -4,7 +4,6 @@ import {
   adminClient,
   corsHeaders,
   eligiblePharmacies,
-  enforceOtpRateLimits,
   errorResponse,
   generateOtp,
   hashOtp,
@@ -17,32 +16,36 @@ import {
 
 Deno.serve(async (request: Request) => {
   try {
-    if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: corsHeaders(request) });
+    // Validate the browser origin before parsing input, rate-limit writes,
+    // challenge creation, or WhatsApp delivery. CORS is not only a response
+    // decoration here: a rejected origin must have no authentication side
+    // effects.
+    const responseCors = corsHeaders(request);
+    if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: responseCors });
     if (request.method !== "POST") throw new HttpError("Method not allowed.", 405);
 
     const body = await request.json().catch(() => ({}));
     const phone = normalizeRwandaPhone(body?.phone);
     const client = adminClient();
     const sourceHash = await requestSourceHash(request);
-    await enforceOtpRateLimits(client, phone, sourceHash);
 
     const now = new Date();
     const expiresAt = new Date(now.getTime() + 5 * 60_000).toISOString();
     const code = generateOtp();
     const codeHash = await hashOtp(phone, code);
-
-    await client
-      .from("dawanear_pharmacy_otp_challenges")
-      .update({ used_at: now.toISOString() })
-      .eq("phone", phone)
-      .is("used_at", null);
-
-    const { data: challenge, error: insertError } = await client
-      .from("dawanear_pharmacy_otp_challenges")
-      .insert({ phone, code_hash: codeHash, source_hash: sourceHash, expires_at: expiresAt })
-      .select("id")
-      .single();
-    if (insertError || !challenge) throw insertError ?? new Error("Challenge was not created");
+    const { data: issueRows, error: issueError } = await client.rpc("dawanear_issue_pharmacy_otp", {
+      p_phone: phone,
+      p_code_hash: codeHash,
+      p_source_hash: sourceHash,
+      p_expires_at: expiresAt,
+    });
+    if (issueError) throw issueError;
+    const issue = Array.isArray(issueRows) ? issueRows[0] : null;
+    if (issue?.rate_limit_reason) {
+      throw new HttpError(String(issue.rate_limit_reason), 429, Number(issue.retry_after_seconds || 60));
+    }
+    if (!issue?.challenge_id) throw new Error("Challenge was not created");
+    const challenge = { id: String(issue.challenge_id) };
 
     const pharmacies = await eligiblePharmacies(client, phone);
     if (!pharmacies.length) {
@@ -65,7 +68,7 @@ Deno.serve(async (request: Request) => {
     return json(request, {
       registered: true,
       challengeId: challenge.id,
-      expiresAt,
+      expiresAt: issue.challenge_expires_at ?? expiresAt,
       message: "A WhatsApp verification code has been sent.",
     });
   } catch (error) {

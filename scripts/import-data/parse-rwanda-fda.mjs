@@ -126,10 +126,11 @@ const products = [];
 const productParseErrors = [];
 function decodeHtml(value) {
   const named = { amp:"&", quot:'"', apos:"'", lt:"<", gt:">", nbsp:" " };
-  return value.replace(/<[^>]+>/g, " ").replace(/&(#x?[0-9a-f]+|[a-z]+);/gi, (_, entity) => {
+  const decoded = value.replace(/&(#x?[0-9a-f]+|[a-z]+);/gi, (_, entity) => {
     if (entity[0] === "#") return String.fromCodePoint(entity[1].toLowerCase() === "x" ? Number.parseInt(entity.slice(2), 16) : Number(entity.slice(1)));
     return named[entity.toLowerCase()] ?? `&${entity};`;
   });
+  return decoded.replace(/<[^>]*>/g, " ").replace(/[<>]/g, " ");
 }
 function addProduct(cells, regulatoryStatus, sourceSerial) {
   if (cells.length !== 14) {

@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 
 function parseCsv(text) {
   const rows = [];
@@ -20,8 +21,23 @@ function parseCsv(text) {
 }
 
 const inputPath = process.argv[2];
-if (!inputPath) throw new Error("Usage: node emit-rwanda-fda-pharmacy-contact-sql.mjs <matched-contacts.csv>");
-const rows = parseCsv(await readFile(inputPath, "utf8")).map((row) => ({
+const manifestPath = process.argv[3];
+if (!inputPath || !manifestPath) throw new Error("Usage: node emit-rwanda-fda-pharmacy-contact-sql.mjs <matched-contacts.csv> <source-manifest.json>");
+const inputBytes = await readFile(inputPath);
+const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+const inputSha256 = createHash("sha256").update(inputBytes).digest("hex");
+if (!/^[0-9a-f]{64}$/.test(manifest.matched_contacts_sha256 ?? "") || manifest.matched_contacts_sha256 !== inputSha256) {
+  throw new Error("Contact CSV digest does not match the reviewed source manifest");
+}
+if (!manifest.roster_sources || Object.keys(manifest.roster_sources).length < 1) {
+  throw new Error("Source manifest does not contain reviewed roster origins and digests");
+}
+for (const [name, source] of Object.entries(manifest.roster_sources)) {
+  if (!source?.url?.startsWith("https://") || !/^[0-9a-f]{64}$/.test(source?.sha256 ?? "")) {
+    throw new Error(`Roster source ${name} is missing a reviewed HTTPS origin or SHA-256 digest`);
+  }
+}
+const rows = parseCsv(inputBytes.toString("utf8")).map((row) => ({
   registry_entry_key: row.registry_entry_key,
   e164: row.e164,
   source_url: row.source_url,
@@ -94,6 +110,7 @@ set display_number = excluded.display_number,
     source_url = excluded.source_url,
     source_reference = excluded.source_reference,
     source_observed_at = excluded.source_observed_at,
-    verified_at = excluded.verified_at;
+    verified_at = excluded.verified_at
+where public.dawanear_pharmacy_contacts.verification_status not in ('rejected', 'stale');
 commit;
 `);

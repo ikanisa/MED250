@@ -17,7 +17,10 @@ import {
 
 Deno.serve(async (request: Request) => {
   try {
-    if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: corsHeaders(request) });
+    // Reject an untrusted browser origin before the one-time code is consumed
+    // or any permanent identity, membership, password, or session is changed.
+    const responseCors = corsHeaders(request);
+    if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: responseCors });
     if (request.method !== "POST") throw new HttpError("Method not allowed.", 405);
 
     const body = await request.json().catch(() => ({}));
@@ -84,6 +87,18 @@ Deno.serve(async (request: Request) => {
     }
 
     const now = new Date().toISOString();
+
+    const pharmacyIds = pharmacies.map((pharmacy) => pharmacy.id);
+    const { data: existingMemberships, error: existingMembershipError } = await client
+      .from("dawanear_pharmacy_memberships")
+      .select("pharmacy_id, role, status")
+      .eq("user_id", userId)
+      .in("pharmacy_id", pharmacyIds);
+    if (existingMembershipError) throw existingMembershipError;
+    if ((existingMemberships ?? []).some((membership) => membership.status !== "active")) {
+      throw new HttpError("This pharmacy access has been suspended. Contact the MED+250 administrator.", 403);
+    }
+
     const { error: identityUpdateError } = await client
       .from("dawanear_pharmacy_identities")
       .update({ verified_at: now, last_login_at: now, updated_at: now })
@@ -100,18 +115,21 @@ Deno.serve(async (request: Request) => {
       .in("verification_status", ["source_verified", "admin_verified"]);
     if (contactLoginError) throw contactLoginError;
 
-    const { error: membershipError } = await client.from("dawanear_pharmacy_memberships").upsert(
-      pharmacies.map((pharmacy) => ({
+    const existingPharmacyIds = new Set((existingMemberships ?? []).map((membership) => membership.pharmacy_id));
+    const missingMemberships = pharmacies
+      .filter((pharmacy) => !existingPharmacyIds.has(pharmacy.id))
+      .map((pharmacy) => ({
         pharmacy_id: pharmacy.id,
         user_id: userId,
         role: "manager",
         status: "active",
         created_by: userId,
         updated_at: now,
-      })),
-      { onConflict: "pharmacy_id,user_id" },
-    );
-    if (membershipError) throw membershipError;
+      }));
+    if (missingMemberships.length > 0) {
+      const { error: membershipError } = await client.from("dawanear_pharmacy_memberships").insert(missingMemberships);
+      if (membershipError) throw membershipError;
+    }
 
     const sessionClient = anonClient();
     const { data: signInData, error: signInError } = await sessionClient.auth.signInWithPassword({ email, password });

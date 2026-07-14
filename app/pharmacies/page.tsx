@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Marketplace from "../marketplace";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = { title: "Pharmacy Portal | MED+250" };
+export const metadata: Metadata = { title: "Pharmacy portal", robots: { index: false, follow: false } };
 
 export default function PharmaciesPage() {
-  return <Marketplace pharmacyPage />;
+  redirect("/?pharmacy-portal=open");
 }
