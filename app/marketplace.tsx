@@ -171,8 +171,9 @@ const productPackImages: Record<string, string> = {
   amber: "/marketplace/product-pack-amber.webp",
 };
 const rwf = new Intl.NumberFormat("en-RW");
-const marketplaceMode = new Set(["preview", "catalog", "live"]).has(process.env.NEXT_PUBLIC_MARKETPLACE_MODE ?? "")
-  ? process.env.NEXT_PUBLIC_MARKETPLACE_MODE as "preview" | "catalog" | "live"
+const configuredMarketplaceMode = process.env.NEXT_PUBLIC_MED250_DEPLOYMENT_MODE || process.env.NEXT_PUBLIC_MARKETPLACE_MODE;
+const marketplaceMode = new Set(["preview", "catalog", "live"]).has(configuredMarketplaceMode ?? "")
+  ? configuredMarketplaceMode as "preview" | "catalog" | "live"
   : "preview";
 const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() ?? "";
 const googleMapsBrowserKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY?.trim() ?? "";

@@ -1,7 +1,9 @@
 export const siteName = "MED+250";
-export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "https://med250.gikundiro.com";
-export const marketplaceMode = new Set(["preview", "catalog", "live"]).has(process.env.NEXT_PUBLIC_MARKETPLACE_MODE ?? "")
-  ? process.env.NEXT_PUBLIC_MARKETPLACE_MODE as "preview" | "catalog" | "live"
+const configuredSiteUrl = process.env.NEXT_PUBLIC_MED250_DEPLOYMENT_ORIGIN || process.env.NEXT_PUBLIC_SITE_URL;
+const configuredMarketplaceMode = process.env.NEXT_PUBLIC_MED250_DEPLOYMENT_MODE || process.env.NEXT_PUBLIC_MARKETPLACE_MODE;
+export const siteUrl = configuredSiteUrl?.replace(/\/$/, "") || "https://med250.gikundiro.com";
+export const marketplaceMode = new Set(["preview", "catalog", "live"]).has(configuredMarketplaceMode ?? "")
+  ? configuredMarketplaceMode as "preview" | "catalog" | "live"
   : "preview";
 export const searchIndexingEnabled = marketplaceMode === "catalog" || marketplaceMode === "live";
 export const defaultDescription = marketplaceMode === "catalog"

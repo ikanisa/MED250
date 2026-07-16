@@ -8,6 +8,8 @@ interface __BaseEnv_Env {
 	NEXT_PUBLIC_SUPABASE_URL: string;
 	NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: string;
 	NEXT_PUBLIC_MARKETPLACE_MODE: string;
+	NEXT_PUBLIC_MED250_DEPLOYMENT_MODE?: string;
+	NEXT_PUBLIC_MED250_DEPLOYMENT_ORIGIN?: string;
 }
 declare namespace Cloudflare {
 	interface GlobalProps {
@@ -20,7 +22,7 @@ type StringifyValues<EnvType extends Record<string, unknown>> = {
 	[Binding in keyof EnvType]: EnvType[Binding] extends string ? EnvType[Binding] : string;
 };
 declare namespace NodeJS {
-	interface ProcessEnv extends StringifyValues<Pick<Cloudflare.Env, "MED250_RELEASE_MODE" | "NEXT_PUBLIC_SUPABASE_URL" | "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY" | "NEXT_PUBLIC_MARKETPLACE_MODE">> {}
+	interface ProcessEnv extends StringifyValues<Pick<Cloudflare.Env, "MED250_RELEASE_MODE" | "NEXT_PUBLIC_SUPABASE_URL" | "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY" | "NEXT_PUBLIC_MARKETPLACE_MODE" | "NEXT_PUBLIC_MED250_DEPLOYMENT_MODE" | "NEXT_PUBLIC_MED250_DEPLOYMENT_ORIGIN">> {}
 }
 
 // Begin runtime types

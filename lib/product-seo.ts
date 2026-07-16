@@ -27,7 +27,8 @@ export function productSeoDescription(product: ProductSeoRecord) {
     .filter(Boolean)
     .join(" · ");
   const productSummary = `${product.brand}${details ? ` — ${details}` : ""}.`;
-  return process.env.NEXT_PUBLIC_MARKETPLACE_MODE === "catalog"
+  const mode = process.env.NEXT_PUBLIC_MED250_DEPLOYMENT_MODE || process.env.NEXT_PUBLIC_MARKETPLACE_MODE;
+  return mode === "catalog"
     ? `${productSummary} Browse product information in the public MED+250 Rwanda pharmacy catalogue.`
     : `${productSummary} Add it to one MED+250 order and receive confirmations from verified pharmacies serving Rwanda.`;
 }
