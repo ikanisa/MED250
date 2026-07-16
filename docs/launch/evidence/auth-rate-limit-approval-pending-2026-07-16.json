@@ -1,0 +1,62 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_AUTH_RATE_LIMITS_APPROVED",
+  "evidence_type": "signed_approval",
+  "status": "pending",
+  "title": "MED+250 anonymous-auth rate-limit approval",
+  "summary": "Owner-ready approval for the project-wide anonymous-auth limit after intended-use, abuse-control and shared-application impact testing. The selected limit, monitoring conditions, rollback criteria and security-owner signature remain pending.",
+  "recorded_at": "2026-07-16T14:08:21+02:00",
+  "recorded_by": "MED+250 security readiness review",
+  "recorded_role": "Release evidence preparer",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Controlled rate-limit test complete",
+      "status": "blocked",
+      "detail": "The paired intended-use and abuse-limit test remains pending and therefore cannot yet support accountable approval of the project-wide setting."
+    },
+    {
+      "name": "Shared-project impact accepted",
+      "status": "pending",
+      "detail": "The security owner must record that the selected limit is acceptable for MED+250 and every other application using the same Supabase Auth project."
+    },
+    {
+      "name": "Legitimate demand and abuse risk balanced",
+      "status": "pending",
+      "detail": "The approval must document the expected peak customer-session profile, abuse threat, selected threshold, time window and evidence supporting the decision."
+    },
+    {
+      "name": "Monitoring and rollback conditions approved",
+      "status": "pending",
+      "detail": "Named alert thresholds, change authority, incident response, rollback criteria and next review date have not yet been approved."
+    },
+    {
+      "name": "Turnstile dependency accepted",
+      "status": "pending",
+      "detail": "The security owner must confirm the approved limit assumes production server-side Turnstile remains enabled and that weakening CAPTCHA is not an allowed capacity response."
+    },
+    {
+      "name": "Named security-owner signature",
+      "status": "pending",
+      "detail": "The accountable security owner has not yet recorded the final decision, conditions, named approver, role and timezone-qualified approval timestamp."
+    }
+  ],
+  "review_reference": "docs/launch/SECURITY_OWNER_REVIEW.md",
+  "review_sha256": "f8a12334c222c552457d085500ea98f9e6dbbd63e2ee3d0d488592ae0d06c4ca",
+  "test_reference": "docs/launch/evidence/auth-rate-limit-test-pending-2026-07-16.json",
+  "selected_anonymous_user_limit": null,
+  "selected_time_window": null,
+  "next_review_at": null,
+  "decision": null,
+  "approved_by": null,
+  "approved_role": null,
+  "approved_at": null,
+  "completion_instructions": [
+    "Complete and strictly validate the paired controlled test.",
+    "Review the shared-project impact, legitimate peak profile, abuse risk, selected threshold, time window, monitoring, rollback and change-authority decisions.",
+    "Record the selected limit, time window and timezone-qualified next review date without including identities or provider secrets.",
+    "Confirm the review digest still matches, set every check to passed, set decision to approved, add the named approver, role and timestamp, and set status to complete.",
+    "Validate the completed approval strictly and add it to the launch registry only with its exact SHA-256 digest."
+  ]
+}

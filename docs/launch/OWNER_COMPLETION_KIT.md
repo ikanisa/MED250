@@ -128,6 +128,14 @@ Gates:
 - `MED250_GATE_TURNSTILE_SERVER_VERIFIED`
 - `MED250_GATE_AUTH_RATE_LIMITS_APPROVED`
 
+Use `docs/launch/SECURITY_OWNER_REVIEW.md` as the shared decision and execution packet. Its pending artifacts are:
+
+- `docs/launch/evidence/credentials-rotation-deployment-receipt-pending-2026-07-16.json`
+- `docs/launch/evidence/credentials-rotation-approval-pending-2026-07-16.json`
+- `docs/launch/evidence/turnstile-positive-path-test-pending-2026-07-16.json`
+- `docs/launch/evidence/auth-rate-limit-test-pending-2026-07-16.json`
+- `docs/launch/evidence/auth-rate-limit-approval-pending-2026-07-16.json`
+
 Credential work:
 
 1. Revoke every previously exposed Supabase service, database, personal, and deployment credential.
