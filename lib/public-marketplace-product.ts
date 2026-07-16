@@ -1,6 +1,7 @@
 import type { CatalogueTaxonomyRow, Product } from "./dawanear-client";
 
 type CatalogueRow = Record<string, unknown>;
+const PUBLIC_FETCH_TIMEOUT_MS = 8_000;
 
 function text(row: CatalogueRow, field: string) {
   const value = row[field];
@@ -38,6 +39,28 @@ function publicSupabaseEndpoint(path: string): { endpoint: URL; publishableKey: 
   }
 }
 
+async function fetchPublicRows(endpoint: URL, publishableKey: string): Promise<CatalogueRow[]> {
+  try {
+    const response = await fetch(endpoint, {
+      headers: {
+        apikey: publishableKey,
+        Authorization: `Bearer ${publishableKey}`,
+      },
+      cache: "no-store",
+      signal: AbortSignal.timeout(PUBLIC_FETCH_TIMEOUT_MS),
+    });
+    if (!response.ok) return [];
+    const payload: unknown = await response.json();
+    if (!Array.isArray(payload)) return [];
+    return payload.filter((row): row is CatalogueRow => typeof row === "object" && row !== null);
+  } catch {
+    // Public pages retain their source-backed build snapshot and hydrate again
+    // in the browser. A transient upstream failure must not turn the route into
+    // an HTTP 503 or invent an empty-state label.
+    return [];
+  }
+}
+
 export async function getPublicCatalogueTaxonomy(): Promise<CatalogueTaxonomyRow[]> {
   const connection = publicSupabaseEndpoint("/rest/v1/dawanear_catalogue_taxonomy");
   if (!connection) return [];
@@ -45,18 +68,8 @@ export async function getPublicCatalogueTaxonomy(): Promise<CatalogueTaxonomyRow
   connection.endpoint.searchParams.set("product_count", "gt.0");
   connection.endpoint.searchParams.set("order", "department.asc,subcategory.asc.nullsfirst");
 
-  const response = await fetch(connection.endpoint, {
-    headers: {
-      apikey: connection.publishableKey,
-      Authorization: `Bearer ${connection.publishableKey}`,
-    },
-    cache: "no-store",
-  });
-  if (!response.ok) return [];
-  const payload: unknown = await response.json();
-  if (!Array.isArray(payload)) return [];
-  return payload
-    .filter((row): row is CatalogueRow => typeof row === "object" && row !== null)
+  const rows = await fetchPublicRows(connection.endpoint, connection.publishableKey);
+  return rows
     .map((row) => ({
       department: text(row, "department"),
       subcategory: text(row, "subcategory") || null,
@@ -78,15 +91,8 @@ export async function getPublicProductImages(id: string): Promise<string[]> {
   endpoint.searchParams.set("order", "position.asc");
   endpoint.searchParams.set("limit", "3");
 
-  const response = await fetch(endpoint, {
-    headers: { apikey: publishableKey, Authorization: `Bearer ${publishableKey}` },
-    cache: "no-store",
-  });
-  if (!response.ok) return [];
-  const payload: unknown = await response.json();
-  if (!Array.isArray(payload)) return [];
-  return payload
-    .filter((row): row is CatalogueRow => typeof row === "object" && row !== null)
+  const rows = await fetchPublicRows(endpoint, publishableKey);
+  return rows
     .map((row) => text(row, "public_url"))
     .filter(Boolean);
 }
@@ -103,17 +109,12 @@ export async function getPublicMarketplaceProduct(id: string): Promise<Product |
   endpoint.searchParams.set("id", `eq.${productId}`);
   endpoint.searchParams.set("limit", "1");
 
-  const [response, imageUrls] = await Promise.all([
-    fetch(endpoint, {
-      headers: { apikey: publishableKey, Authorization: `Bearer ${publishableKey}` },
-      cache: "no-store",
-    }),
+  const [rows, imageUrls] = await Promise.all([
+    fetchPublicRows(endpoint, publishableKey),
     getPublicProductImages(productId),
   ]);
-  if (!response.ok) return null;
-  const payload: unknown = await response.json();
-  if (!Array.isArray(payload) || !payload.length || typeof payload[0] !== "object" || payload[0] === null) return null;
-  const row = payload[0] as CatalogueRow;
+  const row = rows[0];
+  if (!row) return null;
   const brand = text(row, "brand_name") || text(row, "generic_name") || productId;
   const indicativePriceRwf = Math.max(0, Math.round(number(row, "indicative_price_rwf") || number(row, "price_min_rwf")));
 

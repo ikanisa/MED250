@@ -60,6 +60,12 @@ const productPage = await readFile(new URL("../app/product/[id]/page.tsx", impor
 const publicProduct = await readFile(new URL("../lib/public-marketplace-product.ts", import.meta.url), "utf8");
 const marketplace = await readFile(new URL("../app/marketplace.tsx", import.meta.url), "utf8");
 const medicinesPage = await readFile(new URL("../app/category/medicines/page.tsx", import.meta.url), "utf8");
+const categoryPages = await Promise.all([
+  "../app/category/medicines/page.tsx",
+  "../app/category/personal-care/page.tsx",
+  "../app/category/baby-family/page.tsx",
+  "../app/category/wellness/page.tsx",
+].map((page) => readFile(new URL(page, import.meta.url), "utf8")));
 
 test("Amazon-first import contains 2,200 unique, centrally activated products across all 25 taxonomy pairs", () => {
   const rows = dataset.consumer_products;
@@ -142,6 +148,16 @@ test("marketplace schema is RLS-protected and keeps pricing central", () => {
   );
 });
 
+test("public server rendering fails blank instead of returning a transient upstream 503", () => {
+  assert.match(publicProduct, /async function fetchPublicRows/);
+  assert.match(publicProduct, /AbortSignal\.timeout\(PUBLIC_FETCH_TIMEOUT_MS\)/);
+  assert.match(publicProduct, /catch \{[\s\S]*return \[\];[\s\S]*\}/);
+  assert.doesNotMatch(publicProduct, /const \[response, imageUrls\]/);
+  for (const page of categoryPages) {
+    assert.match(page, /initialTaxonomy\.length > 0 && !initialTaxonomy\.some/);
+  }
+});
+
 test("publishes central indicative price columns through the RLS-protected catalogue", () => {
   assert.match(publicCentralPriceMigration, /grant select \([\s\S]*indicative_price_rwf[\s\S]*indicative_price_basis[\s\S]*indicative_price_source_url[\s\S]*indicative_price_updated_at[\s\S]*\) on table public\.dawanear_products to anon, authenticated/);
   assert.doesNotMatch(publicCentralPriceMigration, /dawanear_pharmacy_prices|observed_inventory_units/);
@@ -182,5 +198,5 @@ test("medicine taxonomy is source-backed and empty subcategories stay hidden", (
   assert.match(marketplace, /availableDepartments\.has\(item\.department\)/);
   assert.match(marketplace, /departmentCards\.length/);
   assert.doesNotMatch(marketplace, /Medicines &amp;<br \/>pain relief|Find relief from pain/);
-  assert.match(medicinesPage, /if \(!initialTaxonomy\.some[\s\S]*redirect\("\/categories"\)/);
+  assert.match(medicinesPage, /if \(initialTaxonomy\.length > 0 && !initialTaxonomy\.some[\s\S]*redirect\("\/categories"\)/);
 });

@@ -8,6 +8,6 @@ export const metadata: Metadata = { title: "Beauty and personal care products", 
 
 export default async function PersonalCarePage() {
   const initialTaxonomy = await getPublicCatalogueTaxonomy();
-  if (!initialTaxonomy.some((row) => row.department === "Beauty & Personal Care")) redirect("/categories");
+  if (initialTaxonomy.length > 0 && !initialTaxonomy.some((row) => row.department === "Beauty & Personal Care")) redirect("/categories");
   return <Marketplace initialCategory="Beauty & Personal Care" pageTitle="Beauty & Personal Care" pageDescription="Browse source-backed products currently present in this department." pageImage="/marketplace/category-personal-care.webp" initialProducts={getInitialMarketplaceProducts("Personal care")} initialTaxonomy={initialTaxonomy} />;
 }

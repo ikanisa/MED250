@@ -8,6 +8,6 @@ export const metadata: Metadata = { title: "Medicines in Rwanda", description: "
 
 export default async function MedicinesPage() {
   const initialTaxonomy = await getPublicCatalogueTaxonomy();
-  if (!initialTaxonomy.some((row) => row.department === "Medicines")) redirect("/categories");
+  if (initialTaxonomy.length > 0 && !initialTaxonomy.some((row) => row.department === "Medicines")) redirect("/categories");
   return <Marketplace initialCategory="Medicines" pageTitle="Medicines" pageDescription="Search by brand, generic name, symptom, strength, dosage form, or pack size across the current product register." pageImage="/marketplace/category-medicines.webp" initialProducts={getInitialMarketplaceProducts("Medicines")} initialTaxonomy={initialTaxonomy} />;
 }

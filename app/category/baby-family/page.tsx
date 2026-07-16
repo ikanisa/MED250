@@ -8,6 +8,6 @@ export const metadata: Metadata = { title: "Baby products", description: "Browse
 
 export default async function BabyFamilyPage() {
   const initialTaxonomy = await getPublicCatalogueTaxonomy();
-  if (!initialTaxonomy.some((row) => row.department === "Baby")) redirect("/categories");
+  if (initialTaxonomy.length > 0 && !initialTaxonomy.some((row) => row.department === "Baby")) redirect("/categories");
   return <Marketplace initialCategory="Baby" pageTitle="Baby" pageDescription="Browse source-backed products currently present in this department." pageImage="/marketplace/category-baby-family.webp" initialProducts={getInitialMarketplaceProducts("Baby & family")} initialTaxonomy={initialTaxonomy} />;
 }
