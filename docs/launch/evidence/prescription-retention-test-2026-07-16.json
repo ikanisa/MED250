@@ -5,8 +5,8 @@
   "evidence_type": "test_record",
   "status": "complete",
   "title": "Production prescription retention cleanup execution",
-  "summary": "The protected scheduled cleanup entry point ran successfully after redeployment and the aggregate privacy-safe maintenance signal remained healthy and current.",
-  "recorded_at": "2026-07-16T10:09:12Z",
+  "summary": "The protected scheduled cleanup entry point completed successfully and a fresh aggregate privacy-safe production check confirmed that the maintenance signal remains healthy and current.",
+  "recorded_at": "2026-07-16T13:43:37Z",
   "recorded_by": "Codex automated verifier",
   "recorded_role": "Release verification agent",
   "redactions_confirmed": true,
@@ -19,7 +19,7 @@
     {
       "name": "Cleanup result",
       "status": "passed",
-      "detail": "The maintenance record completed successfully with zero processing errors, zero expired claims, and a complete orphan scan."
+      "detail": "The latest maintenance record completed successfully with zero processing errors, zero expired claims, zero active claims and a complete orphan scan."
     },
     {
       "name": "Aggregate privacy",
@@ -29,6 +29,6 @@
   ],
   "executed_by": "Codex automated verifier",
   "executor_role": "Release verification agent",
-  "started_at": "2026-07-16T10:06:25Z",
-  "completed_at": "2026-07-16T10:06:42Z"
+  "started_at": "2026-07-16T12:15:02Z",
+  "completed_at": "2026-07-16T12:15:04Z"
 }

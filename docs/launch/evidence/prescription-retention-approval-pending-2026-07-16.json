@@ -45,7 +45,7 @@
   "policy_reference": "docs/launch/PRESCRIPTION_RETENTION_POLICY.md",
   "policy_sha256": "70a77a1e721b94348125032bcd529e9a89baa3f6cfda907ee3b8070e1d47b88f",
   "test_reference": "docs/launch/evidence/prescription-retention-test-2026-07-16.json",
-  "test_sha256": "14925d74e8d1bc2e996e0fa2efcc488426f6a3c3766fc82d9226abc0203fd90c",
+  "test_sha256": "7ed3d3dff07e1bfcd37550fb7ff2074e50346b8f4221d69be93d3d54946db525",
   "decision": null,
   "approved_by": null,
   "approved_role": null,

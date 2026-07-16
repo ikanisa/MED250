@@ -11,7 +11,7 @@ npm run launch:evidence:status
 npm run --silent launch:evidence:handoff > /tmp/med250-owner-evidence-handoff.json
 ```
 
-The second command produces all 17 currently missing artifact templates without changing the repository. Copy only a completed artifact into `docs/launch/evidence/`, validate it, hash it, and then add it to `data/launch-evidence.json`.
+The second command produces one deterministic handoff for all 17 currently missing evidence types without changing the repository. Every one now has a prepared pending artifact with gate-specific checks, unresolved actions and completion instructions. Complete the listed file in place, validate it, hash it, and then add it to `data/launch-evidence.json`. Do not replace a prepared packet with a generic template.
 
 For every artifact:
 
@@ -122,6 +122,10 @@ Review all 51 groups in `desktop-output/goal-progress-2026-07-16/04-duplicate-re
 - `blocked_source_correction` when an authoritative correction is still required.
 
 Every decision needs reviewer name, timezone-qualified timestamp, and rationale. Never merge or delete source rows merely to make the verifier pass.
+
+Complete the prepared redacted launch ledger after the row-level review:
+
+- `docs/launch/evidence/duplicate-register-review-ledger-pending-2026-07-16.json`
 
 Final check:
 

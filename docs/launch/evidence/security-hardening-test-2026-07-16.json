@@ -5,8 +5,8 @@
   "evidence_type": "test_record",
   "status": "complete",
   "title": "Production backend contract and catalogue security verification",
-  "summary": "After forward repair of live image-governance drift, the privileged aggregate verifier again passes every database, privacy, catalogue, pricing, image, audit, realtime, and least-privilege invariant. Operational health is healthy, the public image bucket is empty, and the expanded regression and dependency-security suites pass.",
-  "recorded_at": "2026-07-16T13:12:09Z",
+  "summary": "After forward repair of live image-governance drift, a fresh privileged aggregate verification passes every database, privacy, catalogue, pricing, image, audit, realtime and least-privilege invariant. Operational health is healthy, the public image bucket is empty, and the expanded regression and dependency-security suites pass.",
+  "recorded_at": "2026-07-16T13:43:37Z",
   "recorded_by": "Codex automated verifier",
   "recorded_role": "Release verification agent",
   "redactions_confirmed": true,
@@ -54,7 +54,7 @@
     {
       "name": "Product-image DDL guard",
       "status": "passed",
-      "detail": "The live database rejected an unauthorized verified-rights constraint drop with SQLSTATE 42501, and the complete 166-test Node suite independently reproduced the protected DDL behavior plus the exact unsafe-drift repair in PGlite."
+      "detail": "The live database rejected an unauthorized verified-rights constraint drop with SQLSTATE 42501, and the complete 177-test Node suite independently reproduced the protected DDL behavior plus the exact unsafe-drift repair in PGlite."
     },
     {
       "name": "Node dependency vulnerability audit",
@@ -69,12 +69,12 @@
     {
       "name": "Integrated automated regression suite",
       "status": "passed",
-      "detail": "The complete regression run finished 166 Node tests and 45 Python pipeline tests with zero failures."
+      "detail": "The complete regression run finished 177 Node tests and 45 Python pipeline tests with zero failures."
     },
     {
       "name": "Current hosted Supabase platform",
       "status": "passed",
-      "detail": "Fresh management-plane verification reports the project active and healthy on PostgreSQL 17.6, with GoTrue 2.193, PostgREST 14.1 and Storage API 1.65. Database SSL enforcement remains enabled and successfully applied."
+      "detail": "Supabase CLI 2.109.1 reports the linked project active and healthy on PostgreSQL 17.6.1, with GoTrue 2.193, PostgREST 14.1 and Storage API 1.65.1. Database SSL enforcement remains enabled and successfully applied."
     },
     {
       "name": "Current SDK and runtime compatibility",
@@ -84,11 +84,21 @@
     {
       "name": "Complete preview-safe release audit",
       "status": "passed",
-      "detail": "The complete preview-safe release check passed evidence validation, dependency audits, lint, source validation, catalogue quality, 45 Python tests, application build, 166 Node tests, performance budgets, and strict Cloudflare dry run. The strict live release command remains intentionally blocked by the 15 pending owner-controlled launch approvals."
+      "detail": "The complete preview-safe release check passed evidence validation, dependency audits, lint, source validation, catalogue quality, 45 Python tests, application build, 177 Node tests, performance budgets and strict Cloudflare dry run. The strict live release command remains intentionally blocked by the 15 pending owner-controlled launch approvals."
+    },
+    {
+      "name": "Fresh production aggregate contract",
+      "status": "passed",
+      "detail": "The current production verifier again returned contract 2026-07-16.10 with zero failures, 4,659 live products, 2,200 governed consumer products, 25 taxonomy pairs, 128 central indicative prices, zero current pharmacy-specific prices and zero unsafe public images."
+    },
+    {
+      "name": "Fresh strict operational health",
+      "status": "passed",
+      "detail": "The current strict health verifier returned healthy with zero critical findings and zero warnings; prescription cleanup remained current and successful."
     }
   ],
   "executed_by": "Codex automated verifier",
   "executor_role": "Release verification agent",
   "started_at": "2026-07-16T13:01:05Z",
-  "completed_at": "2026-07-16T13:12:09Z"
+  "completed_at": "2026-07-16T13:43:37Z"
 }

@@ -5,7 +5,11 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 
-import { createLaunchEvidenceHandoff, createLaunchEvidenceTemplate } from "../scripts/create-launch-evidence-template.mjs";
+import {
+  createLaunchEvidenceHandoff,
+  createLaunchEvidenceTemplate,
+  discoverPreparedLaunchEvidence,
+} from "../scripts/create-launch-evidence-template.mjs";
 import { validateLaunchEvidence } from "../scripts/validate-launch-evidence.mjs";
 import { validateLaunchEvidenceArtifact } from "../scripts/validate-launch-evidence-artifact.mjs";
 
@@ -73,18 +77,27 @@ test("rejects incomplete, mislabelled, unredacted and secret-bearing artifacts",
   assert.ok(result.errors.some((error) => /check 1 must be passed/.test(error)));
 });
 
-test("builds one owner-ready handoff for every missing evidence artifact", () => {
-  const handoff = createLaunchEvidenceHandoff(manifest);
+test("builds one owner-ready handoff using every prepared pending artifact", async () => {
+  const prepared = await discoverPreparedLaunchEvidence(new URL("../docs/launch/evidence", import.meta.url));
+  const handoff = createLaunchEvidenceHandoff(manifest, prepared);
   assert.equal(handoff.release, "med250-production");
   assert.equal(handoff.gate_count, 15);
   assert.equal(handoff.missing_evidence_artifact_count, 17);
+  assert.equal(handoff.prepared_pending_artifact_count, 17);
+  assert.equal(handoff.unprepared_evidence_artifact_count, 0);
   const security = handoff.gates.find((gate) => gate.gate === "MED250_GATE_SECURITY_HARDENING_DEPLOYED");
   assert.deepEqual(security.missing_evidence_types, []);
   assert.equal(security.approval_required.approved_by, null);
   const credentials = handoff.gates.find((gate) => gate.gate === "MED250_GATE_CREDENTIALS_ROTATED");
   assert.deepEqual(credentials.missing_evidence_types, ["deployment_receipt", "signed_approval"]);
-  assert.equal(credentials.evidence_templates.deployment_receipt.status, "pending");
-  assert.match(credentials.suggested_filenames.signed_approval, /^docs\/launch\/evidence\//);
+  assert.deepEqual(credentials.unprepared_evidence_types, []);
+  assert.deepEqual(credentials.evidence_templates, {});
+  assert.match(credentials.suggested_filenames.signed_approval, /credentials-rotation-approval-pending-2026-07-16\.json$/);
+  assert.equal(credentials.prepared_pending_evidence.signed_approval.template_valid, true);
+  assert.ok(credentials.prepared_pending_evidence.signed_approval.unresolved_checks.length > 0);
+  const duplicates = handoff.gates.find((gate) => gate.gate === "MED250_GATE_DUPLICATE_REGISTER_REVIEWED");
+  assert.match(duplicates.suggested_filenames.review_ledger, /duplicate-register-review-ledger-pending-2026-07-16\.json$/);
+  assert.equal(duplicates.prepared_pending_evidence.review_ledger.check_status_counts.blocked, 1);
 });
 
 test("registry validates hashed local JSON artifacts and rejects artifact metadata drift", async () => {

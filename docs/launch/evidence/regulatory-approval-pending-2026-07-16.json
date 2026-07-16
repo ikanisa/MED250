@@ -54,7 +54,7 @@
     {
       "name": "Source reuse and product image rights",
       "status": "blocked",
-      "detail": "The separate data-reuse gate remains pending, including raw source retention and permission issues. Amazon is limited to taxonomy and product-reference research, Amazon prices are absent, and external image rights still require source-level approval."
+      "detail": "Technical source capture is complete, but the separate data-reuse gate still requires durable-storage approval and one lawful publication and operational-reuse decision per source class. Amazon remains limited to taxonomy and product-reference research, Amazon prices are absent, and external image rights still require source-level approval."
     },
     {
       "name": "Named legal owner decision and signature",

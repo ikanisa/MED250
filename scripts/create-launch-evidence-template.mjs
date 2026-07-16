@@ -1,5 +1,8 @@
-import { readFile } from "node:fs/promises";
-import { pathToFileURL } from "node:url";
+import { readdir, readFile } from "node:fs/promises";
+import { join } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+
+import { validateLaunchEvidenceArtifact } from "./validate-launch-evidence-artifact.mjs";
 
 export function createLaunchEvidenceTemplate(gateName, evidenceType) {
   const base = {
@@ -29,12 +32,72 @@ export function createLaunchEvidenceTemplate(gateName, evidenceType) {
   return { ...base, ...extensions[evidenceType] };
 }
 
-export function createLaunchEvidenceHandoff(manifest) {
+function preparedArtifactKey(gate, type) {
+  return `${gate}\0${type}`;
+}
+
+function checkStatusCounts(checks) {
+  return (Array.isArray(checks) ? checks : []).reduce((counts, check) => {
+    const status = String(check?.status ?? "invalid");
+    counts[status] = (counts[status] ?? 0) + 1;
+    return counts;
+  }, {});
+}
+
+export async function discoverPreparedLaunchEvidence(directory = "docs/launch/evidence") {
+  const directoryPath = directory instanceof URL ? fileURLToPath(directory) : directory;
+  const prepared = [];
+  for (const name of (await readdir(directoryPath)).filter((candidate) => candidate.endsWith(".json")).sort()) {
+    const reference = join(directoryPath, name).replaceAll("\\", "/");
+    const artifact = JSON.parse(await readFile(reference, "utf8"));
+    if (artifact?.status !== "pending") continue;
+    prepared.push({ reference, artifact });
+  }
+  return prepared;
+}
+
+export function createLaunchEvidenceHandoff(manifest, preparedArtifacts = []) {
+  const preparedByKey = new Map();
+  for (const candidate of preparedArtifacts) {
+    const artifact = candidate?.artifact ?? candidate;
+    const reference = candidate?.reference ?? null;
+    if (artifact?.status !== "pending" || !artifact?.gate || !artifact?.evidence_type) continue;
+    const key = preparedArtifactKey(artifact.gate, artifact.evidence_type);
+    if (preparedByKey.has(key)) throw new Error(`Duplicate prepared evidence for ${artifact.gate} ${artifact.evidence_type}.`);
+    const validation = validateLaunchEvidenceArtifact(artifact, {
+      strict: false,
+      expectedGate: artifact.gate,
+      expectedType: artifact.evidence_type,
+    });
+    preparedByKey.set(key, {
+      reference,
+      status: artifact.status,
+      recorded_at: artifact.recorded_at ?? null,
+      template_valid: validation.valid,
+      template_errors: validation.errors,
+      check_status_counts: checkStatusCounts(artifact.checks),
+      unresolved_checks: (artifact.checks ?? [])
+        .filter((check) => check?.status !== "passed")
+        .map((check) => ({
+          name: check.name,
+          status: check.status,
+          detail: check.detail,
+        })),
+      completion_instructions: Array.isArray(artifact.completion_instructions)
+        ? artifact.completion_instructions
+        : [],
+    });
+  }
   const gates = [];
   for (const [gateName, gate] of Object.entries(manifest?.gates ?? {})) {
     if (gate.status === "confirmed") continue;
     const recordedTypes = new Set((gate.evidence ?? []).map((entry) => entry.type));
     const missingTypes = gate.required_evidence_types.filter((type) => !recordedTypes.has(type));
+    const preparedEvidence = Object.fromEntries(missingTypes.flatMap((type) => {
+      const prepared = preparedByKey.get(preparedArtifactKey(gateName, type));
+      return prepared ? [[type, prepared]] : [];
+    }));
+    const unpreparedTypes = missingTypes.filter((type) => !preparedEvidence[type]);
     gates.push({
       gate: gateName,
       title: gate.title,
@@ -47,28 +110,39 @@ export function createLaunchEvidenceHandoff(manifest) {
         approved_at: gate.approved_at,
       },
       missing_evidence_types: missingTypes,
+      prepared_pending_evidence: preparedEvidence,
+      unprepared_evidence_types: unpreparedTypes,
       suggested_filenames: Object.fromEntries(
         missingTypes.map((type) => [
           type,
-          `docs/launch/evidence/${gateName.toLowerCase().replace(/^med250_gate_/, "").replaceAll("_", "-")}-${type.replaceAll("_", "-")}.json`,
+          preparedEvidence[type]?.reference
+            ?? `docs/launch/evidence/${gateName.toLowerCase().replace(/^med250_gate_/, "").replaceAll("_", "-")}-${type.replaceAll("_", "-")}.json`,
         ]),
       ),
       evidence_templates: Object.fromEntries(
-        missingTypes.map((type) => [type, createLaunchEvidenceTemplate(gateName, type)]),
+        unpreparedTypes.map((type) => [type, createLaunchEvidenceTemplate(gateName, type)]),
       ),
     });
   }
+  const missingArtifactCount = gates.reduce((total, gate) => total + gate.missing_evidence_types.length, 0);
+  const preparedArtifactCount = gates.reduce(
+    (total, gate) => total + Object.keys(gate.prepared_pending_evidence).length,
+    0,
+  );
   return {
     schema_version: "1",
     release: manifest?.release ?? "med250-production",
     instructions: [
       "Complete only evidence produced by the accountable owner or named executor.",
       "Never store credentials, tokens, phone numbers, OTPs, customer identifiers, prescription contents, email addresses, or precise customer coordinates.",
+      "Use a prepared_pending_evidence file when one is listed; it already contains the scoped checks and completion instructions for that gate.",
       "Validate each completed artifact before adding its SHA-256 digest and approval metadata to data/launch-evidence.json.",
       "Do not mark a gate confirmed until every required evidence type and the named gate approval are complete.",
     ],
     gate_count: gates.length,
-    missing_evidence_artifact_count: gates.reduce((total, gate) => total + gate.missing_evidence_types.length, 0),
+    missing_evidence_artifact_count: missingArtifactCount,
+    prepared_pending_artifact_count: preparedArtifactCount,
+    unprepared_evidence_artifact_count: missingArtifactCount - preparedArtifactCount,
     gates,
   };
 }
@@ -77,7 +151,8 @@ async function main() {
   const manifest = JSON.parse(await readFile("data/launch-evidence.json", "utf8"));
   const values = process.argv.slice(2);
   if (values.includes("--all-missing")) {
-    process.stdout.write(`${JSON.stringify(createLaunchEvidenceHandoff(manifest), null, 2)}\n`);
+    const prepared = await discoverPreparedLaunchEvidence();
+    process.stdout.write(`${JSON.stringify(createLaunchEvidenceHandoff(manifest, prepared), null, 2)}\n`);
     return;
   }
   const args = {};

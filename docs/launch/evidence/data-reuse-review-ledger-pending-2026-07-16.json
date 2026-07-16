@@ -38,13 +38,13 @@
     },
     {
       "name": "Licence and reuse permission decisions",
-      "status": "blocked",
+      "status": "pending",
       "detail": "A named data owner has not yet approved publication, operational reuse, attribution, retention, refresh cadence or withdrawal handling for every active source class."
     },
     {
       "name": "Data-owner review and signature",
       "status": "pending",
-      "detail": "The accountable data owner must resolve blocked records, record one decision per source class, complete reviewer fields and provide the separate signed approval artifact."
+      "detail": "The accountable data owner must resolve all nine pending source-class decisions, approve the durable evidence-store location, complete reviewer fields and provide the separate signed approval artifact."
     }
   ],
   "reviewed_by": null,

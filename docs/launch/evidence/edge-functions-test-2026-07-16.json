@@ -5,8 +5,8 @@
   "evidence_type": "test_record",
   "status": "complete",
   "title": "Production Edge Function protected-access verification",
-  "summary": "Fresh production probes confirm that every reviewed administrative function denies unauthorised calls, both pharmacy authentication functions reject untrusted origins, and the separately reviewed env-dump retirement tombstone is blocked by gateway JWT verification for unauthenticated traffic.",
-  "recorded_at": "2026-07-16T12:57:41Z",
+  "summary": "Production probes confirm that every reviewed administrative function denies unauthorised calls, both pharmacy authentication functions reject untrusted origins, and a fresh management inventory confirms all reviewed deployments remain active at the governed versions.",
+  "recorded_at": "2026-07-16T13:43:37Z",
   "recorded_by": "Codex automated verifier",
   "recorded_role": "Release verification agent",
   "redactions_confirmed": true,
@@ -40,10 +40,15 @@
       "name": "Retired diagnostic endpoint safely contained",
       "status": "passed",
       "detail": "An unauthenticated production request to active env-dump version 6 returned HTTP 401 at the Supabase gateway. A complete static review of the downloaded deployed source found zero reportable security findings and confirmed that authenticated execution can only return a constant non-cacheable HTTP 410 retirement response. Response-body SHA-256: 2fa2c84fed16d2ecfffc375515c8095ca6be18d8dabe1f54fd12142d23834634."
+    },
+    {
+      "name": "Current reviewed deployment inventory",
+      "status": "passed",
+      "detail": "A fresh linked-project management inventory reports geocode-pharmacies version 6, cleanup-prescriptions version 4, both pharmacy authentication functions at version 9, review-pharmacy-contacts version 3 and review-marketplace-products version 5, all ACTIVE with the intended gateway settings."
     }
   ],
   "executed_by": "Codex automated verifier",
   "executor_role": "Release verification agent",
   "started_at": "2026-07-16T10:05:45Z",
-  "completed_at": "2026-07-16T12:57:41Z"
+  "completed_at": "2026-07-16T13:43:37Z"
 }

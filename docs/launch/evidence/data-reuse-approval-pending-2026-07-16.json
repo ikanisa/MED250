@@ -48,7 +48,7 @@
     }
   ],
   "review_ledger_reference": "docs/launch/evidence/data-reuse-review-ledger-pending-2026-07-16.json",
-  "review_ledger_sha256": "b7609b75f9a2cc2fc904252374b2c7b7de8702f4d7f4a697e9582e5b7fa3aeb6",
+  "review_ledger_sha256": "9c3cd3e1e62e0fb174e7787c8378f61d1fc884f53db5cc70a2bd0d3fe89c5f7b",
   "source_retention_receipt_reference": "docs/launch/evidence/source-retention-bundle-2026-07-16.json",
   "source_retention_receipt_sha256": "49855558c9e41cb5720c66d3e28891eeb476d40d9c4778242c2f308efba91747",
   "decision": null,

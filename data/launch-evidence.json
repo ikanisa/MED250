@@ -13,8 +13,8 @@
         {
           "type": "operations_snapshot",
           "reference": "docs/launch/evidence/gps-operational-health-2026-07-16.json",
-          "sha256": "dfe1d210dc8d8674e4c1ebc56de82ff63ddfca2c7809565121e0f6d3ff823c2e",
-          "recorded_at": "2026-07-16T10:09:12Z",
+          "sha256": "98eade6bf6be83e1a4f558bb3729dfde03a5df5c329be640298983c6a09acde4",
+          "recorded_at": "2026-07-16T13:43:37Z",
           "summary": "Privacy-safe production health snapshot confirming governed GPS and dispatch-ready coverage with no strict health findings."
         }
       ],
@@ -32,8 +32,8 @@
         {
           "type": "operations_snapshot",
           "reference": "docs/launch/evidence/whatsapp-operational-health-2026-07-16.json",
-          "sha256": "5583ba89955037177c373f7874736bcc7529ba13fa2552929a3fdafc4134099a",
-          "recorded_at": "2026-07-16T10:09:12Z",
+          "sha256": "1608a4a9d63b327d78b1cd2ebc8ce5e895a4115d12c56e9574db16cc93d0e6f9",
+          "recorded_at": "2026-07-16T13:43:37Z",
           "summary": "Privacy-safe production health snapshot confirming governed WhatsApp login coverage and no recent delivery failures."
         }
       ],
@@ -113,9 +113,9 @@
         {
           "type": "test_record",
           "reference": "docs/launch/evidence/security-hardening-test-2026-07-16.json",
-          "sha256": "2d12c9fdeee208aae093a656fba5b6534aef60f55996a891ec5035021e419622",
-          "recorded_at": "2026-07-16T13:12:09Z",
-          "summary": "Post-repair production contract, operational health, advisor scope, empty public image Storage, protected DDL and expanded regression audits passed."
+          "sha256": "7f89436fffa0f69b61902a76a804b0cd9471b7e8f9cfdbdcc704e7d40b65be2d",
+          "recorded_at": "2026-07-16T13:43:37Z",
+          "summary": "Fresh post-repair production contract, strict operational health, advisor scope, empty public image Storage, protected DDL and expanded regression audits passed."
         }
       ],
       "approved_by": null,
@@ -139,9 +139,9 @@
         {
           "type": "test_record",
           "reference": "docs/launch/evidence/edge-functions-test-2026-07-16.json",
-          "sha256": "fec985b759715eae8ef380eaff4ca12d7ca058911de00f76c593f24daa2491ae",
-          "recorded_at": "2026-07-16T12:57:41Z",
-          "summary": "Fresh protected-access probes passed for all six reviewed functions; env-dump unauthenticated access returned HTTP 401 and its deployed retirement-tombstone source passed focused security review."
+          "sha256": "7cb2e77597fe2b37df9636c2f8b6cd28a182631a310aeef868714d07988588e1",
+          "recorded_at": "2026-07-16T13:43:37Z",
+          "summary": "Protected-access probes passed for all six reviewed functions; env-dump remains safely contained and a fresh management inventory confirms every reviewed deployment remains active at the governed version."
         }
       ],
       "approved_by": null,
@@ -180,9 +180,9 @@
         {
           "type": "test_record",
           "reference": "docs/launch/evidence/prescription-retention-test-2026-07-16.json",
-          "sha256": "14925d74e8d1bc2e996e0fa2efcc488426f6a3c3766fc82d9226abc0203fd90c",
-          "recorded_at": "2026-07-16T10:09:12Z",
-          "summary": "Protected production retention cleanup completed successfully with a current aggregate privacy-safe health signal."
+          "sha256": "7ed3d3dff07e1bfcd37550fb7ff2074e50346b8f4221d69be93d3d54946db525",
+          "recorded_at": "2026-07-16T13:43:37Z",
+          "summary": "Protected production retention cleanup completed successfully and a fresh aggregate privacy-safe health check confirmed the signal remains current."
         }
       ],
       "approved_by": null,
