@@ -7,6 +7,12 @@ project_id = "dawanear-marketplace"
 [functions.geocode-pharmacies]
 verify_jwt = false
 
+[functions.review-pharmacy-contacts]
+verify_jwt = false
+
+[functions.review-marketplace-products]
+verify_jwt = false
+
 [functions.cleanup-prescriptions]
 verify_jwt = false
 

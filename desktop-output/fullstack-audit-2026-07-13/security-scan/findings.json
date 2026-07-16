@@ -1,0 +1,1074 @@
+{
+  "documentType": "codex-security.findings",
+  "findings": [
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Suspended staff regains manager access",
+          "sink": "Membership upsert at verify-OTP lines 106-116",
+          "source": "Valid OTP from a still-linked suspended staff number",
+          "summary": "Valid OTP -> eligible contact lookup -> unconditional manager/active membership upsert -> permanent pharmacy session.",
+          "transformations": [
+            "Contact and pharmacy eligibility checks",
+            "Auth user creation or lookup"
+          ]
+        },
+        "reachability": {
+          "attacker": "Suspended pharmacy staff who still controls the linked WhatsApp number",
+          "entrypoint": "dawanear-pharmacy-verify-otp Edge Function",
+          "outcome": "Suspended staff regains manager access",
+          "preconditions": [
+            "Valid OTP",
+            "Login contact remains enabled"
+          ],
+          "summary": "The pre-auth OTP function is public by design and issues a normal pharmacy session after verification."
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "The membership upsert is unconditional and downstream RPCs trust active membership."
+      },
+      "extensions": {
+        "candidateId": "MED250-AUTH-001"
+      },
+      "findingId": "csf_ba153d4f9237db9cefd325b3",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:273b792baf110af0e1e785ce003386fedd96dd41979de9d04428d7351e8d3cf1"
+      },
+      "identity": {
+        "anchor": "pharmacy-membership-state-preservation"
+      },
+      "locations": [
+        {
+          "endLine": 116,
+          "path": "supabase/functions/dawanear-pharmacy-verify-otp/index.ts",
+          "role": "root_control",
+          "startLine": 106
+        }
+      ],
+      "occurrenceId": "occ_147a68e51ccb6a7c68230092",
+      "preventiveControls": [
+        "Keep the release contract and full-stack security tests in the mandatory production gate."
+      ],
+      "provenance": {
+        "source": "local_plugin"
+      },
+      "remediation": "Preserve existing role/status, refuse suspended or revoked membership reactivation, and require an explicit operator-managed restoration path.",
+      "remediationTests": [
+        "Add a regression test that fails before the remediation and proves the pharmacy-membership-state-preservation invariant after it."
+      ],
+      "rootCause": {
+        "summary": "Authentication proof and membership authorization state are conflated in one upsert."
+      },
+      "ruleId": "authorization-bypass.membership-lifecycle",
+      "severity": {
+        "changeConditions": "Broader tenant reach, live affected-row counts, or production load evidence could raise severity; stronger server-side invariants could lower it.",
+        "level": "high",
+        "rationale": "The path can restore or retain control of a pharmacy identity and its private order workflow."
+      },
+      "summary": "A valid OTP for a still-linked number unconditionally overwrites an existing membership as manager/active.",
+      "taxonomy": {
+        "category": "authorization-bypass",
+        "cwe": [
+          "CWE-863"
+        ]
+      },
+      "title": "OTP login can reactivate a suspended pharmacy member",
+      "validation": {
+        "counterEvidence": [
+          "The contact and licence are rechecked, but existing membership lifecycle state is not."
+        ],
+        "evidence": [
+          "Valid OTP -> eligible contact lookup -> unconditional manager/active membership upsert -> permanent pharmacy session."
+        ],
+        "method": "Static source-to-sink review plus bounded local diagnostics; no destructive live action.",
+        "summary": "The membership upsert is unconditional and downstream RPCs trust active membership."
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Former staff retains pharmacy access",
+          "sink": "Active-membership authorization in pharmacy RPCs",
+          "source": "Existing pharmacy session before contact removal",
+          "summary": "Staff signs in -> operator removes contact -> session and membership remain active -> pharmacy RPCs still authorize.",
+          "transformations": [
+            "Contact marked stale/login-disabled"
+          ]
+        },
+        "reachability": {
+          "attacker": "Removed pharmacy staff with a pre-existing browser session",
+          "entrypoint": "Authenticated pharmacy RPCs",
+          "outcome": "Former staff retains pharmacy access",
+          "preconditions": [
+            "Session issued before removal",
+            "Membership remains active"
+          ],
+          "summary": "The attacker already has a legitimate session; no new OTP is required after removal."
+        }
+      },
+      "confidence": {
+        "level": "medium",
+        "rationale": "Repository review found no session revocation, membership suspension, or credential-version check on contact removal."
+      },
+      "extensions": {
+        "candidateId": "MED250-AUTH-002"
+      },
+      "findingId": "csf_d2f912b2ea649177ef7395f8",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:af66f3cf64be7302f33e805039db42cfaf4e624e6bc040f48b4074203bf57aed"
+      },
+      "identity": {
+        "anchor": "pharmacy-session-revocation-on-contact-removal"
+      },
+      "locations": [
+        {
+          "endLine": 117,
+          "path": "supabase/migrations/20260713234500_govern_pharmacy_contact_edit_reviews.sql",
+          "role": "root_control",
+          "startLine": 89
+        },
+        {
+          "endLine": 125,
+          "path": "supabase/functions/dawanear-pharmacy-verify-otp/index.ts",
+          "role": "entrypoint",
+          "startLine": 119
+        }
+      ],
+      "occurrenceId": "occ_1abf9e661950bdf8c3ebfe2c",
+      "preventiveControls": [
+        "Keep the release contract and full-stack security tests in the mandatory production gate."
+      ],
+      "provenance": {
+        "source": "local_plugin"
+      },
+      "remediation": "Atomically suspend affected memberships, revoke refresh sessions or increment a credential version, and enforce current contact authorization on pharmacy RPCs.",
+      "remediationTests": [
+        "Add a regression test that fails before the remediation and proves the pharmacy-session-revocation-on-contact-removal invariant after it."
+      ],
+      "rootCause": {
+        "summary": "The offboarding transition changes contact state only, while authorization is represented separately by persistent session and active membership."
+      },
+      "ruleId": "session-management.offboarding",
+      "severity": {
+        "changeConditions": "Broader tenant reach, live affected-row counts, or production load evidence could raise severity; stronger server-side invariants could lower it.",
+        "level": "high",
+        "rationale": "The path can restore or retain control of a pharmacy identity and its private order workflow."
+      },
+      "summary": "Contact removal blocks future OTP use but leaves active memberships and previously issued permanent sessions usable.",
+      "taxonomy": {
+        "category": "session-management",
+        "cwe": [
+          "CWE-613"
+        ]
+      },
+      "title": "Removing a pharmacy login contact does not revoke existing access",
+      "validation": {
+        "counterEvidence": [
+          "An operator can separately suspend membership, but that is not atomic with contact removal."
+        ],
+        "evidence": [
+          "Staff signs in -> operator removes contact -> session and membership remain active -> pharmacy RPCs still authorize."
+        ],
+        "method": "Static source-to-sink review plus bounded local diagnostics; no destructive live action.",
+        "summary": "Repository review found no session revocation, membership suspension, or credential-version check on contact removal."
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Bounded notification/cost abuse and expanded challenge budget",
+          "sink": "OTP challenge insert and WhatsApp send",
+          "source": "Public OTP-send requests",
+          "summary": "Parallel public send requests -> identical pre-insert counts -> multiple challenge inserts and WhatsApp sends; User-Agent variation partitions the source counter.",
+          "transformations": [
+            "Phone normalization",
+            "Source-hash calculation",
+            "Separate counter queries"
+          ]
+        },
+        "reachability": {
+          "attacker": "Unauthenticated bot",
+          "entrypoint": "dawanear-pharmacy-send-otp Edge Function",
+          "outcome": "Bounded notification/cost abuse and expanded challenge budget",
+          "preconditions": [
+            "Target registered pharmacy numbers for successful sends"
+          ],
+          "summary": "The send endpoint is public before authentication and accepts normal HTTP headers."
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "The checks and insert are separate operations; source hashing includes caller-controlled User-Agent."
+      },
+      "extensions": {
+        "candidateId": "MED250-OTP-001"
+      },
+      "findingId": "csf_e67bc6aeee2ccb4ea6f3c970",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:4445a33b0f4c8d36481d113935f965f7703135bde6ae3ff0becc05c98f4664b2"
+      },
+      "identity": {
+        "anchor": "otp-rate-limit-atomicity-and-source-key"
+      },
+      "locations": [
+        {
+          "endLine": 47,
+          "path": "supabase/functions/dawanear-pharmacy-send-otp/index.ts",
+          "role": "sink",
+          "startLine": 31
+        },
+        {
+          "endLine": 188,
+          "path": "supabase/functions/_shared/dawanear-pharmacy-auth.ts",
+          "role": "root_control",
+          "startLine": 175
+        }
+      ],
+      "occurrenceId": "occ_9e7f709b5b99e07dd097276e",
+      "preventiveControls": [
+        "Keep the release contract and full-stack security tests in the mandatory production gate."
+      ],
+      "provenance": {
+        "source": "local_plugin"
+      },
+      "remediation": "Move rate-limit reservation, invalidation, and challenge creation into one atomic database function keyed by normalized phone and trusted source IP only.",
+      "remediationTests": [
+        "Add a regression test that fails before the remediation and proves the otp-rate-limit-atomicity-and-source-key invariant after it."
+      ],
+      "rootCause": {
+        "summary": "Rate-limit observation and OTP issuance are not one atomic state transition."
+      },
+      "ruleId": "rate-limit.otp-issuance",
+      "severity": {
+        "changeConditions": "Broader tenant reach, live affected-row counts, or production load evidence could raise severity; stronger server-side invariants could lower it.",
+        "level": "medium",
+        "rationale": "The path has a realistic product or production boundary impact, but scope or prerequisites constrain it."
+      },
+      "summary": "Concurrent requests can pass separate pre-insert counters, while caller-controlled User-Agent creates additional source buckets.",
+      "taxonomy": {
+        "category": "rate-limit",
+        "cwe": [
+          "CWE-362",
+          "CWE-799"
+        ]
+      },
+      "title": "OTP rate limits can be raced and partitioned",
+      "validation": {
+        "counterEvidence": [
+          "Per-phone and global caps remain and bound overall abuse."
+        ],
+        "evidence": [
+          "Parallel public send requests -> identical pre-insert counts -> multiple challenge inserts and WhatsApp sends; User-Agent variation partitions the source counter."
+        ],
+        "method": "Static source-to-sink review plus bounded local diagnostics; no destructive live action.",
+        "summary": "The checks and insert are separate operations; source hashing includes caller-controlled User-Agent."
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Premature pharmacy disclosure or health/payment message to an unverified destination",
+          "sink": "Active-order and selected-contact RPC outputs",
+          "source": "Order-owning customer after order placement or selection",
+          "summary": "Customer calls active-order/contact RPCs -> SECURITY DEFINER aggregation or summary lookup selects insufficiently constrained rows -> private draft or wrong contact crosses the boundary.",
+          "transformations": [
+            "RPC aggregation",
+            "Pharmacy eligibility check",
+            "Summary contact lookup"
+          ]
+        },
+        "reachability": {
+          "attacker": "Authenticated order owner or an affected normal customer",
+          "entrypoint": "Supabase RPC endpoints",
+          "outcome": "Premature pharmacy disclosure or health/payment message to an unverified destination",
+          "preconditions": [
+            "Own active or selected order",
+            "Affected incomplete offer or mismatched contact state exists"
+          ],
+          "summary": "Both RPCs are part of the normal authenticated customer flow and are callable directly."
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Direct RPC analysis confirms draft data crosses the network before client filtering and contact eligibility is not bound to the returned number."
+      },
+      "extensions": {
+        "candidateId": "MED250-DB-001"
+      },
+      "findingId": "csf_b3f6649b9a8d494c7de0aefc",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:7df3438aeee857aaf84e2b483578dbb659163c7a7c2cec51753ef17ab6b1c4dd"
+      },
+      "identity": {
+        "anchor": "preselection-offer-and-contact-integrity"
+      },
+      "locations": [
+        {
+          "endLine": 1937,
+          "path": "supabase/migrations/20260712130000_dawanear_marketplace.sql",
+          "role": "root_control",
+          "startLine": 1875
+        },
+        {
+          "endLine": 2670,
+          "path": "supabase/migrations/20260712130000_dawanear_marketplace.sql",
+          "role": "sink",
+          "startLine": 2600
+        },
+        {
+          "endLine": 117,
+          "path": "supabase/migrations/20260713234500_govern_pharmacy_contact_edit_reviews.sql",
+          "role": "concrete_implementation",
+          "startLine": 89
+        }
+      ],
+      "occurrenceId": "occ_148f5bd2af6112cead47c713",
+      "preventiveControls": [
+        "Keep the release contract and full-stack security tests in the mandatory production gate."
+      ],
+      "provenance": {
+        "source": "local_plugin"
+      },
+      "remediation": "Require complete offers in the active-order RPC; return the exact verified login-enabled WhatsApp contact; and stale derived children when the parent is removed or replaced.",
+      "remediationTests": [
+        "Add a regression test that fails before the remediation and proves the preselection-offer-and-contact-integrity invariant after it."
+      ],
+      "rootCause": {
+        "summary": "Related privacy and contact-integrity checks use existence or client filtering instead of binding the exact returned row to the approved state."
+      },
+      "ruleId": "privacy-boundary.offer-and-contact",
+      "severity": {
+        "changeConditions": "Broader tenant reach, live affected-row counts, or production load evidence could raise severity; stronger server-side invariants could lower it.",
+        "level": "medium",
+        "rationale": "The path has a realistic product or production boundary impact, but scope or prerequisites constrain it."
+      },
+      "summary": "Active-order recovery can return incomplete pharmacy drafts, while selected contact can resolve to a different unverified summary number and removed derived contacts may remain active.",
+      "taxonomy": {
+        "category": "privacy-boundary",
+        "cwe": [
+          "CWE-200",
+          "CWE-345"
+        ]
+      },
+      "title": "Offer and contact disclosure boundaries are inconsistent",
+      "validation": {
+        "counterEvidence": [
+          "Direct-table RLS and the confirmed-offers RPC are stricter, but do not protect the affected RPC responses."
+        ],
+        "evidence": [
+          "Customer calls active-order/contact RPCs -> SECURITY DEFINER aggregation or summary lookup selects insufficiently constrained rows -> private draft or wrong contact crosses the boundary."
+        ],
+        "method": "Static source-to-sink review plus bounded local diagnostics; no destructive live action.",
+        "summary": "Direct RPC analysis confirms draft data crosses the network before client filtering and contact eligibility is not bound to the returned number."
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Withdrawn or disabled product becomes confirmed fulfilment",
+          "sink": "Offer submission and selection state updates",
+          "source": "Legitimate pharmacy offer or customer selection",
+          "summary": "Product is disabled after order or offer creation -> pharmacy submits or customer selects -> missing predicate permits persisted/selected fulfilment.",
+          "transformations": [
+            "Order/offer lifecycle state changes"
+          ]
+        },
+        "reachability": {
+          "attacker": "Legitimate or compromised pharmacy staff, or normal customer selecting a stale offer",
+          "entrypoint": "dawanear_submit_offer and dawanear_select_offer RPCs",
+          "outcome": "Withdrawn or disabled product becomes confirmed fulfilment",
+          "preconditions": [
+            "Product state changes after an earlier validation"
+          ],
+          "summary": "This is reachable through ordinary authenticated marketplace operations after product state changes."
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Static SQL traces show the exact requested-item path and selection transition omit current product predicates."
+      },
+      "extensions": {
+        "candidateId": "MED250-DB-002"
+      },
+      "findingId": "csf_c16b7ff4ec51fcc31bb26d93",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:4b4680dc9753953b88b1291e8de9a2dc05065919c67bf7fcffc4d9792d466ae9"
+      },
+      "identity": {
+        "anchor": "product-state-revalidation-on-offer-selection"
+      },
+      "locations": [
+        {
+          "endLine": 1748,
+          "path": "supabase/migrations/20260712130000_dawanear_marketplace.sql",
+          "role": "root_control",
+          "startLine": 1384
+        },
+        {
+          "endLine": 1872,
+          "path": "supabase/migrations/20260712130000_dawanear_marketplace.sql",
+          "role": "sink",
+          "startLine": 1752
+        }
+      ],
+      "occurrenceId": "occ_ee0ab421cf4986b4d803b41d",
+      "preventiveControls": [
+        "Keep the release contract and full-stack security tests in the mandatory production gate."
+      ],
+      "provenance": {
+        "source": "local_plugin"
+      },
+      "remediation": "Revalidate every offered product at submission and again in the atomic selection transaction; reject disabled or non-orderable exact and substitute items.",
+      "remediationTests": [
+        "Add a regression test that fails before the remediation and proves the product-state-revalidation-on-offer-selection invariant after it."
+      ],
+      "rootCause": {
+        "summary": "A time-varying regulatory/product invariant is checked at earlier stages but not at each committing transition."
+      },
+      "ruleId": "integrity.product-lifecycle",
+      "severity": {
+        "changeConditions": "Broader tenant reach, live affected-row counts, or production load evidence could raise severity; stronger server-side invariants could lower it.",
+        "level": "medium",
+        "rationale": "The path has a realistic product or production boundary impact, but scope or prerequisites constrain it."
+      },
+      "summary": "Offer submission and selection do not consistently revalidate current active/orderable state for exact and substitute products.",
+      "taxonomy": {
+        "category": "integrity",
+        "cwe": [
+          "CWE-367",
+          "CWE-20"
+        ]
+      },
+      "title": "Disabled products can remain confirmable or selectable",
+      "validation": {
+        "counterEvidence": [
+          "Order creation and substitute submission have partial checks, but they do not cover all later paths."
+        ],
+        "evidence": [
+          "Product is disabled after order or offer creation -> pharmacy submits or customer selects -> missing predicate permits persisted/selected fulfilment."
+        ],
+        "method": "Static source-to-sink review plus bounded local diagnostics; no destructive live action.",
+        "summary": "Static SQL traces show the exact requested-item path and selection transition omit current product predicates."
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Pharmacy notification and operational abuse",
+          "sink": "Repeated dispatch/notification work",
+          "source": "Authenticated anonymous customer session",
+          "summary": "Anonymous customer creates order -> routing notifies up to 20 pharmacies -> customer cancels -> active slot clears -> loop repeats.",
+          "transformations": [
+            "Create order",
+            "Route recipients",
+            "Cancel order"
+          ]
+        },
+        "reachability": {
+          "attacker": "Anonymous customer or bot with one established session",
+          "entrypoint": "Order create and close RPCs",
+          "outcome": "Pharmacy notification and operational abuse",
+          "preconditions": [
+            "One valid anonymous session"
+          ],
+          "summary": "Normal customer RPCs are internet-accessible and cancellation is a supported action."
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "The live rollback UAT intentionally proves slot reuse immediately after cancellation, while no rolling quota exists."
+      },
+      "extensions": {
+        "candidateId": "MED250-DB-005"
+      },
+      "findingId": "csf_a744bda3cf60f19497b4fbc0",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:274ccbb1244d08fa9180f975d76be98af271f6f013d2c9a67ef409cb8f24740d"
+      },
+      "identity": {
+        "anchor": "anonymous-order-rolling-quota"
+      },
+      "locations": [
+        {
+          "endLine": 2024,
+          "path": "supabase/migrations/20260712130000_dawanear_marketplace.sql",
+          "role": "root_control",
+          "startLine": 1940
+        }
+      ],
+      "occurrenceId": "occ_7f398b5f0464d2c114c3a45f",
+      "preventiveControls": [
+        "Keep the release contract and full-stack security tests in the mandatory production gate."
+      ],
+      "provenance": {
+        "source": "local_plugin"
+      },
+      "remediation": "Add a server-enforced rolling quota and cooldown keyed to customer, source, and destination footprint; count recent terminal cancellations before routing another order.",
+      "remediationTests": [
+        "Add a regression test that fails before the remediation and proves the anonymous-order-rolling-quota invariant after it."
+      ],
+      "rootCause": {
+        "summary": "The concurrency invariant limits active orders but not repeated sequential dispatch."
+      },
+      "ruleId": "abuse.order-churn",
+      "severity": {
+        "changeConditions": "Broader tenant reach, live affected-row counts, or production load evidence could raise severity; stronger server-side invariants could lower it.",
+        "level": "medium",
+        "rationale": "The path has a realistic product or production boundary impact, but scope or prerequisites constrain it."
+      },
+      "summary": "Cancellation immediately frees the single-active-order slot, and no rolling creation/cancellation quota limits sequential notification churn.",
+      "taxonomy": {
+        "category": "abuse",
+        "cwe": [
+          "CWE-799"
+        ]
+      },
+      "title": "One customer session can repeatedly dispatch and cancel orders",
+      "validation": {
+        "counterEvidence": [
+          "Turnstile protects initial anonymous sign-in, and idempotency prevents duplicates, but neither limits sequential churn."
+        ],
+        "evidence": [
+          "Anonymous customer creates order -> routing notifies up to 20 pharmacies -> customer cancels -> active slot clears -> loop repeats."
+        ],
+        "method": "Static source-to-sink review plus bounded local diagnostics; no destructive live action.",
+        "summary": "The live rollback UAT intentionally proves slot reuse immediately after cancellation, while no rolling quota exists."
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Repeatable resource consumption",
+          "sink": "Worker memory/CPU allocation",
+          "source": "Public telemetry HTTP body",
+          "summary": "Public caller omits Content-Length and streams a large body -> request.text buffers it -> post-buffer check returns 413.",
+          "transformations": [
+            "Full text decoding"
+          ]
+        },
+        "reachability": {
+          "attacker": "Unauthenticated internet caller",
+          "entrypoint": "POST /api/telemetry",
+          "outcome": "Repeatable resource consumption",
+          "preconditions": [
+            "Network access to the site"
+          ],
+          "summary": "The route is public on the deployed Worker and needs no authentication."
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "A bounded local diagnostic confirmed a 5 MB no-Content-Length request was consumed before the 413 response."
+      },
+      "extensions": {
+        "candidateId": "MED250-TELEMETRY-001"
+      },
+      "findingId": "csf_5152086d6febb76de5c227de",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:9ab186a200301c39a9bd26dca147eb8f7e428d957187dbf70f621f09ec80cca7"
+      },
+      "identity": {
+        "anchor": "telemetry-stream-byte-limit"
+      },
+      "locations": [
+        {
+          "endLine": 91,
+          "path": "app/api/telemetry/route.ts",
+          "role": "root_control",
+          "startLine": 78
+        }
+      ],
+      "occurrenceId": "occ_e220dd65657294354d7ab4a7",
+      "preventiveControls": [
+        "Keep the release contract and full-stack security tests in the mandatory production gate."
+      ],
+      "provenance": {
+        "source": "local_plugin"
+      },
+      "remediation": "Read the body through a byte-limited stream, abort immediately above 2 KiB, and add request-rate and concurrency controls at Cloudflare.",
+      "remediationTests": [
+        "Add a regression test that fails before the remediation and proves the telemetry-stream-byte-limit invariant after it."
+      ],
+      "rootCause": {
+        "summary": "The size control is applied after full body materialization."
+      },
+      "ruleId": "resource-exhaustion.request-body",
+      "severity": {
+        "changeConditions": "Broader tenant reach, live affected-row counts, or production load evidence could raise severity; stronger server-side invariants could lower it.",
+        "level": "medium",
+        "rationale": "The path has a realistic product or production boundary impact, but scope or prerequisites constrain it."
+      },
+      "summary": "The public telemetry route calls request.text() before applying its 2 KiB policy, so an unknown-length body is fully consumed first.",
+      "taxonomy": {
+        "category": "resource-exhaustion",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "Telemetry buffers oversized unknown-length bodies before rejecting them",
+      "validation": {
+        "counterEvidence": [
+          "Event and property allow-lists run later and do not bound body ingestion."
+        ],
+        "evidence": [
+          "Public caller omits Content-Length and streams a large body -> request.text buffers it -> post-buffer check returns 413."
+        ],
+        "method": "Static source-to-sink review plus bounded local diagnostics; no destructive live action.",
+        "summary": "A bounded local diagnostic confirmed a 5 MB no-Content-Length request was consumed before the 413 response."
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Stored same-origin script execution on product pages",
+          "sink": "Product and Breadcrumb JSON-LD script elements",
+          "source": "External/local regulatory catalogue fields",
+          "summary": "Encoded external catalogue value -> entity decoding after tag stripping -> SEO data generation -> JSON.stringify in inline script -> browser script-context breakout.",
+          "transformations": [
+            "Entity decoding",
+            "SEO catalogue generation",
+            "JSON serialization"
+          ]
+        },
+        "reachability": {
+          "attacker": "Attacker able to influence an imported catalogue source or its local artifact",
+          "entrypoint": "Product data import followed by public product page",
+          "outcome": "Stored same-origin script execution on product pages",
+          "preconditions": [
+            "Hostile encoded value is imported",
+            "A user opens the affected product page"
+          ],
+          "summary": "The vulnerable pages are public, but exploitation additionally requires a hostile value to enter the supported import pipeline."
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "A bounded render diagnostic produced a literal script terminator in both Product and Breadcrumb JSON-LD sinks."
+      },
+      "extensions": {
+        "candidateId": "MED250-SEO-XSS-001"
+      },
+      "findingId": "csf_c969edda31dcddaac651f13d",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:970b422f451e870ad5a25c16d72a4239e9ff9cbf66928c92384e5d9766f1ce5e"
+      },
+      "identity": {
+        "anchor": "json-ld-safe-serialization"
+      },
+      "locations": [
+        {
+          "endLine": 132,
+          "path": "scripts/import-data/parse-rwanda-fda.mjs",
+          "role": "entrypoint",
+          "startLine": 127
+        },
+        {
+          "endLine": 51,
+          "path": "app/product/[id]/page.tsx",
+          "role": "sink",
+          "startLine": 51
+        }
+      ],
+      "occurrenceId": "occ_0d891f8515825b622c677ad3",
+      "preventiveControls": [
+        "Keep the release contract and full-stack security tests in the mandatory production gate."
+      ],
+      "provenance": {
+        "source": "local_plugin"
+      },
+      "remediation": "Decode entities before removing markup, reject script-delimiter characters in imported structured fields, and serialize JSON-LD with a helper that escapes < as \\u003c.",
+      "remediationTests": [
+        "Add a regression test that fails before the remediation and proves the json-ld-safe-serialization invariant after it."
+      ],
+      "rootCause": {
+        "summary": "HTML normalization and script-context output encoding are both incomplete."
+      },
+      "ruleId": "stored-xss.structured-data",
+      "severity": {
+        "changeConditions": "Broader tenant reach, live affected-row counts, or production load evidence could raise severity; stronger server-side invariants could lower it.",
+        "level": "medium",
+        "rationale": "The path has a realistic product or production boundary impact, but scope or prerequisites constrain it."
+      },
+      "summary": "The import decodes HTML entities after stripping literal tags, and product/brand values are serialized directly into inline JSON-LD script elements.",
+      "taxonomy": {
+        "category": "stored-xss",
+        "cwe": [
+          "CWE-79"
+        ]
+      },
+      "title": "Catalogue data can break out of product JSON-LD",
+      "validation": {
+        "counterEvidence": [
+          "The current generated catalogue contains no angle-bracket fields, so present data is not already exploiting the sink."
+        ],
+        "evidence": [
+          "Encoded external catalogue value -> entity decoding after tag stripping -> SEO data generation -> JSON.stringify in inline script -> browser script-context breakout."
+        ],
+        "method": "Static source-to-sink review plus bounded local diagnostics; no destructive live action.",
+        "summary": "A bounded render diagnostic produced a literal script terminator in both Product and Breadcrumb JSON-LD sinks."
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Unreviewed location influences nearest-pharmacy dispatch",
+          "sink": "Verified pharmacy coordinates",
+          "source": "Concurrent candidate update during operator review",
+          "summary": "Candidate is reviewed -> same Place ID record changes -> approval updates by status and Place ID only -> changed coordinates become verified.",
+          "transformations": [
+            "Candidate read",
+            "Human review",
+            "Conditional update"
+          ]
+        },
+        "reachability": {
+          "attacker": "Actor or process able to update staged geocode candidates",
+          "entrypoint": "Geocode approval Edge Function",
+          "outcome": "Unreviewed location influences nearest-pharmacy dispatch",
+          "preconditions": [
+            "Candidate update races the approval",
+            "Place ID remains unchanged"
+          ],
+          "summary": "The path depends on a narrow concurrency window in a protected operator workflow."
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Static review confirms a same-Place-ID concurrent update can pass the final predicate."
+      },
+      "extensions": {
+        "candidateId": "MED250-GEOCODE-002"
+      },
+      "findingId": "csf_9c4e2fbfebfa8a678fedf6c8",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:c492b540e4ef2ca4dc5ecca1f1c6c4b4cb4477e4822224ff02b74603ac393992"
+      },
+      "identity": {
+        "anchor": "geocode-candidate-version-binding"
+      },
+      "locations": [
+        {
+          "endLine": 123,
+          "path": "supabase/functions/geocode-pharmacies/index.ts",
+          "role": "root_control",
+          "startLine": 98
+        }
+      ],
+      "occurrenceId": "occ_dc90b712cbfc0858d4937536",
+      "preventiveControls": [
+        "Keep the release contract and full-stack security tests in the mandatory production gate."
+      ],
+      "provenance": {
+        "source": "local_plugin"
+      },
+      "remediation": "Store a candidate version/digest and approve it in one atomic database RPC that compares the full reviewed snapshot before promoting it.",
+      "remediationTests": [
+        "Add a regression test that fails before the remediation and proves the geocode-candidate-version-binding invariant after it."
+      ],
+      "rootCause": {
+        "summary": "The approval transaction is not bound to the complete reviewed candidate state."
+      },
+      "ruleId": "integrity.geocode-approval",
+      "severity": {
+        "changeConditions": "Broader tenant reach, live affected-row counts, or production load evidence could raise severity; stronger server-side invariants could lower it.",
+        "level": "low",
+        "rationale": "The path is real but has constrained likelihood or impact."
+      },
+      "summary": "Approval compares status and Place ID but not a version or digest of the exact reviewed coordinates and metadata.",
+      "taxonomy": {
+        "category": "integrity",
+        "cwe": [
+          "CWE-367"
+        ]
+      },
+      "title": "Geocode approval can verify a changed candidate snapshot",
+      "validation": {
+        "counterEvidence": [
+          "Approval requires named evidence and a matching Place ID, reducing likelihood and scope."
+        ],
+        "evidence": [
+          "Candidate is reviewed -> same Place ID record changes -> approval updates by status and Place ID only -> changed coordinates become verified."
+        ],
+        "method": "Static source-to-sink review plus bounded local diagnostics; no destructive live action.",
+        "summary": "Static review confirms a same-Place-ID concurrent update can pass the final predicate."
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Unauthorized or previously rejected number can authenticate to a pharmacy",
+          "sink": "OTP-authoritative pharmacy contact rows",
+          "source": "Caller-selected CSV/PDF contact artifacts",
+          "summary": "Local file is selected or substituted -> extractor labels it official -> SQL import marks numbers verified/login-enabled -> OTP login accepts them or restores rejected rows.",
+          "transformations": [
+            "Roster extraction",
+            "Provenance relabelling",
+            "SQL generation",
+            "Conflict upsert"
+          ]
+        },
+        "reachability": {
+          "attacker": "Actor able to substitute or influence the contact import artifact",
+          "entrypoint": "Documented contact import workflow",
+          "outcome": "Unauthorized or previously rejected number can authenticate to a pharmacy",
+          "preconditions": [
+            "Operator runs the importer against the affected file"
+          ],
+          "summary": "This is a production data-supply-chain path rather than a direct anonymous HTTP endpoint."
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "The generated SQL grants source_verified/login-enabled state from caller-selected local files and overwrites governance state on conflict."
+      },
+      "extensions": {
+        "candidateId": "MED250-CONTACT-002"
+      },
+      "findingId": "csf_180c8b3fbf946193985ec0b9",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:ea2d5588bf3fd57921f857ceebf7d434f99ac05692ae12aad15ac45df3b4239f"
+      },
+      "identity": {
+        "anchor": "pharmacy-contact-import-authority"
+      },
+      "locations": [
+        {
+          "endLine": 92,
+          "path": "scripts/import-data/emit-rwanda-fda-pharmacy-contact-sql.mjs",
+          "role": "sink",
+          "startLine": 65
+        },
+        {
+          "endLine": 25,
+          "path": "scripts/import-data/extract-rwanda-fda-duty-rosters.py",
+          "role": "entrypoint",
+          "startLine": 1
+        }
+      ],
+      "occurrenceId": "occ_0fecbf35d7b475bdbc137c1e",
+      "preventiveControls": [
+        "Keep the release contract and full-stack security tests in the mandatory production gate."
+      ],
+      "provenance": {
+        "source": "local_plugin"
+      },
+      "remediation": "Require approved source URLs/digests and expected row counts, separate extraction from authority grants, and never overwrite stale/rejected review state without an explicit reapproval.",
+      "remediationTests": [
+        "Add a regression test that fails before the remediation and proves the pharmacy-contact-import-authority invariant after it."
+      ],
+      "rootCause": {
+        "summary": "Data provenance labels are asserted by tooling rather than cryptographically or operationally bound to the reviewed official source."
+      },
+      "ruleId": "supply-chain.contact-provenance",
+      "severity": {
+        "changeConditions": "Broader tenant reach, live affected-row counts, or production load evidence could raise severity; stronger server-side invariants could lower it.",
+        "level": "medium",
+        "rationale": "The path has a realistic product or production boundary impact, but scope or prerequisites constrain it."
+      },
+      "summary": "Local CSV/PDF tooling assigns official provenance without source digest verification, and conflict handling can restore stale or rejected login contacts.",
+      "taxonomy": {
+        "category": "supply-chain",
+        "cwe": [
+          "CWE-345",
+          "CWE-284"
+        ]
+      },
+      "title": "Unbound contact imports can grant or restore pharmacy login authority",
+      "validation": {
+        "counterEvidence": [
+          "An operator must run the import, which constrains likelihood but does not validate the artifact content."
+        ],
+        "evidence": [
+          "Local file is selected or substituted -> extractor labels it official -> SQL import marks numbers verified/login-enabled -> OTP login accepts them or restores rejected rows."
+        ],
+        "method": "Static source-to-sink review plus bounded local diagnostics; no destructive live action.",
+        "summary": "The generated SQL grants source_verified/login-enabled state from caller-selected local files and overwrites governance state on conflict."
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Production data-plane or deployment compromise",
+          "sink": "Supabase/Cloudflare credentials and production deployment",
+          "source": "Mutable action resolution or compromised build dependency",
+          "summary": "Compromised dependency/action or upstream tag change -> code executes in production job -> reads job-scoped secrets or alters deployment.",
+          "transformations": [
+            "Checkout",
+            "Dependency install",
+            "Build and release steps"
+          ]
+        },
+        "reachability": {
+          "attacker": "Supply-chain attacker controlling a resolved action/dependency",
+          "entrypoint": "GitHub Actions production workflow",
+          "outcome": "Production data-plane or deployment compromise",
+          "preconditions": [
+            "Production workflow is approved and runs",
+            "Referenced code is compromised"
+          ],
+          "summary": "The path requires CI supply-chain compromise, but the workflow is the real production release surface."
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Workflow inspection confirms job-wide secret availability and mutable action references in the credential-bearing production path."
+      },
+      "extensions": {
+        "candidateId": "MED250-CI-001"
+      },
+      "findingId": "csf_c27fb8bafb612576393046d1",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:c9b1defca6598521d48d7fbd2f521299a7369bf4b7364b89a06c6f616467cfa9"
+      },
+      "identity": {
+        "anchor": "production-workflow-secret-isolation"
+      },
+      "locations": [
+        {
+          "endLine": 116,
+          "path": ".github/workflows/deploy-cloudflare.yml",
+          "role": "root_control",
+          "startLine": 74
+        }
+      ],
+      "occurrenceId": "occ_3482edbf0bae1bd2a902ff1c",
+      "preventiveControls": [
+        "Keep the release contract and full-stack security tests in the mandatory production gate."
+      ],
+      "provenance": {
+        "source": "local_plugin"
+      },
+      "remediation": "Scope Supabase secrets only to the exact backend verification step, separate build and privileged release jobs, and pin every third-party action to a reviewed full commit SHA.",
+      "remediationTests": [
+        "Add a regression test that fails before the remediation and proves the production-workflow-secret-isolation invariant after it."
+      ],
+      "rootCause": {
+        "summary": "Production credentials and third-party executable code have broader lifetime and mutability than necessary."
+      },
+      "ruleId": "supply-chain.ci-secrets",
+      "severity": {
+        "changeConditions": "Broader tenant reach, live affected-row counts, or production load evidence could raise severity; stronger server-side invariants could lower it.",
+        "level": "medium",
+        "rationale": "The path has a realistic product or production boundary impact, but scope or prerequisites constrain it."
+      },
+      "summary": "The elevated Supabase key is defined for the entire production job and deployment actions use mutable major-version refs.",
+      "taxonomy": {
+        "category": "supply-chain",
+        "cwe": [
+          "CWE-522",
+          "CWE-829"
+        ]
+      },
+      "title": "Production workflow overexposes secrets to mutable build steps",
+      "validation": {
+        "counterEvidence": [
+          "GitHub environments and manual dispatch reduce exposure, but do not restrict secrets within the job."
+        ],
+        "evidence": [
+          "Compromised dependency/action or upstream tag change -> code executes in production job -> reads job-scoped secrets or alters deployment."
+        ],
+        "method": "Static source-to-sink review plus bounded local diagnostics; no destructive live action.",
+        "summary": "Workflow inspection confirms job-wide secret availability and mutable action references in the credential-bearing production path."
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Delayed or failed retention cleanup",
+          "sink": "Scheduled cleanup CPU/network/time budget",
+          "source": "Authenticated owner-prefixed Storage object paths",
+          "summary": "User creates many nested paths -> scheduled cleanup recursively lists folders/pages -> deletion cap is applied only after enumeration.",
+          "transformations": [
+            "Recursive folder listing",
+            "Pagination"
+          ]
+        },
+        "reachability": {
+          "attacker": "Authenticated customer able to upload owner-prefixed objects",
+          "entrypoint": "Storage upload plus cleanup cron",
+          "outcome": "Delayed or failed retention cleanup",
+          "preconditions": [
+            "Large/deep object tree",
+            "Cleanup run executes"
+          ],
+          "summary": "The path requires many objects and affects scheduled maintenance rather than interactive ordering directly."
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Static loops show unbounded folder/page traversal before the final deletion limit is applied."
+      },
+      "extensions": {
+        "candidateId": "MED250-CLEANUP-001"
+      },
+      "findingId": "csf_760c1e3f178e2a85f3bda2f5",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:d6f432ea6be4e85afa06d2f30f37af214acd6bcf13e4de6ebea3347509ed2173"
+      },
+      "identity": {
+        "anchor": "prescription-cleanup-work-bound"
+      },
+      "locations": [
+        {
+          "endLine": 268,
+          "path": "supabase/functions/cleanup-prescriptions/index.ts",
+          "role": "root_control",
+          "startLine": 180
+        }
+      ],
+      "occurrenceId": "occ_eedfd8293d7bbaa6625927d1",
+      "preventiveControls": [
+        "Keep the release contract and full-stack security tests in the mandatory production gate."
+      ],
+      "provenance": {
+        "source": "local_plugin"
+      },
+      "remediation": "Enforce a maximum folder/page/time budget, persist cursors, restrict object-path depth, and stop enumeration when the run budget is exhausted.",
+      "remediationTests": [
+        "Add a regression test that fails before the remediation and proves the prescription-cleanup-work-bound invariant after it."
+      ],
+      "rootCause": {
+        "summary": "The batch limit controls mutation count, not discovery work."
+      },
+      "ruleId": "resource-exhaustion.storage-enumeration",
+      "severity": {
+        "changeConditions": "Broader tenant reach, live affected-row counts, or production load evidence could raise severity; stronger server-side invariants could lower it.",
+        "level": "low",
+        "rationale": "The path is real but has constrained likelihood or impact."
+      },
+      "summary": "Cleanup caps deletions but enumerates all folders and pages first; authenticated users can create nested owner-prefixed paths.",
+      "taxonomy": {
+        "category": "resource-exhaustion",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "Prescription cleanup performs unbounded storage enumeration",
+      "validation": {
+        "counterEvidence": [
+          "Per-run deletion limits and cron authentication exist but do not bound listing work."
+        ],
+        "evidence": [
+          "User creates many nested paths -> scheduled cleanup recursively lists folders/pages -> deletion cap is applied only after enumeration."
+        ],
+        "method": "Static source-to-sink review plus bounded local diagnostics; no destructive live action.",
+        "summary": "Static loops show unbounded folder/page traversal before the final deletion limit is applied."
+      }
+    }
+  ],
+  "scanId": "565904a48825d810c544271e0cc10882a59272c1_20260713T220040Z",
+  "schemaVersion": "1.0"
+}

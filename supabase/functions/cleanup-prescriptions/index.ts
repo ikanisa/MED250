@@ -45,6 +45,28 @@ Deno.serve(async (request) => {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
+  const maintenanceTaskKey = "prescription_cleanup";
+  async function recordMaintenanceRun(
+    status: "running" | "succeeded" | "degraded" | "failed",
+    summary: Record<string, string | number | boolean | null>,
+  ) {
+    const { error } = await supabase.rpc("dawanear_record_maintenance_run", {
+      p_task_key: maintenanceTaskKey,
+      p_status: status,
+      p_summary: summary,
+    });
+    if (error) {
+      console.error(JSON.stringify({
+        event: "maintenance_health_record_failed",
+        task: maintenanceTaskKey,
+        status,
+        errorType: "DatabaseError",
+      }));
+    }
+  }
+
+  await recordMaintenanceRun("running", { batch_limit: batchLimit });
+
   const abandonedBefore = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
   const { data: timedOutTransitions, error: transitionError } = await supabase.rpc(
@@ -52,6 +74,7 @@ Deno.serve(async (request) => {
     { p_limit: batchLimit },
   );
   if (transitionError) {
+    await recordMaintenanceRun("failed", { stage: "expire_selected_orders" });
     return Response.json({ error: transitionError.message }, { status: 500 });
   }
 
@@ -80,6 +103,7 @@ Deno.serve(async (request) => {
     { p_limit: recoveryLimit },
   );
   if (recoveryError) {
+    await recordMaintenanceRun("failed", { stage: "recover_expired_claims" });
     return Response.json({ error: recoveryError.message }, { status: 500 });
   }
   const recoveredClaims = (recoveredRows ?? []) as CleanupClaim[];
@@ -90,6 +114,7 @@ Deno.serve(async (request) => {
     { p_limit: dueLimit },
   );
   if (claimError) {
+    await recordMaintenanceRun("failed", { stage: "claim_due_paths" });
     return Response.json({ error: claimError.message }, { status: 500 });
   }
   const dueClaims = (dueRows ?? []) as CleanupClaim[];
@@ -136,8 +161,9 @@ Deno.serve(async (request) => {
   // so only older, still-unreferenced objects are eligible here.
   const bucket = supabase.storage.from("dawanear-prescriptions");
   const listPageSize = 200;
+  const maxEnumerationPages = Math.max(4, Math.min(40, batchLimit));
   const perFolderLimit = Math.max(1, Math.min(25, Math.ceil(batchLimit / 4)));
-  const maintenanceTaskKey = "prescription_orphan_sweep";
+  const orphanSweepTaskKey = "prescription_orphan_sweep";
   const orphanPaths: string[] = [];
   const orphanPathSet = new Set<string>();
   let orphanSweepError: string | null = null;
@@ -145,6 +171,7 @@ Deno.serve(async (request) => {
   let orphanOldObjectsScanned = 0;
   let orphanScanPages = 0;
   let orphanEnumerationPages = 0;
+  let enumerationBudgetExhausted = false;
   let orphanScanComplete = false;
   let folderContributionCapped = false;
   let foldersProcessed = 0;
@@ -153,7 +180,7 @@ Deno.serve(async (request) => {
   const { data: maintenanceState, error: maintenanceReadError } = await supabase
     .from("dawanear_maintenance_state")
     .select("folder_cursor")
-    .eq("task_key", maintenanceTaskKey)
+    .eq("task_key", orphanSweepTaskKey)
     .maybeSingle();
   if (maintenanceReadError) orphanSweepError = maintenanceReadError.message;
   const savedFolderCursor = typeof maintenanceState?.folder_cursor === "string"
@@ -165,10 +192,10 @@ Deno.serve(async (request) => {
   // still supporting nested paths rather than assuming one user-folder level.
   const discoveredFolders = new Set<string>([""]);
   const folderQueue = [""];
-  while (folderQueue.length > 0 && !orphanSweepError) {
+  while (folderQueue.length > 0 && !orphanSweepError && orphanEnumerationPages < maxEnumerationPages) {
     const folder = folderQueue.shift() ?? "";
     let offset = 0;
-    while (!orphanSweepError) {
+    while (!orphanSweepError && orphanEnumerationPages < maxEnumerationPages) {
       const { data: entries, error: listError } = await bucket.list(folder, {
         limit: listPageSize,
         offset,
@@ -191,6 +218,9 @@ Deno.serve(async (request) => {
       offset += pageEntries.length;
       if (pageEntries.length < listPageSize) break;
     }
+  }
+  if (folderQueue.length > 0 || orphanEnumerationPages >= maxEnumerationPages) {
+    enumerationBudgetExhausted = true;
   }
 
   const folders = [...discoveredFolders].sort();
@@ -220,6 +250,7 @@ Deno.serve(async (request) => {
       !orphanSweepError
       && orphanPaths.length < batchLimit
       && folderAdded < perFolderLimit
+      && orphanEnumerationPages + orphanScanPages < maxEnumerationPages
     ) {
       const { data: entries, error: listError } = await bucket.list(folder, {
         limit: listPageSize,
@@ -270,6 +301,8 @@ Deno.serve(async (request) => {
   }
 
   orphanScanComplete = !orphanSweepError
+    && !enumerationBudgetExhausted
+    && orphanEnumerationPages + orphanScanPages < maxEnumerationPages
     && foldersProcessed === rotatedFolders.length
     && orphanPaths.length < batchLimit
     && !folderContributionCapped;
@@ -281,7 +314,7 @@ Deno.serve(async (request) => {
     const { error: maintenanceWriteError } = await supabase
       .from("dawanear_maintenance_state")
       .upsert({
-        task_key: maintenanceTaskKey,
+        task_key: orphanSweepTaskKey,
         folder_cursor: lastProcessedFolder,
         updated_at: new Date().toISOString(),
       }, { onConflict: "task_key" });
@@ -338,7 +371,7 @@ Deno.serve(async (request) => {
     }
   }
 
-  return Response.json({
+  const responsePayload = {
     processed: results.length,
     deleted: results.filter((result) => result.outcome === "deleted").length,
     references_cleared: results.reduce(
@@ -360,6 +393,8 @@ Deno.serve(async (request) => {
     orphan_old_objects_scanned: orphanOldObjectsScanned,
     orphan_enumeration_pages: orphanEnumerationPages,
     orphan_scan_pages: orphanScanPages,
+    orphan_page_budget: maxEnumerationPages,
+    orphan_page_budget_exhausted: enumerationBudgetExhausted || orphanEnumerationPages + orphanScanPages >= maxEnumerationPages,
     orphan_scan_complete: orphanScanComplete,
     orphan_folders_discovered: folders.length,
     orphan_folders_processed: foldersProcessed,
@@ -374,5 +409,24 @@ Deno.serve(async (request) => {
       cleanup_claim_minutes: 15,
     },
     results,
+  };
+
+  const resultErrors = results.filter((result) => result.outcome !== "deleted").length;
+  const maintenanceStatus = resultErrors > 0 || orphanSweepError
+    ? "degraded" as const
+    : "succeeded" as const;
+  await recordMaintenanceRun(maintenanceStatus, {
+    processed: responsePayload.processed,
+    deleted: responsePayload.deleted,
+    result_errors: resultErrors,
+    timed_out_selected: responsePayload.timed_out_selected,
+    recovered_claims: responsePayload.recovered_claims,
+    due_claims: responsePayload.due_claims,
+    orphan_candidates: responsePayload.orphan_candidates,
+    orphan_deleted: responsePayload.orphan_deleted,
+    orphan_scan_complete: responsePayload.orphan_scan_complete,
+    orphan_sweep_failed: Boolean(orphanSweepError),
   });
+
+  return Response.json(responsePayload);
 });

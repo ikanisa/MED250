@@ -1,0 +1,127 @@
+name: Deploy MED+250 to Cloudflare
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Deployment target
+        required: true
+        type: choice
+        options:
+          - preview
+          - production
+      confirmation:
+        description: Type DEPLOY MED250 LIVE for a production deployment
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: med250-deploy-${{ inputs.target }}
+  cancel-in-progress: false
+
+jobs:
+  validate-request:
+    name: Validate deployment request
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Require explicit live confirmation
+        env:
+          TARGET: ${{ inputs.target }}
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          if [ "$TARGET" = "production" ] && [ "$CONFIRMATION" != "DEPLOY MED250 LIVE" ]; then
+            echo "Production deployment requires the exact confirmation phrase."
+            exit 1
+          fi
+
+  preview:
+    name: Deploy protected preview
+    if: inputs.target == 'preview'
+    needs: validate-request
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: med250-preview
+    env:
+      NEXT_PUBLIC_MED250_OBSERVABILITY: cloud
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version-file: package.json
+          cache: npm
+      - name: Use committed preview-safe public configuration
+        run: cp .env.example .env.local
+      - run: npm ci
+      - run: npm run release:check
+      - name: Deploy preview Worker
+        id: deploy
+        uses: cloudflare/wrangler-action@9acf94ace14e7dc412b076f2c5c20b8ce93c79cd # v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: 4.110.0
+          command: deploy --strict
+      - name: Verify protected deployment
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: npm run deployment:verify -- --url "$DEPLOYMENT_URL" --mode preview
+
+  production:
+    name: Deploy production Worker
+    if: inputs.target == 'production'
+    needs: validate-request
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: med250-production
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+      NEXT_PUBLIC_MARKETPLACE_MODE: live
+      NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
+      NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
+      NEXT_PUBLIC_MED250_OBSERVABILITY: cloud
+      SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+      MED250_GATE_GPS_READY: ${{ vars.MED250_GATE_GPS_READY }}
+      MED250_GATE_WHATSAPP_READY: ${{ vars.MED250_GATE_WHATSAPP_READY }}
+      MED250_GATE_PHARMACY_OPERATIONS_APPROVED: ${{ vars.MED250_GATE_PHARMACY_OPERATIONS_APPROVED }}
+      MED250_GATE_REGULATORY_APPROVED: ${{ vars.MED250_GATE_REGULATORY_APPROVED }}
+      MED250_GATE_DATA_REUSE_APPROVED: ${{ vars.MED250_GATE_DATA_REUSE_APPROVED }}
+      MED250_GATE_DUPLICATE_REGISTER_REVIEWED: ${{ vars.MED250_GATE_DUPLICATE_REGISTER_REVIEWED }}
+      MED250_GATE_CREDENTIALS_ROTATED: ${{ vars.MED250_GATE_CREDENTIALS_ROTATED }}
+      MED250_GATE_SECURITY_HARDENING_DEPLOYED: ${{ vars.MED250_GATE_SECURITY_HARDENING_DEPLOYED }}
+      MED250_GATE_EDGE_FUNCTIONS_DEPLOYED: ${{ vars.MED250_GATE_EDGE_FUNCTIONS_DEPLOYED }}
+      MED250_GATE_TURNSTILE_SERVER_VERIFIED: ${{ vars.MED250_GATE_TURNSTILE_SERVER_VERIFIED }}
+      MED250_GATE_AUTH_RATE_LIMITS_APPROVED: ${{ vars.MED250_GATE_AUTH_RATE_LIMITS_APPROVED }}
+      MED250_GATE_PRESCRIPTION_RETENTION_APPROVED: ${{ vars.MED250_GATE_PRESCRIPTION_RETENTION_APPROVED }}
+      MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED: ${{ vars.MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED }}
+      MED250_GATE_DOMAIN_DNS_VERIFIED: ${{ vars.MED250_GATE_DOMAIN_DNS_VERIFIED }}
+      MED250_GATE_PHYSICAL_UAT_PASSED: ${{ vars.MED250_GATE_PHYSICAL_UAT_PASSED }}
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version-file: package.json
+          cache: npm
+      - run: npm ci
+      - name: Validate production attestations and governed sources
+        run: npm run release:preflight:live && npm run data:duplicates:verify -- --strict && npm run uat:verify:live
+      - name: Verify privileged production backend
+        env:
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: npm run backend:verify && npm run ops:health:strict
+      - name: Run unprivileged production release checks
+        run: npm run lint && npm run data:validate && npm run data:quality && npm run test:preview && npm run test:production && npm run performance:budget && wrangler deploy --env production --dry-run --strict
+      - name: Deploy production Worker
+        uses: cloudflare/wrangler-action@9acf94ace14e7dc412b076f2c5c20b8ce93c79cd # v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: 4.110.0
+          command: deploy --env production --strict
+      - name: Verify production deployment
+        run: npm run deployment:verify -- --url "$NEXT_PUBLIC_SITE_URL" --mode live

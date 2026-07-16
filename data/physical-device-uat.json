@@ -1,0 +1,90 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "description": "Controlled physical-device UAT ledger. Keep identities opaque and evidence redacted; never record phone numbers, OTPs, order IDs, prescription contents or exact coordinates.",
+  "status": "pending",
+  "environment": "controlled-production",
+  "customer_identity_label": null,
+  "pharmacy_identity_label": null,
+  "unrelated_pharmacy_identity_label": null,
+  "executed_by": null,
+  "started_at": null,
+  "completed_at": null,
+  "approved_by": null,
+  "approved_role": null,
+  "approved_at": null,
+  "scenarios": {
+    "PREVIEW_FAIL_CLOSED": {
+      "title": "Preview ordering and indexing remain disabled before controlled enablement",
+      "status": "pending",
+      "evidence_reference": null,
+      "note": null
+    },
+    "GPS_DENIAL_RECOVERY": {
+      "title": "GPS denial shows recovery guidance without dispatch",
+      "status": "pending",
+      "evidence_reference": null,
+      "note": null
+    },
+    "GPS_CONSENT_BOUNDED_DISPATCH": {
+      "title": "GPS consent produces only bounded eligible-pharmacy dispatch",
+      "status": "pending",
+      "evidence_reference": null,
+      "note": null
+    },
+    "PRESCRIPTION_ENFORCEMENT": {
+      "title": "Prescription-required products enforce private upload and missing-file rejection",
+      "status": "pending",
+      "evidence_reference": null,
+      "note": null
+    },
+    "RECIPIENT_ISOLATION": {
+      "title": "Only eligible recipient pharmacies receive and read the request",
+      "status": "pending",
+      "evidence_reference": null,
+      "note": null
+    },
+    "WHATSAPP_OTP_LIFECYCLE": {
+      "title": "Real WhatsApp OTP succeeds once and rejects wrong, expired and reused codes",
+      "status": "pending",
+      "evidence_reference": null,
+      "note": null
+    },
+    "COMPLETE_OFFER_AND_SUBSTITUTE": {
+      "title": "Complete offer, fulfilment and compatible-substitute rules work on device",
+      "status": "pending",
+      "evidence_reference": null,
+      "note": null
+    },
+    "CONTACT_PRIVACY_AND_SELECTION": {
+      "title": "Pharmacy contact remains private before selection and is limited after selection",
+      "status": "pending",
+      "evidence_reference": null,
+      "note": null
+    },
+    "EXPLICIT_HANDOFFS": {
+      "title": "WhatsApp and MoMo handoffs require explicit customer action and claim no payment custody",
+      "status": "pending",
+      "evidence_reference": null,
+      "note": null
+    },
+    "CANCELLATION_COMPLETION_EXPIRY": {
+      "title": "Cancellation, completion, expiry and closure notifications behave correctly",
+      "status": "pending",
+      "evidence_reference": null,
+      "note": null
+    },
+    "PRESCRIPTION_ACCESS_RETENTION": {
+      "title": "Prescription access boundaries and approved retention behavior hold through lifecycle",
+      "status": "pending",
+      "evidence_reference": null,
+      "note": null
+    },
+    "PRIVACY_SAFE_OPERATIONS": {
+      "title": "Operational health and Worker logs contain no prohibited identifiers",
+      "status": "pending",
+      "evidence_reference": null,
+      "note": null
+    }
+  }
+}

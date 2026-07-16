@@ -1,0 +1,12 @@
+{
+  "contract_version": "2026-07-13.7",
+  "function_count": 24,
+  "expected_function_count": 24,
+  "missing_authenticated_security_definer_count": 0,
+  "unexpected_authenticated_security_definer_count": 0,
+  "new_submit_rpc_exists": true,
+  "old_public_submit_rpc_removed": true,
+  "authenticated_can_submit": true,
+  "anonymous_can_submit": false,
+  "verified_at": "2026-07-13T21:08:00Z"
+}

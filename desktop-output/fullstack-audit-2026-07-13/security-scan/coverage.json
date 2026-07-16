@@ -1,0 +1,91 @@
+{
+  "completeness": "complete",
+  "deferred": [],
+  "documentType": "codex-security.coverage",
+  "excludePaths": [
+    "node_modules/",
+    ".next/",
+    "dist/"
+  ],
+  "explicitExclusions": [
+    {
+      "pattern": "node_modules/ and generated build output",
+      "reason": "Third-party/generated contents were evaluated through manifests, lockfiles, build artifacts, and dependency audit rather than line-by-line source review."
+    }
+  ],
+  "includePaths": [
+    "."
+  ],
+  "inventoryStrategy": "repository",
+  "mode": "deep_repository",
+  "openQuestions": [
+    {
+      "followUpPrompt": "Run the approved production-readiness verification with a newly rotated Supabase secret and record aggregate-only counts.",
+      "question": "How many live rows are affected by contact, membership, geocode, and product lifecycle defects after privileged remediation migrations are applied?"
+    }
+  ],
+  "scanId": "565904a48825d810c544271e0cc10882a59272c1_20260713T220040Z",
+  "schemaVersion": "1.0",
+  "surfaces": [
+    {
+      "disposition": "reported",
+      "id": "authentication",
+      "label": "Pharmacy WhatsApp authentication and session lifecycle",
+      "notes": "OTP and offboarding controls reviewed.",
+      "receiptRefs": [
+        "artifacts/03_coverage/validation_closure_table.md"
+      ],
+      "riskArea": "identity"
+    },
+    {
+      "disposition": "reported",
+      "id": "database",
+      "label": "Supabase RLS, RPC, order, offer, and contact boundaries",
+      "notes": "Ownership, membership, lifecycle, and disclosure paths reviewed.",
+      "receiptRefs": [
+        "artifacts/03_coverage/repository_coverage_ledger.md"
+      ],
+      "riskArea": "data and authorization"
+    },
+    {
+      "disposition": "reported",
+      "id": "web",
+      "label": "Cloudflare Worker, Next rendering, telemetry, search, and headers",
+      "notes": "Public input and output contexts reviewed.",
+      "receiptRefs": [
+        "artifacts/05_findings/attack_path_analysis_report.md"
+      ],
+      "riskArea": "runtime and browser"
+    },
+    {
+      "disposition": "reported",
+      "id": "storage",
+      "label": "Prescription upload, access, and cleanup",
+      "notes": "Private bucket and cleanup flows reviewed.",
+      "receiptRefs": [
+        "artifacts/03_coverage/repository_coverage_ledger.md"
+      ],
+      "riskArea": "health data and availability"
+    },
+    {
+      "disposition": "reported",
+      "id": "supply_chain",
+      "label": "Regulatory imports and CI deployment",
+      "notes": "Import provenance, action references, and credential scope reviewed.",
+      "receiptRefs": [
+        "artifacts/02_discovery/finding_discovery_report.md"
+      ],
+      "riskArea": "production integrity"
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "dependencies",
+      "label": "Runtime dependencies",
+      "notes": "Package audit reported zero known vulnerabilities.",
+      "receiptRefs": [
+        "artifacts/02_discovery/work_ledger.jsonl"
+      ],
+      "riskArea": "third-party packages"
+    }
+  ]
+}

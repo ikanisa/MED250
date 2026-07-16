@@ -1,0 +1,718 @@
+{
+  "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/os/schemas/sarif-schema-2.1.0.json",
+  "runs": [
+    {
+      "automationDetails": {
+        "id": "565904a48825d810c544271e0cc10882a59272c1_20260713T220040Z"
+      },
+      "properties": {
+        "codexSecuritySchemaVersion": "1.0",
+        "codexSecurityTargetKind": "git_worktree"
+      },
+      "results": [
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "entrypoint"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/import-data/parse-rwanda-fda.mjs"
+                },
+                "region": {
+                  "endLine": 132,
+                  "startLine": 127
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "The import decodes HTML entities after stripping literal tags, and product/brand values are serialized directly into inline JSON-LD script elements."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:970b422f451e870ad5a25c16d72a4239e9ff9cbf66928c92384e5d9766f1ce5e",
+            "primaryLocationLineHash": "3075e88bc33728e4:1"
+          },
+          "properties": {
+            "candidateId": "MED250-SEO-XSS-001",
+            "category": "stored-xss",
+            "confidence": "high",
+            "findingId": "csf_c969edda31dcddaac651f13d",
+            "occurrenceId": "occ_0d891f8515825b622c677ad3",
+            "severity": "medium"
+          },
+          "relatedLocations": [
+            {
+              "id": 1,
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/product/%5Bid%5D/page.tsx"
+                },
+                "region": {
+                  "endLine": 51,
+                  "startLine": 51
+                }
+              }
+            }
+          ],
+          "ruleId": "stored-xss.structured-data",
+          "ruleIndex": 9
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/import-data/emit-rwanda-fda-pharmacy-contact-sql.mjs"
+                },
+                "region": {
+                  "endLine": 92,
+                  "startLine": 65
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Local CSV/PDF tooling assigns official provenance without source digest verification, and conflict handling can restore stale or rejected login contacts."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:ea2d5588bf3fd57921f857ceebf7d434f99ac05692ae12aad15ac45df3b4239f",
+            "primaryLocationLineHash": "4d5a3f348a4bd86f:1"
+          },
+          "properties": {
+            "candidateId": "MED250-CONTACT-002",
+            "category": "supply-chain",
+            "confidence": "high",
+            "findingId": "csf_180c8b3fbf946193985ec0b9",
+            "occurrenceId": "occ_0fecbf35d7b475bdbc137c1e",
+            "severity": "medium"
+          },
+          "relatedLocations": [
+            {
+              "id": 1,
+              "message": {
+                "text": "entrypoint"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/import-data/extract-rwanda-fda-duty-rosters.py"
+                },
+                "region": {
+                  "endLine": 25,
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "ruleId": "supply-chain.contact-provenance",
+          "ruleIndex": 11
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/functions/dawanear-pharmacy-verify-otp/index.ts"
+                },
+                "region": {
+                  "endLine": 116,
+                  "startLine": 106
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "A valid OTP for a still-linked number unconditionally overwrites an existing membership as manager/active."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:273b792baf110af0e1e785ce003386fedd96dd41979de9d04428d7351e8d3cf1",
+            "primaryLocationLineHash": "772501d2d7ffa0f:1"
+          },
+          "properties": {
+            "candidateId": "MED250-AUTH-001",
+            "category": "authorization-bypass",
+            "confidence": "high",
+            "findingId": "csf_ba153d4f9237db9cefd325b3",
+            "occurrenceId": "occ_147a68e51ccb6a7c68230092",
+            "severity": "high"
+          },
+          "ruleId": "authorization-bypass.membership-lifecycle",
+          "ruleIndex": 1
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/20260712130000_dawanear_marketplace.sql"
+                },
+                "region": {
+                  "endLine": 1937,
+                  "startLine": 1875
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Active-order recovery can return incomplete pharmacy drafts, while selected contact can resolve to a different unverified summary number and removed derived contacts may remain active."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:7df3438aeee857aaf84e2b483578dbb659163c7a7c2cec51753ef17ab6b1c4dd",
+            "primaryLocationLineHash": "a6a86f31aaa2bb3f:1"
+          },
+          "properties": {
+            "candidateId": "MED250-DB-001",
+            "category": "privacy-boundary",
+            "confidence": "high",
+            "findingId": "csf_b3f6649b9a8d494c7de0aefc",
+            "occurrenceId": "occ_148f5bd2af6112cead47c713",
+            "severity": "medium"
+          },
+          "relatedLocations": [
+            {
+              "id": 1,
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/20260712130000_dawanear_marketplace.sql"
+                },
+                "region": {
+                  "endLine": 2670,
+                  "startLine": 2600
+                }
+              }
+            },
+            {
+              "id": 2,
+              "message": {
+                "text": "concrete_implementation"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/20260713234500_govern_pharmacy_contact_edit_reviews.sql"
+                },
+                "region": {
+                  "endLine": 117,
+                  "startLine": 89
+                }
+              }
+            }
+          ],
+          "ruleId": "privacy-boundary.offer-and-contact",
+          "ruleIndex": 4
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/20260713234500_govern_pharmacy_contact_edit_reviews.sql"
+                },
+                "region": {
+                  "endLine": 117,
+                  "startLine": 89
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Contact removal blocks future OTP use but leaves active memberships and previously issued permanent sessions usable."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:af66f3cf64be7302f33e805039db42cfaf4e624e6bc040f48b4074203bf57aed",
+            "primaryLocationLineHash": "c849b81e82e09544:1"
+          },
+          "properties": {
+            "candidateId": "MED250-AUTH-002",
+            "category": "session-management",
+            "confidence": "medium",
+            "findingId": "csf_d2f912b2ea649177ef7395f8",
+            "occurrenceId": "occ_1abf9e661950bdf8c3ebfe2c",
+            "severity": "high"
+          },
+          "relatedLocations": [
+            {
+              "id": 1,
+              "message": {
+                "text": "entrypoint"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/functions/dawanear-pharmacy-verify-otp/index.ts"
+                },
+                "region": {
+                  "endLine": 125,
+                  "startLine": 119
+                }
+              }
+            }
+          ],
+          "ruleId": "session-management.offboarding",
+          "ruleIndex": 8
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": ".github/workflows/deploy-cloudflare.yml"
+                },
+                "region": {
+                  "endLine": 116,
+                  "startLine": 74
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "The elevated Supabase key is defined for the entire production job and deployment actions use mutable major-version refs."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:c9b1defca6598521d48d7fbd2f521299a7369bf4b7364b89a06c6f616467cfa9",
+            "primaryLocationLineHash": "73be036850724577:1"
+          },
+          "properties": {
+            "candidateId": "MED250-CI-001",
+            "category": "supply-chain",
+            "confidence": "high",
+            "findingId": "csf_c27fb8bafb612576393046d1",
+            "occurrenceId": "occ_3482edbf0bae1bd2a902ff1c",
+            "severity": "medium"
+          },
+          "ruleId": "supply-chain.ci-secrets",
+          "ruleIndex": 10
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/20260712130000_dawanear_marketplace.sql"
+                },
+                "region": {
+                  "endLine": 2024,
+                  "startLine": 1940
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Cancellation immediately frees the single-active-order slot, and no rolling creation/cancellation quota limits sequential notification churn."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:274ccbb1244d08fa9180f975d76be98af271f6f013d2c9a67ef409cb8f24740d",
+            "primaryLocationLineHash": "c2681416f5bb1471:1"
+          },
+          "properties": {
+            "candidateId": "MED250-DB-005",
+            "category": "abuse",
+            "confidence": "high",
+            "findingId": "csf_a744bda3cf60f19497b4fbc0",
+            "occurrenceId": "occ_7f398b5f0464d2c114c3a45f",
+            "severity": "medium"
+          },
+          "ruleId": "abuse.order-churn",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/functions/_shared/dawanear-pharmacy-auth.ts"
+                },
+                "region": {
+                  "endLine": 188,
+                  "startLine": 175
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Concurrent requests can pass separate pre-insert counters, while caller-controlled User-Agent creates additional source buckets."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:4445a33b0f4c8d36481d113935f965f7703135bde6ae3ff0becc05c98f4664b2",
+            "primaryLocationLineHash": "3e43bec3c5976623:1"
+          },
+          "properties": {
+            "candidateId": "MED250-OTP-001",
+            "category": "rate-limit",
+            "confidence": "high",
+            "findingId": "csf_e67bc6aeee2ccb4ea6f3c970",
+            "occurrenceId": "occ_9e7f709b5b99e07dd097276e",
+            "severity": "medium"
+          },
+          "relatedLocations": [
+            {
+              "id": 0,
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/functions/dawanear-pharmacy-send-otp/index.ts"
+                },
+                "region": {
+                  "endLine": 47,
+                  "startLine": 31
+                }
+              }
+            }
+          ],
+          "ruleId": "rate-limit.otp-issuance",
+          "ruleIndex": 5
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/functions/geocode-pharmacies/index.ts"
+                },
+                "region": {
+                  "endLine": 123,
+                  "startLine": 98
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Approval compares status and Place ID but not a version or digest of the exact reviewed coordinates and metadata."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:c492b540e4ef2ca4dc5ecca1f1c6c4b4cb4477e4822224ff02b74603ac393992",
+            "primaryLocationLineHash": "f08f3e7d40bd8f8a:1"
+          },
+          "properties": {
+            "candidateId": "MED250-GEOCODE-002",
+            "category": "integrity",
+            "confidence": "high",
+            "findingId": "csf_9c4e2fbfebfa8a678fedf6c8",
+            "occurrenceId": "occ_dc90b712cbfc0858d4937536",
+            "severity": "low"
+          },
+          "ruleId": "integrity.geocode-approval",
+          "ruleIndex": 2
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/telemetry/route.ts"
+                },
+                "region": {
+                  "endLine": 91,
+                  "startLine": 78
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "The public telemetry route calls request.text() before applying its 2 KiB policy, so an unknown-length body is fully consumed first."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:9ab186a200301c39a9bd26dca147eb8f7e428d957187dbf70f621f09ec80cca7",
+            "primaryLocationLineHash": "1694d9ee4cb1566a:1"
+          },
+          "properties": {
+            "candidateId": "MED250-TELEMETRY-001",
+            "category": "resource-exhaustion",
+            "confidence": "high",
+            "findingId": "csf_5152086d6febb76de5c227de",
+            "occurrenceId": "occ_e220dd65657294354d7ab4a7",
+            "severity": "medium"
+          },
+          "ruleId": "resource-exhaustion.request-body",
+          "ruleIndex": 6
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/20260712130000_dawanear_marketplace.sql"
+                },
+                "region": {
+                  "endLine": 1748,
+                  "startLine": 1384
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Offer submission and selection do not consistently revalidate current active/orderable state for exact and substitute products."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:4b4680dc9753953b88b1291e8de9a2dc05065919c67bf7fcffc4d9792d466ae9",
+            "primaryLocationLineHash": "a7706b066f1b05c:1"
+          },
+          "properties": {
+            "candidateId": "MED250-DB-002",
+            "category": "integrity",
+            "confidence": "high",
+            "findingId": "csf_c16b7ff4ec51fcc31bb26d93",
+            "occurrenceId": "occ_ee0ab421cf4986b4d803b41d",
+            "severity": "medium"
+          },
+          "relatedLocations": [
+            {
+              "id": 1,
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/20260712130000_dawanear_marketplace.sql"
+                },
+                "region": {
+                  "endLine": 1872,
+                  "startLine": 1752
+                }
+              }
+            }
+          ],
+          "ruleId": "integrity.product-lifecycle",
+          "ruleIndex": 3
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/functions/cleanup-prescriptions/index.ts"
+                },
+                "region": {
+                  "endLine": 268,
+                  "startLine": 180
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Cleanup caps deletions but enumerates all folders and pages first; authenticated users can create nested owner-prefixed paths."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:d6f432ea6be4e85afa06d2f30f37af214acd6bcf13e4de6ebea3347509ed2173",
+            "primaryLocationLineHash": "e6ff2c61838637c1:1"
+          },
+          "properties": {
+            "candidateId": "MED250-CLEANUP-001",
+            "category": "resource-exhaustion",
+            "confidence": "high",
+            "findingId": "csf_760c1e3f178e2a85f3bda2f5",
+            "occurrenceId": "occ_eedfd8293d7bbaa6625927d1",
+            "severity": "low"
+          },
+          "ruleId": "resource-exhaustion.storage-enumeration",
+          "ruleIndex": 7
+        }
+      ],
+      "tool": {
+        "driver": {
+          "name": "Codex Security",
+          "rules": [
+            {
+              "id": "abuse.order-churn",
+              "name": "abuse.order-churn",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "abuse.order-churn"
+              }
+            },
+            {
+              "id": "authorization-bypass.membership-lifecycle",
+              "name": "authorization-bypass.membership-lifecycle",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "authorization-bypass.membership-lifecycle"
+              }
+            },
+            {
+              "id": "integrity.geocode-approval",
+              "name": "integrity.geocode-approval",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "integrity.geocode-approval"
+              }
+            },
+            {
+              "id": "integrity.product-lifecycle",
+              "name": "integrity.product-lifecycle",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "integrity.product-lifecycle"
+              }
+            },
+            {
+              "id": "privacy-boundary.offer-and-contact",
+              "name": "privacy-boundary.offer-and-contact",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "privacy-boundary.offer-and-contact"
+              }
+            },
+            {
+              "id": "rate-limit.otp-issuance",
+              "name": "rate-limit.otp-issuance",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "rate-limit.otp-issuance"
+              }
+            },
+            {
+              "id": "resource-exhaustion.request-body",
+              "name": "resource-exhaustion.request-body",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "resource-exhaustion.request-body"
+              }
+            },
+            {
+              "id": "resource-exhaustion.storage-enumeration",
+              "name": "resource-exhaustion.storage-enumeration",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "resource-exhaustion.storage-enumeration"
+              }
+            },
+            {
+              "id": "session-management.offboarding",
+              "name": "session-management.offboarding",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "session-management.offboarding"
+              }
+            },
+            {
+              "id": "stored-xss.structured-data",
+              "name": "stored-xss.structured-data",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "stored-xss.structured-data"
+              }
+            },
+            {
+              "id": "supply-chain.ci-secrets",
+              "name": "supply-chain.ci-secrets",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "supply-chain.ci-secrets"
+              }
+            },
+            {
+              "id": "supply-chain.contact-provenance",
+              "name": "supply-chain.contact-provenance",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "supply-chain.contact-provenance"
+              }
+            }
+          ],
+          "version": "0.1.11"
+        }
+      }
+    }
+  ],
+  "version": "2.1.0"
+}

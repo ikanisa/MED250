@@ -1,0 +1,36 @@
+{
+  "verified_at": "2026-07-13T21:17:28.818616+00:00",
+  "project_ref": "uskfnszcdqpcfrhjxitl",
+  "migration": "marketplace_dispatch_eligibility",
+  "functions": {
+    "required": 11,
+    "existing": 11,
+    "using_central_eligibility": 11,
+    "still_using_online_license_gate": 0
+  },
+  "helper": {
+    "schema": "dawanear_private",
+    "security_invoker": true,
+    "stable": true,
+    "search_path_locked": true,
+    "public_can_execute": false,
+    "anon_can_execute": false,
+    "authenticated_can_execute": false
+  },
+  "pharmacies": {
+    "active": 769,
+    "marketplace_approved": 769,
+    "informational_online_register_entries": 3,
+    "contact_and_license_ready_before_gps": 267,
+    "gps_ready": 0,
+    "dispatch_ready": 0
+  },
+  "backend_contract": {
+    "version": "2026-07-13.7",
+    "functions": "24/24",
+    "tables": "19/19",
+    "public_execute_count": 0,
+    "missing_authenticated_security_definer_count": 0,
+    "unexpected_authenticated_security_definer_count": 0
+  }
+}

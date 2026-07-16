@@ -9,7 +9,7 @@ revoke all on schema dawanear_private from public, anon, authenticated;
 
 create table if not exists public.dawanear_customer_profiles (
   user_id uuid primary key references auth.users(id) on delete cascade,
-  whatsapp text check (whatsapp is null or whatsapp ~ '^2507[2389][0-9]{7}$'),
+  whatsapp text check (whatsapp is null or whatsapp ~ '^[1-9][0-9]{7,14}$'),
   preferred_language text not null default 'en'
     check (preferred_language in ('en', 'rw', 'fr')),
   created_at timestamptz not null default now(),
@@ -196,7 +196,7 @@ create table if not exists public.dawanear_orders (
   customer_location extensions.geography(point, 4326) not null,
   location_accuracy_m numeric(10, 2) not null
     check (location_accuracy_m > 0 and location_accuracy_m <= 5000),
-  whatsapp text check (whatsapp is null or whatsapp ~ '^2507[2389][0-9]{7}$'),
+  whatsapp text check (whatsapp is null or whatsapp ~ '^[1-9][0-9]{7,14}$'),
   delivery_preference text not null default 'either'
     check (delivery_preference in ('pickup', 'delivery', 'either')),
   substitutes_allowed boolean not null default true,
@@ -1048,7 +1048,7 @@ begin
     select r.pharmacy_id, r.order_id, 'order_closed'
     from public.dawanear_order_recipients as r
     where r.order_id = v_stale_order_id
-    on conflict (pharmacy_id, order_id, kind) do update
+    on conflict on constraint dawanear_pharmacy_notifications_pharmacy_id_order_id_kind_key do update
       set read_at = null,
           created_at = excluded.created_at;
   end if;
@@ -1078,8 +1078,8 @@ begin
     raise exception 'Invalid delivery preference' using errcode = '22023';
   end if;
 
-  if p_whatsapp is not null and p_whatsapp !~ '^2507[2389][0-9]{7}$' then
-    raise exception 'Invalid Rwanda WhatsApp number' using errcode = '22023';
+  if p_whatsapp is not null and p_whatsapp !~ '^[1-9][0-9]{7,14}$' then
+    raise exception 'Invalid international WhatsApp number' using errcode = '22023';
   end if;
 
   if p_items is null or jsonb_typeof(p_items) <> 'array' then
@@ -1256,7 +1256,7 @@ begin
     select r.pharmacy_id, r.order_id, 'new_request'
     from public.dawanear_order_recipients as r
     where r.order_id = v_order_id
-    on conflict (pharmacy_id, order_id, kind) do nothing;
+    on conflict on constraint dawanear_pharmacy_notifications_pharmacy_id_order_id_kind_key do nothing;
 
     update public.dawanear_orders as o
     set status = 'broadcast',
@@ -1850,7 +1850,7 @@ begin
   select r.pharmacy_id, r.order_id, 'order_closed'
   from public.dawanear_order_recipients as r
   where r.order_id = p_order_id
-  on conflict (pharmacy_id, order_id, kind) do update
+  on conflict on constraint dawanear_pharmacy_notifications_pharmacy_id_order_id_kind_key do update
     set read_at = null,
         created_at = excluded.created_at;
 
@@ -1860,7 +1860,7 @@ begin
     kind
   )
   values (v_pharmacy_id, p_order_id, 'order_selected')
-  on conflict (pharmacy_id, order_id, kind) do nothing;
+  on conflict on constraint dawanear_pharmacy_notifications_pharmacy_id_order_id_kind_key do nothing;
 
   return query
     select p_order_id, p_offer_id, v_pharmacy_id, 'selected'::text, v_total_rwf, v_distance_m;
@@ -2011,7 +2011,7 @@ begin
   select r.pharmacy_id, r.order_id, 'order_closed'
   from public.dawanear_order_recipients as r
   where r.order_id = p_order_id
-  on conflict (pharmacy_id, order_id, kind) do update
+  on conflict on constraint dawanear_pharmacy_notifications_pharmacy_id_order_id_kind_key do update
     set read_at = null,
         created_at = excluded.created_at;
 
@@ -2085,7 +2085,7 @@ begin
     select r.pharmacy_id, r.order_id, 'order_closed'
     from public.dawanear_order_recipients as r
     where r.order_id = v_order.id
-    on conflict (pharmacy_id, order_id, kind) do update
+    on conflict on constraint dawanear_pharmacy_notifications_pharmacy_id_order_id_kind_key do update
       set read_at = null,
           created_at = excluded.created_at;
 
@@ -2912,7 +2912,7 @@ begin
     v_user_id,
     now()
   )
-  on conflict (pharmacy_id, product_id) do update
+  on conflict on constraint dawanear_pharmacy_prices_pharmacy_id_product_id_key do update
     set price_rwf = excluded.price_rwf,
         is_current = true,
         contributed_by = excluded.contributed_by,

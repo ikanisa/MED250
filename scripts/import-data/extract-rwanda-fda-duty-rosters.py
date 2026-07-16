@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import re
 import unicodedata
@@ -213,6 +214,14 @@ def write_csv(path: Path, rows: list[dict[str, str]], fields: list[str]) -> None
         writer.writerows(rows)
 
 
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--pdf-dir", type=Path, required=True)
@@ -290,6 +299,7 @@ def main() -> None:
     write_csv(args.output_dir / "rwanda-fda-pharmacy-contacts-review.csv", reviews, review_fields)
 
     matched_pharmacies = len({row["registry_entry_key"] for row in matched})
+    matched_path = args.output_dir / "rwanda-fda-pharmacy-contacts-jul-sep-2026.csv"
     manifest = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "source_page": "https://rwandafda.gov.rw/human-retail-pharmacy-duty-rosters-2/",
@@ -301,6 +311,13 @@ def main() -> None:
         "review_rows": len(reviews),
         "authentication_rule": "Only rows in the matched CSV may be imported as source-verified phone and default WhatsApp login contacts.",
         "google_places_rule": "Google Places candidates are not imported as authentication contacts without separate pharmacy or admin verification.",
+        "retail_registry_sha256": sha256_file(args.retail_csv),
+        "matched_contacts_sha256": sha256_file(matched_path),
+        "roster_sources": {
+            name: {"url": ROSTER_URLS[name], "sha256": sha256_file(args.pdf_dir / f"{name}.pdf")}
+            for name in ROSTER_URLS
+            if (args.pdf_dir / f"{name}.pdf").exists()
+        },
     }
     (args.output_dir / "rwanda-fda-pharmacy-contacts-manifest.json").write_text(
         json.dumps(manifest, indent=2) + "\n", encoding="utf-8"

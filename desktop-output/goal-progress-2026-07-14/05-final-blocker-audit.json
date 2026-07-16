@@ -1,0 +1,42 @@
+{
+  "captured_at": "2026-07-14T10:24:10Z",
+  "objective_complete": false,
+  "blocked_audit_consecutive_turns": 3,
+  "verified_implementation": {
+    "automated_tests": { "passed": 115, "failed": 0 },
+    "preview_preflight": "passed",
+    "performance_budget": "passed",
+    "lint": "passed",
+    "diff_check": "passed",
+    "private_sites_version": 8,
+    "private_deployment_routes_verified": 7,
+    "private_deployment_errors": 0,
+    "public_ordering": "disabled",
+    "search_indexing": "disabled"
+  },
+  "authoritative_external_blockers": {
+    "launch_attestations": { "pending": 15, "confirmed": 0 },
+    "duplicate_register_groups": { "pending": 51, "reviewed": 0 },
+    "physical_uat_scenarios": { "pending": 12, "passed": 0 },
+    "custom_domain_dns_records": { "required": 6, "matching": 0 },
+    "custom_domain_status": "pending",
+    "custom_domain_ssl_status": "pending_validation",
+    "wrangler_authenticated": false,
+    "cloudflare_api_credentials_present": false,
+    "supabase_privileged_credentials_present": false,
+    "operations_admin_credentials_present": false,
+    "google_maps_geocoding_credential_present": false,
+    "pharmacy_gps_approvals": { "approved": 0, "total": 769 },
+    "pharmacy_whatsapp_coverage": { "covered": 267, "total": 769 }
+  },
+  "required_external_actions": [
+    "The infrastructure owner must choose Sites or direct Worker as the sole production routing owner, apply the six DNS records, validate TLS/routes and approve the Cloudflare account evidence.",
+    "The security owner must rotate exposed credentials and provide redacted rotation approval evidence.",
+    "The backend owner must provide protected Supabase access, deploy/verify migrations and Edge Functions, and retain deployment/test evidence.",
+    "The regulatory data reviewer must decide all 51 duplicate groups using the generated source-comparison packet.",
+    "Operations must approve authoritative GPS and WhatsApp readiness for the intended production pharmacy set.",
+    "Legal, data, privacy and operations owners must provide their named signed approvals.",
+    "Named physical-device operators and the QA owner must execute and approve all 12 UAT scenarios."
+  ],
+  "safety_conclusion": "No remaining repository edit can truthfully substitute for protected-system access, authoritative source decisions, physical-device execution or accountable human approval. Public ordering and indexing must remain disabled."
+}

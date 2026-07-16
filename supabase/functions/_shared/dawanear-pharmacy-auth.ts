@@ -5,8 +5,7 @@ const DEFAULT_ORIGINS = [
   "http://127.0.0.1:3000",
   "http://localhost:3001",
   "http://127.0.0.1:3001",
-  "https://med250.rw",
-  "https://www.med250.rw",
+  "https://med250.gikundiro.com",
 ];
 
 export class HttpError extends Error {
@@ -146,8 +145,7 @@ export async function requestSourceHash(request: Request): Promise<string> {
     || request.headers.get("x-real-ip")?.trim()
     || forwarded
     || "no-ip";
-  const agent = request.headers.get("user-agent")?.slice(0, 240) || "no-agent";
-  return sha256(`${ip}:${agent}:${otpSecret()}`);
+  return sha256(`${ip}:${otpSecret()}`);
 }
 
 export function generateOtp(): string {

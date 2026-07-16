@@ -4,10 +4,10 @@ export default function BrandLogo({ className = "" }: { className?: string }) {
   return (
     <Image
       className={`official-brand-logo ${className}`.trim()}
-      src="/brand/med-plus-250-wordmark.png"
+      src="/brand/med-plus-250-wordmark-220.png"
       alt="med+250"
-      width={1100}
-      height={700}
+      width={220}
+      height={140}
       priority
       unoptimized
     />
