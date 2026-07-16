@@ -1,7 +1,7 @@
 {
   "schema_version": "1",
   "release": "med250-production",
-  "captured_at": "2026-07-16T10:19:06Z",
+  "captured_at": "2026-07-16T10:38:03Z",
   "objective_complete": false,
   "public_origin": "https://med250.gikundiro.com",
   "release_decision": "conditional_hold",
@@ -9,14 +9,25 @@
   "automated_verification": {
     "release_check": "passed",
     "automated_tests": {
-      "passed": 147,
+      "passed": 151,
       "failed": 0
     },
     "lint": "passed",
+    "dependency_security_audit": {
+      "status": "passed",
+      "known_vulnerabilities": 0,
+      "node_minimum_failure_severity": "moderate",
+      "python_exact_pin_count": 9,
+      "python_advisory_source": "OSV"
+    },
     "data_validation": "passed_with_governed_duplicate_review_warnings",
     "catalogue_quality": "passed",
     "product_image_tests": {
       "passed": 9,
+      "failed": 0
+    },
+    "python_pipeline_tests": {
+      "passed": 32,
       "failed": 0
     },
     "performance_budget": {

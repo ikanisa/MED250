@@ -43,14 +43,20 @@ maps the ASIN to `AMZ-{ASIN}`.
 
 ## Install
 
-Use a dedicated virtual environment because `rembg` installs an ONNX runtime:
+Use Python 3.11 or newer in a dedicated virtual environment because the
+security-supported `rembg` and Pillow releases require a modern runtime and
+`rembg` installs an ONNX runtime:
 
 ```sh
-python3 -m venv .venv-product-images
+python3.11 -m venv .venv-product-images
 source .venv-product-images/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -r requirements-product-images.txt
 ```
+
+The requirement files use exact versions and `npm run security:audit:python`
+checks every pin against the OSV vulnerability database. Do not relax the pins
+or install the image pipeline into the macOS system Python.
 
 The source policy and manifests are optional accelerators. Without them, the
 script searches public product listings automatically.

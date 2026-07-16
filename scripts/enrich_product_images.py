@@ -1100,20 +1100,51 @@ def normalize_image(
     transparent = remove_background(image, background_engine)
     if alpha_fraction(transparent) < 0.03:
         raise PipelineError("Background removal did not produce a transparent image")
-    from PIL import ImageFilter
-
     alpha = transparent.getchannel("A")
     strong_alpha = alpha.point(lambda value: 255 if value >= 128 else 0)
     try:
         import cv2
         import numpy as np
 
+        alpha_array = np.asarray(alpha)
         opened_alpha = cv2.morphologyEx(
             np.asarray(strong_alpha),
             cv2.MORPH_OPEN,
             np.ones((5, 5), dtype=np.uint8),
         )
-        strong_alpha = Image.fromarray(opened_alpha, mode="L")
+        row_widths = np.count_nonzero(opened_alpha, axis=1)
+        nonzero_row_widths = row_widths[row_widths > 0]
+        if (
+            nonzero_row_widths.size
+            and int(nonzero_row_widths.max()) >= width * 0.75
+            and float(nonzero_row_widths.max())
+            > float(np.median(nonzero_row_widths)) * 2.2
+        ):
+            raise PipelineError("Background removal produced a horizontal band artifact")
+        contours, _ = cv2.findContours(
+            opened_alpha,
+            cv2.RETR_EXTERNAL,
+            cv2.CHAIN_APPROX_SIMPLE,
+        )
+        contour_areas = [cv2.contourArea(contour) for contour in contours]
+        largest_contour = max(contour_areas, default=0.0)
+        support = np.zeros_like(opened_alpha)
+        kept_contours = [
+            contour
+            for contour, area in zip(contours, contour_areas)
+            if area >= width * height * 0.005
+            and area >= largest_contour * 0.08
+        ]
+        if kept_contours:
+            cv2.drawContours(support, kept_contours, -1, 255, thickness=cv2.FILLED)
+            support = cv2.dilate(
+                support,
+                np.ones((3, 3), dtype=np.uint8),
+                iterations=1,
+            )
+            cleaned_alpha = np.where(support > 0, alpha_array, 0).astype(np.uint8)
+            transparent.putalpha(Image.fromarray(cleaned_alpha))
+            strong_alpha = Image.fromarray(support)
         component_count, _, component_stats, _ = cv2.connectedComponentsWithStats(
             np.asarray(strong_alpha),
             connectivity=8,
@@ -1128,9 +1159,10 @@ def normalize_image(
             and max(significant_areas) / max(1, sum(significant_areas)) < 0.72
         ):
             raise PipelineError("Background removal produced a fragmented product cutout")
+        if len(significant_areas) >= 2 and len(image_text.split()) > 35:
+            raise PipelineError("Image is a multi-panel marketing graphic")
     except ImportError:
         pass
-    transparent.putalpha(strong_alpha.filter(ImageFilter.GaussianBlur(radius=0.7)))
     bbox = strong_alpha.getbbox()
     if not bbox:
         raise PipelineError("Background removal erased the entire image")
@@ -1143,6 +1175,8 @@ def normalize_image(
         raise PipelineError("Image is a text-heavy marketing graphic, not a clean product view")
     if cropped.width * cropped.height < width * height * 0.02:
         raise PipelineError("Detected product occupies too little of the image")
+    if max(cropped.size) < 700:
+        raise PipelineError("Detected product has insufficient effective resolution")
 
     canvas_size, max_object = 1400, 1220
     cropped.thumbnail((max_object, max_object), Image.Resampling.LANCZOS)
@@ -1151,6 +1185,14 @@ def normalize_image(
         cropped,
         ((canvas_size - cropped.width) // 2, (canvas_size - cropped.height) // 2),
     )
+    try:
+        import numpy as np
+
+        canvas_array = np.asarray(canvas).copy()
+        canvas_array[canvas_array[:, :, 3] == 0, :3] = 255
+        canvas = Image.fromarray(canvas_array)
+    except ImportError:
+        pass
     output = io.BytesIO()
     canvas.save(output, format="WEBP", lossless=True, quality=92, method=6)
     content = output.getvalue()

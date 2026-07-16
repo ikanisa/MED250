@@ -95,13 +95,15 @@ Only `prescription_status` and `is_orderable` on matched `dawanear_products` row
 npm run release:preflight
 npm run data:validate
 npm run data:quality
+npm run security:audit
+npm run python:test
 npm run lint
 npm test
 npm run performance:budget
 npm run cloudflare:check
 ```
 
-`npm run release:check` runs the complete preview-safe gate in one command. Before any protected production approval or redeployment, `npm run release:preflight:live` additionally requires live marketplace mode and an explicit HTTPS site origin. It never prints key values. The final `npm run release:check:live` command then requires the deployed backend contract and strict operational-health snapshot to pass before lint, data validation, tests, budgets, and Cloudflare packaging can proceed. Keep routine local development in preview mode until the GPS, regulated-operation, authorised test-identity, and production-domain gates are complete.
+`npm run release:check` runs the complete preview-safe gate in one command. Its dependency gate audits the complete Node tree at moderate severity or higher and checks every exact Python requirement pin against OSV. The image pipeline requires Python 3.11+ because supported Pillow and rembg releases no longer support the macOS system Python. Before any protected production approval or redeployment, `npm run release:preflight:live` additionally requires live marketplace mode and an explicit HTTPS site origin. It never prints key values. The final `npm run release:check:live` command then requires the deployed backend contract and strict operational-health snapshot to pass before the dependency audit, lint, data validation, tests, budgets, and Cloudflare packaging can proceed. Keep routine local development in preview mode until the GPS, regulated-operation, authorised test-identity, and production-domain gates are complete.
 
 The live preflight also requires `NEXT_PUBLIC_MED250_OBSERVABILITY=cloud`, a public Turnstile site key, and fifteen CI-only launch attestations to be set to `confirmed`: GPS readiness, WhatsApp readiness, pharmacy operational approval, regulatory approval, source-data reuse approval, duplicate-register review, credential rotation, security-hardening migration deployment, revised Edge Function deployment, Supabase Turnstile server verification, approved anonymous-auth rate limits, prescription-retention approval, Cloudflare account verification, domain/DNS verification, and physical-device UAT. These values are deliberate release locks, not substitutes for evidence. Keep them unset until the corresponding signed approval, deployment receipt, or controlled test record exists.
 

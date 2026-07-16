@@ -113,9 +113,9 @@
         {
           "type": "test_record",
           "reference": "docs/launch/evidence/security-hardening-test-2026-07-16.json",
-          "sha256": "7ddce5509985207854b95dfb8ddfabfbdd15916dce428bff9ce812e84280398f",
-          "recorded_at": "2026-07-16T10:09:12Z",
-          "summary": "Production backend contract verification with every privacy, catalogue, pricing, audit, and privilege invariant passing."
+          "sha256": "83d91a631b195d8facca84218582d1ae50a93722d740c20276a6e49bd083c8bc",
+          "recorded_at": "2026-07-16T10:38:03Z",
+          "summary": "Production backend contract verification, 151 Node tests, 32 Python tests, and the complete Node and pinned Python dependency audits passed."
         }
       ],
       "approved_by": null,

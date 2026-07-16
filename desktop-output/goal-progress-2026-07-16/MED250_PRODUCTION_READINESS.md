@@ -29,11 +29,12 @@ The strict production release cannot yet be honestly marked complete. Its remain
 | Check | Result |
 | --- | --- |
 | Integrated `npm run release:check` | Passed |
-| Automated tests | 147 passed, 0 failed |
+| Automated tests | 151 passed, 0 failed |
+| Complete Node and pinned Python dependency audits | Zero known vulnerabilities; 9 Python pins checked against OSV |
 | Lint | Passed |
 | Catalogue import validation | Passed |
 | Catalogue quality | Passed |
-| Product-image pipeline tests | 9 passed, 0 failed |
+| Python pharmacy, source-enrichment, and image-pipeline tests | 32 passed, 0 failed |
 | Performance budgets | Passed |
 | Wrangler strict dry-run | Passed |
 | Production Cloudflare build/dry-run | Passed |

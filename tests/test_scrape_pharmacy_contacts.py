@@ -126,7 +126,8 @@ class PharmacyScraperTests(unittest.TestCase):
                 "google_maps_url": "https://www.google.com/maps/place/DUPHAR",
                 "maps_url_source": "google_maps_browser",
                 "match_confidence": "1.000",
-                "matched_name": "DUPHAR",
+                "matched_name": "DUPHAR Pharmacy",
+                "matched_address": "Gasabo, Rwanda",
             }
         )
         current = MODULE.blank_result(row, "unmatched")
@@ -178,6 +179,10 @@ class PharmacyScraperTests(unittest.TestCase):
                     "phone_source": "google_maps_browser",
                     "match_status": "matched",
                     "google_maps_url": "https://www.google.com/maps/place/Test",
+                    "name": "TEST PHARMACY",
+                    "district": "GASABO",
+                    "matched_name": "Test Pharmacy",
+                    "matched_address": "Gasabo, Rwanda",
                 }
             )
         )
@@ -205,6 +210,74 @@ class PharmacyScraperTests(unittest.TestCase):
         self.assertEqual(score, 1.0)
         self.assertTrue(evidence["exact_name"])
         self.assertTrue(evidence["district"])
+
+    def test_unrelated_business_with_one_shared_name_token_is_not_pharmacy_evidence(self):
+        score, evidence = MODULE.candidate_score(
+            "STREAM PHARMACY LTD",
+            "GASABO",
+            "KINYINYA",
+            "KAGUGU",
+            "Kigali streams",
+            "Web hosting company, Kigali",
+        )
+        self.assertGreaterEqual(score, 0.80)
+        self.assertFalse(
+            MODULE.has_pharmacy_identity_evidence(
+                "STREAM PHARMACY LTD",
+                "Kigali streams",
+                "Web hosting company, Kigali",
+                evidence,
+            )
+        )
+
+    def test_exact_brand_and_precise_locality_can_prove_pharmacy_identity(self):
+        _, evidence = MODULE.candidate_score(
+            "KASHA PHARMACY LTD",
+            "GASABO",
+            "KIMIRONKO",
+            "BIBARE",
+            "Kasha",
+            "Bibare, Kimironko, Gasabo, Rwanda",
+        )
+        self.assertTrue(
+            MODULE.has_pharmacy_identity_evidence(
+                "KASHA PHARMACY LTD",
+                "Kasha",
+                "Bibare, Kimironko, Gasabo, Rwanda",
+                evidence,
+            )
+        )
+
+    def test_refresh_drops_prior_matched_place_without_pharmacy_identity(self):
+        row = {key: "" for key in MODULE.SOURCE_COLUMNS}
+        row.update(
+            {
+                "source_serial": "2",
+                "name": "STREAM PHARMACY LTD",
+                "district": "GASABO",
+                "sector": "KINYINYA",
+                "cell": "KAGUGU",
+            }
+        )
+        previous = MODULE.blank_result(row, "matched")
+        previous.update(
+            {
+                "phone_number": "+250788111111",
+                "google_maps_phone_numbers": "+250788111111",
+                "phone_source": "google_maps_browser",
+                "google_maps_url": "https://www.google.com/maps/place/Kigali+streams",
+                "matched_name": "Kigali streams",
+                "matched_address": "Web hosting company, Kigali",
+                "match_confidence": "0.855",
+            }
+        )
+        current = MODULE.blank_result(row, "unmatched")
+        current["query_used"] = "https://www.google.com/maps/search/Stream+Pharmacy"
+        merged = MODULE.merge_observations(previous, current)
+        self.assertEqual(merged["phone_number"], "")
+        self.assertNotIn("/maps/place/", merged["google_maps_url"])
+        self.assertEqual(merged["maps_url_source"], "generated_google_maps_search")
+        self.assertEqual(merged["match_status"], "unmatched")
 
     def test_local_checkpoint_is_loaded_but_not_browser_complete(self):
         row = {key: "" for key in MODULE.SOURCE_COLUMNS}

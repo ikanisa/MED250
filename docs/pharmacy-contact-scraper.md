@@ -8,7 +8,7 @@ It does not use a paid API or require an API key. It combines:
 2. High-confidence matching against public contact-evidence CSVs.
 3. Optional Selenium/Chrome browsing of public Google Maps listings for resolved Maps page URLs and publicly displayed business phones.
 
-The browser workflow is slower and less stable than an official API. The script compensates with throttling, redundant page selectors, a persistent SQLite checkpoint, browser restarts, exact name/locality scoring, and a separate audit CSV. If Google presents a verification page, the script stops safely and can resume later.
+The browser workflow is slower and less stable than an official API. The script compensates with throttling, redundant page selectors, a persistent SQLite checkpoint, browser restarts, exact name/locality scoring, pharmacy-identity checks, and a separate audit CSV. A shared brand token is not enough: a Maps result must explicitly identify a pharmacy/chemist/drugstore, or have an exact normalized brand plus precise district and sector/cell evidence. If Google presents a verification page, the script stops safely and can resume later.
 
 ## Install free dependencies
 
@@ -19,6 +19,9 @@ python3 -m pip install -r requirements-pharmacy-scraper.txt
 ```
 
 Modern Selenium finds the compatible Chrome driver automatically. No API key is used.
+The dependencies are exactly pinned for reproducibility.
+`npm run security:audit:python` checks both scraper and image-pipeline pins
+against OSV.
 
 ## Validate the 725 PDF rows only
 
@@ -79,3 +82,5 @@ python3 scripts/scrape_pharmacy_contacts.py \
 - SQLite checkpoint: completed rows, enabling safe restart without redoing them.
 
 A high-confidence resolved listing/page URL replaces the generated search URL when Google exposes one. Ambiguous and unmatched rows retain a pharmacy-specific Google Maps search URL, so all 725 rows have a useful Maps link without falsely attaching another pharmacy's listing. Phones remain blank where no sufficiently reliable public phone can be found; the audit file makes those gaps explicit.
+
+These outputs are evidence candidates, not production approval. A public phone or Maps phone must never be inferred to be an authorized pharmacy WhatsApp identity. Production contact promotion still requires the governed single-record review workflow, exact source evidence, and an accountable reviewer.

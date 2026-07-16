@@ -108,6 +108,14 @@ NAME_STOPWORDS = {
     "CO",
     "THE",
 }
+PHARMACY_IDENTITY_TERMS = {
+    "APOTHECARY",
+    "CHEMIST",
+    "DRUG",
+    "DRUGSTORE",
+    "PHARMACIE",
+    "PHARMACY",
+}
 DEFAULT_CONTACT_SOURCES = [
     REPO_ROOT / "data/imports/rwanda-fda-pharmacy-contacts-jul-sep-2026.csv",
     REPO_ROOT / "data/imports/rwanda-fda-pharmacy-contacts-exact-review.csv",
@@ -186,6 +194,22 @@ def candidate_score(
         "sector": sector,
         "cell": cell,
     }
+
+
+def has_pharmacy_identity_evidence(
+    source_name: str,
+    candidate_name: str,
+    candidate_context: str,
+    evidence: dict[str, bool],
+) -> bool:
+    candidate_tokens = set(normalized_text(f"{candidate_name} {candidate_context}").split())
+    explicit_pharmacy_identity = bool(candidate_tokens & PHARMACY_IDENTITY_TERMS)
+    exact_name_with_precise_locality = (
+        evidence.get("exact_name", False)
+        and evidence.get("district", False)
+        and (evidence.get("sector", False) or evidence.get("cell", False))
+    )
+    return explicit_pharmacy_identity or exact_name_with_precise_locality
 
 
 def maps_search_url(row: dict[str, str]) -> str:
@@ -667,6 +691,12 @@ class GoogleMapsBrowser:
                 if (
                     direct_score >= 0.97
                     and direct_evidence["exact_name"]
+                    and has_pharmacy_identity_evidence(
+                        row["name"],
+                        details["name"],
+                        details["address"],
+                        direct_evidence,
+                    )
                     and extract_rwanda_phones(details.get("phone"))
                 ):
                     break
@@ -744,7 +774,13 @@ class GoogleMapsBrowser:
         phone = unique_join(extract_rwanda_phones(details.get("phone")))
         url = clean_maps_url(details.get("href"))
         exact_local = evidence["exact_name"] and evidence["district"]
-        accepted = score >= 0.84 and (margin >= 0.08 or exact_local)
+        pharmacy_identity = has_pharmacy_identity_evidence(
+            row["name"],
+            name,
+            address,
+            evidence,
+        )
+        accepted = score >= 0.84 and (margin >= 0.08 or exact_local) and pharmacy_identity
         status = "matched" if accepted else ("needs_review" if score >= 0.58 else "unmatched")
         return {
             "status": status,
@@ -852,8 +888,22 @@ def merge_observations(previous: dict[str, Any] | None, current: dict[str, Any])
     current_url = clean_maps_url(merged.get("google_maps_url"))
     previous_is_place = "/maps/place/" in previous_url
     current_is_place = "/maps/place/" in current_url
+    _, previous_evidence = candidate_score(
+        merged.get("name", ""),
+        merged.get("district", ""),
+        merged.get("sector", ""),
+        merged.get("cell", ""),
+        previous.get("matched_name", ""),
+        previous.get("matched_address", ""),
+    )
     previous_is_strong_match = (
         previous_is_place and str(previous.get("match_status") or "").startswith("matched")
+        and has_pharmacy_identity_evidence(
+            merged.get("name", ""),
+            previous.get("matched_name", ""),
+            previous.get("matched_address", ""),
+            previous_evidence,
+        )
     )
     previous_google = (
         extract_rwanda_phones(
@@ -885,7 +935,7 @@ def merge_observations(previous: dict[str, Any] | None, current: dict[str, Any])
         current_score = float(merged.get("match_confidence") or 0)
     except (TypeError, ValueError):
         current_score = 0.0
-    if previous_is_place and (not current_is_place or previous_score > current_score):
+    if previous_is_strong_match and (not current_is_place or previous_score > current_score):
         for field in (
             "google_maps_url",
             "maps_url_source",
@@ -914,9 +964,23 @@ def has_trusted_phone(result: dict[str, Any] | None) -> bool:
     if result.get("phone_source") in {"public_evidence_csv", "public_evidence_csv+google_maps_browser"}:
         return bool(extract_rwanda_phones(result.get("phone_number")))
     maps_url = clean_maps_url(result.get("google_maps_url"))
+    _, evidence = candidate_score(
+        result.get("name", ""),
+        result.get("district", ""),
+        result.get("sector", ""),
+        result.get("cell", ""),
+        result.get("matched_name", ""),
+        result.get("matched_address", ""),
+    )
     return (
         str(result.get("match_status") or "").startswith("matched")
         and "/maps/place/" in maps_url
+        and has_pharmacy_identity_evidence(
+            result.get("name", ""),
+            result.get("matched_name", ""),
+            result.get("matched_address", ""),
+            evidence,
+        )
         and bool(
             extract_rwanda_phones(
                 result.get("google_maps_phone_numbers") or result.get("phone_number")

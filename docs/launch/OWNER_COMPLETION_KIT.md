@@ -201,6 +201,7 @@ npm run data:duplicates:verify -- --strict
 npm run uat:verify:live
 npm run backend:verify
 npm run ops:health:strict
+npm run security:audit
 npm run release:check:live
 npm run deployment:verify -- --url https://med250.gikundiro.com --mode live
 ```
