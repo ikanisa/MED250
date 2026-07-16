@@ -1,7 +1,7 @@
 {
   "schema_version": "1",
   "release": "med250-production",
-  "captured_at": "2026-07-16T11:36:10Z",
+  "captured_at": "2026-07-16T11:42:36Z",
   "objective_complete": false,
   "public_origin": "https://med250.gikundiro.com",
   "release_decision": "conditional_hold",
@@ -85,7 +85,23 @@
     },
     "database_advisors": {
       "med_performance_warnings": 0,
-      "remaining_security_notes": "Documented intentional controls and one plan-limited HIBP setting."
+      "shared_project_security_total": 95,
+      "shared_project_security_warnings": 74,
+      "shared_project_performance_total": 109,
+      "med_security_warnings": 37,
+      "med_security_info": 10,
+      "remaining_security_notes": "Documented intentional GraphQL, authenticated RPC, anonymous-sign-in, and deny-by-default controls; password breach screening remains disabled in the current project configuration."
+    },
+    "authentication_configuration": {
+      "turnstile_enabled": true,
+      "turnstile_provider": "turnstile",
+      "anonymous_users_enabled": true,
+      "anonymous_user_rate_limit": 30,
+      "jwt_exp_seconds": 3600,
+      "refresh_token_rotation_enabled": true,
+      "missing_token_test": "passed_without_user_count_change",
+      "invalid_token_test": "passed_without_user_count_change",
+      "valid_widget_test": "pending_owner_controlled_execution"
     }
   },
   "operations_snapshot": {

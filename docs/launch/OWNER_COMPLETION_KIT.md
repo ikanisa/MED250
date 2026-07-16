@@ -117,6 +117,11 @@ Credential work:
 
 Turnstile positive-path test:
 
+Current production configuration already reports Turnstile enabled and the
+automated verifier proves that missing and invalid tokens return a CAPTCHA
+rejection without changing the aggregate Auth user count. Only the real-widget
+positive path below remains:
+
 1. Use the production hostname in a controlled browser.
 2. Complete the real production widget.
 3. Put the short-lived token only in the operator process environment.
@@ -129,6 +134,11 @@ Turnstile positive-path test:
 7. Retain the redacted command result without the token or identity.
 
 Rate-limit test:
+
+The current project reports anonymous identities enabled, an anonymous-user
+rate-limit value of 30, a one-hour JWT lifetime, and refresh-token rotation
+enabled. These are project-wide settings in a shared Supabase project and must
+be approved without changing unrelated DineIn or BioPay behavior.
 
 1. Agree a controlled test window.
 2. Verify intended anonymous customer access.
@@ -143,7 +153,7 @@ Gates:
 - `MED250_GATE_SECURITY_HARDENING_DEPLOYED`
 - `MED250_GATE_EDGE_FUNCTIONS_DEPLOYED`
 
-The required deployment and test artifacts already exist. The backend owner must inspect them, verify the current live contract remains `2026-07-16.10`, verify the independent product-image approval trigger, DDL governance guard, six function versions, and protected probes, and add their name, role, and timezone-qualified approval to the registry. If privileged credentials have since changed, rerun:
+The required deployment and test artifacts already exist. The backend owner must inspect them, verify the current live contract remains `2026-07-16.10`, verify database SSL enforcement, the independent product-image approval trigger, DDL governance guard, six function versions, protected probes, and the scoped database-advisor record, and add their name, role, and timezone-qualified approval to the registry. If privileged credentials have since changed, rerun:
 
 ```sh
 npm run backend:verify

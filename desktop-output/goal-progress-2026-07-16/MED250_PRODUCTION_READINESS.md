@@ -58,6 +58,8 @@ Current transfer measurements are 204,821 bytes of JavaScript, 26,637 bytes of C
 
 The operations counts do not replace review-ledger approval. Coordinates and contacts must remain source-backed and explicitly reviewed.
 
+The refreshed Supabase audit reports database SSL enforcement active, all six reviewed MED+250 Edge Functions active at their expected versions, zero MED+250 performance warnings, and no unexpected backend-contract access. Turnstile rejects missing and invalid tokens without changing the aggregate Auth-user count. The valid-widget test and approval of the project-wide anonymous-user limit remain controlled security-owner tasks.
+
 ## Strict release gaps
 
 `npm run launch:evidence:verify:live` correctly reports 15 pending gates. Some already have complete technical evidence but still require accountable approval.

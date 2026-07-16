@@ -22,6 +22,8 @@ This runbook closes the 15 fail-closed production gates without weakening them o
 - Wrangler is authenticated to the intended deployment account, but the current OAuth session has broad account-wide write scopes. The infrastructure owner must replace it with a narrowly scoped deploy credential before confirming least privilege.
 - Privileged Supabase verification is available through the protected connector and the live backend contract passes.
 - Supabase server-side Turnstile validation is enabled with the production widget. Missing and invalid tokens are rejected without creating users; one controlled valid-token browser test remains before the security owner can sign the gate.
+- The shared Supabase project currently reports an anonymous-user rate-limit value of 30, a one-hour JWT lifetime, and refresh-token rotation enabled. These project-wide settings still require a controlled impact test and security-owner approval.
+- The scoped advisor audit reports zero MED+250 performance warnings. MED+250 security warnings are the documented catalogue GraphQL surface, exact authenticated RPC allowlist, and anonymous customer-sign-in requirement; the aggregate contract rejects unexpected access drift.
 - All 51 duplicate-register groups remain pending named human review.
 
 ## Gate closure matrix

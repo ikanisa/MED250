@@ -113,9 +113,9 @@
         {
           "type": "test_record",
           "reference": "docs/launch/evidence/security-hardening-test-2026-07-16.json",
-          "sha256": "47420577dc43daab0a84dcb90318e5e7290af264156de71b3b0b7be87e1edf09",
-          "recorded_at": "2026-07-16T11:36:10Z",
-          "summary": "Production backend contract verification, protected DDL rejection, 164 Node tests, 43 Python tests, and the complete Node and pinned Python dependency audits passed."
+          "sha256": "115762636f9314a65bee86b019f4b043f6ee475e122da65da1c580578ac1f394",
+          "recorded_at": "2026-07-16T11:42:36Z",
+          "summary": "Production backend contract, SSL, scoped database-advisor and authentication configuration verification, protected DDL rejection, 164 Node tests, 43 Python tests, and dependency audits passed."
         }
       ],
       "approved_by": null,
@@ -132,16 +132,16 @@
         {
           "type": "deployment_receipt",
           "reference": "docs/launch/evidence/edge-functions-deployment-2026-07-16.json",
-          "sha256": "5756a365a7440197e6fcb210a866fd125686ea2224ceb496a483114127e54c7c",
-          "recorded_at": "2026-07-16T10:09:12Z",
+          "sha256": "00a5da95fb71d9bffd40f2b0f24b48d8f36c101b2a7aa6227b112574afe3be78",
+          "recorded_at": "2026-07-16T11:42:36Z",
           "summary": "Redacted receipt for the six reviewed MED+250 production Edge Function deployments."
         },
         {
           "type": "test_record",
           "reference": "docs/launch/evidence/edge-functions-test-2026-07-16.json",
-          "sha256": "83934c99894fbc84052147f8c06aad4ff996bfbf357cd5b750336e7a5727f95c",
-          "recorded_at": "2026-07-16T10:09:12Z",
-          "summary": "Post-deployment protected-access probes and scheduled cleanup execution passed for all reviewed function surfaces."
+          "sha256": "a66d06d87049c0d12cefc7a37124ac72a2614bfcb6120133a4cbf1457291ff58",
+          "recorded_at": "2026-07-16T11:42:36Z",
+          "summary": "Fresh post-deployment protected-access probes and scheduled cleanup execution passed for all six reviewed function surfaces."
         }
       ],
       "approved_by": null,
