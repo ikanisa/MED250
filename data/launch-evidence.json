@@ -210,16 +210,16 @@
         {
           "type": "domain_verification",
           "reference": "docs/launch/evidence/domain-verification-2026-07-16.json",
-          "sha256": "4e2b2c80bb2f815007946f0d65b9e5c55c859e34a478c536ac9aeaa6a8a137bf",
-          "recorded_at": "2026-07-16T12:19:05Z",
-          "summary": "Fresh production custom-domain DNS, HTTPS, security-header, Worker route, and production-build verification passed."
+          "sha256": "1710f30758a4c66c53c1dc7066fb3a9bceee333c234e52c76a5cf42cd0af6ff4",
+          "recorded_at": "2026-07-16T12:43:07Z",
+          "summary": "Post-deployment custom-domain DNS, HTTPS, Worker route, repeated availability sampling, and browser verification passed for the fail-soft catalogue release."
         },
         {
           "type": "test_record",
           "reference": "docs/launch/evidence/domain-deployment-test-2026-07-16.json",
-          "sha256": "10bc08a6bc4434bfdada6bcf1bccea1a12326ed9d170abbfdbb8ec693848427c",
-          "recorded_at": "2026-07-16T12:19:05Z",
-          "summary": "The fresh seven-route live test and strict production Cloudflare dry run passed with current assets and index controls."
+          "sha256": "97c8f62071a8196e419fda3b92e96d3bf305289748136564818658fff39756c7",
+          "recorded_at": "2026-07-16T12:43:07Z",
+          "summary": "The deployed production version passed the seven-route verifier, ninety repeated HTTP checks, and desktop and mobile catalogue browser checks."
         }
       ],
       "approved_by": null,

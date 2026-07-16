@@ -5,8 +5,8 @@
   "evidence_type": "test_record",
   "status": "complete",
   "title": "Live MED+250 production deployment route test",
-  "summary": "Fresh production deployment verification passed the required route status, same-origin redirect, marketplace identity, security-header, robots, and source-backed sitemap checks.",
-  "recorded_at": "2026-07-16T12:19:05Z",
+  "summary": "The fail-soft catalogue release was deployed to the production custom domain and passed required-route verification, repeated HTTP sampling, and desktop and mobile browser checks.",
+  "recorded_at": "2026-07-16T12:43:07Z",
   "recorded_by": "Codex automated verifier",
   "recorded_role": "Release verification agent",
   "redactions_confirmed": true,
@@ -24,16 +24,26 @@
     {
       "name": "Current release assets",
       "status": "passed",
-      "detail": "The public page referenced the same production asset hashes emitted by the current local production build."
+      "detail": "Cloudflare deployed production version 431f38e3-4b6c-47cd-94a8-2d1adc0442a5 from the checked production build."
     },
     {
       "name": "Fresh live deployment verification",
       "status": "passed",
       "detail": "The seven-route verifier passed against the live custom origin, and the explicit production build and strict Cloudflare dry run completed without errors."
+    },
+    {
+      "name": "Repeated route availability",
+      "status": "passed",
+      "detail": "Ten requests to each of nine public catalogue, category, product, robots, and sitemap routes completed successfully, for ninety HTTP 200 responses."
+    },
+    {
+      "name": "Desktop and mobile browser behavior",
+      "status": "passed",
+      "detail": "Desktop Makeup filtering rendered populated cards without blank taxonomy or placeholder price labels, while mobile navigation exposed only the five populated catalogue links; neither pass recorded browser or server errors."
     }
   ],
   "executed_by": "Codex automated verifier",
   "executor_role": "Release verification agent",
-  "started_at": "2026-07-16T12:17:00Z",
-  "completed_at": "2026-07-16T12:19:05Z"
+  "started_at": "2026-07-16T12:38:00Z",
+  "completed_at": "2026-07-16T12:43:07Z"
 }
