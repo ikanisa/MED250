@@ -1,0 +1,64 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_PHYSICAL_UAT_PASSED",
+  "evidence_type": "signed_approval",
+  "status": "pending",
+  "title": "MED+250 controlled physical-device UAT approval",
+  "summary": "Owner-ready QA approval for all 12 production-device scenarios, redacted evidence, safe test identities and confirmation that no unintended pharmacy was contacted. The UAT ledger and paired test record remain pending.",
+  "recorded_at": "2026-07-16T14:08:21+02:00",
+  "recorded_by": "MED+250 QA readiness review",
+  "recorded_role": "Release evidence preparer",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Strict UAT ledger passes",
+      "status": "blocked",
+      "detail": "The governed 12-scenario ledger remains pending and the strict UAT verifier cannot pass until every scenario has evidence and named execution and approval."
+    },
+    {
+      "name": "Completed paired test record",
+      "status": "blocked",
+      "detail": "The paired physical-device test artifact remains pending and therefore cannot yet support accountable QA approval."
+    },
+    {
+      "name": "Approved opaque test identities",
+      "status": "pending",
+      "detail": "The QA owner must confirm the customer, pharmacy and unrelated-pharmacy labels refer only to pre-authorised controlled test identities."
+    },
+    {
+      "name": "No unintended pharmacy contacted",
+      "status": "pending",
+      "detail": "The QA owner must explicitly confirm that no real request, OTP, prescription or message reached a pharmacy outside the approved test scope."
+    },
+    {
+      "name": "All lifecycle and privacy boundaries accepted",
+      "status": "pending",
+      "detail": "The final approval must cover location, dispatch, OTP, offer, substitute, selection, handoff, cancellation, expiry, prescription and privacy-safe logging behavior."
+    },
+    {
+      "name": "Residual test data removed",
+      "status": "pending",
+      "detail": "The QA owner must confirm disposable Auth sessions, identities, requests, notifications, prescriptions and any other controlled test data were removed or expired as designed."
+    },
+    {
+      "name": "Named QA-owner signature",
+      "status": "pending",
+      "detail": "The accountable QA owner has not yet recorded the final decision, conditions, named approver, role and timezone-qualified approval timestamp."
+    }
+  ],
+  "uat_ledger_reference": "data/physical-device-uat.json",
+  "uat_ledger_sha256": "489330c2db1ec7400a459bacf216ac7b0bb719893ad8deaee588ed9d69d7ae11",
+  "test_reference": "docs/launch/evidence/physical-device-uat-test-pending-2026-07-16.json",
+  "decision": null,
+  "approved_by": null,
+  "approved_role": null,
+  "approved_at": null,
+  "completion_instructions": [
+    "Complete the governed UAT ledger and paired test artifact and make npm run uat:verify:live pass.",
+    "Review every redacted scenario result and confirm the approved identity scope, no unintended contact, lifecycle behavior, privacy boundaries and cleanup.",
+    "Update the ledger and test digests if either file changed.",
+    "Set every check to passed, set decision to approved, add the named approver, role and timezone-qualified timestamp, and set status to complete.",
+    "Validate the completed approval strictly and add it to the launch registry only with its exact SHA-256 digest."
+  ]
+}

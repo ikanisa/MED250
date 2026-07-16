@@ -92,6 +92,7 @@ The review ledger must cover every active source and include exact SHA-256 sourc
 Start from the prepared redacted ledger:
 
 - `docs/launch/evidence/data-reuse-review-ledger-pending-2026-07-16.json`
+- `docs/launch/evidence/data-reuse-approval-pending-2026-07-16.json`
 
 It already inventories the nine active source classes, binds the current derived data and captured external snapshots to SHA-256 digests, records Amazon as taxonomy/product-reference research only, and confirms that Amazon prices are absent. Resolve its three explicit provenance blockers before signing: retain the missing raw Rwanda FDA register snapshots, replace the duty-roster source-digest placeholder with exact PDF digests, and place the local Amazon research snapshot under an approved durable retention arrangement. Then record one reuse decision per source class and follow the artifact's completion instructions.
 
@@ -213,6 +214,8 @@ The current redacted snapshot is
 `docs/launch/evidence/cloudflare-account-verification-pending-2026-07-16.json`.
 It confirms one intended account and the production deployment are visible,
 but records that the interactive OAuth session still has 29 broad permissions.
+The paired infrastructure signature is
+`docs/launch/evidence/cloudflare-account-approval-pending-2026-07-16.json`.
 
 1. Create and install the least-privilege Cloudflare deployment token described above.
 2. Confirm the intended account, production Worker, custom-domain route, protected GitHub environment, and secret/variable ownership.
@@ -233,6 +236,12 @@ npm run deployment:verify -- --url https://med250.gikundiro.com --mode live
 Gate:
 
 - `MED250_GATE_PHYSICAL_UAT_PASSED`
+
+Start from:
+
+- `data/physical-device-uat.json`
+- `docs/launch/evidence/physical-device-uat-test-pending-2026-07-16.json`
+- `docs/launch/evidence/physical-device-uat-approval-pending-2026-07-16.json`
 
 Use only approved, opaque customer, pharmacy, and unrelated-pharmacy test identities. Execute all 12 scenarios in `data/physical-device-uat.json`. Do not record real phone numbers, OTPs, order IDs, prescription contents, or exact coordinates. Do not contact an unintended pharmacy.
 

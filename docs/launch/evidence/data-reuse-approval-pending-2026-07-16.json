@@ -1,0 +1,64 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_DATA_REUSE_APPROVED",
+  "evidence_type": "signed_approval",
+  "status": "pending",
+  "title": "MED+250 source-data publication and reuse approval",
+  "summary": "Owner-ready signed decision for publication and operational reuse of every active medicine, consumer-product, pharmacy, contact, geospatial, image and central indicative-price source. The paired source ledger remains blocked and no reuse approval is inferred.",
+  "recorded_at": "2026-07-16T14:08:21+02:00",
+  "recorded_by": "MED+250 data-governance readiness review",
+  "recorded_role": "Release evidence preparer",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Complete source review ledger",
+      "status": "blocked",
+      "detail": "The paired nine-record source ledger still contains pending and blocked decisions and therefore cannot support a signed publication or operational-reuse approval."
+    },
+    {
+      "name": "Immutable raw source retention",
+      "status": "blocked",
+      "detail": "Raw Rwanda FDA snapshots are incomplete, a duty-roster source digest remains unresolved, and the Amazon research snapshot lacks an approved durable retention arrangement."
+    },
+    {
+      "name": "Publication and operational reuse permission",
+      "status": "pending",
+      "detail": "The data owner has not yet recorded a lawful publication and operational-reuse basis for every active source class, derived dataset and displayed field."
+    },
+    {
+      "name": "Amazon scope and price exclusion",
+      "status": "passed",
+      "detail": "The paired ledger records Amazon only as taxonomy and product-reference research, confirms Amazon prices are absent, and does not treat Amazon availability as Rwanda market authorisation."
+    },
+    {
+      "name": "Attribution, refresh and withdrawal conditions",
+      "status": "pending",
+      "detail": "Required attribution, source versioning, refresh cadence, correction, removal, withdrawal and regulator or rights-holder response procedures have not yet been approved."
+    },
+    {
+      "name": "Product image and content rights",
+      "status": "pending",
+      "detail": "The data owner must confirm that only rights-verified product images and lawfully reusable product content can become public and that unverified material remains hidden."
+    },
+    {
+      "name": "Named data-owner signature",
+      "status": "pending",
+      "detail": "The accountable data owner has not yet recorded the final scope, exclusions, conditions, decision, named approver, role and timezone-qualified approval timestamp."
+    }
+  ],
+  "review_ledger_reference": "docs/launch/evidence/data-reuse-review-ledger-pending-2026-07-16.json",
+  "review_ledger_sha256": "9c4d76e6d849ed61b4c209d5f9396362f926d08b513be8ecffcff6439df04253",
+  "decision": null,
+  "approved_by": null,
+  "approved_role": null,
+  "approved_at": null,
+  "completion_instructions": [
+    "Resolve every pending and blocked source-class record in the paired review ledger and retain all required raw source snapshots and exact digests.",
+    "Record the publication and operational-reuse basis, attribution, retention, refresh, correction, withdrawal and takedown conditions for every approved source.",
+    "Remove or replace every source or derived field that is not approved for the intended public or operational use.",
+    "Confirm the completed review-ledger digest and update this artifact if the ledger changed.",
+    "Set every check to passed, set decision to approved, add the named approver, role and timezone-qualified timestamp, and set status to complete.",
+    "Validate both completed artifacts strictly and add them to the launch registry only with their exact SHA-256 digests."
+  ]
+}
