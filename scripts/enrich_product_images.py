@@ -48,6 +48,7 @@ SEARCH_USER_AGENT = (
     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0 Safari/537.36"
 )
 IMAGE_BUCKET = "product-images"
+EXPECTED_BACKEND_CONTRACT_VERSION = "2026-07-16.10"
 SOURCE_KINDS = {
     "licensed_feed",
     "manufacturer",
@@ -1574,8 +1575,40 @@ class SupabasePublisher:
         self.base_url = url.rstrip("/")
         self.client = httpx.Client(timeout=timeout, follow_redirects=True)
         self.headers = {"apikey": secret_key, "Authorization": f"Bearer {secret_key}"}
+        self.assert_publication_backend_safe()
+
+    def assert_publication_backend_safe(self) -> None:
+        response = self.client.post(
+            f"{self.base_url}/rest/v1/rpc/dawanear_backend_contract",
+            headers={**self.headers, "Content-Type": "application/json"},
+            json={},
+        )
+        if response.status_code >= 300:
+            raise PipelineError(
+                "Product-image publication refused because the backend contract "
+                f"could not be verified ({response.status_code})"
+            )
+        contract = response.json()
+        images = contract.get("product_images", {}) if isinstance(contract, dict) else {}
+        safe = (
+            isinstance(contract, dict)
+            and contract.get("contract_version") == EXPECTED_BACKEND_CONTRACT_VERSION
+            and images.get("rights_verified_required") is True
+            and images.get("approved_rights_constraint_validated") is True
+            and images.get("public_policy_requires_verified") is True
+            and images.get("publication_guard_trigger_exists") is True
+            and images.get("ddl_guard_event_trigger_exists") is True
+            and images.get("unsafe_image_count") == 0
+            and images.get("partial_product_count") == 0
+        )
+        if not safe:
+            raise PipelineError(
+                "Product-image publication refused because the live verified-rights "
+                "constraint, RLS policy, runtime trigger, DDL guard, or gallery state is unsafe"
+            )
 
     def upload(self, product_id: str, position: int, image: ProcessedImage) -> None:
+        self.assert_publication_backend_safe()
         safe_id = re.sub(r"[^A-Za-z0-9_-]+", "-", product_id)[:100]
         path = f"v1/{safe_id}/{image.content_sha256}-{position}.{image.extension}"
         endpoint = (
@@ -1605,6 +1638,7 @@ class SupabasePublisher:
         )
 
     def publish(self, product_id: str, images: Sequence[ProcessedImage]) -> dict[str, Any]:
+        self.assert_publication_backend_safe()
         response = self.client.post(
             f"{self.base_url}/rest/v1/rpc/dawanear_publish_product_images",
             headers={**self.headers, "Content-Type": "application/json"},

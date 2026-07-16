@@ -6,7 +6,7 @@
   "status": "complete",
   "title": "Production backend contract and catalogue security verification",
   "summary": "The privileged aggregate verifier passed every database, privacy, catalogue, pricing, image, audit, realtime, and least-privilege invariant, and the complete Node and pinned Python dependency audits reported no known vulnerabilities.",
-  "recorded_at": "2026-07-16T11:06:19Z",
+  "recorded_at": "2026-07-16T11:36:10Z",
   "recorded_by": "Codex automated verifier",
   "recorded_role": "Release verification agent",
   "redactions_confirmed": true,
@@ -14,7 +14,7 @@
     {
       "name": "Backend contract version",
       "status": "passed",
-      "detail": "The expected and observed production backend contract versions both equal 2026-07-16.8."
+      "detail": "The expected and observed production backend contract versions both equal 2026-07-16.10."
     },
     {
       "name": "Catalogue governance",
@@ -34,7 +34,12 @@
     {
       "name": "Product-image reuse-rights boundary",
       "status": "passed",
-      "detail": "The live contract reports zero unsafe public images, zero approved unverified images, zero catalogue image links, an empty public Storage bucket, and a validated explicit-rights database constraint."
+      "detail": "The live contract reports zero unsafe public images, zero partial galleries, zero catalogue image links, an empty public Storage bucket, a validated explicit-rights constraint, verified-only public RLS, an enabled independent approval trigger, and an enabled DDL governance guard."
+    },
+    {
+      "name": "Product-image DDL guard",
+      "status": "passed",
+      "detail": "The live database rejected an unauthorized verified-rights constraint drop with SQLSTATE 42501, and the complete 164-test Node suite independently reproduced the protected DDL behavior in PGlite."
     },
     {
       "name": "Node dependency vulnerability audit",
@@ -49,11 +54,11 @@
     {
       "name": "Integrated automated regression suite",
       "status": "passed",
-      "detail": "The release gate completed 159 Node tests and 41 Python pipeline tests with zero failures."
+      "detail": "The complete regression run finished 164 Node tests and 43 Python pipeline tests with zero failures."
     }
   ],
   "executed_by": "Codex automated verifier",
   "executor_role": "Release verification agent",
   "started_at": "2026-07-16T11:04:00Z",
-  "completed_at": "2026-07-16T11:06:19Z"
+  "completed_at": "2026-07-16T11:36:10Z"
 }

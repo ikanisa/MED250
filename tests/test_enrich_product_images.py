@@ -122,6 +122,60 @@ class ProductImagePipelineTests(unittest.TestCase):
             )
         )
 
+    def test_publisher_refuses_storage_upload_when_live_rights_guard_is_unsafe(self):
+        class Response:
+            status_code = 200
+
+            @staticmethod
+            def json():
+                return {
+                    "contract_version": MODULE.EXPECTED_BACKEND_CONTRACT_VERSION,
+                    "product_images": {
+                        "rights_verified_required": True,
+                        "approved_rights_constraint_validated": False,
+                        "public_policy_requires_verified": True,
+                        "publication_guard_trigger_exists": False,
+                        "ddl_guard_event_trigger_exists": False,
+                        "unsafe_image_count": 0,
+                        "partial_product_count": 0,
+                    },
+                }
+
+        class Client:
+            def __init__(self):
+                self.calls = []
+
+            def post(self, url, **kwargs):
+                self.calls.append((url, kwargs))
+                return Response()
+
+        candidate = MODULE.Candidate(
+            "p",
+            "https://manufacturer.example/i.jpg",
+            "https://manufacturer.example/p",
+            "manufacturer.example",
+            "manufacturer",
+            "Signed manufacturer catalogue licence.",
+            100,
+            rights_verified=True,
+        )
+        image = MODULE.ProcessedImage(
+            candidate, b"a", 1400, 1400, 99, "a" * 64, "0" * 16, True
+        )
+        publisher = object.__new__(MODULE.SupabasePublisher)
+        publisher.base_url = "https://project.supabase.co"
+        publisher.headers = {"apikey": "redacted", "Authorization": "redacted"}
+        publisher.client = Client()
+
+        with self.assertRaisesRegex(MODULE.PipelineError, "publication refused"):
+            publisher.upload("p", 1, image)
+        self.assertEqual(len(publisher.client.calls), 1)
+        self.assertTrue(
+            publisher.client.calls[0][0].endswith(
+                "/rest/v1/rpc/dawanear_backend_contract"
+            )
+        )
+
     def test_rejects_private_and_non_http_urls(self):
         with self.assertRaises(MODULE.PipelineError):
             MODULE.ensure_public_url("file:///etc/passwd")

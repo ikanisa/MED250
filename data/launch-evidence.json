@@ -101,21 +101,21 @@
       "owner": "MED+250 backend owner",
       "required_evidence_types": ["deployment_receipt", "test_record"],
       "status": "pending",
-      "acceptance": "The forward security migrations and contract refresh are deployed using rotated credentials, and the privileged backend verifier returns contract 2026-07-16.8 with all invariants passing.",
+      "acceptance": "The forward security migrations and contract refresh are deployed using rotated credentials, and the privileged backend verifier returns contract 2026-07-16.10 with the runtime and DDL product-image governance guards and all invariants passing.",
       "evidence": [
         {
           "type": "deployment_receipt",
           "reference": "docs/launch/evidence/security-hardening-deployment-2026-07-16.json",
-          "sha256": "620a438c270b34b08a8912c8fe92875f87aa0bae3daf92999e60c8d2de2caa31",
-          "recorded_at": "2026-07-16T11:06:19Z",
-          "summary": "Redacted production migration and backend contract deployment receipt for release 2026-07-16.8."
+          "sha256": "06be315c1d256ec5546eb3a1806fc382737b28bb1382ed7da2e2719a815e1c25",
+          "recorded_at": "2026-07-16T11:36:10Z",
+          "summary": "Redacted production migration and backend contract deployment receipt for release 2026-07-16.10."
         },
         {
           "type": "test_record",
           "reference": "docs/launch/evidence/security-hardening-test-2026-07-16.json",
-          "sha256": "f7969589226fbc1df8e77f509ae2547d6558a7f4f07dc0eca20894b71e4dda3e",
-          "recorded_at": "2026-07-16T11:06:19Z",
-          "summary": "Production backend contract verification, 159 Node tests, 41 Python tests, and the complete Node and pinned Python dependency audits passed."
+          "sha256": "47420577dc43daab0a84dcb90318e5e7290af264156de71b3b0b7be87e1edf09",
+          "recorded_at": "2026-07-16T11:36:10Z",
+          "summary": "Production backend contract verification, protected DDL rejection, 164 Node tests, 43 Python tests, and the complete Node and pinned Python dependency audits passed."
         }
       ],
       "approved_by": null,

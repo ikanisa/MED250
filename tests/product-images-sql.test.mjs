@@ -23,6 +23,20 @@ const verifiedRightsMigration = await readFile(
   ),
   "utf8",
 );
+const runtimeGuardMigration = await readFile(
+  new URL(
+    "../supabase/migrations/20260716173000_enforce_runtime_product_image_publication_guard.sql",
+    import.meta.url,
+  ),
+  "utf8",
+);
+const ddlGuardMigration = await readFile(
+  new URL(
+    "../supabase/migrations/20260716175000_protect_product_image_governance_ddl.sql",
+    import.meta.url,
+  ),
+  "utf8",
+);
 
 async function database() {
   const db = new PGlite();
@@ -81,6 +95,8 @@ async function database() {
   await db.exec(migration);
   await db.exec(optionalCoverageMigration);
   await db.exec(verifiedRightsMigration);
+  await db.exec(runtimeGuardMigration);
+  await db.exec(ddlGuardMigration);
   return db;
 }
 
@@ -133,7 +149,7 @@ test("publishes exactly three distinct images and links the primary catalogue im
   assert.match(product.rows[0].image_source, /verified product-image pipeline/);
 
   const contract = await db.query("select public.dawanear_backend_contract() as value");
-  assert.equal(contract.rows[0].value.contract_version, "2026-07-16.8");
+  assert.equal(contract.rows[0].value.contract_version, "2026-07-16.10");
   assert.equal(contract.rows[0].value.api_surface.expected_function_count, 29);
   assert.equal(contract.rows[0].value.table_surface.expected_table_count, 22);
   assert.equal(contract.rows[0].value.product_images.complete_product_count, 1);
@@ -149,6 +165,14 @@ test("publishes exactly three distinct images and links the primary catalogue im
   );
   assert.equal(
     contract.rows[0].value.product_images.public_policy_requires_verified,
+    true,
+  );
+  assert.equal(
+    contract.rows[0].value.product_images.publication_guard_trigger_exists,
+    true,
+  );
+  assert.equal(
+    contract.rows[0].value.product_images.ddl_guard_event_trigger_exists,
     true,
   );
   assert.equal(contract.rows[0].value.product_images.partial_product_count, 0);
@@ -173,6 +197,51 @@ test("rejects galleries without explicit verified reuse rights", async () => {
   await assert.rejects(
     db.exec(`select public.dawanear_publish_product_images('p1', '${payload}'::jsonb);`),
     /Every product image requires explicit verified reuse rights/,
+  );
+});
+
+test("runtime trigger rejects unsafe approval even without the check constraint", async () => {
+  const db = await database();
+  await db.exec(`
+    select set_config('med250.allow_product_image_governance_ddl', 'on', false);
+    alter table public.dawanear_product_images
+      drop constraint dawanear_product_images_approved_rights_verified;
+    select set_config('med250.allow_product_image_governance_ddl', 'off', false);
+    insert into public.dawanear_products(id) values ('p1');
+  `);
+  const unsafe = image(1);
+  unsafe.rights_verified = false;
+  const payload = JSON.stringify(unsafe).replaceAll("'", "''");
+  await assert.rejects(
+    db.exec(`
+      insert into public.dawanear_product_images (
+        product_id, position, public_url, storage_path, source_page_url,
+        source_image_url, source_domain, source_kind, rights_basis,
+        rights_verified, width, height, quality_score, content_sha256,
+        perceptual_hash, background_removed, approved, checked_at
+      )
+      select
+        'p1', 1, value->>'public_url', value->>'storage_path',
+        value->>'source_page_url', value->>'source_image_url',
+        value->>'source_domain', value->>'source_kind',
+        value->>'rights_basis', false, (value->>'width')::integer,
+        (value->>'height')::integer, (value->>'quality_score')::numeric,
+        value->>'content_sha256', value->>'perceptual_hash',
+        true, true, (value->>'checked_at')::timestamptz
+      from jsonb_array_elements('[${payload}]'::jsonb) as item(value);
+    `),
+    /Approved product images require verified reuse rights/,
+  );
+});
+
+test("DDL guard rejects removal of the verified-rights constraint", async () => {
+  const db = await database();
+  await assert.rejects(
+    db.exec(`
+      alter table public.dawanear_product_images
+        drop constraint dawanear_product_images_approved_rights_verified;
+    `),
+    /MED\+250 product-image governance DDL is protected/,
   );
 });
 

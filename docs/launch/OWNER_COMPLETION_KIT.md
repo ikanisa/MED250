@@ -143,7 +143,7 @@ Gates:
 - `MED250_GATE_SECURITY_HARDENING_DEPLOYED`
 - `MED250_GATE_EDGE_FUNCTIONS_DEPLOYED`
 
-The required deployment and test artifacts already exist. The backend owner must inspect them, verify the current live contract remains `2026-07-16.8`, verify the six function versions and protected probes, and add their name, role, and timezone-qualified approval to the registry. If privileged credentials have since changed, rerun:
+The required deployment and test artifacts already exist. The backend owner must inspect them, verify the current live contract remains `2026-07-16.10`, verify the independent product-image approval trigger, DDL governance guard, six function versions, and protected probes, and add their name, role, and timezone-qualified approval to the registry. If privileged credentials have since changed, rerun:
 
 ```sh
 npm run backend:verify

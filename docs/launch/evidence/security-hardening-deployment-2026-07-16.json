@@ -6,7 +6,7 @@
   "status": "complete",
   "title": "MED+250 production security and catalogue contract deployment",
   "summary": "The reviewed database migrations were applied to production, the migration ledger was reconciled, and unverified product imagery was removed from public catalogue and Storage exposure.",
-  "recorded_at": "2026-07-16T11:06:19Z",
+  "recorded_at": "2026-07-16T11:36:10Z",
   "recorded_by": "Codex automated verifier",
   "recorded_role": "Release verification agent",
   "redactions_confirmed": true,
@@ -14,7 +14,7 @@
     {
       "name": "Migration ledger alignment",
       "status": "passed",
-      "detail": "All 57 production-authorised local MED+250 migrations are present in the production ledger with matching names; the separate pharmacy contact candidate import remains intentionally undeployed pending owner review."
+      "detail": "All 60 production-authorised local MED+250 migrations are present in the production ledger with matching names. Two earlier quarantined MED+250 migrations remain visible as historical ledger entries in the shared project; their unsafe image-publication and browser-candidate effects are explicitly remediated by later governed migrations."
     },
     {
       "name": "Publication audit enforcement",
@@ -24,17 +24,27 @@
     {
       "name": "Verified product-image publication boundary",
       "status": "passed",
-      "detail": "All 33 previously published rights-unverified rows were made non-public, catalogue image links were cleared, and 39 unverified or orphaned Storage objects were removed without emitting identifiers; the latest repair migration reasserted the boundary after a conflicting deployment."
+      "detail": "All 51 rights-unverified image rows are non-public and catalogue image links are cleared. The latest remediation removed 21 unverified or orphaned Storage objects, bringing the cumulative recorded removal count to 69, without emitting identifiers; the bucket is empty. A validated constraint, verified-only RLS policy, service publication RPC, independent approval trigger, and DDL event guard enforce the boundary."
+    },
+    {
+      "name": "Governance DDL rejection",
+      "status": "passed",
+      "detail": "A production attempt to drop the verified-rights constraint without the reviewed transaction-local repair override was rejected with SQLSTATE 42501. A post-rejection query confirmed the constraint, RLS policy, runtime trigger, DDL guard, and zero-unsafe-row state remained intact."
+    },
+    {
+      "name": "Quarantined pharmacy candidate remediation",
+      "status": "passed",
+      "detail": "The 25 browser-observation phone candidates from the quarantined import were removed from the production contact table. Zero candidate login or WhatsApp contacts remain, while authoritative source-verified contact rows were preserved."
     },
     {
       "name": "Deployment contract refresh",
       "status": "passed",
-      "detail": "The production backend contract was refreshed to version 2026-07-16.8 and requires explicit reuse-rights verification in the schema constraint, publication RPC, and public RLS policy."
+      "detail": "The production backend contract was refreshed to version 2026-07-16.10 and requires explicit reuse-rights verification in the schema constraint, publication RPC, public RLS policy, independent runtime approval trigger, and DDL governance guard."
     }
   ],
   "deployed_by": "Codex release operator",
   "deployer_role": "Automated backend release operator",
-  "deployed_at": "2026-07-16T11:03:30Z",
+  "deployed_at": "2026-07-16T11:34:58Z",
   "environment": "MED+250 production database",
-  "release_identifier": "med250-backend-contract-2026-07-16.8"
+  "release_identifier": "med250-backend-contract-2026-07-16.10"
 }

@@ -95,6 +95,8 @@ function validContract() {
       rights_verified_column_exists: true,
       approved_rights_constraint_validated: true,
       public_policy_requires_verified: true,
+      publication_guard_trigger_exists: true,
+      ddl_guard_event_trigger_exists: true,
       partial_product_count: 0,
       unsafe_image_count: 0,
     },

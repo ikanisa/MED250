@@ -16,8 +16,10 @@ Use sources in this order:
 4. Specialist pharmacy, retailer, and ecommerce product listings.
 
 Public discovery records the exact source page and source image URL for
-traceability. Manifests and source policies are optional overrides, not a
-publication prerequisite.
+traceability, but public search results are never treated as proof of reuse
+rights. Publication requires a manifest or source-policy decision that sets
+`rights_verified` to the boolean value `true` and records a durable
+`rights_basis` for the exact assets.
 
 Example manifest:
 
@@ -27,7 +29,8 @@ Example manifest:
     "product_id": "rwanda-fda-hm-0001",
     "source_page_url": "https://manufacturer.example/products/atop-250-100",
     "source_kind": "manufacturer",
-    "rights_basis": "Manufacturer product page.",
+    "rights_basis": "Signed manufacturer catalogue licence dated 2026-07-10.",
+    "rights_verified": true,
     "priority": 100,
     "images": [
       "https://manufacturer.example/images/atop-front.jpg",
@@ -58,8 +61,9 @@ The requirement files use exact versions and `npm run security:audit:python`
 checks every pin against the OSV vulnerability database. Do not relax the pins
 or install the image pipeline into the macOS system Python.
 
-The source policy and manifests are optional. Without them, the script uses
-built-in public product-image discovery and records source provenance.
+The source policy and manifests are optional for discovery and dry-run review.
+They are mandatory for publication because automated discovery always leaves
+`rights_verified` false.
 
 Google Custom Search is optional and only works for existing API customers:
 
@@ -79,6 +83,10 @@ Apply the image-gallery migration. It creates:
 - the public-read, service-write `dawanear_product_images` table;
 - the public `product-images` Storage bucket;
 - the service-only `dawanear_publish_product_images` RPC;
+- an independent approval trigger that rejects an unsafe row even if another
+  migration removes the equivalent check constraint;
+- a DDL event guard that rejects schema changes leaving the rights constraint,
+  public RLS policy, runtime trigger, or publication RPC unsafe;
 - atomic primary-image linkage into the existing catalogue.
 
 ## Dry run
@@ -109,9 +117,14 @@ python scripts/enrich_product_images.py \
   --publish
 ```
 
+Before construction and before every Storage or publication write, the
+publisher verifies live backend contract `2026-07-16.10`. It refuses to write
+unless the rights constraint, verified-only public RLS policy, independent
+runtime trigger, DDL event guard, and gallery integrity counts are all safe.
 The command exits non-zero if any selected live product has fewer than three
-validated images. Storage paths contain the processed image SHA-256, making
-repeated runs idempotent and avoiding stale overwritten CDN assets.
+validated, rights-verified images. Storage paths contain the processed image
+SHA-256, making repeated runs idempotent and avoiding stale overwritten CDN
+assets.
 
 On the linked MED+250 macOS operator machine, run the secret-free wrapper in a
 Terminal session so the process retains access to the external catalogue drive:

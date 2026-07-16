@@ -1,7 +1,7 @@
 {
   "schema_version": "1",
   "release": "med250-production",
-  "captured_at": "2026-07-16T10:38:03Z",
+  "captured_at": "2026-07-16T11:36:10Z",
   "objective_complete": false,
   "public_origin": "https://med250.gikundiro.com",
   "release_decision": "conditional_hold",
@@ -9,7 +9,7 @@
   "automated_verification": {
     "release_check": "passed",
     "automated_tests": {
-      "passed": 151,
+      "passed": 164,
       "failed": 0
     },
     "lint": "passed",
@@ -17,23 +17,23 @@
       "status": "passed",
       "known_vulnerabilities": 0,
       "node_minimum_failure_severity": "moderate",
-      "python_exact_pin_count": 9,
+      "python_exact_pin_count": 10,
       "python_advisory_source": "OSV"
     },
     "data_validation": "passed_with_governed_duplicate_review_warnings",
     "catalogue_quality": "passed",
     "product_image_tests": {
-      "passed": 9,
+      "passed": 15,
       "failed": 0
     },
     "python_pipeline_tests": {
-      "passed": 32,
+      "passed": 43,
       "failed": 0
     },
     "performance_budget": {
       "status": "passed",
       "javascript_transfer_bytes": 204821,
-      "css_transfer_bytes": 26612,
+      "css_transfer_bytes": 26637,
       "marketplace_javascript_transfer_bytes": 99302,
       "initial_visual_asset_bytes": 73183
     },
@@ -62,9 +62,19 @@
     "seller_model": "Only pharmacies participate as fulfilment sellers. Products and indicative prices are central; pharmacies privately confirm availability and may optionally add a non-final estimate during customer interaction."
   },
   "backend": {
-    "contract_version": "2026-07-16.8",
+    "contract_version": "2026-07-16.10",
     "migration_ledger": "aligned_at_last_privileged_verification",
     "publication_audit_constraint": "active",
+    "product_image_governance": {
+      "unsafe_public_rows": 0,
+      "partial_galleries": 0,
+      "retained_unverified_rows": 51,
+      "storage_objects": 0,
+      "latest_removed_storage_objects": 21,
+      "cumulative_removed_storage_objects": 69,
+      "runtime_guard": "active",
+      "ddl_guard": "active_and_rejection_tested"
+    },
     "edge_functions": {
       "status": "deployed_and_protected",
       "count": 6
@@ -83,6 +93,8 @@
     "gps_ready_pharmacies": 93,
     "pharmacies_with_whatsapp": 300,
     "login_enabled_whatsapp_contacts": 338,
+    "pharmacies_with_phone": 340,
+    "quarantined_browser_phone_candidates": 0,
     "dispatch_ready_pharmacies": 300,
     "whatsapp_delivery_failures_24h": 0,
     "strict_health_findings": 0

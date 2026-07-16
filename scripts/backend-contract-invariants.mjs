@@ -1,4 +1,4 @@
-export const expectedBackendContractVersion = "2026-07-16.8";
+export const expectedBackendContractVersion = "2026-07-16.10";
 
 export function assessBackendContract(contract) {
   const failures = [];
@@ -92,6 +92,8 @@ export function assessBackendContract(contract) {
   requireInvariant(contract?.product_images?.rights_verified_column_exists === true, "Product-image reuse-rights verification state is missing.");
   requireInvariant(contract?.product_images?.approved_rights_constraint_validated === true, "Approved product images are not database-constrained to verified rights.");
   requireInvariant(contract?.product_images?.public_policy_requires_verified === true, "Product-image public RLS does not require verified reuse rights.");
+  requireInvariant(contract?.product_images?.publication_guard_trigger_exists === true, "The independent product-image publication guard trigger is missing or disabled.");
+  requireInvariant(contract?.product_images?.ddl_guard_event_trigger_exists === true, "The product-image governance DDL guard is missing or disabled.");
   requireInvariant(contract?.product_images?.partial_product_count === 0, "At least one published product gallery is incomplete or internally inconsistent.");
   requireInvariant(
     contract?.product_images?.complete_product_count + contract?.product_images?.missing_product_count

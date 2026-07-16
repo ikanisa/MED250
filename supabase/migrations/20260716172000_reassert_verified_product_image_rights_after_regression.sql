@@ -1,5 +1,11 @@
 begin;
 
+select pg_catalog.set_config(
+  'med250.allow_product_image_governance_ddl',
+  'on',
+  true
+);
+
 update public.dawanear_products as product
 set image_url = null,
     image_source = null

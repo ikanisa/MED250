@@ -6,7 +6,7 @@ Decision: conditional hold pending accountable evidence
 
 ## Current outcome
 
-The complete machine-executable implementation and verification scope is passing. The public MED+250 catalogue is live, the current seven-route deployment verifies successfully, the Supabase contract is at `2026-07-16.8`, all six reviewed Edge Functions are deployed and protected, prescription cleanup is scheduled, the central catalogue model is enforced, and product imagery now fails closed unless exact reuse rights are explicitly verified.
+The complete machine-executable implementation and verification scope is passing. The public MED+250 catalogue is live, the current seven-route deployment verifies successfully, the Supabase contract is at `2026-07-16.10`, all six reviewed Edge Functions are deployed and protected, prescription cleanup is scheduled, the central catalogue model is enforced, and product imagery now fails closed unless exact reuse rights are explicitly verified by the constraint, RLS, service RPC, publisher preflight, independent runtime trigger, and protected DDL boundary.
 
 The strict production release cannot yet be honestly marked complete. Its remaining work consists of accountable human approvals, authoritative data decisions, credential rotation evidence, controlled security tests, and physical-device UAT. These are release evidence requirements, not unresolved application defects.
 
@@ -23,18 +23,19 @@ The strict production release cannot yet be honestly marked complete. Its remain
 - Pharmacies are the only fulfilment sellers. Product records, taxonomy, and indicative pricing remain central.
 - Missing values remain blank. Empty medicine subcategories and other empty labels are dynamically hidden.
 - Product imagery is verified-only and optional; missing imagery does not produce a fabricated product image or placeholder claim.
+- The public product-image Storage bucket is empty; 51 retained unverified database rows are unapproved and hidden.
 
 ## Automated verification
 
 | Check | Result |
 | --- | --- |
 | Integrated `npm run release:check` | Passed |
-| Automated tests | 151 passed, 0 failed |
-| Complete Node and pinned Python dependency audits | Zero known vulnerabilities; 9 Python pins checked against OSV |
+| Automated Node tests | 164 passed, 0 failed |
+| Complete Node and pinned Python dependency audits | Zero known vulnerabilities; 10 Python pins checked against OSV |
 | Lint | Passed |
 | Catalogue import validation | Passed |
 | Catalogue quality | Passed |
-| Python pharmacy, source-enrichment, and image-pipeline tests | 32 passed, 0 failed |
+| Python pharmacy, source-enrichment, and image-pipeline tests | 43 passed, 0 failed |
 | Performance budgets | Passed |
 | Wrangler strict dry-run | Passed |
 | Production Cloudflare build/dry-run | Passed |
@@ -42,7 +43,7 @@ The strict production release cannot yet be honestly marked complete. Its remain
 | Production DNS agreement | Passed |
 | Git whitespace check | Passed |
 
-Current transfer measurements are 204,821 bytes of JavaScript, 26,612 bytes of CSS, and 99,302 bytes for marketplace JavaScript. All are within the enforced budgets.
+Current transfer measurements are 204,821 bytes of JavaScript, 26,637 bytes of CSS, and 99,302 bytes for marketplace JavaScript. All are within the enforced budgets.
 
 ## Live operating snapshot
 
@@ -50,6 +51,7 @@ Current transfer measurements are 204,821 bytes of JavaScript, 26,612 bytes of C
 - 93 pharmacies with governed GPS readiness.
 - 300 pharmacies with WhatsApp coverage.
 - 338 enabled governed WhatsApp login contacts.
+- 340 pharmacies with governed phone coverage after removing 25 quarantined browser-observation candidates.
 - 300 dispatch-ready pharmacies.
 - Zero recent WhatsApp verification delivery failures in the captured 24-hour window.
 - Zero strict operational-health findings in the captured production snapshot.
