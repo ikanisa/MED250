@@ -73,6 +73,12 @@ Review provenance, licence, permission, publication scope, refresh cadence, and 
 
 The review ledger must cover every active source and include exact SHA-256 source digests. If a source is not approved for publication or operational reuse, remove or replace the affected derived data before approval.
 
+Start from the prepared redacted ledger:
+
+- `docs/launch/evidence/data-reuse-review-ledger-pending-2026-07-16.json`
+
+It already inventories the nine active source classes, binds the current derived data and captured external snapshots to SHA-256 digests, records Amazon as taxonomy/product-reference research only, and confirms that Amazon prices are absent. Resolve its three explicit provenance blockers before signing: retain the missing raw Rwanda FDA register snapshots, replace the duty-roster source-digest placeholder with exact PDF digests, and place the local Amazon research snapshot under an approved durable retention arrangement. Then record one reuse decision per source class and follow the artifact's completion instructions.
+
 ### Regulatory data reviewer
 
 Gate:

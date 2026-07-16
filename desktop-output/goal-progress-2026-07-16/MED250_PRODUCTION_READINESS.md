@@ -60,6 +60,8 @@ The operations counts do not replace review-ledger approval. Coordinates and con
 
 The refreshed Supabase audit reports database SSL enforcement active, all six reviewed MED+250 Edge Functions active at their expected versions, zero MED+250 performance warnings, and no unexpected backend-contract access. Turnstile rejects missing and invalid tokens without changing the aggregate Auth-user count. The valid-widget test and approval of the project-wide anonymous-user limit remain controlled security-owner tasks.
 
+The prepared data-reuse ledger now inventories nine active source classes and binds them to 32 SHA-256 digests. It verifies that Amazon is used only for taxonomy and product-reference research, Amazon prices are absent, and the 128 populated central indicative prices come only from directly observed Rwanda catalogue references. The ledger remains pending because the data owner must resolve three provenance gaps and make the licence, publication, retention, refresh and withdrawal decisions.
+
 ## Strict release gaps
 
 `npm run launch:evidence:verify:live` correctly reports 15 pending gates. Some already have complete technical evidence but still require accountable approval.
@@ -69,7 +71,7 @@ The refreshed Supabase audit reports database SSL enforcement active, all six re
 | GPS and WhatsApp | Complete authoritative review ledgers and approve the intended production pharmacy set | Operations |
 | Pharmacy procedures | Sign dispatch, escalation, expiry, cancellation, prescription, and incident procedures | Operations lead |
 | Regulatory model | Approve the Rwanda marketplace model and applicable conditions | Legal/compliance |
-| Source reuse | Approve provenance and reuse/publication of product, pharmacy, GIS, and contact sources | Data owner |
+| Source reuse | Complete `docs/launch/evidence/data-reuse-review-ledger-pending-2026-07-16.json`, resolve three snapshot/retention gaps, and approve reuse/publication of all nine active source classes | Data owner |
 | Duplicate registers | Decide all 51 groups in the synchronized review ledger | Regulatory data reviewer |
 | Credentials | Rotate exposed Supabase/database/personal credentials and retain redacted receipts | Security owner |
 | Backend/Edge evidence | Name and timestamp the backend approval; technical evidence is already complete | Backend owner |

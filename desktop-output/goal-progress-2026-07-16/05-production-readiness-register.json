@@ -1,7 +1,7 @@
 {
   "schema_version": "1",
   "release": "med250-production",
-  "captured_at": "2026-07-16T11:42:36Z",
+  "captured_at": "2026-07-16T11:49:21Z",
   "objective_complete": false,
   "public_origin": "https://med250.gikundiro.com",
   "release_decision": "conditional_hold",
@@ -140,6 +140,21 @@
     "production_custom_domain": "med250.gikundiro.com",
     "pending_artifact": "docs/launch/evidence/cloudflare-account-verification-pending-2026-07-16.json"
   },
+  "data_reuse_audit": {
+    "status": "pending_owner_review",
+    "source_class_count": 9,
+    "pending_source_classes": 6,
+    "blocked_source_classes": 3,
+    "source_digest_count": 32,
+    "amazon_price_count": 0,
+    "rwanda_observed_central_price_count": 128,
+    "pending_artifact": "docs/launch/evidence/data-reuse-review-ledger-pending-2026-07-16.json",
+    "blockers": [
+      "Retain exact raw Rwanda FDA register snapshots and record their SHA-256 digests.",
+      "Replace the Rwanda FDA duty-roster source-digest placeholder with exact PDF digests.",
+      "Place the local Amazon catalogue-research snapshot under an approved durable retention arrangement."
+    ]
+  },
   "remaining_accountable_actions": [
     {
       "priority": 1,
@@ -187,7 +202,7 @@
     {
       "priority": 6,
       "owner": "MED+250 operations lead, legal/compliance owner, data owner, privacy owner, backend owner, and infrastructure owner",
-      "action": "Review the exact gate acceptance criteria and existing evidence, provide the missing signed approvals and review ledgers, and name each approver with role and timezone-qualified timestamp. Backend and domain evidence is already complete but still requires accountable approval.",
+      "action": "Review the exact gate acceptance criteria and existing evidence, provide the missing signed approvals and review ledgers, and name each approver with role and timezone-qualified timestamp. The data owner must complete docs/launch/evidence/data-reuse-review-ledger-pending-2026-07-16.json and resolve its three raw-snapshot or durable-retention blockers before signing. Backend and domain evidence is already complete but still requires accountable approval.",
       "closes": [
         "MED250_GATE_PHARMACY_OPERATIONS_APPROVED",
         "MED250_GATE_REGULATORY_APPROVED",
