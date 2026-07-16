@@ -5,21 +5,21 @@
   "evidence_type": "signed_approval",
   "status": "pending",
   "title": "MED+250 source-data publication and reuse approval",
-  "summary": "Owner-ready signed decision for publication and operational reuse of every active medicine, consumer-product, pharmacy, contact, geospatial, image and central indicative-price source. The paired source ledger remains blocked and no reuse approval is inferred.",
-  "recorded_at": "2026-07-16T14:08:21+02:00",
+  "summary": "Owner-ready signed decision for publication and operational reuse of every active medicine, consumer-product, pharmacy, contact, geospatial, image and central indicative-price source. Technical source capture is complete, but the paired source ledger and durable-storage location still require owner decisions and no reuse approval is inferred.",
+  "recorded_at": "2026-07-16T15:28:48+02:00",
   "recorded_by": "MED+250 data-governance readiness review",
   "recorded_role": "Release evidence preparer",
   "redactions_confirmed": true,
   "checks": [
     {
       "name": "Complete source review ledger",
-      "status": "blocked",
-      "detail": "The paired nine-record source ledger still contains pending and blocked decisions and therefore cannot support a signed publication or operational-reuse approval."
+      "status": "pending",
+      "detail": "The paired nine-record source ledger has no remaining technical retention blocker, but all nine publication and operational-reuse decisions still require a named data owner."
     },
     {
       "name": "Immutable raw source retention",
-      "status": "blocked",
-      "detail": "The 11 Rwanda FDA duty-roster sources have exact PDF digests. Raw product and licensed-premises register retention remains incomplete, and the Amazon research snapshot still lacks an approved durable retention arrangement."
+      "status": "pending",
+      "detail": "A checksum-bound private bundle retains 25 exact Amazon, Rwanda FDA, derived-release and governance artifacts. The data owner must approve its durable storage location or move the unchanged verified bundle to an approved evidence store."
     },
     {
       "name": "Publication and operational reuse permission",
@@ -48,13 +48,16 @@
     }
   ],
   "review_ledger_reference": "docs/launch/evidence/data-reuse-review-ledger-pending-2026-07-16.json",
-  "review_ledger_sha256": "2b423e37b7ba4cc1866eca3eae2efbf54020de30aac22e7af23ef3b632a76f0b",
+  "review_ledger_sha256": "b7609b75f9a2cc2fc904252374b2c7b7de8702f4d7f4a697e9582e5b7fa3aeb6",
+  "source_retention_receipt_reference": "docs/launch/evidence/source-retention-bundle-2026-07-16.json",
+  "source_retention_receipt_sha256": "49855558c9e41cb5720c66d3e28891eeb476d40d9c4778242c2f308efba91747",
   "decision": null,
   "approved_by": null,
   "approved_role": null,
   "approved_at": null,
   "completion_instructions": [
-    "Resolve every pending and blocked source-class record in the paired review ledger and retain all required raw source snapshots and exact digests.",
+    "Approve the current controlled bundle location or move the unchanged bundle to an approved durable evidence store and retain its verified manifest digest.",
+    "Resolve every pending source-class record in the paired review ledger.",
     "Record the publication and operational-reuse basis, attribution, retention, refresh, correction, withdrawal and takedown conditions for every approved source.",
     "Remove or replace every source or derived field that is not approved for the intended public or operational use.",
     "Confirm the completed review-ledger digest and update this artifact if the ledger changed.",

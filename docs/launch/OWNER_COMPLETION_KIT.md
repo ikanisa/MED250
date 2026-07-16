@@ -94,7 +94,15 @@ Start from the prepared redacted ledger:
 - `docs/launch/evidence/data-reuse-review-ledger-pending-2026-07-16.json`
 - `docs/launch/evidence/data-reuse-approval-pending-2026-07-16.json`
 
-It already inventories the nine active source classes, binds the current derived data and captured external snapshots to SHA-256 digests, records Amazon as taxonomy/product-reference research only, and confirms that Amazon prices are absent. The raw Amazon snapshot, corrected 2,200-row import dataset and final 4,680-record workbook now have separate recorded digests. All 11 active Rwanda FDA duty-roster PDFs also have exact source URLs and SHA-256 digests. Resolve the two remaining provenance blockers before signing: retain the raw Rwanda FDA product and licensed-premises register snapshots in an approved durable evidence store, and place the local Amazon artifact set under an approved durable retention arrangement. Then record one reuse decision per source class and follow the artifact's completion instructions.
+It already inventories the nine active source classes, binds the current derived data and captured external snapshots to SHA-256 digests, records Amazon as taxonomy/product-reference research only, and confirms that Amazon prices are absent. A controlled private bundle now retains 25 exact artifacts: the raw Amazon snapshot, corrected 2,200-row import dataset, final 4,680-record workbook, Rwanda FDA product and licensed-premises sources, all 11 active Rwanda FDA duty-roster PDFs, governed derived releases and supporting manifests. The redacted technical receipt is `docs/launch/evidence/source-retention-bundle-2026-07-16.json`.
+
+Before signing, approve the current private durable-storage location or move the unchanged bundle to an approved evidence store and run:
+
+```sh
+npm run data:source-retention:verify
+```
+
+Retain the verified manifest SHA-256, then record one approval, rejection or conditional approval per source class and follow the two pending artifacts' completion instructions. Technical retention does not itself grant publication or operational-reuse rights.
 
 ### Regulatory data reviewer
 

@@ -5,8 +5,8 @@
   "evidence_type": "review_ledger",
   "status": "pending",
   "title": "MED+250 active source-data reuse and provenance review ledger",
-  "summary": "Redacted source-class inventory for the active medicine, consumer-product, pharmacy, contact, geospatial and central indicative-price data. Technical provenance is recorded, but publication and operational reuse still require a named data-owner decision.",
-  "recorded_at": "2026-07-16T14:31:00+02:00",
+  "summary": "Redacted source-class inventory for the active medicine, consumer-product, pharmacy, contact, geospatial and central indicative-price data. Technical provenance and a controlled checksum-bound source bundle are recorded, but durable-storage approval, publication and operational reuse still require a named data-owner decision.",
+  "recorded_at": "2026-07-16T15:28:48+02:00",
   "recorded_by": "MED+250 automated provenance audit",
   "recorded_role": "Release evidence preparer",
   "redactions_confirmed": true,
@@ -32,9 +32,9 @@
       "detail": "No unverified product image is approved for public display. Image-source permission must be reviewed before any currently hidden image record can be approved."
     },
     {
-      "name": "Immutable raw source snapshots",
-      "status": "blocked",
-      "detail": "All 11 active Rwanda FDA duty-roster PDFs now have exact source URLs and SHA-256 digests. Durable retention remains incomplete because the Rwanda FDA product and licensed-premises raw register snapshots are not in an approved evidence store and the Amazon artifact set remains local and ignored by Git."
+      "name": "Controlled raw source capture",
+      "status": "passed",
+      "detail": "A private gitignored bundle now retains 25 checksum-bound artifacts, including the Rwanda FDA product and licensed-premises raw sources, all 11 active duty-roster PDFs, the Amazon research set and governed derived releases. The data owner must still approve this storage location or move the unchanged bundle to an approved durable evidence store."
     },
     {
       "name": "Licence and reuse permission decisions",
@@ -51,9 +51,13 @@
   "reviewer_role": null,
   "reviewed_at": null,
   "total_records": 9,
-  "pending_records": 6,
-  "blocked_records": 2,
+  "pending_records": 9,
+  "blocked_records": 0,
   "source_digests": {
+    "controlled_source_bundle_digest": "c96bd6445e983398cceb92de4328aa59fa5a1c043107e524124b99e610f12057",
+    "controlled_source_bundle_manifest": "181bca849b252f0acd3000e066247cb5e04c934b815d5f8fe83c4732f63d428e",
+    "controlled_source_bundle_spec": "da70f8b651d3ed1d137adc9a95dcfd155f6d0029b6b76608a2f39331b3d2871b",
+    "controlled_source_bundle_verifier": "4474e7ba7c9022d3b631b7e6f0df19c8626a8756c9b2e93aaf675af21969f76c",
     "amazon_raw_research_snapshot": "0479c4e4d4950f443abaf2c716a9e32c83d77829e88ba4960f68070a4355c6a5",
     "amazon_catalogue_research_snapshot": "5000580eb85403a58de8e604bdd055b25b22958ae5755206913a070bcae31383",
     "amazon_catalogue_workbook": "6919e5c0728d1d6e1431844c99e1a96935a4b3b7f29fe60f0adb6a1aa8853f20",
@@ -113,7 +117,7 @@
         "rwanda_fda_online_pharmacies_derived_csv",
         "rwanda_fda_source_manifest"
       ],
-      "decision_status": "blocked_raw_snapshot_retention"
+      "decision_status": "pending_owner_retention_and_reuse_approval"
     },
     {
       "source_class": "Rwanda FDA retail-pharmacy duty rosters",
@@ -180,7 +184,7 @@
         "amazon_quality_overrides",
         "amazon_price_removal_migration"
       ],
-      "decision_status": "blocked_durable_snapshot_and_permission"
+      "decision_status": "pending_owner_retention_and_reuse_approval"
     },
     {
       "source_class": "Kasha Rwanda public product catalogue",
@@ -246,7 +250,7 @@
     }
   ],
   "completion_instructions": [
-    "Retain or archive exact raw source snapshots where the ledger identifies a snapshot gap, and add their lowercase SHA-256 digests.",
+    "Approve the current controlled bundle location or move the unchanged bundle to an approved durable evidence store, rerun its verifier and retain the resulting manifest digest.",
     "For each source record, record approved, rejected or approved-with-conditions plus licence, permission, attribution, publication scope, refresh and withdrawal terms.",
     "Remove or replace derived data for every source that is rejected or cannot be lawfully reused.",
     "Set pending_records and blocked_records to zero only after every record is resolved.",

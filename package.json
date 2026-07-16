@@ -30,6 +30,8 @@
     "data:import-marketplace-products": "node scripts/import-data/load-marketplace-products.mjs",
     "data:validate-marketplace-products": "node scripts/import-data/load-marketplace-products.mjs --dry-run",
     "data:quality": "node scripts/validate-catalogue-quality.mjs",
+    "data:source-retention:bundle": "node scripts/source-retention-bundle.mjs build",
+    "data:source-retention:verify": "node scripts/source-retention-bundle.mjs verify",
     "images:enrich": "python3 scripts/enrich_product_images.py",
     "images:verify": "python3 scripts/enrich_product_images.py --publish --verify-only",
     "images:cleanup-unverified": "node scripts/remediate-unverified-product-images.mjs",
