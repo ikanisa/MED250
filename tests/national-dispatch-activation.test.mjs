@@ -6,6 +6,10 @@ const migration = await readFile(new URL(
   "../supabase/migrations/20260716052434_activate_verified_pharmacy_national_dispatch.sql",
   import.meta.url,
 ), "utf8");
+const sentinelMigration = await readFile(new URL(
+  "../supabase/migrations/20260716053532_allow_national_dispatch_distance_sentinel.sql",
+  import.meta.url,
+), "utf8");
 
 test("activates verified-contact pharmacies without inventing GPS or contact data", () => {
   assert.match(migration, /license_expires_on >= current_date/);
@@ -26,4 +30,7 @@ test("uses a bounded national fallback while preserving real-distance priority",
   assert.match(migration, /limit 20/);
   assert.match(migration, /No operational eligibility predicate was updated/);
   assert.match(migration, /Operational dispatch-ready metric was not updated/);
+  assert.match(sentinelMigration, /distance_m = -1\.0/);
+  assert.match(sentinelMigration, /geocode_status = ''verified''/);
+  assert.match(sentinelMigration, /National routing GPS boundary was not installed/);
 });
