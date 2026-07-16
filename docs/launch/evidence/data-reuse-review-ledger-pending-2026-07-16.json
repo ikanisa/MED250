@@ -34,7 +34,7 @@
     {
       "name": "Immutable raw source snapshots",
       "status": "blocked",
-      "detail": "The active Amazon raw snapshot, corrected dataset and final 4,680-record workbook are hashed, but durable retention remains incomplete: the Rwanda FDA register source files are absent, the duty-roster manifest contains an unresolved source digest placeholder, and the Amazon artifact set remains local and ignored by Git."
+      "detail": "All 11 active Rwanda FDA duty-roster PDFs now have exact source URLs and SHA-256 digests. Durable retention remains incomplete because the Rwanda FDA product and licensed-premises raw register snapshots are not in an approved evidence store and the Amazon artifact set remains local and ignored by Git."
     },
     {
       "name": "Licence and reuse permission decisions",
@@ -52,7 +52,7 @@
   "reviewed_at": null,
   "total_records": 9,
   "pending_records": 6,
-  "blocked_records": 3,
+  "blocked_records": 2,
   "source_digests": {
     "amazon_raw_research_snapshot": "0479c4e4d4950f443abaf2c716a9e32c83d77829e88ba4960f68070a4355c6a5",
     "amazon_catalogue_research_snapshot": "5000580eb85403a58de8e604bdd055b25b22958ae5755206913a070bcae31383",
@@ -63,7 +63,18 @@
     "rwanda_fda_products_derived_csv": "8b6b22d154da87c26bb7fc153d621c41f713f9ba0b60ff16d0c6c4f8122aab22",
     "rwanda_fda_retail_pharmacies_derived_csv": "977b4d35036d178b45191f98de55e574e848755f1153df252a7a621665b583a9",
     "rwanda_fda_online_pharmacies_derived_csv": "03032e7e892cb2d1ffc3a335d28d81288f082c8989fd9113299632c56e2c79c9",
-    "rwanda_fda_duty_roster_manifest": "145f62d4402666a7b46c947c019da0354e4eced8914b773d5ef5064e3736cf6c",
+    "rwanda_fda_duty_roster_manifest": "4ea33e492dc21317b9f0708161d8a6dc9cffd1c00fbd242716371edbdc4dc33a",
+    "rwanda_fda_duty_roster_bugesera": "b069ea475b023e58851a24d8bb5d3a179b69402b7e217ce3a02aa3aec8b719c1",
+    "rwanda_fda_duty_roster_huye": "283d54a247a97ef39494a010a723e335ae841d80249f0fb3912f542690dbbbb9",
+    "rwanda_fda_duty_roster_kamonyi": "de09717d4b3822d395dd66f38d595b26fb88c1e46c300bd3cf87e05293edb307",
+    "rwanda_fda_duty_roster_kayonza": "3f60b9b220eb0f6daa754e66b3cc44be1116b284a70f848d32dda058accc297a",
+    "rwanda_fda_duty_roster_kigali": "5a717a030c845e954a0b3f0fbbb2e290ff3fa88092e0b472a60d1818a3e04d47",
+    "rwanda_fda_duty_roster_muhanga": "ae4a740fee5de34b152539fb6dc77657a68e16eab21478cf322d21bcebadf202",
+    "rwanda_fda_duty_roster_musanze": "7ee184f40c8e71d0f1b6868948cc4806cbd6374b699e2767ea39bfe6dadbfb32",
+    "rwanda_fda_duty_roster_nyagatare": "9b82080b5423093692ab0e8b343ce6afc25af0488c10051318e8cc6b1d8b1dcb",
+    "rwanda_fda_duty_roster_rubavu": "bbc14cbf9fcd06a44d7d14c2712a61d210aa77f4af76476aaea80dc403792498",
+    "rwanda_fda_duty_roster_ruhango": "78ffb4974b5592909fea7404686f539bd7d5acb579c2362f839db14f99c23d5a",
+    "rwanda_fda_duty_roster_rwamagana": "7e67ed8dd8ecd23ea27abb2d4a9868c3300bbe2b93b33b8285f6562c654016de",
     "rwanda_fda_duty_roster_matched_contacts": "05dbdbb8b279f3a1264d5a98afa2afe487e6e26d515e4baf68e48e2d8f1d3228",
     "rwanda_fda_duty_roster_exact_promotions": "9a81e8c327cf7c399ea95cefe96bdc289efa9b8e5fd52b7841946835b4b53232",
     "mmi_directory_manifest": "8690d490a0b14482cd6d2ba798c869d4825ce0ed168527f4238fad711ecb5469",
@@ -115,7 +126,7 @@
         "rwanda_fda_duty_roster_matched_contacts",
         "rwanda_fda_duty_roster_exact_promotions"
       ],
-      "decision_status": "blocked_source_snapshot_digest"
+      "decision_status": "pending_owner_approval"
     },
     {
       "source_class": "Rwanda Military Medical Insurance pharmacy partner directory",

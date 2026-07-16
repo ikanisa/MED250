@@ -337,6 +337,8 @@ test("lazy-loads more catalogue products continuously while scrolling", async ()
   assert.match(marketplace, /setVisibleCount\(\(count\) => count \+ PRODUCT_BATCH_SIZE\)/);
   assert.match(marketplace, /ref=\{productLoadSentinelRef\}/);
   assert.match(marketplace, /data-testid="product-scroll-sentinel"/);
+  assert.match(marketplace, /All \{accessibleCatalogueSize\.toLocaleString\(\)\} matching products are loaded/);
+  assert.doesNotMatch(marketplace, /All \{catalogueMatchCount\.toLocaleString\(\)\} matching products are loaded/);
   assert.match(marketplace, /data-product-card=\{product\.id\}/);
   assert.match(marketplace, /loading=\{eager \? "eager" : "lazy"\}/);
   assert.doesNotMatch(marketplace, /Show 48 more products|>See all<\/button>/);

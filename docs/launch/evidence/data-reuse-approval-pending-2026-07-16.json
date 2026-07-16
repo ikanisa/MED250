@@ -19,7 +19,7 @@
     {
       "name": "Immutable raw source retention",
       "status": "blocked",
-      "detail": "Raw Rwanda FDA snapshots are incomplete, a duty-roster source digest remains unresolved, and the Amazon research snapshot lacks an approved durable retention arrangement."
+      "detail": "The 11 Rwanda FDA duty-roster sources have exact PDF digests. Raw product and licensed-premises register retention remains incomplete, and the Amazon research snapshot still lacks an approved durable retention arrangement."
     },
     {
       "name": "Publication and operational reuse permission",
@@ -48,7 +48,7 @@
     }
   ],
   "review_ledger_reference": "docs/launch/evidence/data-reuse-review-ledger-pending-2026-07-16.json",
-  "review_ledger_sha256": "9c4d76e6d849ed61b4c209d5f9396362f926d08b513be8ecffcff6439df04253",
+  "review_ledger_sha256": "2b423e37b7ba4cc1866eca3eae2efbf54020de30aac22e7af23ef3b632a76f0b",
   "decision": null,
   "approved_by": null,
   "approved_role": null,

@@ -2050,7 +2050,7 @@ export default function Marketplace({
             />)}
           </div> : <div className="catalogue-empty"><Search size={28} /><h3>No close product match</h3><p>Try a brand, generic name, symptom, dosage form, or remove one of the filters.</p><button onClick={clearCatalogueFilters}>Reset search and filters</button></div>}
           {visibleProducts.length ? <div ref={productLoadSentinelRef} className={`infinite-scroll-sentinel${catalogueBusy && hasMoreProducts ? " is-loading" : ""}`} role="status" aria-live="polite" aria-atomic="true" data-testid="product-scroll-sentinel">
-            {hasMoreProducts ? <><span className="infinite-scroll-spinner" aria-hidden="true" /><span>{catalogueBusy ? "Loading more products…" : "Keep scrolling for more products"}</span></> : <span>All {catalogueMatchCount.toLocaleString()} matching products are loaded</span>}
+            {hasMoreProducts ? <><span className="infinite-scroll-spinner" aria-hidden="true" /><span>{catalogueBusy ? "Loading more products…" : "Keep scrolling for more products"}</span></> : <span>All {accessibleCatalogueSize.toLocaleString()} matching products are loaded</span>}
           </div> : null}
         </section>
       </>}
@@ -2068,7 +2068,7 @@ export default function Marketplace({
             <label>Information<select value={availabilityFilter} onChange={(event) => { setAvailabilityFilter(event.target.value); setVisibleCount(INITIAL_PRODUCT_COUNT); }}><option value="all">All products</option><option value="priced">Has indicative price</option><option value="orderable">Can request availability</option><option value="registered">In the product catalogue</option></select></label>
             <label>Sort<select value={sort} onChange={(event) => { setSort(event.target.value); setVisibleCount(INITIAL_PRODUCT_COUNT); }}><option value="relevance">Best match</option><option value="az">Name: A–Z</option><option value="za">Name: Z–A</option><option value="price">Lowest indicative price</option></select></label>
           </div>
-          <div className="filter-dialog-actions"><button className="filter-reset" onClick={clearCatalogueFilters} disabled={!query && !hasActiveFilters}>Reset all</button><button className="primary-wide" onClick={() => { setFiltersOpen(false); announce(`${catalogueMatchCount.toLocaleString()} products ready to browse.`); }}>Show {catalogueMatchCount.toLocaleString()} products</button></div>
+          <div className="filter-dialog-actions"><button className="filter-reset" onClick={clearCatalogueFilters} disabled={!query && !hasActiveFilters}>Reset all</button><button className="primary-wide" onClick={() => { setFiltersOpen(false); announce(`${accessibleCatalogueSize.toLocaleString()} products ready to browse.`); }}>Show {accessibleCatalogueSize.toLocaleString()} products</button></div>
         </section>
       </div> : null}
 
