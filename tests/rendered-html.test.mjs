@@ -268,7 +268,7 @@ test("keeps ordering one-step and exposes complete private response states", asy
   assert.match(marketplace, /Order expired/);
   assert.match(marketplace, /Order cancelled/);
   assert.match(marketplace, /Waiting for pharmacy confirmations/);
-  assert.match(marketplace, /Order sent to nearby pharmacies/);
+  assert.match(marketplace, /Order sent to verified pharmacies/);
   assert.match(marketplace, /Pickup confirmed/);
   assert.match(marketplace, /Fulfilment method/);
   assert.match(marketplace, /Delivery confirmed/);

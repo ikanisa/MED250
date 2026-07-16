@@ -819,7 +819,7 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
     p_prescription_path: prescriptionPath,
     p_items: items,
   });
-  if (error) rethrow("Could not send your order to nearby pharmacies", error);
+  if (error) rethrow("Could not send your order to verified pharmacies", error);
   const row = asRows(data)[0];
   if (!row) throw new Error("Could not create the order: the backend returned no order receipt.");
   const recipientCount = numericValue(row, "recipient_count");
@@ -951,7 +951,7 @@ export async function loadOffers(orderId: string): Promise<OrderOffer[]> {
       distanceM: numericValue(row, "distance_m") ?? 0,
       items: itemRows.map((itemRow) => mapOfferItem(itemRow, products)),
     };
-  }).toSorted((a, b) => a.distanceM - b.distanceM || a.totalRwf - b.totalRwf);
+  }).toSorted((a, b) => Number(a.distanceM < 0) - Number(b.distanceM < 0) || a.distanceM - b.distanceM || a.totalRwf - b.totalRwf);
 }
 
 export async function selectOffer(orderId: string, offerId: string): Promise<SelectedPharmacyContact> {
@@ -1201,12 +1201,12 @@ function mapPharmacyRequest(row: JsonRecord): PharmacyRequest {
 }
 
 export async function loadPharmacyRequests(pharmacyId: string): Promise<PharmacyRequest[]> {
-  await requirePermanentPharmacyUser("Could not load nearby orders");
+  await requirePermanentPharmacyUser("Could not load assigned orders");
   const client = requirePharmacyBackend();
   const { data, error } = await client.rpc("dawanear_pharmacy_requests", {
     p_pharmacy_id: requireNonEmpty(pharmacyId, "Pharmacy ID"),
   });
-  if (error) rethrow("Could not load nearby pharmacy orders", error);
+  if (error) rethrow("Could not load assigned pharmacy orders", error);
   const requests = asRows(data).map(mapPharmacyRequest);
   const productIds = [...new Set(requests.flatMap((request) => request.items.map((item) => item.productId)))];
   if (productIds.length === 0 || requests.every((request) => request.items.every((item) => item.packSize))) {

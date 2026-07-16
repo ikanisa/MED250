@@ -107,7 +107,11 @@ export function validateDeploymentOrigin(value, mode) {
   if (mode === "live" && /\.(?:workers|pages)\.dev$/i.test(url.hostname)) {
     throw new Error("Live verification requires the production custom domain, not a workers.dev or pages.dev URL.");
   }
-  if (mode === "live" && url.hostname !== "med250.gikundiro.com") {
+  const liveHostnames = new Set([
+    "med250.gikundiro.com",
+    "med250-rwanda.ikanisa.chatgpt.site",
+  ]);
+  if (mode === "live" && !liveHostnames.has(url.hostname)) {
     throw new Error("Live verification is restricted to the MED+250 production domains.");
   }
   return url.origin;

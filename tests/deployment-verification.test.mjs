@@ -66,6 +66,12 @@ test("accepts an indexable public catalog on Sites", () => {
   assert.equal(validateDeploymentOrigin(origin, "catalog"), origin);
 });
 
+test("accepts the public Sites deployment as a live ordering origin", () => {
+  const origin = "https://med250-rwanda.ikanisa.chatgpt.site";
+  assert.deepEqual(assessDeploymentEvidence({ origin, mode: "live", records: records(origin, "live") }).errors, []);
+  assert.equal(validateDeploymentOrigin(origin, "live"), origin);
+});
+
 test("detects indexing, security-header, redirect and sitemap failures", () => {
   const origin = "https://med250.gikundiro.com";
   const evidence = records(origin, "live");
