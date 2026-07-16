@@ -5,8 +5,8 @@
   "evidence_type": "deployment_receipt",
   "status": "complete",
   "title": "Reviewed MED+250 production Edge Function deployment",
-  "summary": "All six reviewed MED+250 Edge Functions were redeployed from the tested workspace and subsequently reported active production versions.",
-  "recorded_at": "2026-07-16T11:42:36Z",
+  "summary": "All six reviewed MED+250 Edge Functions remain active at the deployed production versions, and the untracked retired research tombstone was removed from the shared project.",
+  "recorded_at": "2026-07-16T12:19:05Z",
   "recorded_by": "Codex automated verifier",
   "recorded_role": "Release verification agent",
   "redactions_confirmed": true,
@@ -30,6 +30,16 @@
       "name": "Deployment configuration aligned",
       "status": "passed",
       "detail": "All six functions report the handler-managed authentication configuration declared in the reviewed Supabase project file; no reviewed MED+250 function is missing or inactive."
+    },
+    {
+      "name": "Retired research function removed",
+      "status": "passed",
+      "detail": "The untracked MED+250 research function contained only a retired HTTP 410 tombstone, had no repository dependency, and was deleted. The production inventory now contains exactly the six reviewed MED+250 functions, and the retired endpoint returns HTTP 404."
+    },
+    {
+      "name": "Current hosted project compatibility",
+      "status": "passed",
+      "detail": "The hosted project reports an active healthy state on PostgreSQL 17.6, and the application uses TypeScript 5.9 with a Node 22-or-newer engine boundary."
     }
   ],
   "deployed_by": "Codex release operator",

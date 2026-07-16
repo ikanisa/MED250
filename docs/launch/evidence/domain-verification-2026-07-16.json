@@ -5,8 +5,8 @@
   "evidence_type": "domain_verification",
   "status": "complete",
   "title": "MED+250 production domain DNS TLS and route verification",
-  "summary": "The production custom hostname resolved publicly and every required HTTPS marketplace route passed the live deployment verifier.",
-  "recorded_at": "2026-07-16T10:09:12Z",
+  "summary": "Fresh verification confirms that the production custom hostname resolves publicly and every required HTTPS marketplace route passes the live deployment verifier.",
+  "recorded_at": "2026-07-16T12:19:05Z",
   "recorded_by": "Codex automated verifier",
   "recorded_role": "Release verification agent",
   "redactions_confirmed": true,
@@ -25,11 +25,16 @@
       "name": "Worker route behavior",
       "status": "passed",
       "detail": "All seven required marketplace, catalogue, product, robots, sitemap, and manifest routes returned the expected live behavior."
+    },
+    {
+      "name": "Production build and route configuration",
+      "status": "passed",
+      "detail": "The explicit production Worker build, live metadata tests, robots and sitemap tests, custom-domain route configuration, and strict production dry run all passed."
     }
   ],
   "verified_by": "Codex automated verifier",
   "verifier_role": "Release verification agent",
-  "verified_at": "2026-07-16T10:03:40Z",
+  "verified_at": "2026-07-16T12:19:05Z",
   "hostnames": [
     "med250.gikundiro.com"
   ],

@@ -132,16 +132,16 @@
         {
           "type": "deployment_receipt",
           "reference": "docs/launch/evidence/edge-functions-deployment-2026-07-16.json",
-          "sha256": "00a5da95fb71d9bffd40f2b0f24b48d8f36c101b2a7aa6227b112574afe3be78",
-          "recorded_at": "2026-07-16T11:42:36Z",
-          "summary": "Redacted receipt for the six reviewed MED+250 production Edge Function deployments."
+          "sha256": "c6134375a5918c61bb0deae67fa1dcce1abc991c39321dd89e113485502e17b0",
+          "recorded_at": "2026-07-16T12:19:05Z",
+          "summary": "Redacted receipt confirming the six reviewed functions remain active and the retired untracked research tombstone was removed."
         },
         {
           "type": "test_record",
           "reference": "docs/launch/evidence/edge-functions-test-2026-07-16.json",
-          "sha256": "a66d06d87049c0d12cefc7a37124ac72a2614bfcb6120133a4cbf1457291ff58",
-          "recorded_at": "2026-07-16T11:42:36Z",
-          "summary": "Fresh post-deployment protected-access probes and scheduled cleanup execution passed for all six reviewed function surfaces."
+          "sha256": "2852ec3bdeaef793cb7d029182eb0fa0d758a7230337c888433984c9580b8edf",
+          "recorded_at": "2026-07-16T12:19:05Z",
+          "summary": "Fresh protected-access probes passed for all six reviewed functions, and the retired endpoint is unavailable."
         }
       ],
       "approved_by": null,
@@ -210,16 +210,16 @@
         {
           "type": "domain_verification",
           "reference": "docs/launch/evidence/domain-verification-2026-07-16.json",
-          "sha256": "30bce277ef2d85f74b4ac2ed4afd6b5ac6ecb64a32e2a218757a36a349aa3758",
-          "recorded_at": "2026-07-16T10:09:12Z",
-          "summary": "Production custom-domain DNS, HTTPS, security-header, and Worker route verification passed."
+          "sha256": "4e2b2c80bb2f815007946f0d65b9e5c55c859e34a478c536ac9aeaa6a8a137bf",
+          "recorded_at": "2026-07-16T12:19:05Z",
+          "summary": "Fresh production custom-domain DNS, HTTPS, security-header, Worker route, and production-build verification passed."
         },
         {
           "type": "test_record",
           "reference": "docs/launch/evidence/domain-deployment-test-2026-07-16.json",
-          "sha256": "409f506b90625fd45a096323891d967f5a63f7b3589ce5d59db77bc6bebcf9ff",
-          "recorded_at": "2026-07-16T10:09:12Z",
-          "summary": "The seven-route live deployment test passed with current release assets, index controls, and required headers."
+          "sha256": "10bc08a6bc4434bfdada6bcf1bccea1a12326ed9d170abbfdbb8ec693848427c",
+          "recorded_at": "2026-07-16T12:19:05Z",
+          "summary": "The fresh seven-route live test and strict production Cloudflare dry run passed with current assets and index controls."
         }
       ],
       "approved_by": null,
