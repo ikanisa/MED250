@@ -66,6 +66,8 @@ The pharmacy operations procedure is now consolidated in `docs/launch/PHARMACY_O
 
 Redacted GPS and WhatsApp review-ledger shells are also prepared. They bind the current aggregate state to authoritative source digests without exposing coordinates or phone values: 93 of 769 active pharmacies have approved GPS, and 300 of 769 have governed WhatsApp coverage through 338 enabled login contacts. Operations must finish the controlled row-level reviews and reconcile the approved scopes with actual routing before either gate can be confirmed.
 
+The implemented prescription lifecycle is now consolidated in `docs/launch/PRESCRIPTION_RETENTION_POLICY.md` and bound to the existing controlled test artifact. The policy records private selected-pharmacy access, the 24-hour and 30-day periods, six-hour cleanup schedule, 15-minute lease, retry behavior, pharmacy handling and incident actions. Privacy-owner legal acceptance, named incident roles and signature remain pending.
+
 ## Strict release gaps
 
 `npm run launch:evidence:verify:live` correctly reports 15 pending gates. Some already have complete technical evidence but still require accountable approval.
@@ -81,7 +83,7 @@ Redacted GPS and WhatsApp review-ledger shells are also prepared. They bind the 
 | Backend/Edge evidence | Name and timestamp the backend approval; technical evidence is already complete | Backend owner |
 | Turnstile | Complete one real-token, non-ordering, disposable-anonymous-user positive-path browser test | Security owner |
 | Anonymous auth | Approve limits after controlled intended-use and abuse tests | Security owner |
-| Prescription retention | Sign the implemented 24-hour/30-day policy; cleanup test evidence is complete | Privacy owner |
+| Prescription retention | Review the prepared policy, assign incident roles, record legal conditions, and complete its bound signed-approval artifact | Privacy owner |
 | Cloudflare | Replace broad OAuth with a least-privilege MED+250 deploy credential and approve the account record | Infrastructure owner |
 | Domain | Name and timestamp infrastructure approval; DNS and deployment evidence is complete | Infrastructure owner |
 | Physical UAT | Execute and approve all 12 scenarios with controlled identities and redacted evidence | QA owner |

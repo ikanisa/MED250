@@ -1,7 +1,7 @@
 {
   "schema_version": "1",
   "release": "med250-production",
-  "captured_at": "2026-07-16T11:55:39Z",
+  "captured_at": "2026-07-16T11:57:59Z",
   "objective_complete": false,
   "public_origin": "https://med250.gikundiro.com",
   "release_decision": "conditional_hold",
@@ -190,6 +190,15 @@
     },
     "privacy_boundary": "Precise coordinates and contact values remain in controlled private ledgers; release artifacts contain only aggregate counts and immutable source digests."
   },
+  "prescription_retention_policy": {
+    "status": "pending_privacy_owner_approval",
+    "policy": "docs/launch/PRESCRIPTION_RETENTION_POLICY.md",
+    "policy_sha256": "70a77a1e721b94348125032bcd529e9a89baa3f6cfda907ee3b8070e1d47b88f",
+    "test_artifact": "docs/launch/evidence/prescription-retention-test-2026-07-16.json",
+    "test_sha256": "14925d74e8d1bc2e996e0fa2efcc488426f6a3c3766fc82d9226abc0203fd90c",
+    "pending_artifact": "docs/launch/evidence/prescription-retention-approval-pending-2026-07-16.json",
+    "remaining_owner_action": "Approve the periods and safeguards, assign incident roles, record applicable legal conditions, and sign the redacted approval."
+  },
   "remaining_accountable_actions": [
     {
       "priority": 1,
@@ -237,7 +246,7 @@
     {
       "priority": 6,
       "owner": "MED+250 operations lead, legal/compliance owner, data owner, privacy owner, backend owner, and infrastructure owner",
-      "action": "Review the exact gate acceptance criteria and existing evidence, provide the missing signed approvals and review ledgers, and name each approver with role and timezone-qualified timestamp. The operations lead must complete docs/launch/evidence/pharmacy-operations-approval-pending-2026-07-16.json after assigning the named roles. The data owner must complete docs/launch/evidence/data-reuse-review-ledger-pending-2026-07-16.json and resolve its three raw-snapshot or durable-retention blockers before signing. Backend and domain evidence is already complete but still requires accountable approval.",
+      "action": "Review the exact gate acceptance criteria and existing evidence, provide the missing signed approvals and review ledgers, and name each approver with role and timezone-qualified timestamp. The operations lead must complete docs/launch/evidence/pharmacy-operations-approval-pending-2026-07-16.json after assigning the named roles. The data owner must complete docs/launch/evidence/data-reuse-review-ledger-pending-2026-07-16.json and resolve its three raw-snapshot or durable-retention blockers before signing. The privacy owner must complete docs/launch/evidence/prescription-retention-approval-pending-2026-07-16.json after approving legal conditions and incident roles. Backend and domain evidence is already complete but still requires accountable approval.",
       "closes": [
         "MED250_GATE_PHARMACY_OPERATIONS_APPROVED",
         "MED250_GATE_REGULATORY_APPROVED",

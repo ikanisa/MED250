@@ -183,6 +183,8 @@ Gate:
 
 Review and approve the implemented 24-hour orphan/abandoned-file rule, 24-hour selected-pharmacy access window, 30-day completed-order deletion rule, six-hour protected schedule, lease/retry behavior, and incident procedure. The controlled cleanup test artifact already exists; a signed privacy decision remains required.
 
+Use `docs/launch/PRESCRIPTION_RETENTION_POLICY.md` as the exact policy under review and complete `docs/launch/evidence/prescription-retention-approval-pending-2026-07-16.json`. The pending artifact already binds the policy and controlled cleanup test to their SHA-256 values; the privacy owner must add the legal, role and incident decisions.
+
 ### Infrastructure owner
 
 Gates:
