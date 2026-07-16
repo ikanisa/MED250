@@ -65,6 +65,13 @@ Gate:
 
 The named legal/compliance owner must review the exact information-first marketplace model, central indicative-price wording, pharmacy-only fulfilment, WhatsApp handoff, medicine presentation, prescription handling, product advertising, Rwanda FDA conditions, RICA conditions, and any health-sector obligations. Record conditions or restrictions in the signed artifact; do not use a generic project approval.
 
+Start with:
+
+- `docs/launch/RWANDA_REGULATORY_REVIEW_BRIEF.md`
+- `docs/launch/evidence/regulatory-approval-pending-2026-07-16.json`
+
+The brief records two material current-law actions that cannot be closed by engineering: Law No. 011/2026 requires an enterprise engaging in e-commerce or online-intermediary services to apply for the corresponding RICA licence, with an existing-operator conformity period of no more than six months from 4 March 2026; and Rwanda FDA's promotion rules expressly include catalogues and internet/electronic displays within regulated advertising where they promote supply, sale or use. The owner must obtain authoritative written determinations or approvals for the exact MED+250 presentation and operation, complete the privacy and health-sector decisions in the brief, and sign only after every pending check passes.
+
 ### Data owner
 
 Gate:

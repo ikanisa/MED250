@@ -2056,7 +2056,7 @@ export default function Marketplace({
       </>}
       </div>
 
-      <footer><Link className="brand footer-brand" href="/" aria-label="med+250 home"><BrandLogo /></Link><p>MED+250 does not diagnose, prescribe, advertise prescription medicines, or replace a qualified health professional.</p><nav aria-label="Footer"><Link href="/categories">Products</Link><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link><button onClick={openPortal}>For Pharmacies</button></nav></footer>
+      <footer><Link className="brand footer-brand" href="/" aria-label="med+250 home"><BrandLogo /></Link><p>MED+250 does not diagnose, prescribe, recommend treatment, or replace a qualified health professional.</p><nav aria-label="Footer"><Link href="/categories">Products</Link><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link><button onClick={openPortal}>For Pharmacies</button></nav></footer>
 
       {filtersOpen ? <div className="filter-overlay" onMouseDown={(event) => event.target === event.currentTarget && setFiltersOpen(false)}>
         <section className="filter-dialog" role="dialog" aria-modal="true" aria-labelledby="catalogue-filter-title" aria-describedby="catalogue-filter-description" data-modal-root="catalogue-filters" tabIndex={-1}>

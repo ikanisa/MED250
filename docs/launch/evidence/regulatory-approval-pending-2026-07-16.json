@@ -1,0 +1,82 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_REGULATORY_APPROVED",
+  "evidence_type": "signed_approval",
+  "status": "pending",
+  "title": "MED+250 Rwanda marketplace regulatory approval",
+  "summary": "Owner-ready approval record for the exact pharmacy-only, information-first marketplace model. Official-source review is documented, but RICA licensing, Rwanda FDA catalogue and advertising clearance, regulated-product scope, privacy compliance and accountable legal signature remain unresolved.",
+  "recorded_at": "2026-07-16T14:05:04+02:00",
+  "recorded_by": "MED+250 Rwanda regulatory readiness review",
+  "recorded_role": "Release evidence preparer",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Exact production marketplace model documented",
+      "status": "passed",
+      "detail": "The review brief records the pharmacy-only seller model, central catalogue and indicative pricing, private availability requests, nearby-priority and national-fallback routing, optional WhatsApp completion, prescription controls and absence of platform payment custody."
+    },
+    {
+      "name": "RICA e-commerce and online-intermediary classification",
+      "status": "blocked",
+      "detail": "The accountable owner has not yet retained the applicable RICA licence or authoritative written determination for the exact MED+250 model under Law No. 011/2026."
+    },
+    {
+      "name": "RICA transitional compliance deadline",
+      "status": "pending",
+      "detail": "The legal owner must confirm and complete the Article 73 conformity plan within the period of no more than six months from the law's 4 March 2026 publication."
+    },
+    {
+      "name": "Rwanda FDA catalogue and advertising determination",
+      "status": "blocked",
+      "detail": "No written Rwanda FDA determination or clearance has been retained for the exact public catalogue, search, category, product-page, indicative-price, image, metadata, sitemap and availability-request presentation."
+    },
+    {
+      "name": "Regulated product registration and market status",
+      "status": "blocked",
+      "detail": "Medicine source controls are documented, but the legal owner has not approved the complete medicine scope or established Rwanda registration and lawful market-status evidence for every regulated consumer product."
+    },
+    {
+      "name": "Licensed pharmacy and professional dispensing conditions",
+      "status": "pending",
+      "detail": "The pharmacy-only boundary is implemented, but the owner must approve current licence checks, authorised-person requirements, prescription classification, delivery restrictions, controlled-product exclusions, recall handling and final pharmacist responsibility."
+    },
+    {
+      "name": "Personal data and sensitive health-data compliance",
+      "status": "blocked",
+      "detail": "Controller and processor registration, role allocation, data protection impact assessment, lawful bases, processor contracts, outside-Rwanda storage and transfer authority, rights handling, breach procedure and final privacy contacts have not been approved."
+    },
+    {
+      "name": "Consumer and intermediary disclosures",
+      "status": "pending",
+      "detail": "Core central-price, pharmacy-seller, availability-request and no-payment wording is present, but the owner must approve the complete enterprise identity, complaints, after-sales, seller disclosure, rules of procedure, takedown and consumer-rights information."
+    },
+    {
+      "name": "Source reuse and product image rights",
+      "status": "blocked",
+      "detail": "The separate data-reuse gate remains pending, including raw source retention and permission issues. Amazon is limited to taxonomy and product-reference research, Amazon prices are absent, and external image rights still require source-level approval."
+    },
+    {
+      "name": "Named legal owner decision and signature",
+      "status": "pending",
+      "detail": "The accountable legal and compliance owner must record the approved legal entity, regulatory references, permitted product and pharmacy scope, conditions, exclusions, change triggers, named escalation owners and signed decision."
+    }
+  ],
+  "review_brief_reference": "docs/launch/RWANDA_REGULATORY_REVIEW_BRIEF.md",
+  "review_brief_sha256": "5a59d5554d9fc6d2d44d1e11e95f6ad310a4c7cfd8dfd624b19ee90f59c8856d",
+  "decision": null,
+  "approved_by": null,
+  "approved_role": null,
+  "approved_at": null,
+  "completion_instructions": [
+    "Have qualified Rwanda legal and compliance counsel verify the current official sources, amendments, application procedures and exact classification of the implemented marketplace.",
+    "Obtain and retain the applicable RICA licence or an authoritative written determination for the exact model, and complete every required intermediary disclosure and content-removal procedure.",
+    "Obtain and retain the Rwanda FDA determination or clearance required for the exact catalogue and public presentation, including the approved product scope, format, reference numbers, validity periods and change-control conditions.",
+    "Approve only products and pharmacies supported by current Rwanda registration, market-status, premises-licence, authorised-person, prescription, delivery, recall and professional-dispensing evidence.",
+    "Complete controller and processor registration, the data protection impact assessment, legal-basis and transfer decisions, processor contracts, retention approval, privacy contacts, rights procedure and breach response.",
+    "Resolve the separate data-reuse and product-image rights blockers or remove the affected derived data before signing.",
+    "Confirm the recorded review-brief SHA-256 still matches docs/launch/RWANDA_REGULATORY_REVIEW_BRIEF.md.",
+    "Set every check to passed, set decision to approved, add the named approver, role and timezone-qualified timestamp, and set status to complete.",
+    "Validate the completed artifact strictly, record its exact SHA-256 digest in data/launch-evidence.json, and confirm the gate only after the full registry validates."
+  ]
+}
