@@ -1,0 +1,39 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_GPS_READY",
+  "evidence_type": "operations_snapshot",
+  "status": "complete",
+  "title": "Production pharmacy GPS operational health snapshot",
+  "summary": "The aggregate production health endpoint reported no critical or warning conditions and confirmed a non-empty governed GPS and dispatch-ready pharmacy set.",
+  "recorded_at": "2026-07-16T10:09:12Z",
+  "recorded_by": "Codex automated verifier",
+  "recorded_role": "Release verification agent",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Aggregate privacy boundary",
+      "status": "passed",
+      "detail": "The health response declared aggregate-only output with no customer, pharmacy, health, or precise-location identifiers."
+    },
+    {
+      "name": "GPS and dispatch coverage",
+      "status": "passed",
+      "detail": "The live snapshot reported 93 GPS-ready pharmacies and 300 pharmacies satisfying the dispatch-ready aggregate rule."
+    },
+    {
+      "name": "Strict operational health",
+      "status": "passed",
+      "detail": "The strict operational-health evaluator returned healthy with zero critical findings and zero warnings."
+    }
+  ],
+  "captured_by": "Codex automated verifier",
+  "capturer_role": "Release verification agent",
+  "captured_at": "2026-07-16T10:06:41Z",
+  "critical_count": 0,
+  "metrics": {
+    "active_pharmacies": 769,
+    "gps_ready_pharmacies": 93,
+    "dispatch_ready_pharmacies": 300
+  }
+}

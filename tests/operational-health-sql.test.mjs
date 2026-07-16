@@ -15,7 +15,9 @@ await database.exec(`
     id text primary key,
     is_active boolean not null default true,
     is_orderable boolean not null default false,
-    source_refreshed_at timestamptz
+    source_refreshed_at timestamptz,
+    indicative_price_rwf integer,
+    indicative_price_updated_at timestamptz
   );
   create table public.dawanear_pharmacy_prices (
     product_id text not null,
@@ -68,14 +70,21 @@ await database.exec(`
 `);
 
 const migration = await readFile(
-  new URL("../supabase/migrations/20260713214500_operational_health.sql", import.meta.url),
+  new URL("../supabase/migrations/20260713191442_med250_operational_health.sql", import.meta.url),
   "utf8",
 );
 await database.exec(migration);
+const centralPriceHealthMigration = await readFile(
+  new URL("../supabase/migrations/20260716070636_central_indicative_price_operational_health.sql", import.meta.url),
+  "utf8",
+);
+await database.exec(centralPriceHealthMigration);
 
 await database.exec(`
-  insert into public.dawanear_products (id, is_active, is_orderable, source_refreshed_at)
-  values ('product-1', true, true, now());
+  insert into public.dawanear_products (
+    id, is_active, is_orderable, source_refreshed_at,
+    indicative_price_rwf, indicative_price_updated_at
+  ) values ('product-1', true, true, now(), 2500, now());
   insert into public.dawanear_pharmacies (
     id, is_active, marketplace_approved, online_license_verified,
     geocode_status, location, license_expires_on
@@ -112,7 +121,8 @@ test("returns aggregate marketplace operations without row identifiers", async (
   assert.equal(health.privacy.aggregate_only, true);
   assert.equal(health.privacy.contains_health_or_location_data, false);
   assert.equal(health.catalogue.active_products, 1);
-  assert.equal(health.catalogue.products_with_current_prices, 1);
+  assert.equal(health.catalogue.products_with_central_indicative_prices, 1);
+  assert.equal(health.catalogue.pharmacy_specific_price_records_in_use, 0);
   assert.equal(health.pharmacies.dispatch_ready, 1);
   assert.equal(health.pharmacies.login_enabled_whatsapp_contacts, 1);
   assert.equal(health.orders.dispatched_24h, 1);

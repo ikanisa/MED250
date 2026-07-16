@@ -29,13 +29,65 @@ export function createLaunchEvidenceTemplate(gateName, evidenceType) {
   return { ...base, ...extensions[evidenceType] };
 }
 
+export function createLaunchEvidenceHandoff(manifest) {
+  const gates = [];
+  for (const [gateName, gate] of Object.entries(manifest?.gates ?? {})) {
+    if (gate.status === "confirmed") continue;
+    const recordedTypes = new Set((gate.evidence ?? []).map((entry) => entry.type));
+    const missingTypes = gate.required_evidence_types.filter((type) => !recordedTypes.has(type));
+    gates.push({
+      gate: gateName,
+      title: gate.title,
+      owner: gate.owner,
+      acceptance: gate.acceptance,
+      current_status: gate.status,
+      approval_required: {
+        approved_by: gate.approved_by,
+        approved_role: gate.approved_role,
+        approved_at: gate.approved_at,
+      },
+      missing_evidence_types: missingTypes,
+      suggested_filenames: Object.fromEntries(
+        missingTypes.map((type) => [
+          type,
+          `docs/launch/evidence/${gateName.toLowerCase().replace(/^med250_gate_/, "").replaceAll("_", "-")}-${type.replaceAll("_", "-")}.json`,
+        ]),
+      ),
+      evidence_templates: Object.fromEntries(
+        missingTypes.map((type) => [type, createLaunchEvidenceTemplate(gateName, type)]),
+      ),
+    });
+  }
+  return {
+    schema_version: "1",
+    release: manifest?.release ?? "med250-production",
+    instructions: [
+      "Complete only evidence produced by the accountable owner or named executor.",
+      "Never store credentials, tokens, phone numbers, OTPs, customer identifiers, prescription contents, email addresses, or precise customer coordinates.",
+      "Validate each completed artifact before adding its SHA-256 digest and approval metadata to data/launch-evidence.json.",
+      "Do not mark a gate confirmed until every required evidence type and the named gate approval are complete.",
+    ],
+    gate_count: gates.length,
+    missing_evidence_artifact_count: gates.reduce((total, gate) => total + gate.missing_evidence_types.length, 0),
+    gates,
+  };
+}
+
 async function main() {
-  const args = Object.fromEntries(process.argv.slice(2).reduce((pairs, value, index, values) => {
-    if (value.startsWith("--")) pairs.push([value.slice(2), values[index + 1]]);
-    return pairs;
-  }, []));
-  if (!args.gate || !args.type) throw new Error("Use --gate <gate-name> --type <evidence-type>.");
   const manifest = JSON.parse(await readFile("data/launch-evidence.json", "utf8"));
+  const values = process.argv.slice(2);
+  if (values.includes("--all-missing")) {
+    process.stdout.write(`${JSON.stringify(createLaunchEvidenceHandoff(manifest), null, 2)}\n`);
+    return;
+  }
+  const args = {};
+  for (let index = 0; index < values.length; index += 2) {
+    const flag = values[index];
+    const value = values[index + 1];
+    if (!flag?.startsWith("--") || !value) throw new Error("Use --gate <gate-name> --type <evidence-type>, or --all-missing.");
+    args[flag.slice(2)] = value;
+  }
+  if (!args.gate || !args.type) throw new Error("Use --gate <gate-name> --type <evidence-type>, or --all-missing.");
   const gate = manifest.gates?.[args.gate];
   if (!gate) throw new Error(`Unknown launch gate ${args.gate}.`);
   if (!gate.required_evidence_types.includes(args.type)) throw new Error(`${args.type} is not required by ${args.gate}.`);

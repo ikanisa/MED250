@@ -55,7 +55,9 @@ export function assessDeploymentEvidence({ origin, mode, records }) {
     }
     if (!/^[0-9a-f-]{36}$/i.test(home.headers["x-request-id"] ?? "")) errors.push("/: X-Request-Id is missing or invalid");
     if (!home.headers["server-timing"]?.includes("app;dur=")) errors.push("/: Server-Timing is missing");
-    if (!home.body.includes("MED+250") || !home.body.includes("One order")) errors.push("/: marketplace identity or primary proposition is missing");
+    if (!home.body.includes("MED+250") || !home.body.includes("Connect with a pharmacy that has it")) {
+      errors.push("/: marketplace identity or primary proposition is missing");
+    }
     if (mode === "preview" && home.headers["x-robots-tag"] !== "noindex, nofollow") {
       errors.push("/: preview deployment is not protected by X-Robots-Tag");
     }

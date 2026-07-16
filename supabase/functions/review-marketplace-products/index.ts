@@ -26,13 +26,13 @@ function elevatedSupabaseKey() {
 
 const productSelect = `
   id, asin, product_name, brand_name, product_type, category, subcategory,
-  publication_status, seller_verification_required, compliance_status,
-  seller_evidence_url, compliance_evidence_url, reviewed_by_label, review_note,
+  publication_status, compliance_status,
+  compliance_evidence_url, reviewed_by_label, review_note,
   reviewed_at, approved_at, is_active, is_orderable, amazon_product_url,
   rwanda_match_status, rwanda_match_score, rwanda_product_url, updated_at
 `;
 const decisions = new Set(["start_review", "compliance_review", "approve", "reject", "unpublish"]);
-const statuses = new Set(["research_candidate", "seller_review", "compliance_review", "approved", "rejected"]);
+const statuses = new Set(["research_candidate", "catalogue_review", "approved", "rejected"]);
 
 Deno.serve(async (request) => {
   if (request.method !== "POST") return new Response("Method not allowed", { status: 405 });
@@ -99,7 +99,7 @@ Deno.serve(async (request) => {
     const [{ data: product, error }, { data: reviews, error: reviewError }] = await Promise.all([
       supabase.from("dawanear_marketplace_products").select(productSelect).eq("id", productId).maybeSingle(),
       supabase.from("dawanear_marketplace_product_reviews")
-        .select("id,decision,reviewed_by_label,evidence_note,seller_evidence_url,compliance_evidence_url,expected_product_updated_at,previous_state,resulting_state,created_at")
+        .select("id,decision,reviewed_by_label,evidence_note,compliance_evidence_url,expected_product_updated_at,previous_state,resulting_state,created_at")
         .eq("product_id", productId).order("created_at", { ascending: false }).limit(20),
     ]);
     if (error || reviewError) return Response.json({ error: error?.message ?? reviewError?.message }, { status: 500 });
@@ -110,7 +110,6 @@ Deno.serve(async (request) => {
   const reviewer = String(body.reviewed_by ?? "").trim();
   const evidenceNote = String(body.evidence_note ?? "").trim();
   const expectedUpdatedAt = String(body.expected_updated_at ?? "").trim();
-  const sellerEvidenceUrl = String(body.seller_evidence_url ?? "").trim() || null;
   const complianceEvidenceUrl = String(body.compliance_evidence_url ?? "").trim() || null;
   if (reviewer.length < 3 || reviewer.length > 200 || evidenceNote.length < 20 || evidenceNote.length > 4000) {
     return Response.json({ error: "Decision requires a 3-200 character reviewer and 20-4000 character evidence note." }, { status: 400 });
@@ -118,13 +117,7 @@ Deno.serve(async (request) => {
   if (!expectedUpdatedAt || !Number.isFinite(Date.parse(expectedUpdatedAt))) {
     return Response.json({ error: "A valid expected_updated_at from inspect is required." }, { status: 400 });
   }
-  if (action === "compliance_review" && !sellerEvidenceUrl) {
-    return Response.json({ error: "Seller evidence URL is required for compliance review." }, { status: 400 });
-  }
-  if (action === "approve" && (!sellerEvidenceUrl || !complianceEvidenceUrl)) {
-    return Response.json({ error: "Seller and compliance evidence URLs are required for approval." }, { status: 400 });
-  }
-  if ([sellerEvidenceUrl, complianceEvidenceUrl].some((url) => url && !url.startsWith("https://"))) {
+  if (complianceEvidenceUrl && !complianceEvidenceUrl.startsWith("https://")) {
     return Response.json({ error: "Evidence references must be HTTPS URLs." }, { status: 400 });
   }
 
@@ -134,7 +127,6 @@ Deno.serve(async (request) => {
     p_reviewed_by_label: reviewer,
     p_evidence_note: evidenceNote,
     p_expected_updated_at: expectedUpdatedAt,
-    p_seller_evidence_url: sellerEvidenceUrl,
     p_compliance_evidence_url: complianceEvidenceUrl,
   });
   if (error) return Response.json({ error: error.message }, { status: 409 });

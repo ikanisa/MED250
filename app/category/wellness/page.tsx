@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import Marketplace from "../../marketplace";
 import { getInitialMarketplaceProducts } from "../../../lib/product-seo";
+import { getPublicCatalogueTaxonomy } from "../../../lib/public-marketplace-product";
 
-export const metadata: Metadata = { title: "Health and household products", description: "Explore non-prescription health care, household supplies, medical equipment, oral care, nutrition, vision, and wellness products.", alternates: { canonical: "/category/wellness" } };
+export const metadata: Metadata = { title: "Health and household products", description: "Browse source-backed health and household products currently present in the MED+250 catalogue.", alternates: { canonical: "/category/wellness" } };
 
-export default function WellnessPage() {
-  return <Marketplace initialCategory="Health & Household" pageTitle="Health & Household" pageDescription="Explore non-prescription health care, household supplies, medical equipment, oral care, nutrition, vision care, and wellness products." pageImage="/marketplace/category-wellness-devices.webp" initialProducts={getInitialMarketplaceProducts("Wellness")} />;
+export default async function WellnessPage() {
+  const initialTaxonomy = await getPublicCatalogueTaxonomy();
+  if (!initialTaxonomy.some((row) => row.department === "Health & Household")) redirect("/categories");
+  return <Marketplace initialCategory="Health & Household" pageTitle="Health & Household" pageDescription="Browse source-backed products currently present in this department." pageImage="/marketplace/category-wellness-devices.webp" initialProducts={getInitialMarketplaceProducts("Wellness")} initialTaxonomy={initialTaxonomy} />;
 }

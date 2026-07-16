@@ -1,0 +1,20 @@
+{
+  "generated_at": "2026-07-16T06:30:17.738Z",
+  "source": "https://www.mmi.gov.rw/partners/pharmacies",
+  "source_owner": "Rwanda Military Medical Insurance",
+  "decision": "Promote only exact official-name matches confirmed by both FDA district and sector evidence.",
+  "authentication_rule": "Every promoted government-directory mobile is a phone contact and a login-enabled WhatsApp contact; account ownership is established only after OTP verification.",
+  "promoted_contacts": 77,
+  "promoted_pharmacies": 77,
+  "accepted_shared_branch_numbers": [
+    "retail-2026-05-193",
+    "retail-2026-05-664"
+  ],
+  "quarantined_cross_pharmacy_conflicts": {
+    "retail-2026-05-224": "MMI mobile is already verified for unrelated HAMA MUTUAL PHARMACY in another district.",
+    "retail-2026-05-231": "MMI mobile is already verified for unrelated EXTREME PHARMACY in another district.",
+    "retail-2026-05-662": "MMI mobile is already verified for unrelated PHARMA BEST in the same district."
+  },
+  "matched_source_sha256": "f9d4bb728ee108b376e50540a7730e9b838754b298bc83bbd980681837995a08",
+  "promoted_contacts_sha256": "c7529cf0e942554410681e4ad9d42c190246556682c6c0aefd233a16af3d6eba"
+}

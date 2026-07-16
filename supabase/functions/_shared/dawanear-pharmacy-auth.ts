@@ -6,6 +6,7 @@ const DEFAULT_ORIGINS = [
   "http://localhost:3001",
   "http://127.0.0.1:3001",
   "https://med250.gikundiro.com",
+  "https://med250-rwanda.ikanisa.chatgpt.site",
 ];
 
 export class HttpError extends Error {

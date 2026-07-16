@@ -41,7 +41,7 @@ await database.exec(`
 `);
 
 const migration = await readFile(
-  new URL("../supabase/migrations/20260713184500_server_catalogue_search.sql", import.meta.url),
+  new URL("../supabase/migrations/20260713175533_server_catalogue_search.sql", import.meta.url),
   "utf8",
 );
 await database.exec(migration);
@@ -61,17 +61,14 @@ await database.exec(`
 
 after(async () => database.close());
 
-test("server search ranks exact ingredients and returns aggregate price ranges", async () => {
+test("legacy server search still ranks exact active ingredients", async () => {
   const result = await database.query(`
-    select id, match_explanation, price_min_rwf, price_max_rwf, price_contributors, total_count
+    select id, match_explanation, total_count
     from public.dawanear_search_catalogue('paracetamol')
   `);
   assert.deepEqual(result.rows, [{
     id: "p1",
     match_explanation: "Exact active ingredient",
-    price_min_rwf: 1000,
-    price_max_rwf: 1500,
-    price_contributors: 2,
     total_count: 1,
   }]);
 });
@@ -92,19 +89,19 @@ test("server search supports typo and multilingual common-use recovery", async (
   assert.deepEqual(headache.rows, [{ id: "p1", match_explanation: "Related medicine or use" }]);
 });
 
-test("server search applies inferred category, form and availability filters", async () => {
+test("server search applies category, form and requestability filters", async () => {
   const personalCare = await database.query(`
     select id, category from public.dawanear_search_catalogue('', 'Personal care')
   `);
-  const pricedCapsules = await database.query(`
-    select id from public.dawanear_search_catalogue('', 'All products', 'all', 'tablets', 'priced')
+  const requestableTablets = await database.query(`
+    select id from public.dawanear_search_catalogue('', 'All products', 'all', 'tablets', 'orderable')
     order by id
   `);
   const orderablePersonalCare = await database.query(`
     select id from public.dawanear_search_catalogue('', 'Personal care', 'all', 'all', 'orderable')
   `);
   assert.deepEqual(personalCare.rows, [{ id: "p4", category: "Personal care" }]);
-  assert.deepEqual(pricedCapsules.rows, [{ id: "p1" }, { id: "p3" }]);
+  assert.deepEqual(requestableTablets.rows, [{ id: "p1" }, { id: "p3" }]);
   assert.deepEqual(orderablePersonalCare.rows, []);
 });
 

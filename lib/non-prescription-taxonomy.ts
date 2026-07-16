@@ -79,40 +79,7 @@ export function backendCategoryFor(value: string) {
   return value;
 }
 
-type TaxonomyProduct = Pick<Product, "brand" | "generic" | "form" | "packSize" | "category" | "prescriptionStatus" | "department" | "subcategory">;
-
-function inferredSubcategory(department: NonPrescriptionDepartment, product: TaxonomyProduct) {
-  const text = `${product.brand} ${product.generic} ${product.form} ${product.packSize} ${product.category}`.toLowerCase();
-  if (department.label === "Beauty & Personal Care") {
-    if (/tooth|dental|mouth|oral|floss/.test(text)) return "Oral Care";
-    if (/shampoo|conditioner|hair|scalp/.test(text)) return "Hair Care";
-    if (/perfume|fragrance|deodorant|cologne/.test(text)) return "Fragrance";
-    if (/shav|razor|hair removal|depilator/.test(text)) return "Shave & Hair Removal";
-    if (/nail|manicure|pedicure|foot|hand cream/.test(text)) return "Foot, Hand & Nail Care";
-    if (/brush|comb|mirror|applicator|beauty tool/.test(text)) return "Tools & Accessories";
-    if (/makeup|lipstick|mascara|foundation|cosmetic/.test(text)) return "Makeup";
-    if (/skin|lotion|cream|cleanser|moisturi|sunscreen|soap/.test(text)) return "Skin Care";
-    return "Personal Care";
-  }
-  if (department.label === "Baby") {
-    if (/diaper|nappy|wipe/.test(text)) return "Diapering";
-    if (/bottle|feeding|formula|weaning|breast pump/.test(text)) return "Feeding";
-    if (/crib|cot|nursery|blanket|mosquito net/.test(text)) return "Nursery";
-    if (/pregnan|maternity|prenatal|postnatal/.test(text)) return "Pregnancy & Maternity";
-    return "Baby Care";
-  }
-  if (/vitamin|supplement|mineral|omega|probiotic/.test(text)) return "Vitamins & Dietary Supplements";
-  if (/sport|protein|amino|electrolyte/.test(text)) return "Sports Nutrition";
-  if (/eye|vision|contact lens/.test(text)) return "Vision Care";
-  if (/sexual|condom|lubricant|intimate/.test(text)) return "Sexual Wellness";
-  if (/tooth|dental|mouth|oral|floss/.test(text)) return "Oral Care";
-  if (/baby|infant|child|pediatric/.test(text)) return "Baby & Child Care";
-  if (/detergent|cleaner|disinfect|household|laundry/.test(text)) return "Household Supplies";
-  if (/device|monitor|meter|thermometer|bandage|first aid|equipment/.test(text)) return "Medical Supplies & Equipment";
-  if (/relax|sleep|aroma|massage/.test(text)) return "Wellness & Relaxation";
-  if (/hygiene|personal care|sanitary/.test(text)) return "Personal Care";
-  return "Health Care";
-}
+type TaxonomyProduct = Pick<Product, "category" | "prescriptionStatus" | "department" | "subcategory">;
 
 export function nonPrescriptionTaxonomyForProduct(product: TaxonomyProduct) {
   if (product.prescriptionStatus !== "non_prescription") return null;
@@ -123,11 +90,12 @@ export function nonPrescriptionTaxonomyForProduct(product: TaxonomyProduct) {
     || department.subcategories.includes(product.category)
   ));
   if (!directDepartment) return null;
+  // A subcategory is a data field, not a prediction from the product name.
+  // If the catalogue row does not carry one, callers must not render a label.
   const subcategory = product.subcategory && directDepartment.subcategories.includes(product.subcategory)
     ? product.subcategory
-    : directDepartment.subcategories.includes(product.category)
-      ? product.category
-      : inferredSubcategory(directDepartment, product);
+    : null;
+  if (!subcategory) return null;
   return {
     department: directDepartment.label,
     subcategory,

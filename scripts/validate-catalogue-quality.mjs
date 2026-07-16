@@ -30,7 +30,9 @@ for (const [index, product] of products.entries()) {
   }
 }
 
-for (const category of ["Medicines", "Pain & fever", "Digestive health", "Allergy", "Diabetes care", "Personal care", "Baby & family", "Wellness"]) {
+// The FDA source has no medicine subcategory column. Validate only the
+// source-backed medicine department; never require inferred labels.
+for (const category of ["Medicines"]) {
   const count = categoryCounts.get(category) ?? 0;
   if (!count) errors.push(`The ${category} route has no source-backed products.`);
   else if (count < 10) warnings.push(`The ${category} route is source-backed but sparse (${count} products); do not invent products to fill it.`);

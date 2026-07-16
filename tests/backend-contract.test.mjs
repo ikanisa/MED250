@@ -26,7 +26,10 @@ function validContract() {
       distinct_ids: 2200,
       distinct_asins: 2200,
       taxonomy_pair_count: 25,
-      minimum_taxonomy_pair_count: 80,
+      minimum_taxonomy_pair_count: 50,
+      minimum_required_per_pair: 50,
+      candidate_count: 2405,
+      rejected_candidate_count: 205,
       unsafe_publication_count: 0,
       unsafe_projection_count: 0,
       public_policy_exists: true,
@@ -45,14 +48,51 @@ function validContract() {
       review_table_exists: true,
       review_table_rls: true,
       immutable_audit_trigger: true,
-      approved_without_evidence_count: 0,
+      publication_audit_constraint_trigger: true,
+      approved_without_review_metadata_count: 0,
       approved_without_audit_count: 0,
+      rejected_without_audit_count: 0,
+      audit_reconciliation_complete: true,
+      product_seller_columns_absent: true,
       review_function_exists: true,
       review_function_security_definer: true,
       review_function_search_path_locked: true,
       service_role_can_review: true,
       anon_can_review: false,
       authenticated_can_review: false,
+    },
+    pricing_model: {
+      central_price_count: 116,
+      amazon_reference_price_count: 0,
+      amazon_usd_value_count: 0,
+      amazon_price_reference_supported: false,
+      current_pharmacy_price_count: 0,
+      public_view_avoids_pharmacy_prices: true,
+      confirmation_price_optional: true,
+      pharmacy_catalogue_price_write_disabled: true,
+      public_stock_supported: false,
+      final_price_claimed: false,
+    },
+    product_images: {
+      table_exists: true,
+      rls_enabled: true,
+      public_policy_exists: true,
+      public_table_select_expected: true,
+      bucket_configured: true,
+      publish_function_exists: true,
+      publish_function_security_definer: true,
+      publish_function_search_path_locked: true,
+      service_role_can_publish: true,
+      anon_can_publish: false,
+      authenticated_can_publish: false,
+      live_product_count: 4659,
+      complete_product_count: 0,
+      missing_product_count: 4659,
+      coverage_required: false,
+      missing_images_hidden: true,
+      generated_placeholders_allowed: false,
+      partial_product_count: 0,
+      unsafe_image_count: 0,
     },
     monitoring: {
       health_exists: true,
@@ -114,8 +154,8 @@ function validContract() {
     prescriptions: { bucket_exists: true, cleanup_claims_rls: true },
     realtime: { orders: true, offers: true, notifications: true },
     api_surface: {
-      function_count: 28,
-      expected_function_count: 28,
+      function_count: 29,
+      expected_function_count: 29,
       public_execute_count: 0,
       anonymous_security_definer_count: 0,
       mutable_security_definer_path_count: 0,
@@ -124,8 +164,8 @@ function validContract() {
       unexpected_authenticated_security_definer_count: 0,
     },
     table_surface: {
-      table_count: 21,
-      expected_table_count: 21,
+      table_count: 22,
+      expected_table_count: 22,
       rls_disabled_count: 0,
       anonymous_select_count: 0,
       expected_deny_by_default_count: 9,
@@ -156,6 +196,27 @@ test("detects privilege, function-mode and Realtime drift", () => {
     "Offers are missing from Realtime publication.",
     "PUBLIC can execute a MED+250 function.",
     "An unexpected MED+250 table is directly selectable by authenticated clients.",
+  ]);
+});
+
+test("detects pharmacy-specific pricing or stock drift", () => {
+  const contract = validContract();
+  contract.pricing_model.current_pharmacy_price_count = 1;
+  contract.pricing_model.amazon_reference_price_count = 1;
+  contract.pricing_model.amazon_usd_value_count = 1;
+  contract.pricing_model.amazon_price_reference_supported = true;
+  contract.pricing_model.public_view_avoids_pharmacy_prices = false;
+  contract.pricing_model.confirmation_price_optional = false;
+  contract.pricing_model.public_stock_supported = true;
+
+  assert.deepEqual(assessBackendContract(contract), [
+    "Amazon-derived catalogue prices still exist.",
+    "Raw Amazon USD price values still exist.",
+    "The backend contract still permits Amazon-derived prices.",
+    "Current pharmacy-specific catalogue prices still exist.",
+    "A public catalogue view still reads pharmacy-specific prices.",
+    "Pharmacy availability confirmation still requires a price.",
+    "The backend contract incorrectly claims public pharmacy stock support.",
   ]);
 });
 
@@ -198,7 +259,7 @@ test("detects pharmacy contact-review governance drift", () => {
 
 test("keeps contact review atomic, evidenced and service-only", async () => {
   const migration = await readFile(
-    new URL("../supabase/migrations/20260713234500_govern_pharmacy_contact_edit_reviews.sql", import.meta.url),
+    new URL("../supabase/migrations/20260713202237_govern_pharmacy_contact_edit_reviews.sql", import.meta.url),
     "utf8",
   );
   assert.match(migration, /for update/);
@@ -238,7 +299,7 @@ test("detects partial security-hardening deployment", () => {
 
 test("refreshes the aggregate backend contract after security hardening", async () => {
   const migration = await readFile(
-    new URL("../supabase/migrations/20260714070425_refresh_security_backend_contract.sql", import.meta.url),
+    new URL("../supabase/migrations/20260715180533_refresh_med250_security_backend_contract_20260714.sql", import.meta.url),
     "utf8",
   );
   assert.match(migration, /dawanear_private\.dawanear_backend_contract_v7/);
@@ -254,7 +315,7 @@ test("refreshes the aggregate backend contract after security hardening", async 
 
 test("keeps linked contacts private to permanent active pharmacy members", async () => {
   const migration = await readFile(
-    new URL("../supabase/migrations/20260713235500_expose_member_owned_pharmacy_contacts.sql", import.meta.url),
+    new URL("../supabase/migrations/20260713203240_expose_member_owned_pharmacy_contacts.sql", import.meta.url),
     "utf8",
   );
   assert.match(migration, /dawanear_is_permanent_user/);
@@ -269,7 +330,7 @@ test("keeps linked contacts private to permanent active pharmacy members", async
 
 test("stores an explicit pharmacy-confirmed fulfilment method", async () => {
   const migration = await readFile(
-    new URL("../supabase/migrations/20260713235900_add_offer_fulfilment_method.sql", import.meta.url),
+    new URL("../supabase/migrations/20260713210502_add_offer_fulfilment_method.sql", import.meta.url),
     "utf8",
   );
   assert.match(migration, /add column if not exists fulfilment_method/);
@@ -283,7 +344,7 @@ test("stores an explicit pharmacy-confirmed fulfilment method", async () => {
 
 test("keeps the aggregate backend contract aligned with the new offer RPC", async () => {
   const migration = await readFile(
-    new URL("../supabase/migrations/20260714000100_refresh_offer_backend_contract.sql", import.meta.url),
+    new URL("../supabase/migrations/20260713210717_refresh_offer_backend_contract.sql", import.meta.url),
     "utf8",
   );
   assert.match(migration, /dawanear_private\.dawanear_backend_contract_v4/);
@@ -293,7 +354,7 @@ test("keeps the aggregate backend contract aligned with the new offer RPC", asyn
 
 test("keeps GPS governance in the service-only aggregate deployment contract", async () => {
   const migration = await readFile(
-    new URL("../supabase/migrations/20260713233000_extend_backend_contract_for_geocode_governance.sql", import.meta.url),
+    new URL("../supabase/migrations/20260713200843_extend_backend_contract_for_geocode_governance.sql", import.meta.url),
     "utf8",
   );
   assert.match(migration, /'contract_version', '2026-07-13\.5'/);
@@ -308,7 +369,7 @@ test("keeps GPS governance in the service-only aggregate deployment contract", a
 
 test("keeps the deployed contract service-only and identifier-free", async () => {
   const migration = await readFile(
-    new URL("../supabase/migrations/20260713230000_least_privilege_contract.sql", import.meta.url),
+    new URL("../supabase/migrations/20260713192952_med250_least_privilege_contract.sql", import.meta.url),
     "utf8",
   );
   assert.match(migration, /revoke all on function public\.dawanear_backend_contract\(\)[\s\S]*from public, anon, authenticated/);

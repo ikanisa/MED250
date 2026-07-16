@@ -29,8 +29,8 @@ export function productSeoDescription(product: ProductSeoRecord) {
   const productSummary = `${product.brand}${details ? ` — ${details}` : ""}.`;
   const mode = process.env.NEXT_PUBLIC_MED250_DEPLOYMENT_MODE || process.env.NEXT_PUBLIC_MARKETPLACE_MODE;
   return mode === "catalog"
-    ? `${productSummary} Browse product information in the public MED+250 Rwanda pharmacy catalogue.`
-    : `${productSummary} Add it to one MED+250 order and receive confirmations from verified pharmacies serving Rwanda.`;
+    ? `${productSummary} Browse central product information and indicative pricing in the public MED+250 Rwanda pharmacy catalogue.`
+    : `${productSummary} Request availability and continue on WhatsApp with a pharmacy that confirms it can help.`;
 }
 
 export function toMarketplaceProduct(product: ProductSeoRecord): Product {
@@ -51,19 +51,22 @@ export function toMarketplaceProduct(product: ProductSeoRecord): Product {
     min: 0,
     max: 0,
     priceContributors: 0,
+    indicativePriceRwf: 0,
+    priceIsIndicative: false,
+    indicativePriceBasis: "",
+    indicativePriceSourceUrl: null,
+    indicativePriceUpdatedAt: null,
     imageUrl: null,
     isOrderable: ["valid", "active", "expiring_soon"].includes(product.regulatoryStatus.toLowerCase()),
     accent: ["coral", "blue", "mint", "violet", "amber"][Number(product.id.slice(-4)) % 5],
   };
 }
 
-const medicineCategories = new Set(["Medicines", "Pain & fever", "Digestive health", "Allergy", "Diabetes care"]);
-
 export function getInitialMarketplaceProducts(category = "All products", limit = 24) {
   return productSeoIndex
     .filter((product) => (
       category === "All products"
-      || (category === "Medicines" ? medicineCategories.has(product.category) : product.category === category)
+      || product.category === category
     ))
     .filter((product) => ["valid", "active", "expiring_soon"].includes(product.regulatoryStatus.toLowerCase()))
     .sort((left, right) => left.brand.localeCompare(right.brand, "en", { numeric: true, sensitivity: "base" }))

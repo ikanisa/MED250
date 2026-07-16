@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import Marketplace from "../../marketplace";
 import { getInitialMarketplaceProducts } from "../../../lib/product-seo";
+import { getPublicCatalogueTaxonomy } from "../../../lib/public-marketplace-product";
 
-export const metadata: Metadata = { title: "Beauty and personal care products", description: "Browse non-prescription makeup, skin, hair, fragrance, oral care, and personal care products on MED+250.", alternates: { canonical: "/category/personal-care" } };
+export const metadata: Metadata = { title: "Beauty and personal care products", description: "Browse source-backed beauty and personal care products currently present in the MED+250 catalogue.", alternates: { canonical: "/category/personal-care" } };
 
-export default function PersonalCarePage() {
-  return <Marketplace initialCategory="Beauty & Personal Care" pageTitle="Beauty & Personal Care" pageDescription="Browse non-prescription makeup, skin care, hair care, fragrance, oral care, grooming tools, and daily personal care essentials." pageImage="/marketplace/category-personal-care.webp" initialProducts={getInitialMarketplaceProducts("Personal care")} />;
+export default async function PersonalCarePage() {
+  const initialTaxonomy = await getPublicCatalogueTaxonomy();
+  if (!initialTaxonomy.some((row) => row.department === "Beauty & Personal Care")) redirect("/categories");
+  return <Marketplace initialCategory="Beauty & Personal Care" pageTitle="Beauty & Personal Care" pageDescription="Browse source-backed products currently present in this department." pageImage="/marketplace/category-personal-care.webp" initialProducts={getInitialMarketplaceProducts("Personal care")} initialTaxonomy={initialTaxonomy} />;
 }

@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 
-import { createLaunchEvidenceTemplate } from "../scripts/create-launch-evidence-template.mjs";
+import { createLaunchEvidenceHandoff, createLaunchEvidenceTemplate } from "../scripts/create-launch-evidence-template.mjs";
 import { validateLaunchEvidence } from "../scripts/validate-launch-evidence.mjs";
 import { validateLaunchEvidenceArtifact } from "../scripts/validate-launch-evidence-artifact.mjs";
 
@@ -73,11 +73,26 @@ test("rejects incomplete, mislabelled, unredacted and secret-bearing artifacts",
   assert.ok(result.errors.some((error) => /check 1 must be passed/.test(error)));
 });
 
+test("builds one owner-ready handoff for every missing evidence artifact", () => {
+  const handoff = createLaunchEvidenceHandoff(manifest);
+  assert.equal(handoff.release, "med250-production");
+  assert.equal(handoff.gate_count, 15);
+  assert.equal(handoff.missing_evidence_artifact_count, 17);
+  const security = handoff.gates.find((gate) => gate.gate === "MED250_GATE_SECURITY_HARDENING_DEPLOYED");
+  assert.deepEqual(security.missing_evidence_types, []);
+  assert.equal(security.approval_required.approved_by, null);
+  const credentials = handoff.gates.find((gate) => gate.gate === "MED250_GATE_CREDENTIALS_ROTATED");
+  assert.deepEqual(credentials.missing_evidence_types, ["deployment_receipt", "signed_approval"]);
+  assert.equal(credentials.evidence_templates.deployment_receipt.status, "pending");
+  assert.match(credentials.suggested_filenames.signed_approval, /^docs\/launch\/evidence\//);
+});
+
 test("registry validates hashed local JSON artifacts and rejects artifact metadata drift", async () => {
   const root = await mkdtemp(join(tmpdir(), "med250-evidence-"));
   const evidenceDir = join(root, "docs", "launch", "evidence");
   await mkdir(evidenceDir, { recursive: true });
   const localManifest = structuredClone(manifest);
+  for (const candidate of Object.values(localManifest.gates)) candidate.evidence = [];
   const gateName = "MED250_GATE_GPS_READY";
   const gate = localManifest.gates[gateName];
   gate.status = "confirmed";
@@ -98,7 +113,7 @@ test("registry validates hashed local JSON artifacts and rejects artifact metada
       summary: "Controlled gate-specific local evidence retained with an exact digest.",
     });
   }
-  const accepted = validateLaunchEvidence(localManifest, { rootDir: root, now: new Date("2026-07-14T12:00:00Z") });
+  const accepted = validateLaunchEvidence(localManifest, { rootDir: root, now: new Date("2026-07-17T12:00:00Z") });
   assert.equal(accepted.valid, true, accepted.errors.join("; "));
   const artifactPath = join(root, gate.evidence[0].reference);
   const drifted = JSON.parse(await readFile(artifactPath, "utf8"));
@@ -106,7 +121,7 @@ test("registry validates hashed local JSON artifacts and rejects artifact metada
   const driftedSource = `${JSON.stringify(drifted, null, 2)}\n`;
   await writeFile(artifactPath, driftedSource);
   gate.evidence[0].sha256 = createHash("sha256").update(driftedSource).digest("hex");
-  const rejected = validateLaunchEvidence(localManifest, { rootDir: root, now: new Date("2026-07-14T12:00:00Z") });
+  const rejected = validateLaunchEvidence(localManifest, { rootDir: root, now: new Date("2026-07-17T12:00:00Z") });
   assert.equal(rejected.valid, false);
   assert.ok(rejected.errors.some((error) => /artifact gate must be MED250_GATE_GPS_READY/.test(error)));
   await rm(root, { recursive: true, force: true });

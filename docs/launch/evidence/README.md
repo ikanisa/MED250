@@ -6,6 +6,14 @@ Place only completed, redacted JSON evidence artifacts in this directory. Genera
 npm run launch:evidence:template -- --gate MED250_GATE_NAME --type required_evidence_type
 ```
 
+Generate one owner-ready JSON handoff containing every currently missing artifact template, suggested filename, acceptance criterion, and approval field with:
+
+```sh
+npm run --silent launch:evidence:handoff
+```
+
+The handoff is a completion aid, not evidence. Its pending templates must not be referenced by the launch registry.
+
 Before referencing a local artifact in `data/launch-evidence.json`:
 
 1. Replace every pending/null template field with the real redacted result.

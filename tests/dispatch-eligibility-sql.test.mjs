@@ -6,7 +6,7 @@ import { PGlite } from "@electric-sql/pglite";
 
 const migration = await readFile(
   new URL(
-    "../supabase/migrations/20260714001000_marketplace_dispatch_eligibility.sql",
+    "../supabase/migrations/20260713211648_marketplace_dispatch_eligibility.sql",
     import.meta.url,
   ),
   "utf8",

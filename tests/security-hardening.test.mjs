@@ -53,7 +53,7 @@ test("normalises multilingual catalogue queries before the live RPC", async () =
 
 test("enforces pharmacy identity and order lifecycle invariants in the database", async () => {
   const [migration, sendOtp, verifyOtp, sharedAuth, geocoder] = await Promise.all([
-    read("../supabase/migrations/20260714003000_security_hardening.sql"),
+    read("../supabase/migrations/20260715180529_med250_security_hardening_20260714.sql"),
     read("../supabase/functions/dawanear-pharmacy-send-otp/index.ts"),
     read("../supabase/functions/dawanear-pharmacy-verify-otp/index.ts"),
     read("../supabase/functions/_shared/dawanear-pharmacy-auth.ts"),

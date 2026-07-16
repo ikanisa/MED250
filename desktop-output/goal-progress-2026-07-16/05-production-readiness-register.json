@@ -1,0 +1,163 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "captured_at": "2026-07-16T10:19:06Z",
+  "objective_complete": false,
+  "public_origin": "https://med250.gikundiro.com",
+  "release_decision": "conditional_hold",
+  "summary": "All currently authorised machine-executable implementation, deployment, database, catalogue, security, privacy-cleanup, DNS, performance, and verification work passes. The strict production release remains incomplete because accountable human approvals, authoritative duplicate decisions, credential-rotation evidence, one controlled Turnstile positive-path test, anonymous-auth rate-limit approval, and physical-device UAT are not complete.",
+  "automated_verification": {
+    "release_check": "passed",
+    "automated_tests": {
+      "passed": 147,
+      "failed": 0
+    },
+    "lint": "passed",
+    "data_validation": "passed_with_governed_duplicate_review_warnings",
+    "catalogue_quality": "passed",
+    "product_image_tests": {
+      "passed": 9,
+      "failed": 0
+    },
+    "performance_budget": {
+      "status": "passed",
+      "javascript_transfer_bytes": 204821,
+      "css_transfer_bytes": 26612,
+      "marketplace_javascript_transfer_bytes": 99302,
+      "initial_visual_asset_bytes": 73183
+    },
+    "wrangler_preview_dry_run": "passed",
+    "production_build_and_dry_run": "passed",
+    "live_deployment_routes": {
+      "status": "passed",
+      "route_count": 7
+    },
+    "domain_dns": "passed",
+    "git_diff_check": "passed"
+  },
+  "catalogue": {
+    "source_product_count": 4680,
+    "source_medicine_count": 2480,
+    "amazon_first_consumer_candidate_count": 2405,
+    "approved_live_consumer_product_count": 2200,
+    "rejected_consumer_candidate_count": 205,
+    "amazon_taxonomy_pair_count": 25,
+    "active_orderable_medicine_count": 2459,
+    "active_orderable_total_count": 4659,
+    "central_indicative_price_count": 128,
+    "amazon_price_count": 0,
+    "pharmacy_specific_catalogue_price_count": 0,
+    "public_stock_support": false,
+    "seller_model": "Only pharmacies participate as fulfilment sellers. Products and indicative prices are central; pharmacies privately confirm availability and may optionally add a non-final estimate during customer interaction."
+  },
+  "backend": {
+    "contract_version": "2026-07-16.7",
+    "migration_ledger": "aligned_at_last_privileged_verification",
+    "publication_audit_constraint": "active",
+    "edge_functions": {
+      "status": "deployed_and_protected",
+      "count": 6
+    },
+    "prescription_cleanup": {
+      "schedule": "every_6_hours",
+      "last_controlled_result": "healthy"
+    },
+    "database_advisors": {
+      "med_performance_warnings": 0,
+      "remaining_security_notes": "Documented intentional controls and one plan-limited HIBP setting."
+    }
+  },
+  "operations_snapshot": {
+    "active_pharmacies": 769,
+    "gps_ready_pharmacies": 93,
+    "pharmacies_with_whatsapp": 300,
+    "login_enabled_whatsapp_contacts": 338,
+    "dispatch_ready_pharmacies": 300,
+    "whatsapp_delivery_failures_24h": 0,
+    "strict_health_findings": 0
+  },
+  "strict_gate_state": {
+    "launch_evidence": {
+      "pending": 15,
+      "confirmed": 0
+    },
+    "duplicate_register_groups": {
+      "pending": 51,
+      "product_registration_groups": 6,
+      "pharmacy_professional_registration_groups": 45
+    },
+    "physical_uat_scenarios": {
+      "pending": 12,
+      "passed": 0
+    }
+  },
+  "remaining_accountable_actions": [
+    {
+      "priority": 1,
+      "owner": "MED+250 security owner",
+      "action": "Revoke and rotate every previously exposed Supabase service, database, personal, and deployment credential; replace the broad Cloudflare OAuth session with a least-privilege MED+250 deploy credential; attach redacted deployment receipts and signed approval.",
+      "closes": [
+        "MED250_GATE_CREDENTIALS_ROTATED",
+        "MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED"
+      ]
+    },
+    {
+      "priority": 2,
+      "owner": "MED+250 regulatory data reviewer",
+      "action": "Review the generated source-comparison packet and record a named, timestamped, reasoned decision for all 51 duplicate groups without inferring a decision from matching identifiers alone.",
+      "closes": [
+        "MED250_GATE_DUPLICATE_REGISTER_REVIEWED"
+      ]
+    },
+    {
+      "priority": 3,
+      "owner": "MED+250 operations",
+      "action": "Complete and sign the authoritative GPS and pharmacy-authorised WhatsApp review ledgers for the intended production pharmacy set. Do not invent coordinates, contacts, stock, or pharmacy-specific prices.",
+      "closes": [
+        "MED250_GATE_GPS_READY",
+        "MED250_GATE_WHATSAPP_READY"
+      ]
+    },
+    {
+      "priority": 4,
+      "owner": "MED+250 security owner",
+      "action": "Use a controlled browser to obtain a real production Turnstile token, create only a disposable anonymous auth identity without sending an availability request, delete the identity, and record a redacted positive-path test. Then review and test anonymous-auth rate limits and sign both security gates.",
+      "closes": [
+        "MED250_GATE_TURNSTILE_SERVER_VERIFIED",
+        "MED250_GATE_AUTH_RATE_LIMITS_APPROVED"
+      ]
+    },
+    {
+      "priority": 5,
+      "owner": "MED+250 QA owner and named physical-device operators",
+      "action": "Execute all 12 controlled physical-device scenarios using approved customer, pharmacy, and unrelated-pharmacy test identities. Retain redacted results and obtain named QA approval; do not contact an unintended pharmacy.",
+      "closes": [
+        "MED250_GATE_PHYSICAL_UAT_PASSED"
+      ]
+    },
+    {
+      "priority": 6,
+      "owner": "MED+250 operations lead, legal/compliance owner, data owner, privacy owner, backend owner, and infrastructure owner",
+      "action": "Review the exact gate acceptance criteria and existing evidence, provide the missing signed approvals and review ledgers, and name each approver with role and timezone-qualified timestamp. Backend and domain evidence is already complete but still requires accountable approval.",
+      "closes": [
+        "MED250_GATE_PHARMACY_OPERATIONS_APPROVED",
+        "MED250_GATE_REGULATORY_APPROVED",
+        "MED250_GATE_DATA_REUSE_APPROVED",
+        "MED250_GATE_SECURITY_HARDENING_DEPLOYED",
+        "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED",
+        "MED250_GATE_PRESCRIPTION_RETENTION_APPROVED",
+        "MED250_GATE_DOMAIN_DNS_VERIFIED"
+      ]
+    }
+  ],
+  "final_machine_sequence_after_evidence": [
+    "npm run launch:evidence:verify:live",
+    "npm run data:duplicates:verify -- --strict",
+    "npm run uat:verify:live",
+    "npm run backend:verify",
+    "npm run ops:health:strict",
+    "npm run release:check:live",
+    "npm run deployment:verify -- --url https://med250.gikundiro.com --mode live"
+  ],
+  "safety_conclusion": "Do not fabricate approvals, duplicate decisions, physical-device results, pharmacy data, stock, prices, or a positive Turnstile result. The public catalogue is active, but formal production approval remains on hold until every strict evidence gate is genuinely confirmed and the live release check passes."
+}

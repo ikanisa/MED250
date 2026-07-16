@@ -42,6 +42,11 @@ export type Product = {
   min: number;
   max: number;
   priceContributors: number;
+  indicativePriceRwf: number;
+  priceIsIndicative: boolean;
+  indicativePriceBasis: string;
+  indicativePriceSourceUrl: string | null;
+  indicativePriceUpdatedAt: string | null;
   imageUrl: string | null;
   imageUrls?: string[];
   amazonProductUrl?: string | null;
@@ -71,6 +76,12 @@ export type CatalogueSearchResult = {
   products: Product[];
   total: number;
   explanations: Map<string, string>;
+};
+
+export type CatalogueTaxonomyRow = {
+  department: string;
+  subcategory: string | null;
+  productCount: number;
 };
 
 export type CustomerProfile = {
@@ -230,13 +241,6 @@ export type SubmitOfferResult = {
   offerId: string;
   totalRwf: number;
   complete: boolean;
-};
-
-export type PriceContributionResult = {
-  productId: string;
-  min: number;
-  max: number;
-  priceContributors: number;
 };
 
 export type PharmacyClaimInput = {
@@ -599,10 +603,10 @@ function mapProduct(row: JsonRecord): Product {
   const prescriptionStatus = stringValue(row, "prescription_status")
     || (booleanValue(row, false, "prescription_required") ? "prescription" : "unclassified");
   const regulatoryStatus = stringValue(row, "regulatory_status") || "unclassified";
-  const rawMin = numericValue(row, "min", "price_min_rwf");
-  const rawMax = numericValue(row, "max", "price_max_rwf");
-  const min = Math.max(0, Math.round(rawMin ?? rawMax ?? 0));
-  const max = Math.max(min, Math.round(rawMax ?? rawMin ?? 0));
+  const rawIndicative = numericValue(row, "indicative_price_rwf", "min", "price_min_rwf");
+  const indicativePriceRwf = Math.max(0, Math.round(rawIndicative ?? 0));
+  const min = indicativePriceRwf;
+  const max = indicativePriceRwf;
   const defaultOrderable = !["expired", "withdrawn", "suspended"].includes(regulatoryStatus.toLowerCase());
 
   return {
@@ -615,10 +619,9 @@ function mapProduct(row: JsonRecord): Product {
     manufacturer: catalogueText(row, "manufacturer"),
     manufacturerCountry: catalogueText(row, "manufacturer_country", "manufacturerCountry"),
     registrationNumber: registration,
-    category: inferProductCategory(
-      stringValue(row, "category"),
-      `${brand} ${generic} ${catalogueText(row, "form", "dosage_form")}`,
-    ),
+    // Categories and subcategories are source-backed catalogue fields. Never
+    // infer a medicine taxonomy from its name, ingredient, or dosage form.
+    category: stringValue(row, "category") || "Medicines",
     department: stringValue(row, "department") || undefined,
     subcategory: stringValue(row, "subcategory") || undefined,
     productType: stringValue(row, "product_type", "productType") || "medicine",
@@ -626,7 +629,12 @@ function mapProduct(row: JsonRecord): Product {
     regulatoryStatus,
     min,
     max,
-    priceContributors: Math.max(0, Math.round(numericValue(row, "price_contributors", "priceContributors") ?? 0)),
+    priceContributors: 0,
+    indicativePriceRwf,
+    priceIsIndicative: booleanValue(row, indicativePriceRwf > 0, "price_is_indicative", "priceIsIndicative"),
+    indicativePriceBasis: stringValue(row, "indicative_price_basis", "indicativePriceBasis"),
+    indicativePriceSourceUrl: nullableString(row, "indicative_price_source_url", "indicativePriceSourceUrl"),
+    indicativePriceUpdatedAt: nullableString(row, "indicative_price_updated_at", "indicativePriceUpdatedAt"),
     imageUrl: nullableString(row, "image_url", "imageUrl"),
     imageUrls: stringArray(row, "image_urls", "imageUrls"),
     amazonProductUrl: nullableString(row, "amazon_product_url", "amazonProductUrl"),
@@ -634,17 +642,21 @@ function mapProduct(row: JsonRecord): Product {
   };
 }
 
-function inferProductCategory(rawCategory: string, searchableText: string): string {
-  if (rawCategory && rawCategory.toLowerCase() !== "medicines") return rawCategory;
-  const text = searchableText.toLowerCase();
-  if (/paracetamol|diclofenac|ibuprofen|analges|pain|fever/.test(text)) return "Pain & fever";
-  if (/cetirizine|loratadine|allerg|antihistamin/.test(text)) return "Allergy";
-  if (/metformin|insulin|diabet|glucose meter|glucometer/.test(text)) return "Diabetes care";
-  if (/omeprazole|esomeprazole|antacid|digest|laxative|constipation/.test(text)) return "Digestive health";
-  if (/baby|infant|diaper|nappy|feeding bottle|pacifier/.test(text)) return "Baby & family";
-  if (/lotion|shampoo|tooth|skin|cosmetic|soap|deodorant|oral care/.test(text)) return "Personal care";
-  if (/vitamin|supplement|monitor|device|thermometer|blood pressure/.test(text)) return "Wellness";
-  return "Medicines";
+export async function loadCatalogueTaxonomy(): Promise<CatalogueTaxonomyRow[]> {
+  const client = requireCustomerBackend();
+  const { data, error } = await client
+    .from("dawanear_catalogue_taxonomy")
+    .select("department, subcategory, product_count")
+    .order("department", { ascending: true })
+    .order("subcategory", { ascending: true, nullsFirst: true });
+  if (error) rethrow("Could not load catalogue categories", error);
+  return asRows(data)
+    .map((row) => ({
+      department: stringValue(row, "department"),
+      subcategory: nullableString(row, "subcategory"),
+      productCount: Math.max(0, Math.round(numericValue(row, "product_count") ?? 0)),
+    }))
+    .filter((row) => row.department && row.productCount > 0);
 }
 
 export async function loadCatalogue(requestedPageSize = MAX_PAGE_SIZE): Promise<Product[]> {
@@ -654,7 +666,8 @@ export async function loadCatalogue(requestedPageSize = MAX_PAGE_SIZE): Promise<
 
 /**
  * Runs the public, server-ranked catalogue query used by the live storefront.
- * It returns only aggregate product/price data and never pharmacy identities.
+ * It returns central catalogue information and indicative prices. It never
+ * returns pharmacy-specific price lists, pharmacy stock, or pharmacy identity.
  */
 export async function searchCatalogue(input: CatalogueSearchInput = {}): Promise<CatalogueSearchResult> {
   const limit = input.limit ?? 24;
@@ -951,7 +964,7 @@ export async function loadOffers(orderId: string): Promise<OrderOffer[]> {
       distanceM: numericValue(row, "distance_m") ?? 0,
       items: itemRows.map((itemRow) => mapOfferItem(itemRow, products)),
     };
-  }).toSorted((a, b) => Number(a.distanceM < 0) - Number(b.distanceM < 0) || a.distanceM - b.distanceM || a.totalRwf - b.totalRwf);
+  }).toSorted((a, b) => Number(a.distanceM < 0) - Number(b.distanceM < 0) || a.distanceM - b.distanceM || a.pharmacyName.localeCompare(b.pharmacyName));
 }
 
 export async function selectOffer(orderId: string, offerId: string): Promise<SelectedPharmacyContact> {
@@ -1317,9 +1330,9 @@ function offerItemsPayload(items: OfferItemDraft[]): JsonRecord[] {
     if (seen.has(orderItemId)) throw new Error(`Order item ${orderItemId} appears more than once in the offer.`);
     seen.add(orderItemId);
     const quantity = item.quantity == null ? null : requireInteger(item.quantity, `Offer item ${index + 1} quantity`, 1, 99);
-    const unitPrice = item.available ? item.unitPriceRwf ?? null : null;
-    if (item.available && (!Number.isInteger(unitPrice) || (unitPrice ?? 0) <= 0)) {
-      throw new Error(`Add a positive unit price for available offer item ${index + 1}.`);
+    const unitPrice = item.available && item.unitPriceRwf != null ? item.unitPriceRwf : null;
+    if (unitPrice != null && (!Number.isInteger(unitPrice) || unitPrice <= 0)) {
+      throw new Error(`Optional price for available confirmation item ${index + 1} must be a positive whole RWF amount.`);
     }
     const offeredProductId = item.available ? item.offeredProductId?.trim() || null : null;
     if (item.available && item.isSubstitute && !offeredProductId) {
@@ -1363,31 +1376,6 @@ export async function submitOffer(draft: OfferDraft): Promise<SubmitOfferResult>
     offerId: requiredString(row, "submitted offer", "offer_id", "id"),
     totalRwf: Math.round(totalRwf),
     complete: booleanValue(row, false, "complete"),
-  };
-}
-
-export async function contributePrice(pharmacyId: string, productId: string, priceRwf: number): Promise<PriceContributionResult> {
-  await requirePermanentPharmacyUser("Could not contribute this product price");
-  const client = requirePharmacyBackend();
-  const { data, error } = await client.rpc("dawanear_contribute_price", {
-    p_pharmacy_id: requireNonEmpty(pharmacyId, "Pharmacy ID"),
-    p_product_id: requireNonEmpty(productId, "Product ID"),
-    p_price_rwf: requireInteger(priceRwf, "Product price", 1, 100_000_000),
-  });
-  if (error) rethrow("Could not contribute this product price", error);
-  const row = asRows(data)[0];
-  if (!row) throw new Error("Could not contribute this product price: the backend returned no updated range.");
-  const min = numericValue(row, "price_min_rwf", "min");
-  const max = numericValue(row, "price_max_rwf", "max");
-  const contributors = numericValue(row, "price_contributors");
-  if (min == null || max == null || contributors == null) {
-    throw new Error("Could not contribute this product price: the backend returned an invalid updated range.");
-  }
-  return {
-    productId: stringValue(row, "product_id") || productId,
-    min: Math.round(min),
-    max: Math.round(max),
-    priceContributors: Math.round(contributors),
   };
 }
 

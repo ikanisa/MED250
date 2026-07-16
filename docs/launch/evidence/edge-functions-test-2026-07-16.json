@@ -1,0 +1,34 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED",
+  "evidence_type": "test_record",
+  "status": "complete",
+  "title": "Production Edge Function protected-access verification",
+  "summary": "Post-deployment probes confirmed that every administrative function denies unauthorised calls and both pharmacy authentication functions reject untrusted browser origins before side effects.",
+  "recorded_at": "2026-07-16T10:09:12Z",
+  "recorded_by": "Codex automated verifier",
+  "recorded_role": "Release verification agent",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Administrative function denial",
+      "status": "passed",
+      "detail": "Cleanup, geocoding, pharmacy-contact review, and product-review calls without their protected credentials returned HTTP 403."
+    },
+    {
+      "name": "Untrusted-origin denial",
+      "status": "passed",
+      "detail": "Both pharmacy authentication endpoints returned HTTP 403 for an untrusted origin and emitted no allow-origin header."
+    },
+    {
+      "name": "Protected cleanup execution",
+      "status": "passed",
+      "detail": "The protected scheduled cleanup path executed after deployment and recorded a successful, non-stale aggregate maintenance result."
+    }
+  ],
+  "executed_by": "Codex automated verifier",
+  "executor_role": "Release verification agent",
+  "started_at": "2026-07-16T10:05:45Z",
+  "completed_at": "2026-07-16T10:06:42Z"
+}

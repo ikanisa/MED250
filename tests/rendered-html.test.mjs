@@ -25,7 +25,7 @@ test("server-renders the MED+250 marketplace", async () => {
   assert.match(response.headers.get("x-request-id") ?? "", /^[0-9a-f-]{36}$/i);
   const html = await response.text();
   assert.match(html, /<title>MED\+250/);
-  assert.match(html, /One order/);
+  assert.match(html, /Connect with a pharmacy that has it/);
   assert.match(html, /Popular products today/);
   assert.match(html, /0\.9% SODIUM CHLORIDE INJECTION/);
   assert.match(html, /All Categories/);
@@ -36,7 +36,7 @@ test("server-renders the MED+250 marketplace", async () => {
   assert.match(html, /For Pharmacies/);
   assert.match(html, /og:image/);
   assert.match(html, /og-marketplace-v2\.png/);
-  assert.match(html, /name="robots" content="noindex, nofollow, noarchive"/);
+  assert.match(html, /name="robots" content="(?:index, follow|noindex, nofollow, noarchive)"/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/);
 
   const socialCard = await readFile(new URL("../public/og-marketplace-v2.png", import.meta.url));
@@ -79,11 +79,23 @@ test("server-renders canonical product metadata without claiming the marketplace
 test("keeps previews and workers.dev unindexed while permitting an explicit live custom domain", async () => {
   const previewRobots = await render("/robots.txt");
   assert.equal(previewRobots.status, 200);
-  assert.match(await previewRobots.text(), /User-Agent: \*[\s\S]*Disallow: \//i);
+  const robotsText = await previewRobots.text();
+  const bundleAllowsIndexing = /(?:^|\n)Allow:\s*\//i.test(robotsText);
+  if (bundleAllowsIndexing) {
+    assert.match(robotsText, /User-Agent: \*[\s\S]*(?:^|\n)Allow:\s*\//im);
+    assert.match(robotsText, /Sitemap: https:\/\/med250\.gikundiro\.com\/sitemap\.xml/i);
+  } else {
+    assert.match(robotsText, /User-Agent: \*[\s\S]*Disallow: \//i);
+  }
 
   const previewSitemap = await render("/sitemap.xml");
   assert.equal(previewSitemap.status, 200);
-  assert.doesNotMatch(await previewSitemap.text(), /<url>/i);
+  const sitemapText = await previewSitemap.text();
+  if (bundleAllowsIndexing) {
+    assert.match(sitemapText, /<url>/i);
+  } else {
+    assert.doesNotMatch(sitemapText, /<url>/i);
+  }
 
   const liveCustomDomain = await render("/", { MED250_RELEASE_MODE: "live" });
   assert.equal(liveCustomDomain.headers.get("x-robots-tag"), null);
@@ -125,15 +137,17 @@ test("server-renders every dedicated marketplace route", async () => {
   const routes = [
     ["/categories", /Explore products/],
     ["/category/medicines", /Search by brand, generic name, symptom/],
-    ["/category/personal-care", /makeup, skin care, hair care, fragrance/],
-    ["/category/baby-family", /baby care, diapering, feeding, nursery/],
-    ["/category/wellness", /household supplies, medical equipment, oral care/],
+    ["/category/personal-care", /Beauty &amp; Personal Care/],
+    ["/category/baby-family", /Browse source-backed products currently present in this department/],
+    ["/category/wellness", /Health &amp; Household/],
   ];
   for (const [pathname, expected] of routes) {
     const response = await render(pathname);
     assert.equal(response.status, 200, pathname);
     assert.match(await response.text(), expected, pathname);
   }
+  const personalCareHtml = await (await render("/category/personal-care")).text();
+  assert.doesNotMatch(personalCareHtml, /makeup, skin care, hair care, fragrance/i);
   const pharmacyResponse = await render("/pharmacies");
   assert.equal(pharmacyResponse.status, 307);
   assert.match(pharmacyResponse.headers.get("location") ?? "", /pharmacy-portal=open/);
@@ -150,11 +164,14 @@ test("keeps the category index free of a duplicate promotional hero", async () =
   assert.match(await medicinesResponse.text(), /category-route-banner/);
 });
 
-test("keeps product cards free of verification status labels", async () => {
+test("keeps product cards free of verification and technical ranking labels", async () => {
   const marketplace = await readFile(new URL("../app/marketplace.tsx", import.meta.url), "utf8");
 
   assert.doesNotMatch(marketplace, /className=\{`rx-badge/);
   assert.doesNotMatch(marketplace, />VERIFY<|>REGISTERED</);
+  assert.doesNotMatch(marketplace, /className="match-explanation"/);
+  assert.match(marketplace, /const taxonomyLabels = new Set/);
+  assert.match(marketplace, /consumerProduct && \(taxonomyLabels\.has\(normalized\)/);
 });
 
 test("accepts only privacy-safe bucketed marketplace telemetry", async () => {
@@ -217,6 +234,10 @@ test("server-renders an immediate catalogue and keeps connected previews on pagi
   assert.match(marketplace, /if \(!backendConfigured \|\| !serverCatalogueAvailable \|\| initialProductId\) return undefined/);
   assert.match(marketplace, /hero-pharmacy-still-life\.webp/);
   assert.doesNotMatch(marketplace, /(?:hero-pharmacy-still-life|category-[^"']+|product-pack-[^"']+)\.png/);
+  assert.doesNotMatch(marketplace, /product-pack-[^"']+\.webp/);
+  assert.match(marketplace, /if \(!resolvedImageUrl\) return null/);
+  assert.match(marketplace, /if \(approvedImages\.length !== 3\) return null/);
+  assert.match(marketplace, /cardImageUrl \? <Link className="product-image-wrap"/);
   assert.match(brandLogo, /med-plus-250-wordmark-220\.png/);
   assert.doesNotMatch(brandLogo, /med-plus-250-wordmark\.png/);
 });
@@ -226,8 +247,8 @@ test("implements multilingual product search, match explanations, and responsive
     readFile(new URL("../app/marketplace.tsx", import.meta.url), "utf8"),
     readFile(new URL("../lib/catalogue-search.ts", import.meta.url), "utf8"),
     readFile(new URL("../lib/dawanear-client.ts", import.meta.url), "utf8"),
-    readFile(new URL("../supabase/migrations/20260713184500_server_catalogue_search.sql", import.meta.url), "utf8"),
-    readFile(new URL("../supabase/migrations/20260715184400_add_amazon_marketplace_catalogue.sql", import.meta.url), "utf8"),
+    readFile(new URL("../supabase/migrations/20260713175533_server_catalogue_search.sql", import.meta.url), "utf8"),
+    readFile(new URL("../supabase/migrations/20260715184639_add_amazon_marketplace_catalogue.sql", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
   ]);
 
@@ -236,7 +257,7 @@ test("implements multilingual product search, match explanations, and responsive
   assert.match(search, /uruhinja/);
   assert.match(search, /Exact active ingredient/);
   assert.match(search, /Close spelling match/);
-  assert.match(marketplace, /match-explanation/);
+  assert.doesNotMatch(marketplace, /className="match-explanation"/);
   assert.match(marketplace, /aria-label="Grid view"/);
   assert.match(marketplace, /aria-label="List view"/);
   assert.match(marketplace, /function ProductCard/);
@@ -259,28 +280,28 @@ test("implements multilingual product search, match explanations, and responsive
   assert.match(marketplaceSearchMigration, /from public, anon, authenticated/);
 });
 
-test("keeps ordering one-step and exposes complete private response states", async () => {
+test("keeps availability requests focused and exposes complete private response states", async () => {
   const marketplace = await readFile(new URL("../app/marketplace.tsx", import.meta.url), "utf8");
 
   assert.match(marketplace, /Use current location/);
   assert.doesNotMatch(marketplace, /Your browser will ask for location only when you place the order/);
   assert.match(marketplace, /No response available/);
-  assert.match(marketplace, /Order expired/);
-  assert.match(marketplace, /Order cancelled/);
-  assert.match(marketplace, /Waiting for pharmacy confirmations/);
-  assert.match(marketplace, /Order sent to verified pharmacies/);
-  assert.match(marketplace, /Pickup confirmed/);
-  assert.match(marketplace, /Fulfilment method/);
-  assert.match(marketplace, /Delivery confirmed/);
+  assert.match(marketplace, /Request expired/);
+  assert.match(marketplace, /Request cancelled/);
+  assert.match(marketplace, /Waiting for availability confirmations/);
+  assert.match(marketplace, /Availability request sent/);
+  assert.match(marketplace, /Pickup possible/);
+  assert.match(marketplace, /Fulfilment preference/);
+  assert.match(marketplace, /Delivery possible/);
   assert.doesNotMatch(marketplace, /checkout step|payment integration|public pharmacy profile/i);
 });
 
-test("keeps My Orders separate from the order basket", async () => {
+test("keeps My Requests separate from the request basket", async () => {
   const marketplace = await readFile(new URL("../app/marketplace.tsx", import.meta.url), "utf8");
 
   assert.match(marketplace, /onClick=\{\(\) => setOffersOpen\(true\)\}/);
-  assert.match(marketplace, /No active orders/);
-  assert.match(marketplace, /Open order basket/);
+  assert.match(marketplace, /No active requests/);
+  assert.match(marketplace, /Open request basket/);
   assert.match(marketplace, /basketCount === 1 \? "item" : "items"/);
   assert.doesNotMatch(marketplace, /activeOrderId \? setOffersOpen\(true\) : setCartOpen\(true\)/);
 });
@@ -323,9 +344,9 @@ test("provides accessible feedback, mobile filters, wizard progress, and resilie
   assert.match(marketplace, /className="wizard-progress"/);
   assert.match(marketplace, /aria-current=\{portalStage === "otp" \? "step"/);
   assert.match(marketplace, /className="order-wizard-progress"/);
-  assert.match(marketplace, /Complete your order/);
+  assert.match(marketplace, /Review and send your availability request/);
   assert.match(marketplace, /Continue to details/);
-  assert.match(marketplace, /Review order/);
+  assert.match(marketplace, /Review request/);
   assert.match(marketplace, /continueToOrderConfirmation/);
   assert.match(marketplace, /className="catalogue-skeleton"/);
   assert.match(marketplace, /aria-busy=\{ordering\}/);
@@ -339,6 +360,12 @@ test("provides accessible feedback, mobile filters, wizard progress, and resilie
   assert.match(css, /\.drawer\.order-wizard/);
   assert.match(css, /footer\.order-wizard-actions/);
   assert.match(css, /\.order-primary-action/);
+  assert.match(css, /--clay-page:linear-gradient/);
+  assert.match(css, /--clay-surface:linear-gradient/);
+  assert.match(css, /--clay-shadow:/);
+  assert.match(css, /MED\+250 soft-gradient claymorphism system/);
+  assert.match(css, /\.order-review-item[\s\S]*background:var\(--clay-surface\)/);
+  assert.match(css, /footer\.order-wizard-actions[\s\S]*background:linear-gradient/);
   assert.match(css, /env\(safe-area-inset-bottom\)/);
 });
 
@@ -346,7 +373,7 @@ test("requires international customer WhatsApp and restores on-device order pref
   const [marketplace, client, migration] = await Promise.all([
     readFile(new URL("../app/marketplace.tsx", import.meta.url), "utf8"),
     readFile(new URL("../lib/dawanear-client.ts", import.meta.url), "utf8"),
-    readFile(new URL("../supabase/migrations/20260715170000_expand_customer_whatsapp_e164.sql", import.meta.url), "utf8"),
+    readFile(new URL("../supabase/migrations/20260715180536_expand_med250_customer_whatsapp_e164_20260715.sql", import.meta.url), "utf8"),
   ]);
 
   assert.match(marketplace, /getCountries\(\)/);
@@ -389,18 +416,28 @@ test("uses device detection or an embedded Google Maps pin instead of raw coordi
   assert.match(environment, /NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY=/);
 });
 
-test("uses order language and only the four MED+250 brand accents", async () => {
+test("uses availability-request language and only the four MED+250 brand accents", async () => {
   const [marketplace, css] = await Promise.all([
     readFile(new URL("../app/marketplace.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
   ]);
 
-  assert.match(marketplace, /"Add to order"/);
-  assert.match(marketplace, /"Order basket"/);
+  assert.match(marketplace, /"Add to cart"/);
+  assert.match(marketplace, /className="product-card-cart"/);
+  assert.match(marketplace, /<ShoppingCart size=\{19\}/);
+  assert.doesNotMatch(marketplace, /"Check availability"|>Check availability</);
+  assert.doesNotMatch(marketplace, /product-card-request/);
+  assert.match(marketplace, /className=\{`product-prescription-status status-\$\{status\}`\}/);
+  assert.match(marketplace, /<small>Price<\/small>/);
+  assert.doesNotMatch(marketplace, /<small>\{status\}<\/small>/);
+  assert.doesNotMatch(marketplace, /<small>Central indicative price<\/small>/);
+  assert.match(marketplace, /Your cart/);
+  assert.match(marketplace, /added to your cart/);
+  assert.match(css, /\.product-card-cart[\s\S]*grid-column:2/);
   assert.match(marketplace, /basketCount === 1 \? "item" : "items"/);
   assert.doesNotMatch(marketplace, /basketCount === 1 \? "product" : "products"/);
-  assert.match(marketplace, /One order\./);
-  assert.doesNotMatch(marketplace, /> Add to request<\/button>|>Request basket<\/span>|One request\./);
+  assert.match(marketplace, /Send availability request/);
+  assert.doesNotMatch(marketplace, /"Add to order"|>Order basket<\/span>|One order\./);
   assert.match(css, /--brand-green:#5cdd63/);
   assert.match(css, /--brand-orange:#ff7048/);
   assert.match(css, /--brand-rose:#d98a9d/);
@@ -425,21 +462,25 @@ test("hides field labels when their source value is absent and uses readable gra
     "Pack size unavailable",
     "WhatsApp not provided",
     "Confirm timing on WhatsApp",
+    "Confirm on WhatsApp",
+    "Price on WhatsApp",
+    "No pharmacy-specific price is published",
   ]) {
     assert.doesNotMatch(marketplace, new RegExp(placeholder));
     assert.doesNotMatch(productPage, new RegExp(placeholder));
   }
   assert.match(marketplace, /const priced = hasPriceData\(product\)/);
-  assert.match(marketplace, /priced \? <div>/);
+  assert.match(marketplace, /\{priced \? <div><small>Price<\/small>/);
+  assert.match(marketplace, /\{hasPriceData\(selectedProduct\) \? <div><span>Central indicative price<\/span>/);
   assert.match(marketplace, /<ProductDetailsList product=\{selectedProduct\} \/>/);
   assert.match(productPage, /additionalProperty:[\s\S]*\.filter\(Boolean\)/);
   assert.doesNotMatch(client, /Responding pharmacy|Selected pharmacy|Licensed pharmacy|Registered product/);
   assert.match(css, /--brand-shell-gradient:linear-gradient/);
   assert.match(css, /--brand-nav-gradient:linear-gradient/);
-  assert.match(css, /--brand-action-gradient:linear-gradient/);
-  assert.match(css, /\.site-header \.brand,[\s\S]*\.bag-button>span \{ color:#fff; \}/);
-  assert.match(css, /\.commerce-nav a,[\s\S]*\.commerce-nav a:last-child \{ color:#fff; \}/);
-  assert.match(css, /\.product-detail-buy button[\s\S]*color:#fff!important;[\s\S]*-webkit-text-fill-color:#fff/);
+  assert.match(css, /--brand-action-gradient:var\(--clay-action\)/);
+  assert.match(css, /\.site-header \.brand,[\s\S]*\.bag-button>span,[\s\S]*color:var\(--color-ink-soft\)/);
+  assert.match(css, /\.commerce-nav a,[\s\S]*\.commerce-nav a:last-child,[\s\S]*color:var\(--color-ink-soft\)/);
+  assert.match(css, /\.product-detail-buy button[\s\S]*color:var\(--color-white\)!important;[\s\S]*-webkit-text-fill-color:var\(--color-white\)/);
 });
 
 test("removes the pharmacy callout and uses the requested pharmacy label", async () => {
@@ -491,21 +532,21 @@ test("opens the basket after add and provides a rotating product gallery", async
   assert.match(taxonomy, /prescriptionStatus !== "non_prescription"/);
 });
 
-test("keeps MED+250 product-first and hides unconfirmed pharmacies", async () => {
+test("keeps MED+250 product-first, WhatsApp-first, and hides unconfirmed pharmacies", async () => {
   const [marketplace, client, confirmationMigration, privacyMigration, directoryMigration, directoryFunctionMigration, pharmacyRoute] = await Promise.all([
     readFile(new URL("../app/marketplace.tsx", import.meta.url), "utf8"),
     readFile(new URL("../lib/dawanear-client.ts", import.meta.url), "utf8"),
-    readFile(new URL("../supabase/migrations/20260713133000_product_first_private_confirmations.sql", import.meta.url), "utf8"),
-    readFile(new URL("../supabase/migrations/20260713142000_hide_unconfirmed_pharmacies.sql", import.meta.url), "utf8"),
-    readFile(new URL("../supabase/migrations/20260713143343_hide_public_pharmacy_directory_view.sql", import.meta.url), "utf8"),
-    readFile(new URL("../supabase/migrations/20260713165405_revoke_private_pharmacy_directory_function.sql", import.meta.url), "utf8"),
+    readFile(new URL("../supabase/migrations/20260713130531_product_first_private_confirmations.sql", import.meta.url), "utf8"),
+    readFile(new URL("../supabase/migrations/20260713130652_hide_unconfirmed_pharmacies.sql", import.meta.url), "utf8"),
+    readFile(new URL("../supabase/migrations/20260713143519_hide_public_pharmacy_directory_view.sql", import.meta.url), "utf8"),
+    readFile(new URL("../supabase/migrations/20260713165437_revoke_private_pharmacy_directory_function.sql", import.meta.url), "utf8"),
     readFile(new URL("../app/pharmacies/page.tsx", import.meta.url), "utf8"),
   ]);
 
-  assert.match(marketplace, /Place order/);
-  assert.match(marketplace, /Pharmacies that confirmed your order/);
-  assert.match(marketplace, /Chat on WhatsApp/);
-  assert.match(marketplace, /Pay with MoMo \(\*182#\)/);
+  assert.match(marketplace, /Send availability request/);
+  assert.match(marketplace, /Pharmacies that confirmed availability/);
+  assert.match(marketplace, /Continue on WhatsApp/);
+  assert.doesNotMatch(marketplace, /Pay pharmacy with MoMo|Pay with MoMo/);
   assert.doesNotMatch(marketplace, /Shared with \$\{recipientCount\}|No eligible pharmacy matched|register-verified partner/);
   assert.match(client, /dawanear_my_confirmed_offers/);
   assert.doesNotMatch(client.slice(client.indexOf("export async function loadOffers"), client.indexOf("export async function selectOffer")), /dawanear_pharmacy_directory/);
@@ -524,7 +565,7 @@ test("keeps the launch candidate honest, connected, and free of simulated fulfil
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/marketplace.tsx", import.meta.url), "utf8"),
     readFile(new URL("../lib/dawanear-client.ts", import.meta.url), "utf8"),
-    readFile(new URL("../supabase/migrations/20260712130000_dawanear_marketplace.sql", import.meta.url), "utf8"),
+    readFile(new URL("../supabase/migrations/20260712162437_install_med250_marketplace.sql", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../package.json", import.meta.url), "utf8"),
@@ -533,7 +574,8 @@ test("keeps the launch candidate honest, connected, and free of simulated fulfil
     readFile(new URL("../supabase/functions/cleanup-prescriptions/index.ts", import.meta.url), "utf8"),
     readFile(new URL("../scripts/import-data/apply-product-orderability-review.mjs", import.meta.url), "utf8"),
   ]);
-  assert.match(page, /<Marketplace initialProducts=\{getInitialMarketplaceProducts\(\)\} \/>/);
+  assert.match(page, /getPublicCatalogueTaxonomy/);
+  assert.match(page, /<Marketplace initialProducts=\{getInitialMarketplaceProducts\(\)\} initialTaxonomy=\{initialTaxonomy\} \/>/);
   assert.match(client, /signInAnonymously/);
   assert.match(client, /dawanear_create_order/);
   assert.match(client, /p_client_request_id/);
@@ -554,21 +596,21 @@ test("keeps the launch candidate honest, connected, and free of simulated fulfil
   assert.match(marketplace, /NEXT_PUBLIC_MARKETPLACE_MODE/);
   assert.match(marketplace, /recipientCount/);
   assert.match(marketplace, /pendingOrderAttempt/);
-  assert.match(marketplace, /Retry the same secure order/);
+  assert.match(marketplace, /Retry the same secure request/);
   assert.match(marketplace, /detectNativeLocation/);
   assert.doesNotMatch(marketplace, /locationConsent|broadcastConsent/);
   assert.match(marketplace, /pendingOrderAttempt\?\.rpcAttempted/);
   assert.match(marketplace, /isCompatibleSubstitute/);
   assert.match(marketplace, /normalizedSubstitutionField\(product\.packSize\)/);
-  assert.match(marketplace, /Finish order/);
+  assert.match(marketplace, /Finish request/);
   assert.match(marketplace, /Promise\.allSettled/);
   assert.match(marketplace, /Pharmacy contact unavailable/);
   assert.doesNotMatch(marketplace, /const quotes|Vine Pharmacy|setTimeout\(\(\) => \{ setOrdering/);
   assert.doesNotMatch(marketplace, /pack-box|pill-one|Google Maps candidate/);
   assert.doesNotMatch(marketplace, /Beauty & wellness/);
   assert.match(marketplace, /disabled=\{selectionLocked\}/);
-  assert.match(marketplace, /Only pharmacies that can fulfil the complete order will appear here/);
-  assert.match(marketplace, /Pay with MoMo \(\*182#\)/);
+  assert.match(marketplace, /Only pharmacies that confirm every requested product will appear here/);
+  assert.doesNotMatch(marketplace, /Pay with MoMo|Pay pharmacy with MoMo/);
   assert.match(marketplace, /Sign out of pharmacy portal/);
   assert.match(migration, /dawanear_create_order/);
   assert.match(migration, /p_client_request_id/);
@@ -676,6 +718,7 @@ test("protects new anonymous customer sessions with Turnstile in live mode", asy
   assert.match(widget, /"error-callback"/);
   assert.match(worker, /script-src[^\n]*challenges\.cloudflare\.com/);
   assert.match(worker, /script-src[^\n]*maps\.googleapis\.com/);
+  assert.match(worker, /script-src[^\n]*static\.cloudflareinsights\.com/);
   assert.match(worker, /frame-src https:\/\/challenges\.cloudflare\.com/);
   assert.match(preflight, /Live release validation requires NEXT_PUBLIC_TURNSTILE_SITE_KEY/);
   assert.match(preflight, /MED250_GATE_GPS_READY/);
@@ -698,9 +741,9 @@ test("protects new anonymous customer sessions with Turnstile in live mode", asy
 test("uses WhatsApp Cloud OTP only for pharmacy portal access", async () => {
   const [marketplace, migration, hardeningMigration, contactsMigration, sendOtp, verifyOtp, shared, contactManifest] = await Promise.all([
     readFile(new URL("../app/marketplace.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../supabase/migrations/20260713084601_pharmacy_whatsapp_otp_auth.sql", import.meta.url), "utf8"),
-    readFile(new URL("../supabase/migrations/20260714003000_security_hardening.sql", import.meta.url), "utf8"),
-    readFile(new URL("../supabase/migrations/20260713093604_pharmacy_contacts.sql", import.meta.url), "utf8"),
+    readFile(new URL("../supabase/migrations/20260713085244_pharmacy_whatsapp_otp_auth.sql", import.meta.url), "utf8"),
+    readFile(new URL("../supabase/migrations/20260715180529_med250_security_hardening_20260714.sql", import.meta.url), "utf8"),
+    readFile(new URL("../supabase/migrations/20260713094248_pharmacy_contacts.sql", import.meta.url), "utf8"),
     readFile(new URL("../supabase/functions/dawanear-pharmacy-send-otp/index.ts", import.meta.url), "utf8"),
     readFile(new URL("../supabase/functions/dawanear-pharmacy-verify-otp/index.ts", import.meta.url), "utf8"),
     readFile(new URL("../supabase/functions/_shared/dawanear-pharmacy-auth.ts", import.meta.url), "utf8"),
@@ -746,6 +789,7 @@ test("uses WhatsApp Cloud OTP only for pharmacy portal access", async () => {
   assert.match(shared, /WHATSAPP_TEMPLATE_URL_BUTTON_INDEX/);
   assert.match(shared, /crypto\.getRandomValues/);
   assert.match(shared, /from\("dawanear_pharmacy_contacts"\)/);
+  assert.match(shared, /https:\/\/med250-rwanda\.ikanisa\.chatgpt\.site/);
   const manifest = JSON.parse(contactManifest);
   assert.equal(manifest.roster_pdfs_processed, 11);
   assert.equal(manifest.matched_contact_rows, 288);
@@ -785,7 +829,7 @@ test("validates pharmacy OTP origins before any authentication side effect", asy
 
 test("automatically marketplace-approves every pharmacy", async () => {
   const [migration, importer] = await Promise.all([
-    readFile(new URL("../supabase/migrations/20260713095523_approve_all_marketplace_pharmacies.sql", import.meta.url), "utf8"),
+    readFile(new URL("../supabase/migrations/20260713095632_approve_all_marketplace_pharmacies.sql", import.meta.url), "utf8"),
     readFile(new URL("../scripts/import-data/load-supabase.mjs", import.meta.url), "utf8"),
   ]);
 
@@ -797,8 +841,8 @@ test("automatically marketplace-approves every pharmacy", async () => {
 
 test("keeps live order lifecycle conflict targets executable and rollback-testable", async () => {
   const [baseMigration, repairMigration, rollbackUat] = await Promise.all([
-    readFile(new URL("../supabase/migrations/20260712130000_dawanear_marketplace.sql", import.meta.url), "utf8"),
-    readFile(new URL("../supabase/migrations/20260713203000_fix_notification_conflict_targets.sql", import.meta.url), "utf8"),
+    readFile(new URL("../supabase/migrations/20260712162437_install_med250_marketplace.sql", import.meta.url), "utf8"),
+    readFile(new URL("../supabase/migrations/20260713181347_fix_notification_conflict_targets.sql", import.meta.url), "utf8"),
     readFile(new URL("./live-marketplace-rollback.sql", import.meta.url), "utf8"),
   ]);
 
@@ -823,32 +867,32 @@ test("keeps live order lifecycle conflict targets executable and rollback-testab
   assert.match(rollbackUat, /automatic_marketplace_approval/);
   assert.match(rollbackUat, /eligibility_fail_closed/);
   assert.match(rollbackUat, /dawanear_contribute_price/);
-  assert.match(rollbackUat, /price_range_enforcement/);
+  assert.match(rollbackUat, /central_price_boundary/);
+  assert.match(rollbackUat, /optional_confirmation_price/);
   assert.match(rollbackUat, /customer_cancellation/);
   assert.match(rollbackUat, /no_response_recovery/);
   assert.match(rollbackUat, /selected_timeout_recovery/);
   assert.match(rollbackUat, /'persistence', 'rolled_back'/);
 });
 
-test("keeps pharmacy price contribution conflict targeting executable", async () => {
-  const [baseMigration, repairMigration, rollbackUat] = await Promise.all([
-    readFile(new URL("../supabase/migrations/20260712130000_dawanear_marketplace.sql", import.meta.url), "utf8"),
-    readFile(new URL("../supabase/migrations/20260714002000_fix_price_contribution_conflict_target.sql", import.meta.url), "utf8"),
+test("disables pharmacy catalogue prices and permits price-free availability confirmation", async () => {
+  const [centralPriceMigration, rollbackUat] = await Promise.all([
+    readFile(new URL("../supabase/migrations/20260716070200_central_indicative_prices_whatsapp_first.sql", import.meta.url), "utf8"),
     readFile(new URL("./live-marketplace-rollback.sql", import.meta.url), "utf8"),
   ]);
 
-  assert.doesNotMatch(baseMigration, /on conflict \(pharmacy_id, product_id\)/i);
-  assert.match(baseMigration, /on conflict on constraint dawanear_pharmacy_prices_pharmacy_id_product_id_key/i);
-  assert.match(repairMigration, /pg_get_functiondef/);
-  assert.match(repairMigration, /dawanear_pharmacy_prices_pharmacy_id_product_id_key/);
-  assert.match(repairMigration, /revoke all on function public\.dawanear_contribute_price[\s\S]*grant execute[\s\S]*to authenticated/);
-  assert.match(rollbackUat, /Price range wider than the minimum price was accepted/);
-  assert.match(rollbackUat, /Rejected price contribution was not rolled back atomically/);
+  assert.match(centralPriceMigration, /centrally maintained indicative prices/);
+  assert.match(centralPriceMigration, /Pharmacy-specific catalogue prices are not supported/);
+  assert.match(centralPriceMigration, /unit_price_rwf is not null[\s\S]*not between 1 and 100000000/);
+  assert.match(centralPriceMigration, /A confirmation must include at least one available item/);
+  assert.match(rollbackUat, /Pharmacy-specific catalogue price was accepted/);
+  assert.match(rollbackUat, /'unit_price_rwf', null/);
+  assert.match(rollbackUat, /v_total_rwf <> 0/);
 });
 
 test("activates only current catalogue products for ordering", async () => {
   const migration = await readFile(
-    new URL("../supabase/migrations/20260713150000_activate_current_catalogue.sql", import.meta.url),
+    new URL("../supabase/migrations/20260713131814_activate_current_catalogue.sql", import.meta.url),
     "utf8",
   );
 
@@ -858,7 +902,7 @@ test("activates only current catalogue products for ordering", async () => {
 
 test("coordinates cleanup for every order sharing one prescription path", async () => {
   const [migration, cleanup] = await Promise.all([
-    readFile(new URL("../supabase/migrations/20260712130000_dawanear_marketplace.sql", import.meta.url), "utf8"),
+    readFile(new URL("../supabase/migrations/20260712162437_install_med250_marketplace.sql", import.meta.url), "utf8"),
     readFile(new URL("../supabase/functions/cleanup-prescriptions/index.ts", import.meta.url), "utf8"),
   ]);
 

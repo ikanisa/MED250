@@ -36,18 +36,6 @@ function clean(value) {
   return !text || /^(?:—+|-+|n\/?a|null)$/i.test(text) ? "" : text;
 }
 
-function categoryFor(row) {
-  const text = `${row.brand_name ?? ""} ${row.generic_name ?? ""} ${row.dosage_form ?? ""}`.toLowerCase();
-  if (/paracetamol|diclofenac|ibuprofen|analges/.test(text)) return "Pain & fever";
-  if (/cetirizine|loratadine|allerg/.test(text)) return "Allergy";
-  if (/metformin|insulin|diabet/.test(text)) return "Diabetes care";
-  if (/omeprazole|esomeprazole|antacid|digest/.test(text)) return "Digestive health";
-  if (/baby|infant|diaper|nappy/.test(text)) return "Baby & family";
-  if (/lotion|shampoo|tooth|skin|cosmetic|soap/.test(text)) return "Personal care";
-  if (/vitamin|supplement|monitor|device|thermometer/.test(text)) return "Wellness";
-  return "Medicines";
-}
-
 const rows = parseCsv(await readFile(source, "utf8"));
 const products = rows
   .filter((row) => row.regulatory_status !== "expired")
@@ -64,7 +52,7 @@ const products = rows
       packSize: clean(row.pack_size),
       manufacturer: clean(row.manufacturer),
       manufacturerCountry: clean(row.manufacturer_country),
-      category: categoryFor(row),
+      category: clean(row.category) || "Medicines",
       regulatoryStatus: clean(row.regulatory_status) || "valid",
       registrationNumber: clean(row.registration_number),
     };

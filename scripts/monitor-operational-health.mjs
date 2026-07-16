@@ -13,7 +13,8 @@ export function evaluateOperationalHealth(health) {
   if (Number(health?.prescription_cleanup?.expired_claims ?? 0) > 0) warnings.push("Expired prescription cleanup leases require recovery.");
   if (Number(health?.orders?.waiting_without_confirmation_over_30m ?? 0) > 0) warnings.push("Some dispatched orders have waited more than 30 minutes without a complete confirmation.");
   if (Number(health?.pharmacy_auth?.otp_failed_24h ?? 0) > 0) warnings.push("WhatsApp OTP delivery failures occurred in the last 24 hours.");
-  if (Number(health?.catalogue?.products_with_current_prices ?? 0) < 1) warnings.push("No catalogue product has a current pharmacy-contributed price.");
+  if (Number(health?.catalogue?.products_with_central_indicative_prices ?? 0) < 1) warnings.push("No catalogue product has a central indicative price.");
+  if (Number(health?.catalogue?.pharmacy_specific_price_records_in_use ?? 0) > 0) critical.push("Operational health reports pharmacy-specific catalogue prices in use.");
 
   return {
     status: critical.length ? "critical" : warnings.length ? "degraded" : "healthy",

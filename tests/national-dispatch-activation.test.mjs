@@ -3,11 +3,11 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const migration = await readFile(new URL(
-  "../supabase/migrations/20260716052434_activate_verified_pharmacy_national_dispatch.sql",
+  "../supabase/migrations/20260716053053_activate_verified_pharmacy_national_dispatch.sql",
   import.meta.url,
 ), "utf8");
 const sentinelMigration = await readFile(new URL(
-  "../supabase/migrations/20260716053532_allow_national_dispatch_distance_sentinel.sql",
+  "../supabase/migrations/20260716053559_allow_national_dispatch_distance_sentinel.sql",
   import.meta.url,
 ), "utf8");
 

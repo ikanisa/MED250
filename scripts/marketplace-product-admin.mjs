@@ -59,7 +59,7 @@ export function buildMarketplaceProductPayload(argv) {
 
   exactOptions(options, new Set([
     "product-id", "expected-updated-at", "reviewed-by", "evidence-note",
-    "seller-evidence-url", "compliance-evidence-url",
+    "compliance-evidence-url",
   ]));
   const reviewedBy = String(options["reviewed-by"] ?? "").trim();
   const evidenceNote = String(options["evidence-note"] ?? "").trim();
@@ -67,16 +67,13 @@ export function buildMarketplaceProductPayload(argv) {
   if (reviewedBy.length < 3 || reviewedBy.length > 200) throw new Error("--reviewed-by must be 3-200 characters.");
   if (evidenceNote.length < 20 || evidenceNote.length > 4000) throw new Error("--evidence-note must be 20-4000 characters.");
   if (!expectedUpdatedAt || !Number.isFinite(Date.parse(expectedUpdatedAt))) throw new Error("--expected-updated-at must be a valid timestamp copied from inspect.");
-  const sellerRequired = command === "compliance-review" || command === "approve";
-  const complianceRequired = command === "approve";
   return {
     action: decisions.get(command),
     product_id: productId(options["product-id"]),
     expected_updated_at: expectedUpdatedAt,
     reviewed_by: reviewedBy,
     evidence_note: evidenceNote,
-    seller_evidence_url: httpsUrl(options["seller-evidence-url"], "seller-evidence-url", sellerRequired),
-    compliance_evidence_url: httpsUrl(options["compliance-evidence-url"], "compliance-evidence-url", complianceRequired),
+    compliance_evidence_url: httpsUrl(options["compliance-evidence-url"], "compliance-evidence-url", false),
   };
 }
 
@@ -111,12 +108,12 @@ function help() {
     "  npm run ops:marketplace-products -- list [--status <status>] [--category <department>] [--limit <1-100>]",
     "  npm run ops:marketplace-products -- inspect --product-id <AMZ-id>",
     "  npm run ops:marketplace-products -- start-review --product-id <AMZ-id> --expected-updated-at <timestamp> --reviewed-by <name> --evidence-note <note>",
-    "  npm run ops:marketplace-products -- compliance-review ... --seller-evidence-url <https-url>",
-    "  npm run ops:marketplace-products -- approve ... --seller-evidence-url <https-url> --compliance-evidence-url <https-url>",
+    "  npm run ops:marketplace-products -- compliance-review ... [--compliance-evidence-url <https-url>]",
+    "  npm run ops:marketplace-products -- approve ... [--compliance-evidence-url <https-url>]",
     "  npm run ops:marketplace-products -- reject|unpublish ...",
     "",
     "Required environment: SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL) and MED250_ADMIN_TOKEN.",
-    "Every decision affects one product; batch approval is intentionally unsupported.",
+    "Products are central catalogue records; pharmacies are the only sellers and provide offers.",
   ].join("\n");
 }
 

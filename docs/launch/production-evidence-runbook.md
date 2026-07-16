@@ -16,31 +16,32 @@ This runbook closes the 15 fail-closed production gates without weakening them o
 
 ## Current safe release state
 
-- The private owner-only Sites preview is deployed at `https://med250-rwanda.ikanisa.chatgpt.site` and its seven representative routes pass the authenticated preview verifier.
-- Public ordering and indexing remain disabled.
-- `med250.rw` and `www.med250.rw` are attached to the owner-only Sites project, but remain pending because the zone has none of the provider-issued routing or validation records. The exact pending plan is `docs/launch/dns/med250-sites-domain-plan.json`.
-- Wrangler is not authenticated on the audit machine.
-- The local environment contains only the public Supabase URL and publishable key; privileged backend verification cannot run here.
+- The Cloudflare Worker is publicly reachable at `https://med250.gikundiro.com`; the seven representative routes pass live deployment verification.
+- The public catalogue and availability-request workflow are active. The protected release evidence gate remains incomplete and must not be represented as formally approved.
+- Public DNS resolves through Cloudflare. The active verification plan is `docs/launch/dns/med250-cloudflare-domain-plan.json`.
+- Wrangler is authenticated to the intended deployment account, but the current OAuth session has broad account-wide write scopes. The infrastructure owner must replace it with a narrowly scoped deploy credential before confirming least privilege.
+- Privileged Supabase verification is available through the protected connector and the live backend contract passes.
+- Supabase server-side Turnstile validation is enabled with the production widget. Missing and invalid tokens are rejected without creating users; one controlled valid-token browser test remains before the security owner can sign the gate.
 - All 51 duplicate-register groups remain pending named human review.
 
 ## Gate closure matrix
 
 | Gate | Accountable owner | Required evidence | Closure procedure |
 | --- | --- | --- | --- |
-| `MED250_GATE_GPS_READY` | Operations | Operations snapshot + review ledger | Generate candidates, inspect each premises, approve only authoritative coordinates, then run strict operational health. Current gap: 0/769 approved. |
-| `MED250_GATE_WHATSAPP_READY` | Operations | Operations snapshot + review ledger | Directly verify an authorised business WhatsApp identity for every production pharmacy and re-run strict operational health. Current coverage: 267/769 pharmacies. |
+| `MED250_GATE_GPS_READY` | Operations | Operations snapshot + review ledger | Generate candidates, inspect each premises, approve only authoritative coordinates, then run strict operational health. Current aggregate snapshot: 93 GPS-ready and 300 dispatch-ready pharmacies out of 769 active records; the governed review ledger still requires owner completion. |
+| `MED250_GATE_WHATSAPP_READY` | Operations | Operations snapshot + review ledger | Directly verify an authorised business WhatsApp identity for every production pharmacy and re-run strict operational health. Current aggregate snapshot: 338 login-enabled WhatsApp contacts and 300 pharmacies with WhatsApp coverage; the governed review ledger still requires owner completion. |
 | `MED250_GATE_PHARMACY_OPERATIONS_APPROVED` | Operations lead | Signed approval | Approve dispatch, response, selection, escalation, expiry, cancellation, prescription, incident and off-platform-payment procedures for named operating staff. |
 | `MED250_GATE_REGULATORY_APPROVED` | Legal/compliance | Signed approval | Approve the exact Rwanda marketplace model and record applicable Rwanda FDA, RICA, health-sector and pharmaceutical-advertising conditions. |
 | `MED250_GATE_DATA_REUSE_APPROVED` | Data owner | Signed approval + review ledger | Approve reuse/publication of every product, pharmacy and contact source; attach provenance and licence/permission decisions. |
 | `MED250_GATE_DUPLICATE_REGISTER_REVIEWED` | Regulatory data reviewer | Review ledger | Run `npm run data:duplicates:packet` to generate a source-comparison packet, then decide all 51 synchronized groups in `data/imports/duplicate-register-review.csv` with reviewer, timestamp and rationale; `npm run data:duplicates:verify -- --strict` must pass. The packet deliberately contains no decision or recommendation. |
 | `MED250_GATE_CREDENTIALS_ROTATED` | Security owner | Deployment receipt + signed approval | Revoke and replace the previously exposed Supabase service, database and personal credentials; retain only a redacted rotation receipt. |
-| `MED250_GATE_SECURITY_HARDENING_DEPLOYED` | Backend owner | Deployment receipt + test record | Apply the two 2026-07-14 security migrations with rotated credentials, then run `npm run backend:verify`; contract `2026-07-14.1` and all invariants must pass. |
+| `MED250_GATE_SECURITY_HARDENING_DEPLOYED` | Backend owner | Deployment receipt + test record | Apply the security migrations with rotated credentials, then run `npm run backend:verify`; contract `2026-07-16.7` and all invariants must pass. |
 | `MED250_GATE_EDGE_FUNCTIONS_DEPLOYED` | Backend owner | Deployment receipt + test record | Deploy reviewed OTP, cleanup, geocoding and contact-review functions and execute protected-origin/least-privilege probes. |
-| `MED250_GATE_TURNSTILE_SERVER_VERIFIED` | Security owner | Test record | Configure Supabase Auth Turnstile validation and prove missing/invalid tokens cannot create anonymous customer identities while valid controlled tokens can. |
+| `MED250_GATE_TURNSTILE_SERVER_VERIFIED` | Security owner | Test record | Supabase Auth Turnstile validation is configured and missing/invalid-token rejection is proven. In a controlled browser, complete the real production widget, create only an anonymous auth identity without sending an availability request, delete that test identity, and record the redacted positive-path result. |
 | `MED250_GATE_AUTH_RATE_LIMITS_APPROVED` | Security owner | Signed approval + test record | Review project-wide anonymous-auth impact, approve limits, and test intended customer access plus abuse rejection. |
 | `MED250_GATE_PRESCRIPTION_RETENTION_APPROVED` | Privacy owner | Signed approval + test record | Approve the 24-hour and 30-day rules, configure the protected cleanup schedule, execute a controlled run, and obtain a healthy non-stale aggregate signal. |
-| `MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED` | Infrastructure owner | Account verification + signed approval | Verify the intended account and zone, least-privilege deploy token, Worker names and protected GitHub environments without recording token values. |
-| `MED250_GATE_DOMAIN_DNS_VERIFIED` | Infrastructure owner | Domain verification + test record | Choose Sites or direct Wrangler as the sole routing owner. The hostnames are currently attached to owner-only Sites. Apply the provider-issued records in `docs/launch/dns/med250-sites-domain-plan.json`, run `npm run domain:dns:verify`, refresh Sites until provider/TLS status is active, then run authenticated preview verification against both hostnames. Live-mode verification remains a separate final-launch step. |
+| `MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED` | Infrastructure owner | Account verification + signed approval | The intended account and production Worker are visible, but the current OAuth credential is broader than least privilege. Create a deploy credential limited to the MED+250 Worker, its route, required asset capability and read-only zone inspection; replace the local/CI credential, verify deployment, then sign the redacted account record. |
+| `MED250_GATE_DOMAIN_DNS_VERIFIED` | Infrastructure owner | Domain verification + test record | Run `npm run domain:dns:verify` against `docs/launch/dns/med250-cloudflare-domain-plan.json`, then run live deployment verification against `https://med250.gikundiro.com`. Confirm DNS, TLS, routing, headers, robots and sitemap before the infrastructure owner signs the gate. |
 | `MED250_GATE_PHYSICAL_UAT_PASSED` | QA owner | Signed approval + test record | Complete all 12 scenarios in `data/physical-device-uat.json` with opaque identity labels, redacted evidence and named approval. `npm run uat:verify:live` must pass and no unintended pharmacy may receive a message or prescription. |
 
 ## Controlled physical-device UAT script
@@ -69,15 +70,10 @@ Use a dedicated approved pharmacy and customer test identity. Record timestamps 
 6. `npm run ops:health:strict`
 7. `npm run release:check:live`
 8. Approve the protected `med250-production` GitHub environment and dispatch the manual workflow with the exact live confirmation phrase.
-9. `npm run deployment:verify -- --url https://med250.rw --mode live`
+9. `npm run deployment:verify -- --url https://med250.gikundiro.com --mode live`
 
 ### Routing-owner safety rule
 
-The same hostname must not be owned simultaneously by a Sites custom-domain binding and the direct `wrangler.jsonc` production Worker routes. The current safe state assigns both hostnames to the owner-only Sites project while DNS is absent. Before public launch, the infrastructure owner must make and evidence one choice:
-
-- **Sites:** keep the Sites bindings, validate the provider-issued DNS records, preserve owner-only access until all gates pass, then make the approved live release through Sites.
-- **Direct Worker:** remove both Sites custom-domain bindings first, authenticate the intended Cloudflare account, then use the protected `med250-production` workflow and direct Worker routes.
-
-Do not install DNS or run a direct production deployment until that routing-owner decision is recorded.
+`med250.gikundiro.com` is owned by the direct Cloudflare Worker route declared in `wrangler.jsonc`. Do not attach the same hostname to a Sites project or another Worker. The retired `med250.rw` Sites plan is retained only as historical evidence and is not part of the active production verification path.
 
 If any command fails, keep public ordering and indexing disabled and return the responsible gate to `pending` or `rejected` until new evidence exists.

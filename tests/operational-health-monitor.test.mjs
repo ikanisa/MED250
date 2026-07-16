@@ -14,7 +14,7 @@ const healthySnapshot = {
   prescription_cleanup: { stale: false, expired_claims: 0 },
   orders: { waiting_without_confirmation_over_30m: 0 },
   pharmacy_auth: { otp_failed_24h: 0 },
-  catalogue: { products_with_current_prices: 1 },
+  catalogue: { products_with_central_indicative_prices: 1, pharmacy_specific_price_records_in_use: 0 },
 };
 
 test("classifies a complete aggregate production snapshot as healthy", () => {
@@ -40,15 +40,24 @@ test("raises every fail-closed pharmacy and cleanup launch condition", () => {
   assert.ok(result.critical.some((message) => /cleanup/.test(message)));
 });
 
-test("reports recoverable operations, order, OTP and price issues as degraded", () => {
+test("reports recoverable operations, request, OTP and central-price issues as degraded", () => {
   const result = evaluateOperationalHealth({
     ...healthySnapshot,
     prescription_cleanup: { stale: false, expired_claims: 2 },
     orders: { waiting_without_confirmation_over_30m: 3 },
     pharmacy_auth: { otp_failed_24h: 4 },
-    catalogue: { products_with_current_prices: 0 },
+    catalogue: { products_with_central_indicative_prices: 0, pharmacy_specific_price_records_in_use: 0 },
   });
   assert.equal(result.status, "degraded");
   assert.equal(result.critical.length, 0);
   assert.equal(result.warnings.length, 4);
+});
+
+test("fails closed if operational health reports pharmacy-specific prices in use", () => {
+  const result = evaluateOperationalHealth({
+    ...healthySnapshot,
+    catalogue: { products_with_central_indicative_prices: 2168, pharmacy_specific_price_records_in_use: 1 },
+  });
+  assert.equal(result.status, "critical");
+  assert.ok(result.critical.some((message) => /pharmacy-specific catalogue prices/.test(message)));
 });

@@ -41,7 +41,7 @@ function records(origin, mode) {
       ...(mode === "preview" ? { "x-robots-tag": "noindex, nofollow" } : {}),
     } : {},
     body: route === "/"
-      ? "<title>MED+250</title><h1>One order</h1>"
+      ? "<title>MED+250</title><h1>Connect with a pharmacy that has it</h1>"
       : route === "/robots.txt"
         ? mode === "preview" ? "User-Agent: *\nDisallow: /" : `User-Agent: *\nAllow: /\nSitemap: ${origin}/sitemap.xml`
         : route === "/sitemap.xml"

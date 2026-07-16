@@ -1,5 +1,6 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { extname, join, relative, resolve } from "node:path";
+import { gzipSync } from "node:zlib";
 
 const root = resolve(".");
 const clientAssets = resolve("dist/client/assets");
@@ -17,6 +18,13 @@ function bytes(paths) {
   return paths.reduce((total, path) => total + statSync(path).size, 0);
 }
 
+function transferBytes(paths) {
+  return paths.reduce(
+    (total, path) => total + gzipSync(readFileSync(path), { level: 9 }).byteLength,
+    0,
+  );
+}
+
 function enforce(label, actual, maximum) {
   if (actual > maximum) errors.push(`${label} is ${(actual / 1024).toFixed(1)} KiB; budget is ${(maximum / 1024).toFixed(1)} KiB.`);
 }
@@ -29,16 +37,19 @@ const optimizedMarketplaceImages = filesUnder(marketplaceAssets).filter((path) =
 const wordmark = resolve("public/brand/med-plus-250-wordmark-220.png");
 
 const totals = {
-  javascriptBytes: bytes(javascript),
-  cssBytes: bytes(css),
-  marketplaceJavascriptBytes: bytes(marketplaceJavascript),
+  javascriptRawBytes: bytes(javascript),
+  javascriptTransferBytes: transferBytes(javascript),
+  cssRawBytes: bytes(css),
+  cssTransferBytes: transferBytes(css),
+  marketplaceJavascriptRawBytes: bytes(marketplaceJavascript),
+  marketplaceJavascriptTransferBytes: transferBytes(marketplaceJavascript),
   initialVisualAssetBytes: bytes([...optimizedMarketplaceImages, wordmark]),
   optimizedMarketplaceImageCount: optimizedMarketplaceImages.length,
 };
 
-enforce("Total browser JavaScript", totals.javascriptBytes, 600 * 1024);
-enforce("Total browser CSS", totals.cssBytes, 100 * 1024);
-enforce("Marketplace browser JavaScript", totals.marketplaceJavascriptBytes, 230 * 1024);
+enforce("Total browser JavaScript transfer", totals.javascriptTransferBytes, 240 * 1024);
+enforce("Total browser CSS transfer", totals.cssTransferBytes, 40 * 1024);
+enforce("Marketplace browser JavaScript transfer", totals.marketplaceJavascriptTransferBytes, 120 * 1024);
 enforce("Optimized marketplace visuals plus header wordmark", totals.initialVisualAssetBytes, 100 * 1024);
 
 for (const image of optimizedMarketplaceImages) enforce(relative(root, image), statSync(image).size, 20 * 1024);

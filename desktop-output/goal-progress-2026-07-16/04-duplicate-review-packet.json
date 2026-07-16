@@ -1,0 +1,6405 @@
+{
+  "schema_version": "1",
+  "classification": "deterministic reviewer context; contains no regulatory decision or recommendation",
+  "generated_from": {
+    "products": {
+      "path": "data/imports/rwanda-fda-products-july-2026.csv",
+      "sha256": "8b6b22d154da87c26bb7fc153d621c41f713f9ba0b60ff16d0c6c4f8122aab22"
+    },
+    "retail": {
+      "path": "data/imports/rwanda-fda-retail-pharmacies-may-2026.csv",
+      "sha256": "977b4d35036d178b45191f98de55e574e848755f1153df252a7a621665b583a9"
+    },
+    "online": {
+      "path": "data/imports/rwanda-fda-online-pharmacies-may-2026.csv",
+      "sha256": "03032e7e892cb2d1ffc3a335d28d81288f082c8989fd9113299632c56e2c79c9"
+    }
+  },
+  "summary": {
+    "group_count": 51,
+    "product_registration_groups": 6,
+    "pharmacy_professional_registration_groups": 45
+  },
+  "review_rules": [
+    "Use the authoritative source and named regulatory reviewer; this packet does not decide whether a repeated identifier is valid.",
+    "Record decisions only in data/imports/duplicate-register-review.csv with reviewer, timezone-qualified timestamp and rationale.",
+    "Never merge or remove source rows merely to make the strict verifier pass."
+  ],
+  "groups": [
+    {
+      "key": "pharmacy_professional_registration:NPC/A0035",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A0035",
+      "source_references": [
+        "retail:547",
+        "retail:641"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "province",
+        "district",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:547",
+              "value": "SILA PHARMACY Ltd"
+            },
+            {
+              "reference": "retail:641",
+              "value": "PHARMACI ANGE DIVINE Ltd"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:547",
+              "value": "SIBOMANA LAMBERT"
+            },
+            {
+              "reference": "retail:641",
+              "value": "LAMBERT SIBOMANA"
+            }
+          ]
+        },
+        "province": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:547",
+              "value": "WESTERN"
+            },
+            {
+              "reference": "retail:641",
+              "value": "NORTHERN"
+            }
+          ]
+        },
+        "district": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:547",
+              "value": "RUBAVU"
+            },
+            {
+              "reference": "retail:641",
+              "value": "GAKENKE"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:547",
+              "value": "GISENYI NENGO"
+            },
+            {
+              "reference": "retail:641",
+              "value": "GAKENKE RUSAGARA"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:547",
+              "value": "2030-09-09"
+            },
+            {
+              "reference": "retail:641",
+              "value": "2030-10-08"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:547",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:641",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A0078",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A0078",
+      "source_references": [
+        "retail:530",
+        "retail:688"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "province",
+        "district",
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:530",
+              "value": "LINDO PHARMACY Ltd"
+            },
+            {
+              "reference": "retail:688",
+              "value": "HERITAGE PHARMACY Ltd"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:530",
+              "value": "NYIRANSABIMANA ALEXIE"
+            },
+            {
+              "reference": "retail:688",
+              "value": "ALEXIE NYIRANSABIMANA"
+            }
+          ]
+        },
+        "province": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:530",
+              "value": "KIGALI CITY"
+            },
+            {
+              "reference": "retail:688",
+              "value": "KIGALI CITY"
+            }
+          ]
+        },
+        "district": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:530",
+              "value": "NYARUGENGE"
+            },
+            {
+              "reference": "retail:688",
+              "value": "NYARUGENGE"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:530",
+              "value": "RWEZAMENYO RWAMPARA"
+            },
+            {
+              "reference": "retail:688",
+              "value": "NYAMIRAMBO RUGARAMA"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:530",
+              "value": "2030-09-05"
+            },
+            {
+              "reference": "retail:688",
+              "value": "2030-11-05"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:530",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:688",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A0080",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A0080",
+      "source_references": [
+        "retail:131",
+        "retail:383"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "province",
+        "district",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:131",
+              "value": "MIKA PHARMACY Ltd"
+            },
+            {
+              "reference": "retail:383",
+              "value": "PHARMACIE LA PREFERENCE Ltd"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:131",
+              "value": "MUGISHA AIME"
+            },
+            {
+              "reference": "retail:383",
+              "value": "CLEMENT DUSHIME"
+            }
+          ]
+        },
+        "province": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:131",
+              "value": "EASTERN"
+            },
+            {
+              "reference": "retail:383",
+              "value": "SOUTHERN"
+            }
+          ]
+        },
+        "district": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:131",
+              "value": "NYAGATARE"
+            },
+            {
+              "reference": "retail:383",
+              "value": "HUYE"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:131",
+              "value": "NYAGATARE NYAGATARE"
+            },
+            {
+              "reference": "retail:383",
+              "value": "NGOMA BUTARE"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:131",
+              "value": "2030-04-11"
+            },
+            {
+              "reference": "retail:383",
+              "value": "2030-08-08"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:131",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:383",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A0179",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A0179",
+      "source_references": [
+        "retail:428",
+        "retail:525"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "district",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "province",
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:428",
+              "value": "LAGRADA PHARMACY Limited"
+            },
+            {
+              "reference": "retail:525",
+              "value": "BETHEL PHARMACY Ltd"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:428",
+              "value": "ANATHALIE UWAMARIYA"
+            },
+            {
+              "reference": "retail:525",
+              "value": "UWAMARIYA ANATHALIE"
+            }
+          ]
+        },
+        "province": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:428",
+              "value": "KIGALI CITY"
+            },
+            {
+              "reference": "retail:525",
+              "value": "KIGALI CITY"
+            }
+          ]
+        },
+        "district": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:428",
+              "value": "NYARUGENGE"
+            },
+            {
+              "reference": "retail:525",
+              "value": "KICUKIRO"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:428",
+              "value": "RWEZAMENYO RWEZAMENYO I"
+            },
+            {
+              "reference": "retail:525",
+              "value": "MASAKA GAKO"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:428",
+              "value": "2030-08-19"
+            },
+            {
+              "reference": "retail:525",
+              "value": "2030-09-05"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:428",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:525",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A0189",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A0189",
+      "source_references": [
+        "retail:491",
+        "retail:577"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "district",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "province",
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:491",
+              "value": "RAVI PHARMACY Ltd"
+            },
+            {
+              "reference": "retail:577",
+              "value": "PHARMACIE IRIS LTD"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:491",
+              "value": "RUTAGANDA VICENT"
+            },
+            {
+              "reference": "retail:577",
+              "value": "MUNYENGABE JEAN DAMAS"
+            }
+          ]
+        },
+        "province": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:491",
+              "value": "KIGALI CITY"
+            },
+            {
+              "reference": "retail:577",
+              "value": "KIGALI CITY"
+            }
+          ]
+        },
+        "district": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:491",
+              "value": "GASABO"
+            },
+            {
+              "reference": "retail:577",
+              "value": "NYARUGENGE"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:491",
+              "value": "KIMIRONKO NYAGATOVU"
+            },
+            {
+              "reference": "retail:577",
+              "value": "NYARUGENGE KIYOVU"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:491",
+              "value": "2030-08-27"
+            },
+            {
+              "reference": "retail:577",
+              "value": "2030-09-17"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:491",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:577",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A0229",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A0229",
+      "source_references": [
+        "retail:187",
+        "retail:444"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "province",
+        "district",
+        "sector_cell_raw",
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:187",
+              "value": "TREMIRO PHARMACY Ltd"
+            },
+            {
+              "reference": "retail:444",
+              "value": "URWIBUTSO PHARMACY Ltd"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:187",
+              "value": "EUGENIE MUKAKALISA"
+            },
+            {
+              "reference": "retail:444",
+              "value": "MUKAKALISA EUGENIE"
+            }
+          ]
+        },
+        "province": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:187",
+              "value": "KIGALI CITY"
+            },
+            {
+              "reference": "retail:444",
+              "value": "KIGALI CITY"
+            }
+          ]
+        },
+        "district": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:187",
+              "value": "KICUKIRO"
+            },
+            {
+              "reference": "retail:444",
+              "value": "KICUKIRO"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:187",
+              "value": "KICUKIRO KICUKIRO"
+            },
+            {
+              "reference": "retail:444",
+              "value": "KICUKIRO KICUKIRO"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:187",
+              "value": "2030-05-26"
+            },
+            {
+              "reference": "retail:444",
+              "value": "2030-08-19"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:187",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:444",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A0258",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A0258",
+      "source_references": [
+        "retail:26",
+        "retail:650"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "province",
+        "district",
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:26",
+              "value": "SALAMA -PILLAR PHARMACY LTD"
+            },
+            {
+              "reference": "retail:650",
+              "value": "VINE KACYIRU 2"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:26",
+              "value": "ANNE MUKESHIMANA"
+            },
+            {
+              "reference": "retail:650",
+              "value": "MUKESHIMANA ANNE"
+            }
+          ]
+        },
+        "province": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:26",
+              "value": "KIGALI CITY"
+            },
+            {
+              "reference": "retail:650",
+              "value": "KIGALI CITY"
+            }
+          ]
+        },
+        "district": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:26",
+              "value": "GASABO"
+            },
+            {
+              "reference": "retail:650",
+              "value": "GASABO"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:26",
+              "value": "REMERA RUKIRI II"
+            },
+            {
+              "reference": "retail:650",
+              "value": "KACYIRU KAMATAMU"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:26",
+              "value": "2030-02-20"
+            },
+            {
+              "reference": "retail:650",
+              "value": "2030-10-14"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:26",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:650",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A0380",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A0380",
+      "source_references": [
+        "retail:374",
+        "retail:86"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "province",
+        "district",
+        "sector_cell_raw",
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:86",
+              "value": "SHEKINAH PHARMACY LTD"
+            },
+            {
+              "reference": "retail:374",
+              "value": "GABA PHARMACY LTD"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:86",
+              "value": "SEKAMONYO GILBERT"
+            },
+            {
+              "reference": "retail:374",
+              "value": "GILBERT SEKAMONYO"
+            }
+          ]
+        },
+        "province": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:86",
+              "value": "EASTERN"
+            },
+            {
+              "reference": "retail:374",
+              "value": "EASTERN"
+            }
+          ]
+        },
+        "district": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:86",
+              "value": "BUGESERA"
+            },
+            {
+              "reference": "retail:374",
+              "value": "BUGESERA"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:86",
+              "value": "NYAMATA NYAMATA"
+            },
+            {
+              "reference": "retail:374",
+              "value": "NYAMATA NYAMATA"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:86",
+              "value": "2030-03-12"
+            },
+            {
+              "reference": "retail:374",
+              "value": "2030-08-08"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:86",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:374",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A0401",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A0401",
+      "source_references": [
+        "retail:542",
+        "retail:90"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "province",
+        "district",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:90",
+              "value": "HORIZON PHARMACY LTD"
+            },
+            {
+              "reference": "retail:542",
+              "value": "LINCOLN PHARMACY Ltd"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:90",
+              "value": "JANVIER KAZENEZA"
+            },
+            {
+              "reference": "retail:542",
+              "value": "KAZENEZA JANVIER"
+            }
+          ]
+        },
+        "province": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:90",
+              "value": "KIGALI CITY"
+            },
+            {
+              "reference": "retail:542",
+              "value": "EASTERN"
+            }
+          ]
+        },
+        "district": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:90",
+              "value": "NYARUGENGE"
+            },
+            {
+              "reference": "retail:542",
+              "value": "NYAGATARE"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:90",
+              "value": "NYAMIRAMBO RUGARAMA"
+            },
+            {
+              "reference": "retail:542",
+              "value": "TABAGWE NYABITEKERI"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:90",
+              "value": "2030-03-26"
+            },
+            {
+              "reference": "retail:542",
+              "value": "2030-09-09"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:90",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:542",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A0426",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A0426",
+      "source_references": [
+        "retail:526",
+        "retail:531"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "province",
+        "district",
+        "sector_cell_raw"
+      ],
+      "identical_fields": [
+        "license_expiration_date",
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:526",
+              "value": "DAYENU PHARMACY Limited"
+            },
+            {
+              "reference": "retail:531",
+              "value": "PHARMACIE BORA Ltd"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:526",
+              "value": "NKURUNZIZA GASTON"
+            },
+            {
+              "reference": "retail:531",
+              "value": "BAVUGANAYO OMAR"
+            }
+          ]
+        },
+        "province": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:526",
+              "value": "WESTERN"
+            },
+            {
+              "reference": "retail:531",
+              "value": "KIGALI CITY"
+            }
+          ]
+        },
+        "district": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:526",
+              "value": "KARONGI"
+            },
+            {
+              "reference": "retail:531",
+              "value": "GASABO"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:526",
+              "value": "RUBENGERA KIBIRIZI"
+            },
+            {
+              "reference": "retail:531",
+              "value": "GATSATA NYAMUGARI"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:526",
+              "value": "2030-09-05"
+            },
+            {
+              "reference": "retail:531",
+              "value": "2030-09-05"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:526",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:531",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A0450",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A0450",
+      "source_references": [
+        "retail:264",
+        "retail:705"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "province",
+        "district",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:264",
+              "value": "LAVANA G PHARMACY LTD"
+            },
+            {
+              "reference": "retail:705",
+              "value": "MANZI&SANO PHARMACY Limited"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:264",
+              "value": "LILIANE UWIMANA"
+            },
+            {
+              "reference": "retail:705",
+              "value": "UWIMANA LILIANE"
+            }
+          ]
+        },
+        "province": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:264",
+              "value": "WESTERN"
+            },
+            {
+              "reference": "retail:705",
+              "value": "EASTERN"
+            }
+          ]
+        },
+        "district": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:264",
+              "value": "RUBAVU"
+            },
+            {
+              "reference": "retail:705",
+              "value": "NYAGATARE"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:264",
+              "value": "RUBAVU GIKOMBE"
+            },
+            {
+              "reference": "retail:705",
+              "value": "NYAGATARE NYAGATARE"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:264",
+              "value": "2030-06-25"
+            },
+            {
+              "reference": "retail:705",
+              "value": "2030-11-26"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:264",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:705",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A0490",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A0490",
+      "source_references": [
+        "retail:237",
+        "retail:74"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "district",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "province",
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:74",
+              "value": "PROGRESS PHARMACY LTD"
+            },
+            {
+              "reference": "retail:237",
+              "value": "SALAMA -ACCURX PHARMACY LTD"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:74",
+              "value": "SUMBYA LEON JEAN JACQUES"
+            },
+            {
+              "reference": "retail:237",
+              "value": "LEON JEAN JACQUES SUMBYA"
+            }
+          ]
+        },
+        "province": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:74",
+              "value": "KIGALI CITY"
+            },
+            {
+              "reference": "retail:237",
+              "value": "KIGALI CITY"
+            }
+          ]
+        },
+        "district": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:74",
+              "value": "KICUKIRO"
+            },
+            {
+              "reference": "retail:237",
+              "value": "GASABO"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:74",
+              "value": "KIGARAMA BWERANKONI"
+            },
+            {
+              "reference": "retail:237",
+              "value": "REMERA RUKIRI II"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:74",
+              "value": "2030-03-10"
+            },
+            {
+              "reference": "retail:237",
+              "value": "2030-06-16"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:74",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:237",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A0560",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A0560",
+      "source_references": [
+        "retail:295",
+        "retail:8"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "district",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "province",
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:8",
+              "value": "ABATESI PHARMACY LTD"
+            },
+            {
+              "reference": "retail:295",
+              "value": "UMUCYO PHARMACY Ltd"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:8",
+              "value": "FRANCOIS BIRAMAHIRE"
+            },
+            {
+              "reference": "retail:295",
+              "value": "BIRAMAHIRE FRANCOIS"
+            }
+          ]
+        },
+        "province": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:8",
+              "value": "EASTERN"
+            },
+            {
+              "reference": "retail:295",
+              "value": "EASTERN"
+            }
+          ]
+        },
+        "district": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:8",
+              "value": "GATSIBO"
+            },
+            {
+              "reference": "retail:295",
+              "value": "NYAGATARE"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:8",
+              "value": "RWIMBOGO RWIKINIRO"
+            },
+            {
+              "reference": "retail:295",
+              "value": "MATIMBA MATIMBA"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:8",
+              "value": "2030-01-31"
+            },
+            {
+              "reference": "retail:295",
+              "value": "2030-07-10"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:8",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:295",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A0566",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A0566",
+      "source_references": [
+        "retail:185",
+        "retail:496"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "province",
+        "district",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:185",
+              "value": "MURINDI -SUGIRA PHARMACY Ltd"
+            },
+            {
+              "reference": "retail:496",
+              "value": "ANSWER PHARMACIE Ltd"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:185",
+              "value": "NZAYISENGA JOSEPH"
+            },
+            {
+              "reference": "retail:496",
+              "value": "JOSEPH NZAYISENGA"
+            }
+          ]
+        },
+        "province": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:185",
+              "value": "KIGALI CITY"
+            },
+            {
+              "reference": "retail:496",
+              "value": "WESTERN"
+            }
+          ]
+        },
+        "district": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:185",
+              "value": "KICUKIRO"
+            },
+            {
+              "reference": "retail:496",
+              "value": "RUBAVU"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:185",
+              "value": "NYARUGUNGA KAMASHASHI"
+            },
+            {
+              "reference": "retail:496",
+              "value": "GISENYI KIVUMU"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:185",
+              "value": "2030-05-26"
+            },
+            {
+              "reference": "retail:496",
+              "value": "2030-08-28"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:185",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:496",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A0569",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A0569",
+      "source_references": [
+        "retail:116",
+        "retail:77"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "province",
+        "district",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:77",
+              "value": "SIFA PHARMACY LTD"
+            },
+            {
+              "reference": "retail:116",
+              "value": "URUMURI PHARMACY LTD"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:77",
+              "value": "SEBAGENZI JUSTIN"
+            },
+            {
+              "reference": "retail:116",
+              "value": "AKIMANA MARCELLINE"
+            }
+          ]
+        },
+        "province": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:77",
+              "value": "NORTHERN"
+            },
+            {
+              "reference": "retail:116",
+              "value": "SOUTHERN"
+            }
+          ]
+        },
+        "district": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:77",
+              "value": "MUSANZE"
+            },
+            {
+              "reference": "retail:116",
+              "value": "MUHANGA"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:77",
+              "value": "KINIGI KAMPANGA"
+            },
+            {
+              "reference": "retail:116",
+              "value": "NYAMABUYE GAHOGO"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:77",
+              "value": "2030-03-10"
+            },
+            {
+              "reference": "retail:116",
+              "value": "2030-03-27"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:77",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:116",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A0617",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A0617",
+      "source_references": [
+        "retail:263",
+        "retail:328",
+        "retail:676"
+      ],
+      "source_row_count": 3,
+      "differing_fields": [
+        "name",
+        "technician",
+        "district",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "province",
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:263",
+              "value": "BONNE VIE LTD"
+            },
+            {
+              "reference": "retail:328",
+              "value": "MEDIASOL PHARMACY Ltd/REMERA BRANCH"
+            },
+            {
+              "reference": "retail:676",
+              "value": "MEDIASOL PHARMACY Ltd/REMERA BRANCH"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:263",
+              "value": "CHANTAL UWAYEZU"
+            },
+            {
+              "reference": "retail:328",
+              "value": "LINDA UMUTONI"
+            },
+            {
+              "reference": "retail:676",
+              "value": "UMUTONI LINDA"
+            }
+          ]
+        },
+        "province": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:263",
+              "value": "KIGALI CITY"
+            },
+            {
+              "reference": "retail:328",
+              "value": "KIGALI CITY"
+            },
+            {
+              "reference": "retail:676",
+              "value": "KIGALI CITY"
+            }
+          ]
+        },
+        "district": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:263",
+              "value": "KICUKIRO"
+            },
+            {
+              "reference": "retail:328",
+              "value": "GASABO"
+            },
+            {
+              "reference": "retail:676",
+              "value": "GASABO"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:263",
+              "value": "GAHANGA GAHANGA"
+            },
+            {
+              "reference": "retail:328",
+              "value": "REMERA RUKIRI II"
+            },
+            {
+              "reference": "retail:676",
+              "value": "REMERA RUKIRI II"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:263",
+              "value": "2030-06-25"
+            },
+            {
+              "reference": "retail:328",
+              "value": "2030-07-28"
+            },
+            {
+              "reference": "retail:676",
+              "value": "2030-10-23"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:263",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:328",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:676",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A0757",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A0757",
+      "source_references": [
+        "retail:712",
+        "retail:93"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "province",
+        "district",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "technician",
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:93",
+              "value": "AGAPE PHARMACY LTD"
+            },
+            {
+              "reference": "retail:712",
+              "value": "NECTAR PHARMACY Ltd"
+            }
+          ]
+        },
+        "technician": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:93",
+              "value": "NDAHUNGA ANGE ROBERT"
+            },
+            {
+              "reference": "retail:712",
+              "value": "NDAHUNGA ANGE ROBERT"
+            }
+          ]
+        },
+        "province": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:93",
+              "value": "SOUTHERN"
+            },
+            {
+              "reference": "retail:712",
+              "value": "KIGALI CITY"
+            }
+          ]
+        },
+        "district": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:93",
+              "value": "GISAGARA"
+            },
+            {
+              "reference": "retail:712",
+              "value": "NYARUGENGE"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:93",
+              "value": "SAVE GATOKI"
+            },
+            {
+              "reference": "retail:712",
+              "value": "NYARUGENGE BIRYOGO"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:93",
+              "value": "2030-03-27"
+            },
+            {
+              "reference": "retail:712",
+              "value": "2030-12-04"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:93",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:712",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A0883",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A0883",
+      "source_references": [
+        "retail:533",
+        "retail:60"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "province",
+        "district",
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:60",
+              "value": "JAHRAS PHARMACY LTD"
+            },
+            {
+              "reference": "retail:533",
+              "value": "PHARMACY CONCORDE Ltd"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:60",
+              "value": "ISHIMWE JULES"
+            },
+            {
+              "reference": "retail:533",
+              "value": "NDAYISHIMIYE NODIER BRUCE"
+            }
+          ]
+        },
+        "province": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:60",
+              "value": "KIGALI CITY"
+            },
+            {
+              "reference": "retail:533",
+              "value": "KIGALI CITY"
+            }
+          ]
+        },
+        "district": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:60",
+              "value": "KICUKIRO"
+            },
+            {
+              "reference": "retail:533",
+              "value": "KICUKIRO"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:60",
+              "value": "NYARUGUNGA NONKO"
+            },
+            {
+              "reference": "retail:533",
+              "value": "KIGARAMA RWAMPARA"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:60",
+              "value": "2030-03-07"
+            },
+            {
+              "reference": "retail:533",
+              "value": "2030-09-05"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:60",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:533",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A0966",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A0966",
+      "source_references": [
+        "retail:749",
+        "retail:78"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "province",
+        "district",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:78",
+              "value": "WEMA RETAIL PHARMACY LTD"
+            },
+            {
+              "reference": "retail:749",
+              "value": "UMURINGA PHARMACY(UP) Ltd"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:78",
+              "value": "SAMUEL NDAYISHIMYE"
+            },
+            {
+              "reference": "retail:749",
+              "value": "SAMUEL NDAYISHIMIYE"
+            }
+          ]
+        },
+        "province": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:78",
+              "value": "SOUTHERN"
+            },
+            {
+              "reference": "retail:749",
+              "value": "EASTERN"
+            }
+          ]
+        },
+        "district": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:78",
+              "value": "HUYE"
+            },
+            {
+              "reference": "retail:749",
+              "value": "RWAMAGANA"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:78",
+              "value": "NGOMA MATYAZO"
+            },
+            {
+              "reference": "retail:749",
+              "value": "FUMBWE NYAGASAMBU"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:78",
+              "value": "2030-03-10"
+            },
+            {
+              "reference": "retail:749",
+              "value": "2031-02-24"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:78",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:749",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A0976",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A0976",
+      "source_references": [
+        "retail:83",
+        "retail:89"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "district",
+        "sector_cell_raw"
+      ],
+      "identical_fields": [
+        "province",
+        "license_expiration_date",
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:83",
+              "value": "BIPA PHARMACY LTD"
+            },
+            {
+              "reference": "retail:89",
+              "value": "ZOE PHARMACY LTD"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:83",
+              "value": "JEANPIERRE NIYITANGA"
+            },
+            {
+              "reference": "retail:89",
+              "value": "NYIRASHIMWE SHALOM"
+            }
+          ]
+        },
+        "province": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:83",
+              "value": "KIGALI CITY"
+            },
+            {
+              "reference": "retail:89",
+              "value": "KIGALI CITY"
+            }
+          ]
+        },
+        "district": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:83",
+              "value": "KICUKIRO"
+            },
+            {
+              "reference": "retail:89",
+              "value": "GASABO"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:83",
+              "value": "KAGARAMA RUKATSA"
+            },
+            {
+              "reference": "retail:89",
+              "value": "KIMIHURURA KIMIHURURA"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:83",
+              "value": "2030-03-12"
+            },
+            {
+              "reference": "retail:89",
+              "value": "2030-03-12"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:83",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:89",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A1002",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A1002",
+      "source_references": [
+        "retail:114",
+        "retail:296"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "technician",
+        "province",
+        "district",
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:114",
+              "value": "UNIPHARMA B5"
+            },
+            {
+              "reference": "retail:296",
+              "value": "UNIPHARMA B3"
+            }
+          ]
+        },
+        "technician": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:114",
+              "value": "MAURICE MAYIRA"
+            },
+            {
+              "reference": "retail:296",
+              "value": "MAURICE MAYIRA"
+            }
+          ]
+        },
+        "province": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:114",
+              "value": "KIGALI CITY"
+            },
+            {
+              "reference": "retail:296",
+              "value": "KIGALI CITY"
+            }
+          ]
+        },
+        "district": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:114",
+              "value": "KICUKIRO"
+            },
+            {
+              "reference": "retail:296",
+              "value": "KICUKIRO"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:114",
+              "value": "NIBOYE NYAKABANDA"
+            },
+            {
+              "reference": "retail:296",
+              "value": "KANOMBE KABEZA"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:114",
+              "value": "2030-03-27"
+            },
+            {
+              "reference": "retail:296",
+              "value": "2030-07-10"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:114",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:296",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A1015",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A1015",
+      "source_references": [
+        "retail:323",
+        "retail:720"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "province",
+        "district",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "technician",
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:323",
+              "value": "AZ PHARMACIE Ltd"
+            },
+            {
+              "reference": "retail:720",
+              "value": "PHARMACIE TWITEKUBUZIMA"
+            }
+          ]
+        },
+        "technician": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:323",
+              "value": "NDAHIMANA GAETAN"
+            },
+            {
+              "reference": "retail:720",
+              "value": "NDAHIMANA GAETAN"
+            }
+          ]
+        },
+        "province": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:323",
+              "value": "EASTERN"
+            },
+            {
+              "reference": "retail:720",
+              "value": "WESTERN"
+            }
+          ]
+        },
+        "district": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:323",
+              "value": "RWAMAGANA"
+            },
+            {
+              "reference": "retail:720",
+              "value": "NYAMASHEKE"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:323",
+              "value": "NYAKARIRO GISHORE"
+            },
+            {
+              "reference": "retail:720",
+              "value": "KANJONGO KIBOGORA"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:323",
+              "value": "2030-07-25"
+            },
+            {
+              "reference": "retail:720",
+              "value": "2030-12-20"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:323",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:720",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A1020",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A1020",
+      "source_references": [
+        "retail:159",
+        "retail:714"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "district",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "province",
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:159",
+              "value": "ZENITH GF PHARMACY Ltd"
+            },
+            {
+              "reference": "retail:714",
+              "value": "VINE PHARMACY REMERA 2"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:159",
+              "value": "GISELE NIYOMUKESHA"
+            },
+            {
+              "reference": "retail:714",
+              "value": "NIYOMUKESHA GISELE"
+            }
+          ]
+        },
+        "province": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:159",
+              "value": "KIGALI CITY"
+            },
+            {
+              "reference": "retail:714",
+              "value": "KIGALI CITY"
+            }
+          ]
+        },
+        "district": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:159",
+              "value": "KICUKIRO"
+            },
+            {
+              "reference": "retail:714",
+              "value": "GASABO"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:159",
+              "value": "NIBOYE GATARE"
+            },
+            {
+              "reference": "retail:714",
+              "value": "REMERA RUKIRI I"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:159",
+              "value": "2030-05-26"
+            },
+            {
+              "reference": "retail:714",
+              "value": "2030-12-17"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:159",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:714",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A1043",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A1043",
+      "source_references": [
+        "retail:222",
+        "retail:393"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "province",
+        "district",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:222",
+              "value": "GOOD SAMARITAN PHARMACY Limited"
+            },
+            {
+              "reference": "retail:393",
+              "value": "BOVAN LTD"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:222",
+              "value": "MUTUMWANYANA IMMACULEE"
+            },
+            {
+              "reference": "retail:393",
+              "value": "IMMACULEE MUTUMWANYANA"
+            }
+          ]
+        },
+        "province": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:222",
+              "value": "SOUTHERN"
+            },
+            {
+              "reference": "retail:393",
+              "value": "KIGALI CITY"
+            }
+          ]
+        },
+        "district": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:222",
+              "value": "KAMONYI"
+            },
+            {
+              "reference": "retail:393",
+              "value": "NYARUGENGE"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:222",
+              "value": "RUNDA RUGOZI"
+            },
+            {
+              "reference": "retail:393",
+              "value": "MUHIMA NYABUGOGO"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:222",
+              "value": "2030-06-02"
+            },
+            {
+              "reference": "retail:393",
+              "value": "2030-08-14"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:222",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:393",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A1116",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A1116",
+      "source_references": [
+        "retail:243",
+        "retail:424"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "province",
+        "district",
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:243",
+              "value": "VISION MENIPHAR2 Ltd"
+            },
+            {
+              "reference": "retail:424",
+              "value": "LOTUS PHARMA B2 LTD"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:243",
+              "value": "MUGISHA MARIE CARMELLE"
+            },
+            {
+              "reference": "retail:424",
+              "value": "MARIE CARMELLE MUGISHA"
+            }
+          ]
+        },
+        "province": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:243",
+              "value": "KIGALI CITY"
+            },
+            {
+              "reference": "retail:424",
+              "value": "KIGALI CITY"
+            }
+          ]
+        },
+        "district": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:243",
+              "value": "KICUKIRO"
+            },
+            {
+              "reference": "retail:424",
+              "value": "KICUKIRO"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:243",
+              "value": "GAHANGA GAHANGA"
+            },
+            {
+              "reference": "retail:424",
+              "value": "GATENGA GATENGA"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:243",
+              "value": "2030-06-16"
+            },
+            {
+              "reference": "retail:424",
+              "value": "2030-08-19"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:243",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:424",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A1149",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A1149",
+      "source_references": [
+        "retail:101",
+        "retail:218",
+        "retail:291"
+      ],
+      "source_row_count": 3,
+      "differing_fields": [
+        "name",
+        "technician",
+        "province",
+        "district",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:101",
+              "value": "ESPERANTO PHARMACY LTD"
+            },
+            {
+              "reference": "retail:218",
+              "value": "ALEK PHARMA Ltd"
+            },
+            {
+              "reference": "retail:291",
+              "value": "ENIAS PHARMACY LTD"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:101",
+              "value": "MOSES MURIISA"
+            },
+            {
+              "reference": "retail:218",
+              "value": "MOSES MURIISA"
+            },
+            {
+              "reference": "retail:291",
+              "value": "MURIISA MOSES"
+            }
+          ]
+        },
+        "province": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:101",
+              "value": "EASTERN"
+            },
+            {
+              "reference": "retail:218",
+              "value": "KIGALI CITY"
+            },
+            {
+              "reference": "retail:291",
+              "value": "EASTERN"
+            }
+          ]
+        },
+        "district": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:101",
+              "value": "KAYONZA"
+            },
+            {
+              "reference": "retail:218",
+              "value": "KICUKIRO"
+            },
+            {
+              "reference": "retail:291",
+              "value": "GATSIBO"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:101",
+              "value": "MUKARANGE BWIZA"
+            },
+            {
+              "reference": "retail:218",
+              "value": "MASAKA GITAGARA"
+            },
+            {
+              "reference": "retail:291",
+              "value": "RWIMBOGO RWIKINIRO"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:101",
+              "value": "2030-03-27"
+            },
+            {
+              "reference": "retail:218",
+              "value": "2030-06-02"
+            },
+            {
+              "reference": "retail:291",
+              "value": "2030-07-10"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:101",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:218",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:291",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A1164",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A1164",
+      "source_references": [
+        "retail:277",
+        "retail:433"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "district",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "technician",
+        "province",
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:277",
+              "value": "OLYMPE PHARMACY Ltd"
+            },
+            {
+              "reference": "retail:433",
+              "value": "NEW HOPE PHARMACY Ltd"
+            }
+          ]
+        },
+        "technician": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:277",
+              "value": "ALICE DIANE ISHIMWE"
+            },
+            {
+              "reference": "retail:433",
+              "value": "ALICE DIANE ISHIMWE"
+            }
+          ]
+        },
+        "province": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:277",
+              "value": "KIGALI CITY"
+            },
+            {
+              "reference": "retail:433",
+              "value": "KIGALI CITY"
+            }
+          ]
+        },
+        "district": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:277",
+              "value": "KICUKIRO"
+            },
+            {
+              "reference": "retail:433",
+              "value": "GASABO"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:277",
+              "value": "KIGARAMA RWAMPARA"
+            },
+            {
+              "reference": "retail:433",
+              "value": "REMERA RUKIRI II"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:277",
+              "value": "2030-07-03"
+            },
+            {
+              "reference": "retail:433",
+              "value": "2030-08-19"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:277",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:433",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A1172",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A1172",
+      "source_references": [
+        "retail:167",
+        "retail:210"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "name",
+        "technician",
+        "province",
+        "district",
+        "sector_cell_raw",
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:167",
+              "value": "M.V PHARMACIE AGAHOZO Ltd"
+            },
+            {
+              "reference": "retail:210",
+              "value": "M.V PHARMACIE AGAHOZO Ltd"
+            }
+          ]
+        },
+        "technician": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:167",
+              "value": "INEZA GLORIA"
+            },
+            {
+              "reference": "retail:210",
+              "value": "INEZA GLORIA"
+            }
+          ]
+        },
+        "province": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:167",
+              "value": "EASTERN"
+            },
+            {
+              "reference": "retail:210",
+              "value": "EASTERN"
+            }
+          ]
+        },
+        "district": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:167",
+              "value": "NGOMA"
+            },
+            {
+              "reference": "retail:210",
+              "value": "NGOMA"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:167",
+              "value": "RUKIRA BURIBA"
+            },
+            {
+              "reference": "retail:210",
+              "value": "RUKIRA BURIBA"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:167",
+              "value": "2030-05-26"
+            },
+            {
+              "reference": "retail:210",
+              "value": "2030-05-28"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:167",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:210",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A1182",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A1182",
+      "source_references": [
+        "online:1",
+        "retail:427"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "sector_cell_raw",
+        "license_expiration_date",
+        "registry_type"
+      ],
+      "identical_fields": [
+        "province",
+        "district"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:427",
+              "value": "LA FORTUNA PHARMACY Ltd"
+            },
+            {
+              "reference": "online:1",
+              "value": "AXENTT LIMITED"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:427",
+              "value": "NZABAHIMANA EMMANUEL"
+            },
+            {
+              "reference": "online:1",
+              "value": "Emmanuel Nzabahimana"
+            }
+          ]
+        },
+        "province": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:427",
+              "value": "KIGALI CITY"
+            },
+            {
+              "reference": "online:1",
+              "value": "Kigali City"
+            }
+          ]
+        },
+        "district": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:427",
+              "value": "KICUKIRO"
+            },
+            {
+              "reference": "online:1",
+              "value": "Kicukiro"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:427",
+              "value": "GIKONDO KAGUNGA"
+            },
+            {
+              "reference": "online:1",
+              "value": "Gikondo Kanserege"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:427",
+              "value": "2030-08-19"
+            },
+            {
+              "reference": "online:1",
+              "value": "2030-01-27"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:427",
+              "value": "retail"
+            },
+            {
+              "reference": "online:1",
+              "value": "online"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A1191",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A1191",
+      "source_references": [
+        "retail:519",
+        "retail:752"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "district",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "province",
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:519",
+              "value": "MEDWISE PHARMACY LTD"
+            },
+            {
+              "reference": "retail:752",
+              "value": "KAMONYI GETWELL PHARMACY Limited"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:519",
+              "value": "EMILE HATEGEKIMANA"
+            },
+            {
+              "reference": "retail:752",
+              "value": "VIATEUR MUTANGUHA"
+            }
+          ]
+        },
+        "province": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:519",
+              "value": "KIGALI CITY"
+            },
+            {
+              "reference": "retail:752",
+              "value": "KIGALI CITY"
+            }
+          ]
+        },
+        "district": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:519",
+              "value": "NYARUGENGE"
+            },
+            {
+              "reference": "retail:752",
+              "value": "KICUKIRO"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:519",
+              "value": "NYARUGENGE BIRYOGO"
+            },
+            {
+              "reference": "retail:752",
+              "value": "NYARUGUNGA KAMASHASHI"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:519",
+              "value": "2030-09-02"
+            },
+            {
+              "reference": "retail:752",
+              "value": "2031-03-02"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:519",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:752",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A1210",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A1210",
+      "source_references": [
+        "retail:301",
+        "retail:34"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "province",
+        "district",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:34",
+              "value": "BIGIRA PHARMACY LTD"
+            },
+            {
+              "reference": "retail:301",
+              "value": "KIBAGABAGA PHARMACY Ltd"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:34",
+              "value": "NAHIMANA THEOPHILE"
+            },
+            {
+              "reference": "retail:301",
+              "value": "THEOPHILE NAHIMANA"
+            }
+          ]
+        },
+        "province": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:34",
+              "value": "EASTERN"
+            },
+            {
+              "reference": "retail:301",
+              "value": "KIGALI CITY"
+            }
+          ]
+        },
+        "district": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:34",
+              "value": "GATSIBO"
+            },
+            {
+              "reference": "retail:301",
+              "value": "GASABO"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:34",
+              "value": "NGARAMA NGARAMA"
+            },
+            {
+              "reference": "retail:301",
+              "value": "KIMIRONKO KIBAGABAGA"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:34",
+              "value": "2030-02-27"
+            },
+            {
+              "reference": "retail:301",
+              "value": "2030-07-15"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:34",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:301",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A1214",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A1214",
+      "source_references": [
+        "retail:465",
+        "retail:548"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "province",
+        "district",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:465",
+              "value": "MEDIASOL PHARMACY/RUBAVU"
+            },
+            {
+              "reference": "retail:548",
+              "value": "BELLE VIE PHARMACY"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:465",
+              "value": "FRANCOIS NDIHOKUBWAYO"
+            },
+            {
+              "reference": "retail:548",
+              "value": "MIGISHA SUN HOPE"
+            }
+          ]
+        },
+        "province": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:465",
+              "value": "WESTERN"
+            },
+            {
+              "reference": "retail:548",
+              "value": "KIGALI CITY"
+            }
+          ]
+        },
+        "district": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:465",
+              "value": "RUBAVU"
+            },
+            {
+              "reference": "retail:548",
+              "value": "NYARUGENGE"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:465",
+              "value": "GISENYI NENGO"
+            },
+            {
+              "reference": "retail:548",
+              "value": "MUHIMA UBUMWE"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:465",
+              "value": "2030-08-25"
+            },
+            {
+              "reference": "retail:548",
+              "value": "2030-09-10"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:465",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:548",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A1233",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A1233",
+      "source_references": [
+        "retail:32",
+        "retail:71"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "province",
+        "district",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "technician",
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:32",
+              "value": "ACE PHARMACY LTD"
+            },
+            {
+              "reference": "retail:71",
+              "value": "PHARMACY AMIRAH LTD"
+            }
+          ]
+        },
+        "technician": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:32",
+              "value": "SAMUEL HABINEZA"
+            },
+            {
+              "reference": "retail:71",
+              "value": "SAMUEL HABINEZA"
+            }
+          ]
+        },
+        "province": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:32",
+              "value": "WESTERN"
+            },
+            {
+              "reference": "retail:71",
+              "value": "NORTHERN"
+            }
+          ]
+        },
+        "district": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:32",
+              "value": "RUBAVU"
+            },
+            {
+              "reference": "retail:71",
+              "value": "MUSANZE"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:32",
+              "value": "GISENYI NENGO"
+            },
+            {
+              "reference": "retail:71",
+              "value": "MUHOZA KIGOMBE"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:32",
+              "value": "2030-02-27"
+            },
+            {
+              "reference": "retail:71",
+              "value": "2030-03-10"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:32",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:71",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A1284",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A1284",
+      "source_references": [
+        "retail:212",
+        "retail:43"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "province",
+        "district",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:43",
+              "value": "PHARMACY ISHEMA RY’INGABO NZIZA LTD"
+            },
+            {
+              "reference": "retail:212",
+              "value": "MILA PHARMACY LTD"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:43",
+              "value": "MANIRAKIZA AUGUSTIN"
+            },
+            {
+              "reference": "retail:212",
+              "value": "AUGUSTIN MANIRAKIZA"
+            }
+          ]
+        },
+        "province": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:43",
+              "value": "KIGALI CITY"
+            },
+            {
+              "reference": "retail:212",
+              "value": "EASTERN"
+            }
+          ]
+        },
+        "district": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:43",
+              "value": "GASABO"
+            },
+            {
+              "reference": "retail:212",
+              "value": "GATSIBO"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:43",
+              "value": "RUSORORO KABUGA"
+            },
+            {
+              "reference": "retail:212",
+              "value": "KIRAMURUZI AKABUGA"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:43",
+              "value": "2030-02-27"
+            },
+            {
+              "reference": "retail:212",
+              "value": "2030-05-28"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:43",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:212",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A1287",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A1287",
+      "source_references": [
+        "retail:244",
+        "retail:489"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "province",
+        "district",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:244",
+              "value": "AUX PHARMACY Ltd"
+            },
+            {
+              "reference": "retail:489",
+              "value": "TRINITY PHARMACY Ltd"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:244",
+              "value": "IRADUKUNDA JEAN PIERRE"
+            },
+            {
+              "reference": "retail:489",
+              "value": "JEANPIERRE IRADUKUNDA"
+            }
+          ]
+        },
+        "province": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:244",
+              "value": "EASTERN"
+            },
+            {
+              "reference": "retail:489",
+              "value": "KIGALI CITY"
+            }
+          ]
+        },
+        "district": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:244",
+              "value": "RWAMAGANA"
+            },
+            {
+              "reference": "retail:489",
+              "value": "GASABO"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:244",
+              "value": "FUMBWE NYAGASAMBU"
+            },
+            {
+              "reference": "retail:489",
+              "value": "KIMIRONKO KIBAGABAGA"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:244",
+              "value": "2030-06-17"
+            },
+            {
+              "reference": "retail:489",
+              "value": "2030-08-27"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:244",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:489",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A1307",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A1307",
+      "source_references": [
+        "retail:109",
+        "retail:764"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "province",
+        "district",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "technician",
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:109",
+              "value": "NSHUTI2PHARMACY LTD"
+            },
+            {
+              "reference": "retail:764",
+              "value": "PHARMACIE MARANATHA Ltd"
+            }
+          ]
+        },
+        "technician": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:109",
+              "value": "PEACE UWIHOREYE"
+            },
+            {
+              "reference": "retail:764",
+              "value": "PEACE UWIHOREYE"
+            }
+          ]
+        },
+        "province": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:109",
+              "value": "EASTERN"
+            },
+            {
+              "reference": "retail:764",
+              "value": "KIGALI CITY"
+            }
+          ]
+        },
+        "district": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:109",
+              "value": "KIREHE"
+            },
+            {
+              "reference": "retail:764",
+              "value": "GASABO"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:109",
+              "value": "NYAMUGARI KAGASA"
+            },
+            {
+              "reference": "retail:764",
+              "value": "KACYIRU KAMUTWA"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:109",
+              "value": "2030-03-27"
+            },
+            {
+              "reference": "retail:764",
+              "value": "2031-05-19"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:109",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:764",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A1326",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A1326",
+      "source_references": [
+        "retail:137",
+        "retail:55"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "province",
+        "district",
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:55",
+              "value": "PHARMACIE CONSEIL - NYARUTARAMA"
+            },
+            {
+              "reference": "retail:137",
+              "value": "SALAMA -DAVY’S PHARMACY Ltd"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:55",
+              "value": "DAUPHINE MBONINDAVYI"
+            },
+            {
+              "reference": "retail:137",
+              "value": "MBONINDAVYI DAUPHINE"
+            }
+          ]
+        },
+        "province": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:55",
+              "value": "KIGALI CITY"
+            },
+            {
+              "reference": "retail:137",
+              "value": "KIGALI CITY"
+            }
+          ]
+        },
+        "district": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:55",
+              "value": "GASABO"
+            },
+            {
+              "reference": "retail:137",
+              "value": "GASABO"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:55",
+              "value": "REMERA NYARUTARAMA"
+            },
+            {
+              "reference": "retail:137",
+              "value": "JABANA KABUYE"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:55",
+              "value": "2030-03-05"
+            },
+            {
+              "reference": "retail:137",
+              "value": "2030-04-28"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:55",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:137",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A1335",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A1335",
+      "source_references": [
+        "retail:190",
+        "retail:61"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "province",
+        "district",
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:61",
+              "value": "KABARE PHARMACY LTD"
+            },
+            {
+              "reference": "retail:190",
+              "value": "EAGLE PHARMACY"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:61",
+              "value": "MUNEZERO MUNIRA"
+            },
+            {
+              "reference": "retail:190",
+              "value": "MUNIRA MUNEZERO"
+            }
+          ]
+        },
+        "province": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:61",
+              "value": "KIGALI CITY"
+            },
+            {
+              "reference": "retail:190",
+              "value": "KIGALI CITY"
+            }
+          ]
+        },
+        "district": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:61",
+              "value": "GASABO"
+            },
+            {
+              "reference": "retail:190",
+              "value": "GASABO"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:61",
+              "value": "RUSORORO KABUGA I"
+            },
+            {
+              "reference": "retail:190",
+              "value": "JABANA KABUYE"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:61",
+              "value": "2030-03-07"
+            },
+            {
+              "reference": "retail:190",
+              "value": "2030-05-27"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:61",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:190",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A1343",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A1343",
+      "source_references": [
+        "retail:30",
+        "retail:624"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "province",
+        "district",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "technician",
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:30",
+              "value": "PHARMACIE LA PRIERE LTD"
+            },
+            {
+              "reference": "retail:624",
+              "value": "G-PHARMACY Ltd"
+            }
+          ]
+        },
+        "technician": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:30",
+              "value": "HAKIZIMANA OLIVIER"
+            },
+            {
+              "reference": "retail:624",
+              "value": "HAKIZIMANA OLIVIER"
+            }
+          ]
+        },
+        "province": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:30",
+              "value": "EASTERN"
+            },
+            {
+              "reference": "retail:624",
+              "value": "KIGALI CITY"
+            }
+          ]
+        },
+        "district": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:30",
+              "value": "BUGESERA"
+            },
+            {
+              "reference": "retail:624",
+              "value": "GASABO"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:30",
+              "value": "RILIMA NYABIGENDWA"
+            },
+            {
+              "reference": "retail:624",
+              "value": "NDERA CYARUZINGE"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:30",
+              "value": "2030-02-27"
+            },
+            {
+              "reference": "retail:624",
+              "value": "2030-09-25"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:30",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:624",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A1348",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A1348",
+      "source_references": [
+        "retail:412",
+        "retail:44"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "province",
+        "district",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:44",
+              "value": "FELIPHARM PHARMACY LTD"
+            },
+            {
+              "reference": "retail:412",
+              "value": "EBENEPHAR Ltd"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:44",
+              "value": "IMANASHIMWE EMMANUEL"
+            },
+            {
+              "reference": "retail:412",
+              "value": "IMANISHIMWE EMMANUEL"
+            }
+          ]
+        },
+        "province": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:44",
+              "value": "NORTHERN"
+            },
+            {
+              "reference": "retail:412",
+              "value": "SOUTHERN"
+            }
+          ]
+        },
+        "district": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:44",
+              "value": "MUSANZE"
+            },
+            {
+              "reference": "retail:412",
+              "value": "HUYE"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:44",
+              "value": "MUHOZA MPENGE"
+            },
+            {
+              "reference": "retail:412",
+              "value": "NGOMA BUTARE"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:44",
+              "value": "2030-02-27"
+            },
+            {
+              "reference": "retail:412",
+              "value": "2030-08-19"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:44",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:412",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A1351",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A1351",
+      "source_references": [
+        "retail:235",
+        "retail:236"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [],
+      "identical_fields": [
+        "name",
+        "technician",
+        "province",
+        "district",
+        "sector_cell_raw",
+        "license_expiration_date",
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:235",
+              "value": "VIVA PHARMACY Ltd"
+            },
+            {
+              "reference": "retail:236",
+              "value": "VIVA PHARMACY Ltd"
+            }
+          ]
+        },
+        "technician": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:235",
+              "value": "MFURANZIMA ALAIN CHRIS"
+            },
+            {
+              "reference": "retail:236",
+              "value": "MFURANZIMA ALAIN CHRIS"
+            }
+          ]
+        },
+        "province": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:235",
+              "value": "SOUTHERN"
+            },
+            {
+              "reference": "retail:236",
+              "value": "SOUTHERN"
+            }
+          ]
+        },
+        "district": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:235",
+              "value": "HUYE"
+            },
+            {
+              "reference": "retail:236",
+              "value": "HUYE"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:235",
+              "value": "NGOMA BUTARE"
+            },
+            {
+              "reference": "retail:236",
+              "value": "NGOMA BUTARE"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:235",
+              "value": "2030-06-13"
+            },
+            {
+              "reference": "retail:236",
+              "value": "2030-06-13"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:235",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:236",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A1352",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A1352",
+      "source_references": [
+        "retail:271",
+        "retail:36"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "technician",
+        "province",
+        "district",
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:36",
+              "value": "GOLF PHARMACY"
+            },
+            {
+              "reference": "retail:271",
+              "value": "GOLF PHARMACY Ltd"
+            }
+          ]
+        },
+        "technician": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:36",
+              "value": "GEDEON MUSONI"
+            },
+            {
+              "reference": "retail:271",
+              "value": "GEDEON MUSONI"
+            }
+          ]
+        },
+        "province": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:36",
+              "value": "KIGALI CITY"
+            },
+            {
+              "reference": "retail:271",
+              "value": "KIGALI CITY"
+            }
+          ]
+        },
+        "district": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:36",
+              "value": "KICUKIRO"
+            },
+            {
+              "reference": "retail:271",
+              "value": "KICUKIRO"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:36",
+              "value": "NYARUGUNGA KAMASHASHI"
+            },
+            {
+              "reference": "retail:271",
+              "value": "KANOMBE KARAMA"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:36",
+              "value": "2030-02-27"
+            },
+            {
+              "reference": "retail:271",
+              "value": "2030-07-03"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:36",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:271",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A1365",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A1365",
+      "source_references": [
+        "retail:403",
+        "retail:763"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "province",
+        "district",
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:403",
+              "value": "2050 PHARMACY Ltd"
+            },
+            {
+              "reference": "retail:763",
+              "value": "RETAIL URUKUNDO PHARMA Limited"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:403",
+              "value": "MANZI IRAGENA VICTOR"
+            },
+            {
+              "reference": "retail:763",
+              "value": "IRAGENA VICTOR MANZI"
+            }
+          ]
+        },
+        "province": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:403",
+              "value": "KIGALI CITY"
+            },
+            {
+              "reference": "retail:763",
+              "value": "KIGALI CITY"
+            }
+          ]
+        },
+        "district": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:403",
+              "value": "GASABO"
+            },
+            {
+              "reference": "retail:763",
+              "value": "GASABO"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:403",
+              "value": "GISOZI RUHANGO"
+            },
+            {
+              "reference": "retail:763",
+              "value": "KINYINYA MURAMA"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:403",
+              "value": "2030-08-19"
+            },
+            {
+              "reference": "retail:763",
+              "value": "2031-05-14"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:403",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:763",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A1382",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A1382",
+      "source_references": [
+        "retail:126",
+        "retail:91"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "province",
+        "district",
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:91",
+              "value": "PHARMACIE CONSEIL - KACYIRU"
+            },
+            {
+              "reference": "retail:126",
+              "value": "GOODLIFE HEALTH AND BEAUTY GACURIRO"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:91",
+              "value": "GHISLAIN ISHIMWE MUGABE"
+            },
+            {
+              "reference": "retail:126",
+              "value": "ISHIMWE MUGABE GHISLAIN"
+            }
+          ]
+        },
+        "province": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:91",
+              "value": "KIGALI CITY"
+            },
+            {
+              "reference": "retail:126",
+              "value": "KIGALI CITY"
+            }
+          ]
+        },
+        "district": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:91",
+              "value": "GASABO"
+            },
+            {
+              "reference": "retail:126",
+              "value": "GASABO"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:91",
+              "value": "KIMIHURURA KAMUKINA"
+            },
+            {
+              "reference": "retail:126",
+              "value": "KINYINYA GACURIRO"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:91",
+              "value": "2030-03-26"
+            },
+            {
+              "reference": "retail:126",
+              "value": "2030-04-11"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:91",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:126",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "pharmacy_professional_registration:NPC/A1384",
+      "record_type": "pharmacy_professional_registration",
+      "normalized_identifier": "NPC/A1384",
+      "source_references": [
+        "retail:188",
+        "retail:318"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "name",
+        "technician",
+        "province",
+        "district",
+        "sector_cell_raw",
+        "license_expiration_date"
+      ],
+      "identical_fields": [
+        "registry_type"
+      ],
+      "comparison": {
+        "name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:188",
+              "value": "URUMULI PHARMACY Ltd"
+            },
+            {
+              "reference": "retail:318",
+              "value": "LUCKY FAM PHARMACY Ltd"
+            }
+          ]
+        },
+        "technician": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:188",
+              "value": "IMANISHIMWE EMMANUEL"
+            },
+            {
+              "reference": "retail:318",
+              "value": "EMMANUEL HAKIZIMANA"
+            }
+          ]
+        },
+        "province": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:188",
+              "value": "SOUTHERN"
+            },
+            {
+              "reference": "retail:318",
+              "value": "EASTERN"
+            }
+          ]
+        },
+        "district": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:188",
+              "value": "HUYE"
+            },
+            {
+              "reference": "retail:318",
+              "value": "NYAGATARE"
+            }
+          ]
+        },
+        "sector_cell_raw": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:188",
+              "value": "NGOMA BUTARE"
+            },
+            {
+              "reference": "retail:318",
+              "value": "NYAGATARE NYAGATARE"
+            }
+          ]
+        },
+        "license_expiration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "retail:188",
+              "value": "2030-05-26"
+            },
+            {
+              "reference": "retail:318",
+              "value": "2030-07-24"
+            }
+          ]
+        },
+        "registry_type": {
+          "same": true,
+          "values": [
+            {
+              "reference": "retail:188",
+              "value": "retail"
+            },
+            {
+              "reference": "retail:318",
+              "value": "retail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "product_registration:RWANDA FDA-HMP-MA-1188",
+      "record_type": "product_registration",
+      "normalized_identifier": "RWANDA FDA-HMP-MA-1188",
+      "source_references": [
+        "product:1278",
+        "product:1289"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "brand_name",
+        "generic_name",
+        "strength",
+        "dosage_form",
+        "pack_size",
+        "shelf_life",
+        "manufacturer",
+        "manufacturer_country",
+        "marketing_authorization_holder",
+        "local_technical_representative"
+      ],
+      "identical_fields": [
+        "registration_date",
+        "expiry_date",
+        "regulatory_status"
+      ],
+      "comparison": {
+        "brand_name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:1278",
+              "value": "AVAZIR"
+            },
+            {
+              "reference": "product:1289",
+              "value": "BREN-400"
+            }
+          ]
+        },
+        "generic_name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:1278",
+              "value": "Tobramycin 0.3% (3mg/ml)"
+            },
+            {
+              "reference": "product:1289",
+              "value": "Ibuprofen BP 400 mg"
+            }
+          ]
+        },
+        "strength": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:1278",
+              "value": "0.3% (3mg/ml)"
+            },
+            {
+              "reference": "product:1289",
+              "value": "400 mg"
+            }
+          ]
+        },
+        "dosage_form": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:1278",
+              "value": "Ophthalmic Solution"
+            },
+            {
+              "reference": "product:1289",
+              "value": "Film Coated Tablets"
+            }
+          ]
+        },
+        "pack_size": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:1278",
+              "value": "10 ml bottle"
+            },
+            {
+              "reference": "product:1289",
+              "value": "10x10 Tablets & 1000 tablets"
+            }
+          ]
+        },
+        "shelf_life": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:1278",
+              "value": "24 Months"
+            },
+            {
+              "reference": "product:1289",
+              "value": "36 Months"
+            }
+          ]
+        },
+        "manufacturer": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:1278",
+              "value": "ORCHIDIA PHARMACEUTICAL INDUSTRIES,"
+            },
+            {
+              "reference": "product:1289",
+              "value": "KOPRAN LIMITED,"
+            }
+          ]
+        },
+        "manufacturer_country": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:1278",
+              "value": "EGYPT"
+            },
+            {
+              "reference": "product:1289",
+              "value": "INDIA"
+            }
+          ]
+        },
+        "marketing_authorization_holder": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:1278",
+              "value": "ORCHIDIA PHARMACEUTICAL INDUSTRIES"
+            },
+            {
+              "reference": "product:1289",
+              "value": "KOPRAN LIMITED"
+            }
+          ]
+        },
+        "local_technical_representative": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:1278",
+              "value": "ETS CONTINENTAL"
+            },
+            {
+              "reference": "product:1289",
+              "value": "PHILLIPS PHARMACEUTICALS (RWANDA) LTD"
+            }
+          ]
+        },
+        "registration_date": {
+          "same": true,
+          "values": [
+            {
+              "reference": "product:1278",
+              "value": "2024-05-06"
+            },
+            {
+              "reference": "product:1289",
+              "value": "2024-05-06"
+            }
+          ]
+        },
+        "expiry_date": {
+          "same": true,
+          "values": [
+            {
+              "reference": "product:1278",
+              "value": "2029-05-05"
+            },
+            {
+              "reference": "product:1289",
+              "value": "2029-05-05"
+            }
+          ]
+        },
+        "regulatory_status": {
+          "same": true,
+          "values": [
+            {
+              "reference": "product:1278",
+              "value": "valid"
+            },
+            {
+              "reference": "product:1289",
+              "value": "valid"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "product_registration:RWANDA FDA-HMP-MA-1539",
+      "record_type": "product_registration",
+      "normalized_identifier": "RWANDA FDA-HMP-MA-1539",
+      "source_references": [
+        "product:1469",
+        "product:997"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "generic_name",
+        "strength",
+        "pack_size",
+        "shelf_life",
+        "registration_date",
+        "expiry_date"
+      ],
+      "identical_fields": [
+        "brand_name",
+        "dosage_form",
+        "manufacturer",
+        "manufacturer_country",
+        "marketing_authorization_holder",
+        "local_technical_representative",
+        "regulatory_status"
+      ],
+      "comparison": {
+        "brand_name": {
+          "same": true,
+          "values": [
+            {
+              "reference": "product:997",
+              "value": "D5"
+            },
+            {
+              "reference": "product:1469",
+              "value": "D5"
+            }
+          ]
+        },
+        "generic_name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:997",
+              "value": "Glucose Intravenous Infusion B.P"
+            },
+            {
+              "reference": "product:1469",
+              "value": "GLUCOSE INTRAVENOUS INFUSION BP"
+            }
+          ]
+        },
+        "strength": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:997",
+              "value": "50G/LITRE"
+            },
+            {
+              "reference": "product:1469",
+              "value": "—"
+            }
+          ]
+        },
+        "dosage_form": {
+          "same": true,
+          "values": [
+            {
+              "reference": "product:997",
+              "value": "Solution for Infusion"
+            },
+            {
+              "reference": "product:1469",
+              "value": "Solution for Infusion"
+            }
+          ]
+        },
+        "pack_size": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:997",
+              "value": "500ml Bottle"
+            },
+            {
+              "reference": "product:1469",
+              "value": "500ml"
+            }
+          ]
+        },
+        "shelf_life": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:997",
+              "value": "60 Months"
+            },
+            {
+              "reference": "product:1469",
+              "value": "60"
+            }
+          ]
+        },
+        "manufacturer": {
+          "same": true,
+          "values": [
+            {
+              "reference": "product:997",
+              "value": "AMANTA HEALTHCARE LIMITED"
+            },
+            {
+              "reference": "product:1469",
+              "value": "Amanta Healthcare Limited"
+            }
+          ]
+        },
+        "manufacturer_country": {
+          "same": true,
+          "values": [
+            {
+              "reference": "product:997",
+              "value": "INDIA"
+            },
+            {
+              "reference": "product:1469",
+              "value": "India"
+            }
+          ]
+        },
+        "marketing_authorization_holder": {
+          "same": true,
+          "values": [
+            {
+              "reference": "product:997",
+              "value": "AMANTA HEALTHCARE LIMITED"
+            },
+            {
+              "reference": "product:1469",
+              "value": "Amanta Healthcare Limited"
+            }
+          ]
+        },
+        "local_technical_representative": {
+          "same": true,
+          "values": [
+            {
+              "reference": "product:997",
+              "value": "SUN ENTERPRISES LTD"
+            },
+            {
+              "reference": "product:1469",
+              "value": "SUN ENTERPRISES LTD"
+            }
+          ]
+        },
+        "registration_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:997",
+              "value": "2024-07-27"
+            },
+            {
+              "reference": "product:1469",
+              "value": "2024-02-29"
+            }
+          ]
+        },
+        "expiry_date": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:997",
+              "value": "2029-07-26"
+            },
+            {
+              "reference": "product:1469",
+              "value": "2029-02-26"
+            }
+          ]
+        },
+        "regulatory_status": {
+          "same": true,
+          "values": [
+            {
+              "reference": "product:997",
+              "value": "valid"
+            },
+            {
+              "reference": "product:1469",
+              "value": "valid"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "product_registration:RWANDA FDA-HMP-MA-1566",
+      "record_type": "product_registration",
+      "normalized_identifier": "RWANDA FDA-HMP-MA-1566",
+      "source_references": [
+        "product:827",
+        "product:910"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "brand_name",
+        "generic_name",
+        "strength",
+        "dosage_form",
+        "pack_size",
+        "shelf_life",
+        "manufacturer",
+        "manufacturer_country",
+        "marketing_authorization_holder",
+        "local_technical_representative"
+      ],
+      "identical_fields": [
+        "registration_date",
+        "expiry_date",
+        "regulatory_status"
+      ],
+      "comparison": {
+        "brand_name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:827",
+              "value": "NEWCOX-TH"
+            },
+            {
+              "reference": "product:910",
+              "value": "SPIROMIDE TABLETS"
+            }
+          ]
+        },
+        "generic_name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:827",
+              "value": "Etoricoxib & Thiocolchicoside"
+            },
+            {
+              "reference": "product:910",
+              "value": "Spironolactone and Furosemide"
+            }
+          ]
+        },
+        "strength": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:827",
+              "value": "60mg/8mg"
+            },
+            {
+              "reference": "product:910",
+              "value": "50mg/20mg"
+            }
+          ]
+        },
+        "dosage_form": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:827",
+              "value": "Film coated Tablets"
+            },
+            {
+              "reference": "product:910",
+              "value": "Tablets"
+            }
+          ]
+        },
+        "pack_size": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:827",
+              "value": "3x10 Tablets"
+            },
+            {
+              "reference": "product:910",
+              "value": "2x10 Tablets"
+            }
+          ]
+        },
+        "shelf_life": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:827",
+              "value": "36 Months"
+            },
+            {
+              "reference": "product:910",
+              "value": "24 Months"
+            }
+          ]
+        },
+        "manufacturer": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:827",
+              "value": "SKYBIOTECH LIFESCIENCES PVT LTD"
+            },
+            {
+              "reference": "product:910",
+              "value": "THE SEARLE COMPANY LIMITED"
+            }
+          ]
+        },
+        "manufacturer_country": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:827",
+              "value": "INDIA"
+            },
+            {
+              "reference": "product:910",
+              "value": "PAKISTAN"
+            }
+          ]
+        },
+        "marketing_authorization_holder": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:827",
+              "value": "PHARMA LIFE SCIENCE LTD"
+            },
+            {
+              "reference": "product:910",
+              "value": "THE SEARLE COMPANY LIMITED"
+            }
+          ]
+        },
+        "local_technical_representative": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:827",
+              "value": "STAR BIOTECH LIMITED"
+            },
+            {
+              "reference": "product:910",
+              "value": "SURGIPHARM RWANDA LTD"
+            }
+          ]
+        },
+        "registration_date": {
+          "same": true,
+          "values": [
+            {
+              "reference": "product:827",
+              "value": "2024-08-17"
+            },
+            {
+              "reference": "product:910",
+              "value": "2024-08-17"
+            }
+          ]
+        },
+        "expiry_date": {
+          "same": true,
+          "values": [
+            {
+              "reference": "product:827",
+              "value": "2029-08-16"
+            },
+            {
+              "reference": "product:910",
+              "value": "2029-08-16"
+            }
+          ]
+        },
+        "regulatory_status": {
+          "same": true,
+          "values": [
+            {
+              "reference": "product:827",
+              "value": "valid"
+            },
+            {
+              "reference": "product:910",
+              "value": "valid"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "product_registration:RWANDA FDA-HMP-MA-1853",
+      "record_type": "product_registration",
+      "normalized_identifier": "RWANDA FDA-HMP-MA-1853",
+      "source_references": [
+        "product:811",
+        "product:915"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "brand_name",
+        "generic_name",
+        "strength",
+        "dosage_form",
+        "pack_size",
+        "shelf_life",
+        "manufacturer",
+        "marketing_authorization_holder",
+        "local_technical_representative"
+      ],
+      "identical_fields": [
+        "manufacturer_country",
+        "registration_date",
+        "expiry_date",
+        "regulatory_status"
+      ],
+      "comparison": {
+        "brand_name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:811",
+              "value": "MONTEMAC-5"
+            },
+            {
+              "reference": "product:915",
+              "value": "TENOFOVIR/LAMIVUDINE"
+            }
+          ]
+        },
+        "generic_name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:811",
+              "value": "MONTELUKAST"
+            },
+            {
+              "reference": "product:915",
+              "value": "TENOFOVIR/LAMIVUDINE"
+            }
+          ]
+        },
+        "strength": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:811",
+              "value": "5MG"
+            },
+            {
+              "reference": "product:915",
+              "value": "300MG/300MG"
+            }
+          ]
+        },
+        "dosage_form": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:811",
+              "value": "CHEWABLE TABLETS"
+            },
+            {
+              "reference": "product:915",
+              "value": "TABLET"
+            }
+          ]
+        },
+        "pack_size": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:811",
+              "value": "10 Tablets"
+            },
+            {
+              "reference": "product:915",
+              "value": ""
+            }
+          ]
+        },
+        "shelf_life": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:811",
+              "value": "36 months."
+            },
+            {
+              "reference": "product:915",
+              "value": "24 months"
+            }
+          ]
+        },
+        "manufacturer": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:811",
+              "value": "MACLEODS PHARMACEUTICALS LIMITED"
+            },
+            {
+              "reference": "product:915",
+              "value": "HETERO LABS LTD"
+            }
+          ]
+        },
+        "manufacturer_country": {
+          "same": true,
+          "values": [
+            {
+              "reference": "product:811",
+              "value": "India"
+            },
+            {
+              "reference": "product:915",
+              "value": "India"
+            }
+          ]
+        },
+        "marketing_authorization_holder": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:811",
+              "value": "Macleods Pharmaceuticals Limited,Village-Theda, P.O. Lodhimajra, Tehsil Baddi, District Solan, Himachal Pradesh, India-174101"
+            },
+            {
+              "reference": "product:915",
+              "value": "HETERO LAB LTD"
+            }
+          ]
+        },
+        "local_technical_representative": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:811",
+              "value": "AIVEEN RWANDA LTD"
+            },
+            {
+              "reference": "product:915",
+              "value": "SUN ENTEPRISES LTD"
+            }
+          ]
+        },
+        "registration_date": {
+          "same": true,
+          "values": [
+            {
+              "reference": "product:811",
+              "value": "2024-08-17"
+            },
+            {
+              "reference": "product:915",
+              "value": "2024-08-17"
+            }
+          ]
+        },
+        "expiry_date": {
+          "same": true,
+          "values": [
+            {
+              "reference": "product:811",
+              "value": "2029-08-16"
+            },
+            {
+              "reference": "product:915",
+              "value": "2029-08-16"
+            }
+          ]
+        },
+        "regulatory_status": {
+          "same": true,
+          "values": [
+            {
+              "reference": "product:811",
+              "value": "valid"
+            },
+            {
+              "reference": "product:915",
+              "value": "valid"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "product_registration:RWANDA FDA-HMP-MA-1915",
+      "record_type": "product_registration",
+      "normalized_identifier": "RWANDA FDA-HMP-MA-1915",
+      "source_references": [
+        "product:592",
+        "product:813"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "brand_name",
+        "generic_name",
+        "strength",
+        "pack_size",
+        "shelf_life",
+        "manufacturer",
+        "manufacturer_country",
+        "marketing_authorization_holder",
+        "local_technical_representative"
+      ],
+      "identical_fields": [
+        "dosage_form",
+        "registration_date",
+        "expiry_date",
+        "regulatory_status"
+      ],
+      "comparison": {
+        "brand_name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:592",
+              "value": "COLDEASE CAPSULES"
+            },
+            {
+              "reference": "product:813",
+              "value": "MOVFOR"
+            }
+          ]
+        },
+        "generic_name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:592",
+              "value": "Paracetamol, Caffeine Anhydrous, Chlorpheniramine Maleate, Pseudoephedrine Hydrochloride"
+            },
+            {
+              "reference": "product:813",
+              "value": "MOLNUPIRAVIR"
+            }
+          ]
+        },
+        "strength": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:592",
+              "value": "400mg/30mg/4mg/30mg"
+            },
+            {
+              "reference": "product:813",
+              "value": "200MG"
+            }
+          ]
+        },
+        "dosage_form": {
+          "same": true,
+          "values": [
+            {
+              "reference": "product:592",
+              "value": "Capsules"
+            },
+            {
+              "reference": "product:813",
+              "value": "Capsules"
+            }
+          ]
+        },
+        "pack_size": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:592",
+              "value": "10x10"
+            },
+            {
+              "reference": "product:813",
+              "value": "4x10 \\\\\\'s"
+            }
+          ]
+        },
+        "shelf_life": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:592",
+              "value": "24 month"
+            },
+            {
+              "reference": "product:813",
+              "value": "24 months"
+            }
+          ]
+        },
+        "manufacturer": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:592",
+              "value": "Rene Industries Ltd"
+            },
+            {
+              "reference": "product:813",
+              "value": "Hetero Labs Limited (Unit -V)"
+            }
+          ]
+        },
+        "manufacturer_country": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:592",
+              "value": "Uganda"
+            },
+            {
+              "reference": "product:813",
+              "value": "India"
+            }
+          ]
+        },
+        "marketing_authorization_holder": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:592",
+              "value": "Rene Industries Ltd"
+            },
+            {
+              "reference": "product:813",
+              "value": "Hetero Lab Limited"
+            }
+          ]
+        },
+        "local_technical_representative": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:592",
+              "value": "Rene Pharmacy (R) Ltd"
+            },
+            {
+              "reference": "product:813",
+              "value": "Bion Group Pharma Ltd"
+            }
+          ]
+        },
+        "registration_date": {
+          "same": true,
+          "values": [
+            {
+              "reference": "product:592",
+              "value": "2024-08-17"
+            },
+            {
+              "reference": "product:813",
+              "value": "2024-08-17"
+            }
+          ]
+        },
+        "expiry_date": {
+          "same": true,
+          "values": [
+            {
+              "reference": "product:592",
+              "value": "2029-08-16"
+            },
+            {
+              "reference": "product:813",
+              "value": "2029-08-16"
+            }
+          ]
+        },
+        "regulatory_status": {
+          "same": true,
+          "values": [
+            {
+              "reference": "product:592",
+              "value": "valid"
+            },
+            {
+              "reference": "product:813",
+              "value": "valid"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "product_registration:RWANDA FDA-HMP-MA-2086",
+      "record_type": "product_registration",
+      "normalized_identifier": "RWANDA FDA-HMP-MA-2086",
+      "source_references": [
+        "product:710",
+        "product:773"
+      ],
+      "source_row_count": 2,
+      "differing_fields": [
+        "brand_name",
+        "generic_name",
+        "strength",
+        "dosage_form",
+        "pack_size",
+        "shelf_life",
+        "manufacturer",
+        "marketing_authorization_holder",
+        "local_technical_representative"
+      ],
+      "identical_fields": [
+        "manufacturer_country",
+        "registration_date",
+        "expiry_date",
+        "regulatory_status"
+      ],
+      "comparison": {
+        "brand_name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:710",
+              "value": "GLIPMEVIA 50/1000"
+            },
+            {
+              "reference": "product:773",
+              "value": "LC DOPA"
+            }
+          ]
+        },
+        "generic_name": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:710",
+              "value": "SITAGLIPTIN + METFORMIN HCL"
+            },
+            {
+              "reference": "product:773",
+              "value": "LEVODOPA/ CARBIDOPA"
+            }
+          ]
+        },
+        "strength": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:710",
+              "value": "50/1000MG"
+            },
+            {
+              "reference": "product:773",
+              "value": "250MG/ 25MG"
+            }
+          ]
+        },
+        "dosage_form": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:710",
+              "value": "TABLETS"
+            },
+            {
+              "reference": "product:773",
+              "value": "FILM COATED TABLETS"
+            }
+          ]
+        },
+        "pack_size": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:710",
+              "value": "3x10 Tablets"
+            },
+            {
+              "reference": "product:773",
+              "value": "50 Tablets"
+            }
+          ]
+        },
+        "shelf_life": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:710",
+              "value": "24 Months"
+            },
+            {
+              "reference": "product:773",
+              "value": "36 Months"
+            }
+          ]
+        },
+        "manufacturer": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:710",
+              "value": "FREDUM PHARMACEUTICALS LIMITED"
+            },
+            {
+              "reference": "product:773",
+              "value": "AGOG PHARMA LTD"
+            }
+          ]
+        },
+        "manufacturer_country": {
+          "same": true,
+          "values": [
+            {
+              "reference": "product:710",
+              "value": "India"
+            },
+            {
+              "reference": "product:773",
+              "value": "India"
+            }
+          ]
+        },
+        "marketing_authorization_holder": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:710",
+              "value": "FREDUM PHARMACEUTICALS LIMITED"
+            },
+            {
+              "reference": "product:773",
+              "value": "AGOG PHARMA LTD"
+            }
+          ]
+        },
+        "local_technical_representative": {
+          "same": false,
+          "values": [
+            {
+              "reference": "product:710",
+              "value": "STAR BIOTECH LIMITED"
+            },
+            {
+              "reference": "product:773",
+              "value": "SUN ENTERPRISES LTD"
+            }
+          ]
+        },
+        "registration_date": {
+          "same": true,
+          "values": [
+            {
+              "reference": "product:710",
+              "value": "2024-08-17"
+            },
+            {
+              "reference": "product:773",
+              "value": "2024-08-17"
+            }
+          ]
+        },
+        "expiry_date": {
+          "same": true,
+          "values": [
+            {
+              "reference": "product:710",
+              "value": "2029-08-16"
+            },
+            {
+              "reference": "product:773",
+              "value": "2029-08-16"
+            }
+          ]
+        },
+        "regulatory_status": {
+          "same": true,
+          "values": [
+            {
+              "reference": "product:710",
+              "value": "valid"
+            },
+            {
+              "reference": "product:773",
+              "value": "valid"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

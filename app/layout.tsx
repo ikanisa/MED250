@@ -22,11 +22,11 @@ export const metadata: Metadata = {
   robots: searchIndexingEnabled
     ? { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 } }
     : { index: false, follow: false, noarchive: true, googleBot: { index: false, follow: false, noarchive: true } },
-  openGraph: { type: "website", url: "/", siteName, title: "MED+250 — Rwanda pharmacy marketplace", description: defaultDescription, locale: "en_RW", images: [{ url: "/og-marketplace-v2.png", width: 1200, height: 630, alt: "One order. Verified pharmacies confirm. MED+250 Rwanda pharmacy marketplace." }] },
+  openGraph: { type: "website", url: "/", siteName, title: "MED+250 — Rwanda pharmacy marketplace", description: defaultDescription, locale: "en_RW", images: [{ url: "/og-marketplace-v2.png", width: 1200, height: 630, alt: "Find products and connect with pharmacies on MED+250 Rwanda." }] },
   twitter: { card: "summary_large_image", title: "MED+250 — Rwanda pharmacy marketplace", description: defaultDescription, images: ["/og-marketplace-v2.png"] },
 };
 
-export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#7878e8", colorScheme: "light" };
+export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#f6f8ff", colorScheme: "light" };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const websiteSchema = {

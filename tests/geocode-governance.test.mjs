@@ -3,8 +3,8 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const [migration, hardeningMigration, geocoder, documentation, reviewTemplate] = await Promise.all([
-  readFile(new URL("../supabase/migrations/20260713200135_govern_pharmacy_geocode_approvals.sql", import.meta.url), "utf8"),
-  readFile(new URL("../supabase/migrations/20260714003000_security_hardening.sql", import.meta.url), "utf8"),
+  readFile(new URL("../supabase/migrations/20260713200337_govern_pharmacy_geocode_approvals.sql", import.meta.url), "utf8"),
+  readFile(new URL("../supabase/migrations/20260715180529_med250_security_hardening_20260714.sql", import.meta.url), "utf8"),
   readFile(new URL("../supabase/functions/geocode-pharmacies/index.ts", import.meta.url), "utf8"),
   readFile(new URL("../supabase/functions/geocode-pharmacies/README.md", import.meta.url), "utf8"),
   readFile(new URL("../data/imports/pharmacy-geocode-review-template.csv", import.meta.url), "utf8"),

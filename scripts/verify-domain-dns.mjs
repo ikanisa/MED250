@@ -14,14 +14,16 @@ export function assessDomainDns(plan, observed) {
     const expected = [...new Set(record.values.map((value) => normalize(record.type, value)))].sort();
     const actual = [...new Set((observed[key] ?? []).map((value) => normalize(record.type, value)))].sort();
     const missing = expected.filter((value) => !actual.includes(value));
-    const unexpected = actual.filter((value) => !expected.includes(value));
+    const unexpected = expected.length > 0 ? actual.filter((value) => !expected.includes(value)) : [];
+    const minimumCount = Number.isInteger(record.minimum_count) ? record.minimum_count : 0;
     return {
       type: record.type,
       name: record.name,
       purpose: record.purpose,
       expected,
       actual,
-      matches: missing.length === 0,
+      minimumCount,
+      matches: missing.length === 0 && actual.length >= minimumCount,
       missing,
       unexpected,
     };
@@ -29,7 +31,7 @@ export function assessDomainDns(plan, observed) {
   return {
     status: records.every((record) => record.matches) ? "passed" : "pending",
     productionReady: false,
-    note: "DNS agreement is necessary but does not prove TLS, Sites activation, application behavior, access policy, or launch approval.",
+    note: "DNS agreement is necessary but does not prove TLS, Worker behavior, access policy, or launch approval.",
     recordCount: records.length,
     matchingRecordCount: records.filter((record) => record.matches).length,
     records,
@@ -50,7 +52,7 @@ async function lookup(record) {
 
 async function main() {
   if (process.argv.length > 2) throw new Error("This command does not accept arguments.");
-  const plan = JSON.parse(await readFile("docs/launch/dns/med250-sites-domain-plan.json", "utf8"));
+  const plan = JSON.parse(await readFile("docs/launch/dns/med250-cloudflare-domain-plan.json", "utf8"));
   const observed = {};
   for (const record of plan.hostnames.flatMap((hostname) => hostname.records)) {
     observed[`${record.type}:${record.name}`] = await lookup(record);

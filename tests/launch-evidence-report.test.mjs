@@ -14,11 +14,18 @@ test("reports every pending gate and its exact missing evidence categories", () 
   assert.equal(report.gateCount, 15);
   assert.equal(report.productionReady, false);
   assert.equal(report.statusCounts.pending, 15);
-  assert.ok(report.gates.every((gate) => gate.missingEvidenceTypes.length > 0));
   assert.ok(report.gates.every((gate) => gate.approvalComplete === false));
   assert.deepEqual(
     report.gates.find((gate) => gate.name === "MED250_GATE_DOMAIN_DNS_VERIFIED").missingEvidenceTypes,
-    ["domain_verification", "test_record"],
+    [],
+  );
+  assert.deepEqual(
+    report.gates.find((gate) => gate.name === "MED250_GATE_GPS_READY").missingEvidenceTypes,
+    ["review_ledger"],
+  );
+  assert.deepEqual(
+    report.gates.find((gate) => gate.name === "MED250_GATE_SECURITY_HARDENING_DEPLOYED").missingEvidenceTypes,
+    [],
   );
 });
 

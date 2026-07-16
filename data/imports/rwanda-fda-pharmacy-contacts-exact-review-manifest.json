@@ -1,0 +1,57 @@
+{
+  "generated_at": "2026-07-16T06:23:41.895Z",
+  "decision": "Promote only exact official-name and official-locality matches from the Rwanda FDA July-September 2026 duty-roster review queue.",
+  "authentication_rule": "Every promoted official mobile is both a phone contact and a login-enabled WhatsApp contact, per marketplace owner instruction.",
+  "matched_contact_rows": 7,
+  "matched_pharmacies": 5,
+  "review_source_sha256": "358f242d5044a2f8bdeb236adaf81c33690965ef7f6f3e886f44f20677d899e5",
+  "registry_source_sha256": "977b4d35036d178b45191f98de55e574e848755f1153df252a7a621665b583a9",
+  "promoted_contacts_sha256": "9a81e8c327cf7c399ea95cefe96bdc289efa9b8e5fd52b7841946835b4b53232",
+  "decisions": [
+    {
+      "roster": "EL DORADO PHARMACY LTD",
+      "serial": 50,
+      "district": "KICUKIRO",
+      "evidence": [
+        "NYARUGUNGA",
+        "NKOKO"
+      ]
+    },
+    {
+      "roster": "UNIPHARMA BRANCH B2",
+      "serial": 282,
+      "district": "GASABO",
+      "evidence": [
+        "KINYINYA",
+        "KAGUGU"
+      ]
+    },
+    {
+      "roster": "UNIPHARMA, BRANCH B3",
+      "serial": 296,
+      "district": "KICUKIRO",
+      "evidence": [
+        "KANOMBE",
+        "KABEZA"
+      ]
+    },
+    {
+      "roster": "MEDIASOL BRANCH MUSANZE",
+      "serial": 329,
+      "district": "MUSANZE",
+      "evidence": [
+        "MUSANZE",
+        "MUHOZA"
+      ]
+    },
+    {
+      "roster": "PHARMACIE DE LA MISERCORDE",
+      "serial": 352,
+      "district": "NYARUGENGE",
+      "evidence": [
+        "NYARUGENGE",
+        "NYABUGOGO"
+      ]
+    }
+  ]
+}

@@ -82,7 +82,7 @@ await database.exec(`
 `);
 
 const migration = await readFile(
-  new URL("../supabase/migrations/20260714070425_refresh_security_backend_contract.sql", import.meta.url),
+  new URL("../supabase/migrations/20260715180533_refresh_med250_security_backend_contract_20260714.sql", import.meta.url),
   "utf8",
 );
 await database.exec(migration);

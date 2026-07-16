@@ -9,7 +9,7 @@
 --   * top-20 / 10 km dispatch to eligible pharmacies
 --   * idempotent customer retries
 --   * recipient-only pharmacy visibility
---   * complete pharmacy confirmation and server-calculated total
+--   * complete pharmacy confirmation with an optional private price
 --   * pre-selection contact privacy
 --   * customer ownership isolation
 --   * selected-pharmacy contact release
@@ -48,9 +48,6 @@ declare
   v_dispatch_eligible_count integer;
   v_automatic_approval_count integer;
   v_online_flag_count integer;
-  v_price_min integer;
-  v_price_max integer;
-  v_price_contributors bigint;
   v_cancel_order_id uuid;
   v_stale_order_id uuid;
   v_replacement_order_id uuid;
@@ -67,12 +64,6 @@ begin
   where product.is_active
     and product.is_orderable
     and product.prescription_status <> 'prescription'
-    and not exists (
-      select 1
-      from public.dawanear_pharmacy_prices as existing_price
-      where existing_price.product_id = product.id
-        and existing_price.is_current
-    )
   order by product.id
   limit 1;
 
@@ -279,45 +270,19 @@ begin
     when sqlstate '42501' then null;
   end;
 
-  select contributed.price_min_rwf, contributed.price_max_rwf, contributed.price_contributors
-    into v_price_min, v_price_max, v_price_contributors
-  from public.dawanear_contribute_price(v_pharmacy_a, v_product_id, 2500) as contributed;
-
-  if v_price_min <> 2500 or v_price_max <> 2500 or v_price_contributors <> 1 then
-    raise exception 'First pharmacy price contribution returned an invalid range';
-  end if;
-
-  perform set_config('request.jwt.claim.sub', v_staff_b_id::text, true);
-  perform set_config(
-    'request.jwt.claims',
-    jsonb_build_object('sub', v_staff_b_id, 'role', 'authenticated')::text,
-    true
-  );
-
-  select contributed.price_min_rwf, contributed.price_max_rwf, contributed.price_contributors
-    into v_price_min, v_price_max, v_price_contributors
-  from public.dawanear_contribute_price(v_pharmacy_b, v_product_id, 4500) as contributed;
-
-  if v_price_min <> 2500 or v_price_max <> 4500 or v_price_contributors <> 2 then
-    raise exception 'Two-pharmacy price contribution returned an invalid range';
-  end if;
-
   begin
     perform 1
-    from public.dawanear_contribute_price(v_pharmacy_b, v_product_id, 6000);
-    raise exception 'Price range wider than the minimum price was accepted' using errcode = 'P0001';
+    from public.dawanear_contribute_price(v_pharmacy_a, v_product_id, 2500);
+    raise exception 'Pharmacy-specific catalogue price was accepted' using errcode = 'P0001';
   exception
-    when sqlstate '23514' then null;
+    when sqlstate '0A000' then null;
   end;
 
-  select min(price.price_rwf), max(price.price_rwf), count(*)
-    into v_price_min, v_price_max, v_price_contributors
-  from public.dawanear_pharmacy_prices as price
-  where price.product_id = v_product_id
-    and price.is_current;
-
-  if v_price_min <> 2500 or v_price_max <> 4500 or v_price_contributors <> 2 then
-    raise exception 'Rejected price contribution was not rolled back atomically';
+  if exists (
+    select 1 from public.dawanear_pharmacy_prices
+    where product_id = v_product_id and is_current
+  ) then
+    raise exception 'Rejected pharmacy-specific catalogue price created a current record';
   end if;
 
   perform set_config('request.jwt.claim.sub', v_staff_id::text, true);
@@ -337,7 +302,7 @@ begin
       'offered_product_id', v_product_id,
       'available', true,
       'is_substitute', false,
-      'unit_price_rwf', 2500,
+      'unit_price_rwf', null,
       'quantity', 1,
       'note', null
     )),
@@ -346,8 +311,8 @@ begin
     'Rollback-only integration confirmation'
   ) as submitted;
 
-  if not v_complete or v_total_rwf <> 2500 or v_distance_m <= 0 then
-    raise exception 'Complete confirmation receipt was invalid';
+  if not v_complete or v_total_rwf <> 0 or v_distance_m <= 0 then
+    raise exception 'Price-optional complete confirmation receipt was invalid';
   end if;
 
   perform set_config('request.jwt.claim.sub', v_customer_id::text, true);
@@ -641,7 +606,7 @@ select jsonb_build_object(
   'workflow', array[
     'automatic_marketplace_approval', 'eligibility_fail_closed',
     'dispatch', 'idempotent_retry', 'membership_isolation',
-    'price_range_enforcement', 'customer_cancellation',
+    'central_price_boundary', 'optional_confirmation_price', 'customer_cancellation',
     'no_response_recovery', 'selected_timeout_recovery',
     'complete_confirmation', 'preselection_privacy', 'ownership_isolation',
     'selection_contact_release', 'completion', 'notification_lifecycle'

@@ -11,7 +11,6 @@ import {
 } from "libphonenumber-js/min";
 import {
   ArrowRight,
-  Banknote,
   Bell,
   Check,
   ChevronDown,
@@ -38,6 +37,7 @@ import {
   Search,
   ShieldCheck,
   ShoppingBag,
+  ShoppingCart,
   SlidersHorizontal,
   Sparkles,
   Store,
@@ -49,13 +49,13 @@ import BrandLogo from "./brand-logo";
 import {
   backendConfigured,
   closeOrder,
-  contributePrice,
   createOrder,
   deletePrescription,
   ensureAnonymousCustomer,
   hasAnonymousCustomerSession,
   hasPermanentPharmacySession,
   loadCatalogue,
+  loadCatalogueTaxonomy,
   loadCustomerProfile,
   loadMyActiveOrders,
   loadMyPharmacies,
@@ -85,6 +85,7 @@ import {
   type PharmacyRequestItem,
   type PharmacySelectedOrder,
   type Product,
+  type CatalogueTaxonomyRow,
 } from "../lib/dawanear-client";
 import { getPharmacySupabase } from "../lib/supabase";
 import {
@@ -109,7 +110,7 @@ import GoogleMapLocationPicker, { type MapCoordinates } from "./google-map-locat
 type CartItem = Product & { quantity: number; substitutesAllowed: boolean };
 type Coordinates = MapCoordinates;
 type SelectedContact = { pharmacyName: string; whatsapp: string | null; momoCode: string | null };
-type PortalTab = "requests" | "prices" | "profile";
+type PortalTab = "requests" | "profile";
 type CheckoutStep = 1 | 2 | 3;
 type MarketplaceProps = {
   initialCategory?: string;
@@ -120,6 +121,7 @@ type MarketplaceProps = {
   initialProductId?: string;
   initialProduct?: Product;
   initialProducts?: Product[];
+  initialTaxonomy?: CatalogueTaxonomyRow[];
 };
 type PendingOrderAttempt = {
   clientRequestId: string;
@@ -156,20 +158,50 @@ const whatsappCountries = getCountries()
   }))
   .toSorted((left, right) => left.name.localeCompare(right.name));
 
-const departmentNav = [
-  { label: "Medicines", href: "/category/medicines" },
-  ...NON_PRESCRIPTION_TAXONOMY.map(({ label, href }) => ({ label, href })),
-];
-const medicineCategories = new Set(["Medicines", "Pain & fever", "Digestive health", "Allergy", "Diabetes care"]);
+const departmentPresentation = [
+  {
+    department: "Medicines",
+    label: "Medicines",
+    href: "/category/medicines",
+    title: "Medicines",
+    description: "Search the current medicine register by brand, ingredient, strength, dosage form, or pack size.",
+    action: "Shop medicines",
+    image: "/marketplace/category-medicines.webp",
+    imageAlt: "Medicine box and blister pack",
+  },
+  {
+    department: "Beauty & Personal Care",
+    label: "Beauty & Personal Care",
+    href: "/category/personal-care",
+    title: "Beauty & Personal Care",
+    description: "Browse the current source-backed beauty and personal care catalogue.",
+    action: "Shop beauty & care",
+    image: "/marketplace/category-personal-care.webp",
+    imageAlt: "Beauty and personal care products",
+  },
+  {
+    department: "Baby",
+    label: "Baby",
+    href: "/category/baby-family",
+    title: "Baby",
+    description: "Browse the current source-backed baby product catalogue.",
+    action: "Shop baby",
+    image: "/marketplace/category-baby-family.webp",
+    imageAlt: "Baby care products",
+  },
+  {
+    department: "Health & Household",
+    label: "Health & Household",
+    href: "/category/wellness",
+    title: "Health & Household",
+    description: "Browse the current source-backed health and household catalogue.",
+    action: "Shop health & household",
+    image: "/marketplace/category-wellness-devices.webp",
+    imageAlt: "Health and household products",
+  },
+] as const;
 const legacyNonPrescriptionCategories = new Set(NON_PRESCRIPTION_TAXONOMY.map(({ legacyCategory }) => legacyCategory));
 const accentClasses = ["coral", "blue", "mint", "violet", "amber"];
-const productPackImages: Record<string, string> = {
-  blue: "/marketplace/product-pack-blue.webp",
-  coral: "/marketplace/product-pack-coral.webp",
-  mint: "/marketplace/product-pack-mint.webp",
-  violet: "/marketplace/product-pack-violet.webp",
-  amber: "/marketplace/product-pack-amber.webp",
-};
 const rwf = new Intl.NumberFormat("en-RW");
 const configuredMarketplaceMode = process.env.NEXT_PUBLIC_MED250_DEPLOYMENT_MODE || process.env.NEXT_PUBLIC_MARKETPLACE_MODE;
 const marketplaceMode = new Set(["preview", "catalog", "live"]).has(configuredMarketplaceMode ?? "")
@@ -180,7 +212,10 @@ const googleMapsBrowserKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY?.tr
 
 function productMatchesCategory(product: Product, category: string) {
   if (category === "All products") return true;
-  if (category === "Medicines") return medicineCategories.has(product.category);
+  if (category === "Medicines") return product.category === "Medicines";
+  if (category.startsWith("Medicines / ")) {
+    return product.category === "Medicines" && product.subcategory === category.slice("Medicines / ".length);
+  }
   const taxonomy = nonPrescriptionTaxonomyForProduct(product);
   const filterDepartment = taxonomyFilterDepartment(category);
   if (filterDepartment) {
@@ -194,15 +229,22 @@ function displayCategory(product: Product) {
   return nonPrescriptionTaxonomyForProduct(product)?.subcategory ?? product.category;
 }
 
-function CategoryOptions() {
+function CategoryOptions({ taxonomy }: { taxonomy: CatalogueTaxonomyRow[] }) {
+  const grouped = new Map<string, CatalogueTaxonomyRow[]>();
+  taxonomy.forEach((row) => grouped.set(row.department, [...(grouped.get(row.department) ?? []), row]));
+  const medicines = grouped.get("Medicines") ?? [];
+  const nonPrescription = NON_PRESCRIPTION_TAXONOMY
+    .map((department) => ({ department, rows: grouped.get(department.label) ?? [] }))
+    .filter(({ rows }) => rows.length > 0);
   return <>
     <option value="All products">All Categories</option>
-    <optgroup label="Medicines">
-      {["Medicines", "Pain & fever", "Digestive health", "Allergy", "Diabetes care"].map((item) => <option key={item} value={item}>{item}</option>)}
-    </optgroup>
-    {NON_PRESCRIPTION_TAXONOMY.map((department) => <optgroup label={department.label} key={department.label}>
+    {medicines.length ? <optgroup label="Medicines">
+      {medicines.some((row) => !row.subcategory) ? <option value="Medicines">Medicines</option> : null}
+      {medicines.filter((row) => row.subcategory).map((row) => <option key={`Medicines-${row.subcategory}`} value={taxonomyOptionValue("Medicines", row.subcategory!)}>{row.subcategory}</option>)}
+    </optgroup> : null}
+    {nonPrescription.map(({ department, rows }) => <optgroup label={department.label} key={department.label}>
       <option value={department.label}>All {department.label}</option>
-      {department.subcategories.map((subcategory) => <option key={`${department.label}-${subcategory}`} value={taxonomyOptionValue(department.label, subcategory)}>{subcategory}</option>)}
+      {rows.filter((row) => row.subcategory).map((row) => <option key={`${department.label}-${row.subcategory}`} value={taxonomyOptionValue(department.label, row.subcategory!)}>{row.subcategory}</option>)}
     </optgroup>)}
   </>;
 }
@@ -210,19 +252,6 @@ function CategoryOptions() {
 function catalogueText(value: string | undefined) {
   const text = value?.trim() ?? "";
   return !text || /^(?:—+|-+|n\/?a|null)$/i.test(text) ? "" : text;
-}
-
-function categoryFor(product: { brand_name?: string; generic_name?: string; dosage_form?: string; category?: string }) {
-  if (product.category && product.category !== "Medicines") return product.category;
-  const text = `${product.brand_name ?? ""} ${product.generic_name ?? ""} ${product.dosage_form ?? ""}`.toLowerCase();
-  if (/paracetamol|diclofenac|ibuprofen|analges/.test(text)) return "Pain & fever";
-  if (/cetirizine|loratadine|allerg/.test(text)) return "Allergy";
-  if (/metformin|insulin|diabet/.test(text)) return "Diabetes care";
-  if (/omeprazole|esomeprazole|antacid|digest/.test(text)) return "Digestive health";
-  if (/baby|infant|diaper|nappy/.test(text)) return "Baby & family";
-  if (/lotion|shampoo|tooth|skin|cosmetic|soap/.test(text)) return "Personal care";
-  if (/vitamin|supplement|monitor|device|thermometer/.test(text)) return "Wellness";
-  return "Medicines";
 }
 
 function parseCsv(text: string) {
@@ -263,7 +292,7 @@ function fallbackProduct(row: Record<string, string>, index: number): Product {
   const strength = catalogueText(row.strength);
   const dosageForm = catalogueText(row.dosage_form);
   const packSize = catalogueText(row.pack_size);
-  const category = categoryFor(row);
+  const category = catalogueText(row.category) || "Medicines";
   return {
     id: `rwanda-fda-hm-${String(serial).padStart(4, "0")}`,
     brand: brand || generic || catalogueText(row.registration_number),
@@ -281,6 +310,11 @@ function fallbackProduct(row: Record<string, string>, index: number): Product {
     min: 0,
     max: 0,
     priceContributors: 0,
+    indicativePriceRwf: 0,
+    priceIsIndicative: false,
+    indicativePriceBasis: "",
+    indicativePriceSourceUrl: null,
+    indicativePriceUpdatedAt: null,
     imageUrl: null,
     isOrderable: ["valid", "active", "expiring_soon"].includes((row.regulatory_status || "valid").toLowerCase()),
     accent: accentClasses[index % accentClasses.length],
@@ -288,10 +322,11 @@ function fallbackProduct(row: Record<string, string>, index: number): Product {
 }
 
 function ProductVisual({ product, small = false, eager = false, imageUrl }: { product: Product; small?: boolean; eager?: boolean; imageUrl?: string | null }) {
-  const fallbackImage = productPackImages[product.accent ?? "mint"] ?? productPackImages.mint;
+  const resolvedImageUrl = imageUrl ?? product.imageUrl ?? product.imageUrls?.[0] ?? null;
+  if (!resolvedImageUrl) return null;
   return (
     <div className={`dosage-art ${product.accent ?? "mint"} ${small ? "small" : ""}`} aria-hidden="true">
-      <Image src={imageUrl ?? product.imageUrl ?? fallbackImage} alt="" width={small ? 54 : 170} height={small ? 44 : 128} loading={eager ? "eager" : "lazy"} unoptimized />
+      <Image src={resolvedImageUrl} alt="" width={small ? 54 : 170} height={small ? 44 : 128} loading={eager ? "eager" : "lazy"} unoptimized />
       {!small && product.form ? <span>{product.form.split(" · ")[0]}</span> : null}
     </div>
   );
@@ -310,10 +345,10 @@ function ProductGallery({ product }: { product: Product }) {
   const approvedImages = useMemo(() => Array.from(new Set([...(product.imageUrls ?? []), product.imageUrl].filter((url): url is string => Boolean(url)))), [product.imageUrl, product.imageUrls]);
 
   useEffect(() => {
-    if (!autoRotate || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
-    const timer = window.setInterval(() => setActiveSlide((current) => (current + 1) % productGallerySlides.length), 4800);
+    if (approvedImages.length !== 3 || !autoRotate || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
+    const timer = window.setInterval(() => setActiveSlide((current) => (current + 1) % approvedImages.length), 4800);
     return () => window.clearInterval(timer);
-  }, [autoRotate, product.id]);
+  }, [approvedImages.length, autoRotate, product.id]);
 
   function moveSlide(direction: number) {
     setAutoRotate(false);
@@ -324,6 +359,8 @@ function ProductGallery({ product }: { product: Product }) {
     setAutoRotate(false);
     setActiveSlide(index);
   }
+
+  if (approvedImages.length !== 3) return null;
 
   return <section className="product-gallery" aria-label={`${product.brand} image gallery`}>
     <div className="product-gallery-thumbnails" role="group" aria-label="Choose product view">
@@ -413,8 +450,8 @@ function formatDate(value: string | null | undefined) {
   return Number.isNaN(date.valueOf()) ? value : date.toLocaleDateString("en-RW", { day: "numeric", month: "short", year: "numeric" });
 }
 
-function hasPriceData(product: Pick<Product, "min" | "max">) {
-  return Number.isFinite(product.min) && Number.isFinite(product.max) && product.min > 0 && product.max >= product.min;
+function hasPriceData(product: Pick<Product, "indicativePriceRwf" | "priceIsIndicative">) {
+  return product.priceIsIndicative && Number.isFinite(product.indicativePriceRwf) && product.indicativePriceRwf > 0;
 }
 
 function prescriptionLabel(status: Product["prescriptionStatus"]) {
@@ -424,12 +461,24 @@ function prescriptionLabel(status: Product["prescriptionStatus"]) {
   return "";
 }
 
+function PrescriptionStatusIcon({ status }: { status: Product["prescriptionStatus"] }) {
+  const label = prescriptionLabel(status);
+  if (!label) return null;
+  const Icon = status === "prescription" ? FileText : status === "pharmacist_only" ? MessageCircle : ShieldCheck;
+  return <small
+    className={`product-prescription-status status-${status}`}
+    aria-label={label}
+    title={label}
+  >
+    <Icon size={15} aria-hidden="true" />
+    <span className="sr-only">{label}</span>
+  </small>;
+}
+
 type ProductCardProps = {
   product: Product;
   index: number;
   catalogueSize: number;
-  matchExplanation?: string;
-  showMatchExplanation: boolean;
   previewMode: boolean;
   publicCatalogMode: boolean;
   onAdd: (product: Product) => void;
@@ -439,41 +488,57 @@ function ProductCard({
   product,
   index,
   catalogueSize,
-  matchExplanation,
-  showMatchExplanation,
   previewMode,
   publicCatalogMode,
   onAdd,
 }: ProductCardProps) {
-  const status = prescriptionLabel(product.prescriptionStatus);
-  const generic = product.generic.trim() && product.generic.trim().toLocaleLowerCase() !== product.brand.trim().toLocaleLowerCase()
-    ? product.generic.trim()
+  const normalizeLabel = (value: string | undefined) => (value ?? "").trim().toLocaleLowerCase();
+  const consumerProduct = product.id.startsWith("AMZ-");
+  const taxonomyLabels = new Set(
+    [product.category, product.department, product.subcategory, product.productType]
+      .map(normalizeLabel)
+      .filter(Boolean),
+  );
+  const genericCandidate = product.generic.trim();
+  const generic = genericCandidate
+    && normalizeLabel(genericCandidate) !== normalizeLabel(product.brand)
+    && (!consumerProduct || !taxonomyLabels.has(normalizeLabel(genericCandidate)))
+    ? genericCandidate
     : "";
-  const details = [product.strength, product.form, product.packSize].map((value) => value.trim()).filter(Boolean);
+  const seenDetails = new Set<string>();
+  const details = [product.strength, product.form, product.packSize]
+    .map((value) => value.trim())
+    .filter((value) => {
+      const normalized = normalizeLabel(value);
+      if (!normalized || seenDetails.has(normalized)) return false;
+      if (consumerProduct && (taxonomyLabels.has(normalized) || normalized === normalizeLabel(generic))) return false;
+      seenDetails.add(normalized);
+      return true;
+    });
   const priced = hasPriceData(product);
+  const cardImageUrl = product.imageUrl ?? product.imageUrls?.[0] ?? null;
 
   return <article
-    className={`product-card product-card-${product.accent ?? "mint"}`}
+    className={`product-card product-card-${product.accent ?? "mint"}${cardImageUrl ? "" : " without-image"}`}
     aria-posinset={index + 1}
     aria-setsize={catalogueSize}
     data-product-card={product.id}
   >
-    <Link className="product-image-wrap" href={`/product/${encodeURIComponent(product.id)}`} aria-label={`View ${product.brand}`}>
-      <ProductVisual product={product} eager={index < 5} />
+    {cardImageUrl ? <Link className="product-image-wrap" href={`/product/${encodeURIComponent(product.id)}`} aria-label={`View ${product.brand}`}>
+      <ProductVisual product={product} eager={index < 5} imageUrl={cardImageUrl} />
       <span className="product-image-action">View product</span>
-    </Link>
+    </Link> : null}
     <div className="product-card-content">
       <div className="product-meta">
         <span>{displayCategory(product)}</span>
-        {status ? <small>{status}</small> : null}
+        <PrescriptionStatusIcon status={product.prescriptionStatus} />
       </div>
       <h3><Link href={`/product/${encodeURIComponent(product.id)}`}>{product.brand}</Link></h3>
       <p className={`product-card-generic${generic ? "" : " is-empty"}`} aria-hidden={generic ? undefined : true}>{generic || "\u00a0"}</p>
       {details.length ? <div className="product-card-specs" aria-label="Product details">{details.slice(0, 3).join(" · ")}</div> : <div className="product-card-specs is-empty" aria-hidden="true" />}
-      {showMatchExplanation ? <div className="match-explanation"><Sparkles size={12} /> {matchExplanation ?? "Related product"}</div> : null}
       <div className={`price-line ${priced ? "has-price" : "no-price"}`}>
-        {priced ? <div><small>Current pharmacy range</small><b>RWF {rwf.format(product.min)}–{rwf.format(product.max)}</b>{product.priceContributors > 0 ? <em>{product.priceContributors} contribution{product.priceContributors === 1 ? "" : "s"}</em> : null}</div> : null}
-        <button onClick={() => onAdd(product)} disabled={publicCatalogMode || (!previewMode && !product.isOrderable)} aria-label={`${publicCatalogMode ? "Ordering coming soon for" : "Add to order"}: ${product.brand}`} title={publicCatalogMode ? "Ordering will open after pharmacy routing is activated" : !previewMode && !product.isOrderable ? "Currently unavailable for ordering" : "Add to order"}><Plus size={17} /> {publicCatalogMode ? "Ordering coming soon" : "Add to order"}</button>
+        {priced ? <div><small>Price</small><b>From RWF {rwf.format(product.indicativePriceRwf)}</b></div> : null}
+        <button className="product-card-cart" onClick={() => onAdd(product)} disabled={publicCatalogMode || (!previewMode && !product.isOrderable)} aria-label={publicCatalogMode ? `Add ${product.brand} to cart unavailable` : `Add ${product.brand} to cart`} title={publicCatalogMode ? "Cart opens after pharmacy connections are activated" : !previewMode && !product.isOrderable ? "Currently unavailable" : "Add to cart"}><ShoppingCart size={19} aria-hidden="true" /><span className="sr-only">{publicCatalogMode ? "Cart unavailable" : "Add to cart"}</span></button>
       </div>
     </div>
   </article>;
@@ -484,7 +549,7 @@ function errorMessage(error: unknown) {
 }
 
 function OrderWizardProgress({ step }: { step: CheckoutStep }) {
-  return <ol className="order-wizard-progress" aria-label="Order progress">
+  return <ol className="order-wizard-progress" aria-label="Availability request progress">
     {CHECKOUT_STEPS.map((item) => <li className={item.id === step ? "active" : item.id < step ? "complete" : ""} aria-current={item.id === step ? "step" : undefined} key={item.id}>
       <span>{item.id < step ? <Check size={16} /> : item.id}</span>
       <b>{item.label}</b>
@@ -512,11 +577,6 @@ function splitCustomerWhatsapp(value: string | null | undefined) {
     : null;
 }
 
-function momoUssdUrl(merchantCode: string | null | undefined) {
-  const code = merchantCode?.replace(/[^0-9A-Za-z-]/g, "").trim();
-  return code ? "tel:*182%23" : null;
-}
-
 function normalizedSubstitutionField(value: string) {
   return value.normalize("NFKC").trim().toLowerCase().replace(/\s+/g, " ");
 }
@@ -542,6 +602,7 @@ export default function Marketplace({
   initialProductId,
   initialProduct,
   initialProducts = [],
+  initialTaxonomy = [],
 }: MarketplaceProps = {}) {
   const previewMode = marketplaceMode !== "live";
   const publicCatalogMode = marketplaceMode === "catalog";
@@ -554,6 +615,7 @@ export default function Marketplace({
   const [formFilter, setFormFilter] = useState("all");
   const [availabilityFilter, setAvailabilityFilter] = useState("all");
   const [catalogue, setCatalogue] = useState<Product[]>(() => initialProduct ? [initialProduct] : initialProducts);
+  const [taxonomy, setTaxonomy] = useState<CatalogueTaxonomyRow[]>(initialTaxonomy);
   const [portalCatalogue, setPortalCatalogue] = useState<Product[]>([]);
   const [serverCatalogueTotal, setServerCatalogueTotal] = useState(0);
   const [serverExplanations, setServerExplanations] = useState<Map<string, string>>(() => new Map());
@@ -632,9 +694,6 @@ export default function Marketplace({
   const [offerReadyMinutes, setOfferReadyMinutes] = useState("20");
   const [offerFulfilmentMethod, setOfferFulfilmentMethod] = useState<"pickup" | "delivery" | "either">("either");
   const [offerNote, setOfferNote] = useState("");
-  const [priceProductId, setPriceProductId] = useState("");
-  const [priceValue, setPriceValue] = useState("");
-  const [priceSearch, setPriceSearch] = useState("");
   const [contactEditWhatsapp, setContactEditWhatsapp] = useState("");
   const [contactEditNote, setContactEditNote] = useState("");
   const [contactEditType, setContactEditType] = useState<"phone" | "whatsapp">("whatsapp");
@@ -674,7 +733,7 @@ export default function Marketplace({
     if (activeModalKey === "offer-editor" && root) {
       root.setAttribute("role", "dialog");
       root.setAttribute("aria-modal", "true");
-      root.setAttribute("aria-label", "Confirm pharmacy order");
+      root.setAttribute("aria-label", "Confirm pharmacy availability request");
     }
     const focusableSelector = "button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])";
     const focusables = () => root ? Array.from(root.querySelectorAll<HTMLElement>(focusableSelector)).filter((element) => element.offsetParent !== null) : [];
@@ -911,6 +970,15 @@ export default function Marketplace({
   }, [previewMode]);
 
   useEffect(() => {
+    if (!backendConfigured) return undefined;
+    let cancelled = false;
+    void loadCatalogueTaxonomy()
+      .then((rows) => { if (!cancelled) setTaxonomy(rows); })
+      .catch(() => { /* The catalogue can still browse with the All Categories option. */ });
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
     if (!backendConfigured || !serverCatalogueAvailable || initialProductId) return undefined;
     let cancelled = false;
     queueMicrotask(() => { if (!cancelled) setCatalogueLoading(true); });
@@ -1080,6 +1148,34 @@ export default function Marketplace({
   // a server page locally can hide valid alias matches and make preview UAT
   // diverge from production.
   const serverCatalogueActive = backendConfigured && serverCatalogueAvailable && !initialProductId;
+  const fallbackTaxonomy = useMemo<CatalogueTaxonomyRow[]>(() => {
+    const counts = new Map<string, number>();
+    catalogue.forEach((product) => {
+      const department = product.department || product.category;
+      if (!department) return;
+      const key = `${department}\u0000${product.subcategory ?? ""}`;
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    });
+    return [...counts.entries()].map(([key, productCount]) => {
+      const [department, subcategory] = key.split("\u0000");
+      return { department, subcategory: subcategory || null, productCount };
+    });
+  }, [catalogue]);
+  const availableTaxonomy = taxonomy.length ? taxonomy : fallbackTaxonomy;
+  const availableDepartments = useMemo(
+    () => new Set(availableTaxonomy.filter((row) => row.productCount > 0).map((row) => row.department)),
+    [availableTaxonomy],
+  );
+  const departmentNav = useMemo(
+    () => departmentPresentation
+      .filter((item) => availableDepartments.has(item.department))
+      .map(({ label, href }) => ({ label, href })),
+    [availableDepartments],
+  );
+  const departmentCards = useMemo(
+    () => departmentPresentation.filter((item) => availableDepartments.has(item.department)),
+    [availableDepartments],
+  );
   const indexedCatalogue = useMemo(() => catalogue.map(indexCatalogueProduct), [catalogue]);
 
   const filteredMatches = useMemo(() => {
@@ -1105,7 +1201,7 @@ export default function Marketplace({
         if (!productMatchesCategory(product, category)) return false;
         if (prescriptionFilter !== "all" && product.prescriptionStatus !== prescriptionFilter) return false;
         if (formFilter !== "all" && catalogueFormGroup(product) !== formFilter) return false;
-        if (availabilityFilter === "priced" && !(product.priceContributors > 0 && product.min > 0)) return false;
+        if (availabilityFilter === "priced" && !hasPriceData(product)) return false;
         if (availabilityFilter === "orderable" && !product.isOrderable) return false;
         if (availabilityFilter === "registered" && !["valid", "active", "expiring_soon"].includes(product.regulatoryStatus.toLowerCase())) return false;
         return true;
@@ -1114,7 +1210,7 @@ export default function Marketplace({
         const a = left.product;
         const b = right.product;
         if (sort === "za") return b.brand.localeCompare(a.brand);
-        if (sort === "price") return (a.min || Number.MAX_SAFE_INTEGER) - (b.min || Number.MAX_SAFE_INTEGER) || a.brand.localeCompare(b.brand);
+        if (sort === "price") return (a.indicativePriceRwf || Number.MAX_SAFE_INTEGER) - (b.indicativePriceRwf || Number.MAX_SAFE_INTEGER) || a.brand.localeCompare(b.brand);
         if (sort === "relevance" && deferredQuery.trim() && right.score !== left.score) return right.score - left.score;
         return a.brand.localeCompare(b.brand);
       });
@@ -1157,32 +1253,21 @@ export default function Marketplace({
     return () => observer.disconnect();
   }, [catalogueBusy, hasMoreProducts, initialProductId]);
 
-  const matchExplanations = useMemo(() => {
-    const explanations = new Map(filteredMatches.map((match) => [match.product.id, match.explanation]));
-    if (!previewMode && serverCatalogueAvailable) {
-      serverExplanations.forEach((value, key) => explanations.set(key, value));
-    }
-    return explanations;
-  }, [filteredMatches, previewMode, serverCatalogueAvailable, serverExplanations]);
-
   const searchSuggestions = useMemo(() => deferredQuery.trim().length >= 2 ? filtered.slice(0, 6) : [], [deferredQuery, filtered]);
   const hasActiveFilters = category !== initialCategory || prescriptionFilter !== "all" || formFilter !== "all" || availabilityFilter !== "all";
 
   const pharmacyCatalogue = portalCatalogue.length ? portalCatalogue : catalogue;
-  const filteredPriceProducts = useMemo(() => {
-    const normalized = priceSearch.trim().toLowerCase();
-    if (!normalized) return pharmacyCatalogue.slice(0, 30);
-    return pharmacyCatalogue.filter((product) => `${product.brand} ${product.generic}`.toLowerCase().includes(normalized)).slice(0, 30);
-  }, [pharmacyCatalogue, priceSearch]);
-
   const orderableCatalogue = useMemo(() => pharmacyCatalogue.filter((product) => (
     product.isOrderable && ["valid", "active", "expiring_soon"].includes(product.regulatoryStatus.toLowerCase())
   )), [pharmacyCatalogue]);
   const selectedProduct = initialProductId ? catalogue.find((product) => product.id === initialProductId) ?? null : null;
+  const selectedProductHasGallery = Boolean(
+    selectedProduct
+    && Array.from(new Set([...(selectedProduct.imageUrls ?? []), selectedProduct.imageUrl].filter(Boolean))).length === 3,
+  );
 
   const basketCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-  const basketMin = cart.reduce((sum, item) => sum + item.min * item.quantity, 0);
-  const basketMax = cart.reduce((sum, item) => sum + item.max * item.quantity, 0);
+  const basketIndicativeFrom = cart.reduce((sum, item) => sum + item.indicativePriceRwf * item.quantity, 0);
   const displayedCartItems = showAllCartItems ? cart : cart.slice(0, 3);
   const customerWhatsapp = useMemo(
     () => parseCustomerWhatsapp(whatsappCountry, whatsapp),
@@ -1249,7 +1334,7 @@ export default function Marketplace({
 
   function add(product: Product) {
     if (requestLocked) {
-      setCheckoutError("Retry or reset the pending order before changing its products.");
+      setCheckoutError("Retry or reset the pending request before changing its products.");
       setCheckoutStep(1);
       setCartOpen(true);
       return;
@@ -1289,7 +1374,7 @@ export default function Marketplace({
       return;
     }
     if (cartRequiresPrescription && !prescription && !pendingOrderAttempt?.prescriptionPath) {
-      setCheckoutError("Attach a valid prescription before reviewing this order.");
+      setCheckoutError("Attach a valid prescription before reviewing this request.");
       return;
     }
     if (prescriptionError) {
@@ -1305,7 +1390,7 @@ export default function Marketplace({
     setCart((current) => current
       .map((item) => item.id === id ? { ...item, quantity: item.quantity + delta } : item)
       .filter((item) => item.quantity > 0));
-    if (item) announce(delta < 0 && item.quantity === 1 ? `${item.brand} removed from your order.` : `${item.brand} quantity ${delta > 0 ? "increased" : "decreased"}.`);
+    if (item) announce(delta < 0 && item.quantity === 1 ? `${item.brand} removed from your request.` : `${item.brand} quantity ${delta > 0 ? "increased" : "decreased"}.`);
   }
 
   function setSubstituteConsent(id: string, allowed: boolean) {
@@ -1389,7 +1474,7 @@ export default function Marketplace({
 
   function clearRequestState(message = "") {
     if (pendingOrderAttempt?.rpcAttempted) {
-      setCheckoutError("This order may already have been committed. Retry the same secure order; local reset is disabled.");
+      setCheckoutError("This request may already have been saved. Retry the same secure request; local reset is disabled.");
       return false;
     }
     setPendingOrderAttempt(null);
@@ -1415,7 +1500,7 @@ export default function Marketplace({
 
   async function resetRequest() {
     if (pendingOrderAttempt?.rpcAttempted) {
-      setCheckoutError("This order may already have been committed. Retry the same secure order so MED+250 can recover its receipt; resetting is disabled.");
+      setCheckoutError("This request may already have been saved. Retry the same secure request so MED+250 can recover its receipt; resetting is disabled.");
       return;
     }
     setOrdering(true);
@@ -1428,7 +1513,7 @@ export default function Marketplace({
         return;
       }
     }
-    clearRequestState("Order cleared. You can start another order.");
+    clearRequestState("Request cleared. You can start another request.");
     setOrdering(false);
     setCartOpen(true);
   }
@@ -1441,8 +1526,8 @@ export default function Marketplace({
       const result = await closeOrder(activeOrderId, outcome);
       setRestoredActiveOrders((current) => current.filter((order) => order.orderId !== result.orderId));
       clearRequestState(result.status === "completed"
-        ? "Order marked completed. You can start another order."
-        : "Order cancelled. You can start another order.");
+        ? "Request finished. You can start another request."
+        : "Request cancelled. You can start another request.");
       setCartOpen(true);
     } catch (error) {
       setCheckoutError(errorMessage(error));
@@ -1455,11 +1540,11 @@ export default function Marketplace({
     setCheckoutError("");
     setCustomerMessage("");
     if (restoredActiveOrders.length > 0) {
-      setCheckoutError("Open and close each existing active order before starting another one.");
+      setCheckoutError("Open and close each existing active request before starting another one.");
       return;
     }
     if (!cart.length) {
-      setCheckoutError("Add at least one product to your order.");
+      setCheckoutError("Add at least one product to your availability request.");
       return;
     }
     setWhatsappTouched(true);
@@ -1468,7 +1553,7 @@ export default function Marketplace({
       return;
     }
     if (cartRequiresPrescription && !prescription && !pendingOrderAttempt?.prescriptionPath) {
-      setCheckoutError("Attach a valid prescription before ordering a prescription-classified product.");
+      setCheckoutError("Attach a valid prescription before requesting a prescription-classified product.");
       return;
     }
     if (prescriptionError) {
@@ -1476,7 +1561,7 @@ export default function Marketplace({
       return;
     }
     if (!orderingEnabled) {
-      setCheckoutError("Ordering is not enabled in this build.");
+      setCheckoutError("Availability requests are not enabled in this build.");
       return;
     }
     setOrdering(true);
@@ -1496,11 +1581,11 @@ export default function Marketplace({
         }
       }
       if (orderCoordinates.latitude < -3 || orderCoordinates.latitude > -0.8 || orderCoordinates.longitude < 28.7 || orderCoordinates.longitude > 30.9) {
-        throw new Error("MED+250 currently accepts order locations inside Rwanda only.");
+        throw new Error("MED+250 currently accepts request locations inside Rwanda only.");
       }
       if (!attempt) {
         if (!globalThis.crypto?.randomUUID) {
-          throw new Error("Secure order IDs are unavailable in this browser. Update your browser and try again.");
+          throw new Error("Secure request IDs are unavailable in this browser. Update your browser and try again.");
         }
         attempt = {
           clientRequestId: globalThis.crypto.randomUUID(),
@@ -1567,7 +1652,7 @@ export default function Marketplace({
         setCaptchaVersion((version) => version + 1);
       }
       setCheckoutError(attempt
-        ? `${errorMessage(error)} The same order ID and prescription upload will be reused when you retry.`
+        ? `${errorMessage(error)} The same secure request ID and prescription upload will be reused when you retry.`
         : errorMessage(error));
       trackMarketplaceEvent("order_failed", { stage: attempt?.rpcAttempted ? "dispatch" : "validation" });
     } finally {
@@ -1819,11 +1904,10 @@ export default function Marketplace({
     setPortalError("");
     const incompleteItem = selectedRequest.items.find((item) => (
       !(offerAvailability[item.orderItemId] ?? false)
-      || !Number(offerPrices[item.orderItemId])
       || ((offerSubstitutes[item.orderItemId] ?? false) && !offerProductIds[item.orderItemId])
     ));
     if (incompleteItem) {
-      setPortalError("Confirm every product and enter every price before confirming this order.");
+      setPortalError("Confirm availability for every product before sending this response.");
       return;
     }
     setPortalLoading(true);
@@ -1844,33 +1928,15 @@ export default function Marketplace({
               : null,
             available,
             isSubstitute,
-            unitPriceRwf: Number(offerPrices[item.orderItemId] || 0),
+            unitPriceRwf: offerPrices[item.orderItemId] ? Number(offerPrices[item.orderItemId]) : null,
             quantity: item.quantity,
             note: null,
           };
         }),
       });
-      setPortalMessage("Complete order confirmation sent to the customer.");
+      setPortalMessage("Availability confirmation sent. The customer can continue with the pharmacy on WhatsApp.");
       setSelectedRequest(null);
       await refreshPharmacyRequests();
-    } catch (error) {
-      setPortalError(errorMessage(error));
-    } finally {
-      setPortalLoading(false);
-    }
-  }
-
-  async function addPriceContribution() {
-    if (!activeMembership || !priceProductId || !Number(priceValue)) {
-      setPortalError("Choose a product and enter a valid RWF price.");
-      return;
-    }
-    setPortalLoading(true);
-    setPortalError("");
-    try {
-      await contributePrice(activeMembership.pharmacyId, priceProductId, Number(priceValue));
-      setPortalMessage("Price saved. The customer price range has been updated.");
-      setPriceValue("");
     } catch (error) {
       setPortalError(errorMessage(error));
     } finally {
@@ -1881,17 +1947,17 @@ export default function Marketplace({
   return (
     <main id="main-content">
       <a className="skip-link" href="#marketplace-content">Skip to marketplace content</a>
-      {!isOnline ? <div className="connection-banner" role="alert"><WifiOff size={17} /><span>You are offline. Browsing may continue, but live search and ordering need a connection.</span></div> : null}
+      {!isOnline ? <div className="connection-banner" role="alert"><WifiOff size={17} /><span>You are offline. Browsing may continue, but live search and availability requests need a connection.</span></div> : null}
       <header className="site-header">
         <Link className="brand" href="/" aria-label="med+250 home"><BrandLogo /></Link>
-        <button type="button" className={`delivery-location ${coordinates ? "location-ready" : ""}`} onClick={() => requestNativeLocation(true)} disabled={publicCatalogMode || locationLoading} aria-busy={locationLoading} aria-label={publicCatalogMode ? "Delivery location will be available when ordering opens" : locationLoading ? "Detecting delivery location" : "Set delivery location"}><MapPin size={18} /><span><small>{publicCatalogMode ? "Public catalogue" : coordinates ? "Current location" : "Deliver to"}</small><b>{publicCatalogMode ? "Ordering coming soon" : locationLoading ? "Detecting location…" : coordinates ? "Location ready" : location === "Location needed" ? "Use location" : location}</b></span>{locationLoading ? <LoaderCircle className="button-spinner" size={14} aria-hidden="true" /> : coordinates ? <Check size={14} /> : <ChevronDown size={13} />}</button>
+        <button type="button" className={`delivery-location ${coordinates ? "location-ready" : ""}`} onClick={() => requestNativeLocation(true)} disabled={publicCatalogMode || locationLoading} aria-busy={locationLoading} aria-label={publicCatalogMode ? "Location matching will be available when requests open" : locationLoading ? "Detecting location" : "Set location for nearby pharmacy matching"}><MapPin size={18} /><span><small>{publicCatalogMode ? "Public catalogue" : coordinates ? "Current location" : "Near you"}</small><b>{publicCatalogMode ? "Requests coming soon" : locationLoading ? "Detecting location…" : coordinates ? "Location ready" : location === "Location needed" ? "Use location" : location}</b></span>{locationLoading ? <LoaderCircle className="button-spinner" size={14} aria-hidden="true" /> : coordinates ? <Check size={14} /> : <ChevronDown size={13} />}</button>
         <div
           className="header-search-shell"
           onFocusCapture={() => setSuggestionsOpen(true)}
           onBlurCapture={(event) => { if (!(event.relatedTarget instanceof Node) || !event.currentTarget.contains(event.relatedTarget)) setSuggestionsOpen(false); }}
         >
           <div className="header-search">
-            <select value={category} onChange={(event) => { setCategory(event.target.value); setVisibleCount(INITIAL_PRODUCT_COUNT); }} aria-label="Search category"><CategoryOptions /></select>
+            <select value={category} onChange={(event) => { setCategory(event.target.value); setVisibleCount(INITIAL_PRODUCT_COUNT); }} aria-label="Search category"><CategoryOptions taxonomy={availableTaxonomy} /></select>
             <input id="marketplace-search" value={query} maxLength={MAX_CATALOGUE_QUERY_LENGTH} onChange={(event) => { setQuery(boundedCatalogueQuery(event.target.value)); setSuggestionsOpen(true); setVisibleCount(INITIAL_PRODUCT_COUNT); }} onKeyDown={handleSearchKeyDown} placeholder="Search by product, generic name, symptom or use" role="combobox" aria-label="Search the marketplace" aria-controls="smart-search-suggestions" aria-expanded={suggestionsOpen && query.trim().length >= 2} aria-autocomplete="list" aria-haspopup="listbox" autoComplete="off" />
             <button type="button" aria-label="Search marketplace" onClick={showSearchResults}><Search size={22} /><span>Search</span></button>
           </div>
@@ -1901,14 +1967,14 @@ export default function Marketplace({
           </div> : null}
         </div>
         <div className="header-actions">
-          <button type="button" className="header-utility" onClick={() => setOffersOpen(true)} disabled={publicCatalogMode} aria-label={publicCatalogMode ? "My orders will be available when ordering opens" : "Open my orders"}><PackageCheck size={19} /><span><small>My</small><b>Orders</b></span></button>
+          <button type="button" className="header-utility" onClick={() => setOffersOpen(true)} disabled={publicCatalogMode} aria-label={publicCatalogMode ? "My requests will be available when requests open" : "Open my requests"}><PackageCheck size={19} /><span><small>My</small><b>Requests</b></span></button>
           <button type="button" className="header-utility" onClick={openPortal} aria-label="Open For Pharmacies"><Store size={19} /><span><b>For Pharmacies</b></span></button>
-          <button className="bag-button" disabled={publicCatalogMode} onClick={() => { setCheckoutStep(1); setShowAllCartItems(false); setRecentlyAddedBrand(""); setCartOpen(true); }} aria-label={publicCatalogMode ? "Order basket will be available when ordering opens" : `Open order with ${basketCount} ${basketCount === 1 ? "item" : "items"}`}><ShoppingBag size={22} /><span>{publicCatalogMode ? "Ordering soon" : "Order basket"}</span><b>{basketCount}</b></button>
+          <button className="bag-button" disabled={publicCatalogMode} onClick={() => { setCheckoutStep(1); setShowAllCartItems(false); setRecentlyAddedBrand(""); setCartOpen(true); }} aria-label={publicCatalogMode ? "Cart will be available when requests open" : `Open cart with ${basketCount} ${basketCount === 1 ? "item" : "items"}`}><ShoppingCart size={22} /><span>{publicCatalogMode ? "Cart soon" : "Cart"}</span><b>{basketCount}</b></button>
           <button className="mobile-toggle" onClick={() => setMobileMenu(!mobileMenu)} aria-label="Toggle navigation" aria-expanded={mobileMenu} aria-controls="mobile-marketplace-menu"><Menu size={22} /></button>
         </div>
       </header>
 
-      {mobileMenu ? <nav className="mobile-menu-panel" id="mobile-marketplace-menu" aria-label="Mobile marketplace navigation"><Link href="/categories">All products</Link>{departmentNav.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}<button onClick={() => { setMobileMenu(false); setOffersOpen(true); }}>My orders</button><button onClick={() => { setMobileMenu(false); void openPortal(); }}>For Pharmacies</button></nav> : null}
+      {mobileMenu ? <nav className="mobile-menu-panel" id="mobile-marketplace-menu" aria-label="Mobile marketplace navigation"><Link href="/categories">All products</Link>{departmentNav.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}<button onClick={() => { setMobileMenu(false); setOffersOpen(true); }}>My requests</button><button onClick={() => { setMobileMenu(false); void openPortal(); }}>For Pharmacies</button></nav> : null}
 
       <nav className="commerce-nav" id="top" aria-label="Product categories">
         <a href="/categories"><Menu size={18} /> All Categories</a>
@@ -1918,18 +1984,18 @@ export default function Marketplace({
       {publicCatalogMode ? <div className="preview-banner public-catalog-banner" role="status"><ShieldCheck size={16} /><span><b>Public catalogue is live.</b> Browse and search products now. Ordering stays unavailable until verified pharmacies are ready to receive requests.</span></div> : null}
 
       <div id="marketplace-content">
-      {initialProductId ? <section className="product-detail-page" aria-live="polite">
+      {initialProductId ? <section className={`product-detail-page${selectedProductHasGallery ? "" : " without-image"}`} aria-live="polite">
         {selectedProduct ? <>
           <nav className="product-breadcrumbs" aria-label="Breadcrumb"><Link href="/">Home</Link><span aria-hidden="true">/</span><Link href="/categories">Products</Link><span aria-hidden="true">/</span><span aria-current="page">{selectedProduct.brand}</span></nav>
-          <div className="product-detail-visual"><ProductGallery product={selectedProduct} /></div>
+          {selectedProductHasGallery ? <div className="product-detail-visual"><ProductGallery product={selectedProduct} /></div> : null}
           <div className="product-detail-copy">
             {selectedProduct.category ? <small>{displayCategory(selectedProduct)}</small> : null}
             <h1>{selectedProduct.brand}</h1>
             {selectedProduct.generic ? <p className="product-generic">{selectedProduct.generic}</p> : null}
             <ProductDetailsList product={selectedProduct} />
             <div className={`product-detail-buy ${hasPriceData(selectedProduct) ? "has-price" : "no-price"}`}>
-              {hasPriceData(selectedProduct) ? <div><span>Current contributed range</span><b>RWF {rwf.format(selectedProduct.min)}–{rwf.format(selectedProduct.max)}</b></div> : null}
-              <button onClick={() => add(selectedProduct)} disabled={publicCatalogMode || (!previewMode && !selectedProduct.isOrderable)} title={publicCatalogMode ? "Ordering will open after pharmacy routing is activated" : undefined}><Plus size={20} /> {publicCatalogMode ? "Ordering coming soon" : "Add to order"}</button>
+              {hasPriceData(selectedProduct) ? <div><span>Central indicative price</span><b>From RWF {rwf.format(selectedProduct.indicativePriceRwf)}</b><small>Reference only. Confirm availability and final price on WhatsApp.</small></div> : null}
+              <button onClick={() => add(selectedProduct)} disabled={publicCatalogMode || (!previewMode && !selectedProduct.isOrderable)} aria-label={publicCatalogMode ? `Add ${selectedProduct.brand} to cart unavailable` : `Add ${selectedProduct.brand} to cart`} title={publicCatalogMode ? "Cart opens after pharmacy connections are activated" : undefined}><ShoppingCart size={20} /> {publicCatalogMode ? "Cart coming soon" : "Add to cart"}</button>
             </div>
             <details className="product-information">
               <summary><FileText size={18} /> Product information <ChevronDown size={18} /></summary>
@@ -1949,27 +2015,24 @@ export default function Marketplace({
           <div><h1>{pageTitle}</h1><p>{pageDescription}</p><button onClick={() => requestNativeLocation(true)}><LocateFixed size={18} /> {coordinates ? "Location ready" : "Use my location"}</button></div>
           <Image src={pageImage ?? "/marketplace/hero-pharmacy-still-life.webp"} alt="" width={620} height={330} priority unoptimized />
         </section> : !pageTitle ? <section className="market-banner">
-          <div className="market-banner-copy"><h1>{publicCatalogMode ? <>Rwanda pharmacy products. <em>One searchable catalogue.</em></> : <>One order. <em>Verified pharmacies confirm.</em></>}</h1><p>{publicCatalogMode ? "Browse and search the public MED+250 catalogue. Ordering opens after verified pharmacy routing is activated." : "Find the products you need, place one order, then choose from pharmacies that confirm they can fulfil it."}</p><a className="shop-button" href="#marketplace">Browse products <ArrowRight size={18} /></a></div>
+          <div className="market-banner-copy"><h1>Find the product. <em>Connect with a pharmacy that has it.</em></h1><p>{publicCatalogMode ? "Browse central product information and indicative From RWF prices. Availability and final prices are confirmed directly with pharmacies on WhatsApp." : "Search once, send an availability request, and continue on WhatsApp with a pharmacy that confirms it can help."}</p><a className="shop-button" href="#marketplace">Browse products <ArrowRight size={18} /></a></div>
           <div className="market-banner-art"><Image src="/marketplace/hero-pharmacy-still-life.webp" alt="Pharmacy and wellness products arranged in the med+250 brand colours" width={760} height={340} priority unoptimized /></div>
         </section> : null}
 
-        {(!pageTitle || showDepartments) ? <section className={`department-cards${pageTitle && showDepartments ? " category-index-departments" : ""}`} aria-label="Shop pharmacy departments">
-          <article><div><h2>Medicines &amp;<br />pain relief</h2><p>Find relief from pain, fever, cough, allergies and more.</p><a href="/category/medicines">Shop medicines <ArrowRight size={15} /></a></div><Image src="/marketplace/category-medicines.webp" alt="Medicine box and blister pack" width={210} height={150} unoptimized /></article>
-          <article><div><h2>Beauty &amp;<br />Personal Care</h2><p>Makeup, skin, hair, fragrance, oral care and daily essentials.</p><a href="/category/personal-care">Shop beauty &amp; care <ArrowRight size={15} /></a></div><Image src="/marketplace/category-personal-care.webp" alt="Beauty and personal care products" width={210} height={150} unoptimized /></article>
-          <article><div><h2>Baby</h2><p>Baby care, diapering, feeding, nursery and maternity essentials.</p><a href="/category/baby-family">Shop baby <ArrowRight size={15} /></a></div><Image src="/marketplace/category-baby-family.webp" alt="Baby care products" width={210} height={150} unoptimized /></article>
-          <article><div><h2>Health &amp;<br />Household</h2><p>Health care, supplies, equipment, nutrition and wellness products.</p><a href="/category/wellness">Shop health &amp; household <ArrowRight size={15} /></a></div><Image src="/marketplace/category-wellness-devices.webp" alt="Health and household products" width={210} height={150} unoptimized /></article>
+        {(!pageTitle || showDepartments) && departmentCards.length ? <section className={`department-cards${pageTitle && showDepartments ? " category-index-departments" : ""}`} aria-label="Shop pharmacy departments">
+          {departmentCards.map((item) => <article key={item.department}><div><h2>{item.title}</h2><p>{item.description}</p><a href={item.href}>{item.action} <ArrowRight size={15} /></a></div><Image src={item.image} alt={item.imageAlt} width={210} height={150} unoptimized /></article>)}
         </section> : null}
 
         <section className="marketplace-section" id="marketplace" aria-busy={catalogueBusy}>
-          <div className="section-heading"><div>{pageTitle && showDepartments ? <h1>{pageTitle}</h1> : <h2>{pageTitle ?? "Popular products today"}</h2>}{query.trim() ? <p>Best matches for “{query.trim()}”</p> : visibleProducts.some(hasPriceData) ? <p>Contributed pharmacy price ranges</p> : null}</div><span className="catalogue-progress">{visibleProducts.length.toLocaleString()} shown</span></div>
+          <div className="section-heading"><div>{pageTitle && showDepartments ? <h1>{pageTitle}</h1> : <h2>{pageTitle ?? "Popular products today"}</h2>}{query.trim() ? <p>Best matches for “{query.trim()}”</p> : <p>Pharmacies confirm availability and final price on WhatsApp</p>}</div><span className="catalogue-progress">{visibleProducts.length.toLocaleString()} shown</span></div>
           <div className="smart-filter-bar" aria-label="Catalogue filters">
             <button className="mobile-filter-button" type="button" onClick={() => setFiltersOpen(true)} aria-haspopup="dialog"><SlidersHorizontal size={17} /> Filters and sort{hasActiveFilters ? <b aria-label="Active filters">!</b> : null}</button>
             <div className="desktop-filter-controls">
-              <label>Category<select value={category} onChange={(event) => { setCategory(event.target.value); setVisibleCount(INITIAL_PRODUCT_COUNT); }}><CategoryOptions /></select></label>
+              <label>Category<select value={category} onChange={(event) => { setCategory(event.target.value); setVisibleCount(INITIAL_PRODUCT_COUNT); }}><CategoryOptions taxonomy={availableTaxonomy} /></select></label>
               <label>Prescription<select value={prescriptionFilter} onChange={(event) => { setPrescriptionFilter(event.target.value); setVisibleCount(INITIAL_PRODUCT_COUNT); }}><option value="all">Any status</option><option value="non_prescription">OTC</option><option value="prescription">Prescription</option><option value="pharmacist_only">Ask pharmacist</option><option value="unclassified">Not classified</option></select></label>
               <label>Form<select value={formFilter} onChange={(event) => { setFormFilter(event.target.value); setVisibleCount(INITIAL_PRODUCT_COUNT); }}><option value="all">Any form</option><option value="tablets">Tablets & capsules</option><option value="liquids">Liquids & drops</option><option value="injections">Injections</option><option value="topical">Creams & topical</option><option value="devices">Devices & inhalers</option><option value="other">Other forms</option></select></label>
-              <label>Availability<select value={availabilityFilter} onChange={(event) => { setAvailabilityFilter(event.target.value); setVisibleCount(INITIAL_PRODUCT_COUNT); }}><option value="all">Any availability</option><option value="priced">Has price range</option><option value="orderable">Can be added to an order</option><option value="registered">In the product catalogue</option></select></label>
-              <label>Sort<select value={sort} onChange={(event) => { setSort(event.target.value); setVisibleCount(INITIAL_PRODUCT_COUNT); }}><option value="relevance">Best match</option><option value="az">Name: A–Z</option><option value="za">Name: Z–A</option><option value="price">Lowest price</option></select></label>
+              <label>Information<select value={availabilityFilter} onChange={(event) => { setAvailabilityFilter(event.target.value); setVisibleCount(INITIAL_PRODUCT_COUNT); }}><option value="all">All products</option><option value="priced">Has indicative price</option><option value="orderable">Can request availability</option><option value="registered">In the product catalogue</option></select></label>
+              <label>Sort<select value={sort} onChange={(event) => { setSort(event.target.value); setVisibleCount(INITIAL_PRODUCT_COUNT); }}><option value="relevance">Best match</option><option value="az">Name: A–Z</option><option value="za">Name: Z–A</option><option value="price">Lowest indicative price</option></select></label>
             </div>
             <div className="view-toggle" aria-label="Product view"><button type="button" aria-label="Grid view" aria-pressed={viewMode === "grid"} onClick={() => { setViewMode("grid"); trackMarketplaceEvent("catalogue_view_changed", { view: "grid" }); }}><Grid3X3 size={15} /></button><button type="button" aria-label="List view" aria-pressed={viewMode === "list"} onClick={() => { setViewMode("list"); trackMarketplaceEvent("catalogue_view_changed", { view: "list" }); }}><List size={16} /></button></div>
             {query || hasActiveFilters ? <button className="clear-filters" onClick={clearCatalogueFilters}><SlidersHorizontal size={14} /> Reset</button> : null}
@@ -1980,8 +2043,6 @@ export default function Marketplace({
               product={product}
               index={index}
               catalogueSize={accessibleCatalogueSize}
-              matchExplanation={matchExplanations.get(product.id)}
-              showMatchExplanation={Boolean(query.trim())}
               previewMode={previewMode && !publicCatalogMode}
               publicCatalogMode={publicCatalogMode}
               onAdd={add}
@@ -2001,11 +2062,11 @@ export default function Marketplace({
         <section className="filter-dialog" role="dialog" aria-modal="true" aria-labelledby="catalogue-filter-title" aria-describedby="catalogue-filter-description" data-modal-root="catalogue-filters" tabIndex={-1}>
           <div className="filter-dialog-head"><div><span>REFINE RESULTS</span><h2 id="catalogue-filter-title">Filters and sort</h2><p id="catalogue-filter-description">Narrow the catalogue without losing your search.</p></div><button data-autofocus onClick={() => setFiltersOpen(false)} aria-label="Close filters"><X size={20} /></button></div>
           <div className="filter-dialog-fields">
-            <label>Category<select value={category} onChange={(event) => { setCategory(event.target.value); setVisibleCount(INITIAL_PRODUCT_COUNT); }}><CategoryOptions /></select></label>
+            <label>Category<select value={category} onChange={(event) => { setCategory(event.target.value); setVisibleCount(INITIAL_PRODUCT_COUNT); }}><CategoryOptions taxonomy={availableTaxonomy} /></select></label>
             <label>Prescription<select value={prescriptionFilter} onChange={(event) => { setPrescriptionFilter(event.target.value); setVisibleCount(INITIAL_PRODUCT_COUNT); }}><option value="all">Any status</option><option value="non_prescription">OTC</option><option value="prescription">Prescription</option><option value="pharmacist_only">Ask pharmacist</option><option value="unclassified">Not classified</option></select></label>
             <label>Form<select value={formFilter} onChange={(event) => { setFormFilter(event.target.value); setVisibleCount(INITIAL_PRODUCT_COUNT); }}><option value="all">Any form</option><option value="tablets">Tablets & capsules</option><option value="liquids">Liquids & drops</option><option value="injections">Injections</option><option value="topical">Creams & topical</option><option value="devices">Devices & inhalers</option><option value="other">Other forms</option></select></label>
-            <label>Availability<select value={availabilityFilter} onChange={(event) => { setAvailabilityFilter(event.target.value); setVisibleCount(INITIAL_PRODUCT_COUNT); }}><option value="all">Any availability</option><option value="priced">Has price range</option><option value="orderable">Can be added to an order</option><option value="registered">In the product catalogue</option></select></label>
-            <label>Sort<select value={sort} onChange={(event) => { setSort(event.target.value); setVisibleCount(INITIAL_PRODUCT_COUNT); }}><option value="relevance">Best match</option><option value="az">Name: A–Z</option><option value="za">Name: Z–A</option><option value="price">Lowest price</option></select></label>
+            <label>Information<select value={availabilityFilter} onChange={(event) => { setAvailabilityFilter(event.target.value); setVisibleCount(INITIAL_PRODUCT_COUNT); }}><option value="all">All products</option><option value="priced">Has indicative price</option><option value="orderable">Can request availability</option><option value="registered">In the product catalogue</option></select></label>
+            <label>Sort<select value={sort} onChange={(event) => { setSort(event.target.value); setVisibleCount(INITIAL_PRODUCT_COUNT); }}><option value="relevance">Best match</option><option value="az">Name: A–Z</option><option value="za">Name: Z–A</option><option value="price">Lowest indicative price</option></select></label>
           </div>
           <div className="filter-dialog-actions"><button className="filter-reset" onClick={clearCatalogueFilters} disabled={!query && !hasActiveFilters}>Reset all</button><button className="primary-wide" onClick={() => { setFiltersOpen(false); announce(`${catalogueMatchCount.toLocaleString()} products ready to browse.`); }}>Show {catalogueMatchCount.toLocaleString()} products</button></div>
         </section>
@@ -2013,17 +2074,24 @@ export default function Marketplace({
 
       {cartOpen ? <div className="overlay order-wizard-overlay" onMouseDown={(event) => event.target === event.currentTarget && setCartOpen(false)}>
         <aside className="drawer order-wizard" role="dialog" aria-modal="true" aria-labelledby="order-basket-title" data-modal-root="order-basket" tabIndex={-1}>
-          <header className="order-wizard-head"><div><h2 id="order-basket-title">Complete your order</h2><p>{basketCount} {basketCount === 1 ? "item" : "items"}</p></div><button data-autofocus onClick={() => { setCartOpen(false); setRecentlyAddedBrand(""); }} aria-label="Close order"><X size={22} /></button></header>
+          <header className="order-wizard-head"><div><h2 id="order-basket-title">Your cart</h2><p>{basketCount} {basketCount === 1 ? "item" : "items"}</p></div><button data-autofocus onClick={() => { setCartOpen(false); setRecentlyAddedBrand(""); }} aria-label="Close cart"><X size={22} /></button></header>
           {!orderSent ? <OrderWizardProgress step={checkoutStep} /> : null}
           <div className="order-wizard-body" ref={orderWizardBodyRef}>
             {!orderSent && checkoutStep === 1 ? <section className="order-step-panel" aria-labelledby="order-review-heading">
-              {recentlyAddedBrand ? <p className="order-added-feedback" role="status"><CircleCheck size={21} /> <b>{recentlyAddedBrand}</b> added to your order</p> : null}
+              {recentlyAddedBrand ? <p className="order-added-feedback" role="status"><CircleCheck size={21} /> <b>{recentlyAddedBrand}</b> added to your cart</p> : null}
               <div className="order-step-heading"><h3 id="order-review-heading">Review products</h3>{cart.length ? <span>{cart.length} {cart.length === 1 ? "product" : "products"}</span> : null}</div>
-              <div className={`cart-list order-review-list${showAllCartItems ? " show-all" : ""}`}>{displayedCartItems.map((item) => <div className="cart-item order-review-item" key={item.id}><ProductVisual product={item} small /><div><b>{[item.brand, item.strength].filter(Boolean).join(" ")}</b>{item.generic || item.packSize ? <small>{[item.generic, item.packSize ? `Pack ${item.packSize}` : ""].filter(Boolean).join(" · ")}</small> : null}<label className="substitute-check"><input type="checkbox" checked={item.substitutesAllowed} disabled={requestLocked} onChange={(event) => setSubstituteConsent(item.id, event.target.checked)} /> Allow a pharmacist-proposed substitute</label></div><div className="quantity"><button onClick={() => adjust(item.id, -1)} disabled={requestLocked} aria-label={`Decrease ${item.brand} quantity`}><Minus size={15} /></button><b>{item.quantity}</b><button onClick={() => adjust(item.id, 1)} disabled={requestLocked} aria-label={`Increase ${item.brand} quantity`}><Plus size={15} /></button></div></div>)}</div>
+              <div className={`cart-list order-review-list${showAllCartItems ? " show-all" : ""}`}>{displayedCartItems.map((item) => {
+                const hasImage = Boolean(item.imageUrl ?? item.imageUrls?.[0]);
+                return <div className={`cart-item order-review-item${hasImage ? "" : " without-image"}`} key={item.id}>
+                  {hasImage ? <ProductVisual product={item} small /> : null}
+                  <div><b>{[item.brand, item.strength].filter(Boolean).join(" ")}</b>{item.generic || item.packSize ? <small>{[item.generic, item.packSize ? `Pack ${item.packSize}` : ""].filter(Boolean).join(" · ")}</small> : null}<label className="substitute-check"><input type="checkbox" checked={item.substitutesAllowed} disabled={requestLocked} onChange={(event) => setSubstituteConsent(item.id, event.target.checked)} /> Allow a pharmacist-proposed substitute</label></div>
+                  <div className="quantity"><button onClick={() => adjust(item.id, -1)} disabled={requestLocked} aria-label={`Decrease ${item.brand} quantity`}><Minus size={15} /></button><b>{item.quantity}</b><button onClick={() => adjust(item.id, 1)} disabled={requestLocked} aria-label={`Increase ${item.brand} quantity`}><Plus size={15} /></button></div>
+                </div>;
+              })}</div>
               {cart.length > 2 ? <button type="button" className="order-list-toggle" onClick={() => setShowAllCartItems((current) => !current)}><List size={18} /> {showAllCartItems ? "Show fewer products" : `View all ${cart.length} products`}</button> : null}
-              {!cart.length ? <div className="empty-request"><ShoppingBag size={28} /><b>Your order is empty</b><p>Add products from the catalogue to continue.</p></div> : null}
+              {!cart.length ? <div className="empty-request"><ShoppingCart size={28} /><b>Your cart is empty</b><p>Add products from the catalogue to continue.</p></div> : null}
               {customerMessage ? <p className="form-success" role="status" aria-live="polite"><CircleCheck size={15} /> {customerMessage}</p> : null}
-              {restoredActiveOrders.length ? <div className="sent-timeline compact"><div><b>{restoredActiveOrders.length} active {restoredActiveOrders.length === 1 ? "order" : "orders"}</b><small>Open an existing order before starting another.</small></div>{restoredActiveOrders.map((order) => <button className="text-action" key={order.orderId} onClick={() => openRestoredOrder(order)} disabled={ordering}>Open {order.reference} · {order.offerCount} {order.offerCount === 1 ? "confirmation" : "confirmations"}</button>)}</div> : null}
+              {restoredActiveOrders.length ? <div className="sent-timeline compact"><div><b>{restoredActiveOrders.length} active {restoredActiveOrders.length === 1 ? "request" : "requests"}</b><small>Open an existing request before starting another.</small></div>{restoredActiveOrders.map((order) => <button className="text-action" key={order.orderId} onClick={() => openRestoredOrder(order)} disabled={ordering}>Open {order.reference} · {order.offerCount} {order.offerCount === 1 ? "confirmation" : "confirmations"}</button>)}</div> : null}
               {checkoutError ? <p className="form-error" role="alert"><CircleAlert size={15} /> {checkoutError}</p> : null}
             </section> : null}
 
@@ -2031,7 +2099,7 @@ export default function Marketplace({
               <div className="order-step-heading"><h3 id="order-details-heading">How should pharmacies reach you?</h3></div>
               <div className="whatsapp-field"><label htmlFor="customer-whatsapp">WhatsApp number <small>required · remembered for your next visit</small></label><div><select value={whatsappCountry} disabled={requestLocked} onChange={(event) => { setWhatsappCountry(event.target.value as CountryCode); setWhatsappTouched(false); }} aria-label="WhatsApp country code">{whatsappCountries.map((item) => <option value={item.country} key={item.country}>{item.name} (+{item.callingCode})</option>)}</select><input id="customer-whatsapp" value={whatsapp} required disabled={requestLocked} onBlur={() => setWhatsappTouched(true)} onChange={(event) => { setWhatsapp(event.target.value.replace(/\D/g, "").slice(0, 15)); setWhatsappTouched(false); }} placeholder="78 000 000" inputMode="tel" autoComplete="tel-national" aria-invalid={whatsappTouched && !customerWhatsapp} aria-describedby={whatsappTouched && !customerWhatsapp ? "customer-whatsapp-error" : undefined} /></div></div>
               {whatsappTouched && !customerWhatsapp ? <p id="customer-whatsapp-error" className="form-error" role="alert"><CircleAlert size={15} /> Enter a valid WhatsApp number for the selected country.</p> : null}
-              <fieldset className="fulfilment-choice"><legend>How would you like your order?</legend><div role="radiogroup" aria-label="Fulfilment preference">
+              <fieldset className="fulfilment-choice"><legend>What fulfilment would you discuss if available?</legend><div role="radiogroup" aria-label="Fulfilment preference">
                 <button type="button" role="radio" aria-checked={deliveryPreference === "either"} className={deliveryPreference === "either" ? "selected" : ""} onClick={() => setDeliveryPreference("either")} disabled={requestLocked}><PackageCheck size={23} /><span>Pickup or delivery</span>{deliveryPreference === "either" ? <Check size={15} /> : null}</button>
                 <button type="button" role="radio" aria-checked={deliveryPreference === "pickup"} className={deliveryPreference === "pickup" ? "selected" : ""} onClick={() => setDeliveryPreference("pickup")} disabled={requestLocked}><ShoppingBag size={23} /><span>Pickup</span>{deliveryPreference === "pickup" ? <Check size={15} /> : null}</button>
                 <button type="button" role="radio" aria-checked={deliveryPreference === "delivery"} className={deliveryPreference === "delivery" ? "selected" : ""} onClick={() => setDeliveryPreference("delivery")} disabled={requestLocked}><MapPin size={23} /><span>Delivery</span>{deliveryPreference === "delivery" ? <Check size={15} /> : null}</button>
@@ -2047,31 +2115,37 @@ export default function Marketplace({
             </section> : null}
 
             {!orderSent && checkoutStep === 3 ? <section className="order-step-panel order-confirm-panel" aria-labelledby="order-confirm-heading">
-              <div className="order-step-heading"><h3 id="order-confirm-heading">Review and place your order</h3></div>
+              <div className="order-step-heading"><h3 id="order-confirm-heading">Review and send your availability request</h3></div>
               <div className="order-confirm-summary"><div><span>Products</span><b>{basketCount} {basketCount === 1 ? "item" : "items"}</b></div><div><span>WhatsApp</span><b>{customerWhatsapp ? `+${customerWhatsapp}` : "Not provided"}</b></div><div><span>Fulfilment</span><b>{deliveryPreference === "either" ? "Pickup or delivery" : deliveryPreference === "pickup" ? "Pickup" : "Delivery"}</b></div><div><span>Location</span><b>{coordinates ? "Location ready" : "Location needed"}</b></div></div>
-              <div className="order-confirm-products">{cart.slice(0, 3).map((item) => <div key={item.id}><ProductVisual product={item} small /><span><b>{item.brand}</b><small>{[item.strength, `Qty ${item.quantity}`].filter(Boolean).join(" · ")}</small></span></div>)}{cart.length > 3 ? <p>+ {cart.length - 3} more {cart.length - 3 === 1 ? "product" : "products"}</p> : null}</div>
-              {basketMin > 0 ? <div className="estimate"><span>Current contributed range</span><b>RWF {rwf.format(basketMin)}–{rwf.format(basketMax)}</b><small>Based on current pharmacy contributions</small></div> : null}
-              {!previewMode && customerSessionAvailable !== true ? turnstileSiteKey ? <><Turnstile key={captchaVersion} siteKey={turnstileSiteKey} onToken={(token) => { setCaptchaToken(token); if (token) setCaptchaError(""); }} onError={setCaptchaError} />{captchaError ? <p className="form-error" role="alert"><CircleAlert size={15} /> {captchaError}</p> : null}</> : <p className="privacy-note"><ShieldCheck size={14} /> A private guest session and backend order limits protect this request.</p> : null}
+              <div className="order-confirm-products">{cart.slice(0, 3).map((item) => {
+                const hasImage = Boolean(item.imageUrl ?? item.imageUrls?.[0]);
+                return <div className={hasImage ? "" : "without-image"} key={item.id}>
+                  {hasImage ? <ProductVisual product={item} small /> : null}
+                  <span><b>{item.brand}</b><small>{[item.strength, `Qty ${item.quantity}`].filter(Boolean).join(" · ")}</small></span>
+                </div>;
+              })}{cart.length > 3 ? <p>+ {cart.length - 3} more {cart.length - 3 === 1 ? "product" : "products"}</p> : null}</div>
+              {basketIndicativeFrom > 0 ? <div className="estimate"><span>Central indicative total</span><b>From RWF {rwf.format(basketIndicativeFrom)}</b><small>Information only. The pharmacy confirms its final price on WhatsApp.</small></div> : null}
+              {!previewMode && customerSessionAvailable !== true ? turnstileSiteKey ? <><Turnstile key={captchaVersion} siteKey={turnstileSiteKey} onToken={(token) => { setCaptchaToken(token); if (token) setCaptchaError(""); }} onError={setCaptchaError} />{captchaError ? <p className="form-error" role="alert"><CircleAlert size={15} /> {captchaError}</p> : null}</> : <p className="privacy-note"><ShieldCheck size={14} /> A private guest session and backend request limits protect this request.</p> : null}
               {checkoutError ? <p className="form-error" role="alert"><CircleAlert size={15} /> {checkoutError}</p> : null}
-              {pendingOrderAttempt?.rpcAttempted ? <p className="privacy-note"><ShieldCheck size={14} /> This attempt may already be saved. Retry with the same secure order ID to recover it safely.</p> : null}
-              {cart.length || requestLocked ? <button className="text-action" onClick={resetRequest} disabled={ordering}>{requestLocked ? "Reset order" : "Clear order"}</button> : null}
+              {pendingOrderAttempt?.rpcAttempted ? <p className="privacy-note"><ShieldCheck size={14} /> This attempt may already be saved. Retry with the same secure request ID to recover it safely.</p> : null}
+              {cart.length || requestLocked ? <button className="text-action" onClick={resetRequest} disabled={ordering}>{requestLocked ? "Reset request" : "Clear request"}</button> : null}
             </section> : null}
 
-            {orderSent ? <div className="sent-state"><span><Check size={35} /></span><h2>Order sent to verified pharmacies</h2><p>{activeOrderNoRecipients ? "No pharmacy could receive this order. You can close it and try again later." : "MED+250 is waiting for pharmacies that can fulfil your complete order."}</p><div className="sent-timeline"><div><b>Order placed</b><small>{activeOrderId}</small></div><div><b>{activeOrderNoRecipients ? "No pharmacy response possible" : activeOrderExpired ? "Response window ended" : "Waiting for confirmations"}</b><small>{activeOrderNoRecipients ? "Nothing was shared with a pharmacy." : activeOrderExpired ? "No pharmacy confirmed before this order expired." : "You will only see pharmacies that respond to this order."}</small></div></div><button className="primary-wide" onClick={() => { setCartOpen(false); setOffersOpen(true); }}>View order status <ArrowRight size={18} /></button><button className="text-action" onClick={() => closeAndResetOrder("cancelled")} disabled={closingOrder}>{closingOrder ? "Cancelling order…" : "Cancel order"}</button></div> : null}
-            {orderSent && restoredActiveOrders.some((order) => order.orderId !== activeOrderId) ? <div className="sent-timeline"><div><b>Other active orders</b><small>Review or close each order before placing another.</small></div>{restoredActiveOrders.filter((order) => order.orderId !== activeOrderId).map((order) => <button className="text-action" key={order.orderId} onClick={() => openRestoredOrder(order)} disabled={ordering}>Open {order.reference} · {order.offerCount} {order.offerCount === 1 ? "confirmation" : "confirmations"}</button>)}</div> : null}
+            {orderSent ? <div className="sent-state"><span><Check size={35} /></span><h2>Availability request sent</h2><p>{activeOrderNoRecipients ? "No pharmacy could receive this request. You can close it and try again later." : "MED+250 is waiting for pharmacies to confirm that they have every requested product."}</p><div className="sent-timeline"><div><b>Request sent</b><small>{activeOrderId}</small></div><div><b>{activeOrderNoRecipients ? "No pharmacy response possible" : activeOrderExpired ? "Response window ended" : "Waiting for availability confirmations"}</b><small>{activeOrderNoRecipients ? "Nothing was shared with a pharmacy." : activeOrderExpired ? "No pharmacy confirmed before this request expired." : "Only pharmacies that confirm availability will appear. Final price is discussed on WhatsApp."}</small></div></div><button className="primary-wide" onClick={() => { setCartOpen(false); setOffersOpen(true); }}>View request status <ArrowRight size={18} /></button><button className="text-action" onClick={() => closeAndResetOrder("cancelled")} disabled={closingOrder}>{closingOrder ? "Closing request…" : "Cancel request"}</button></div> : null}
+            {orderSent && restoredActiveOrders.some((order) => order.orderId !== activeOrderId) ? <div className="sent-timeline"><div><b>Other active requests</b><small>Review or close each request before starting another.</small></div>{restoredActiveOrders.filter((order) => order.orderId !== activeOrderId).map((order) => <button className="text-action" key={order.orderId} onClick={() => openRestoredOrder(order)} disabled={ordering}>Open {order.reference} · {order.offerCount} {order.offerCount === 1 ? "confirmation" : "confirmations"}</button>)}</div> : null}
           </div>
           {!orderSent ? <footer className="order-wizard-actions">
             {checkoutStep === 1 ? <><button type="button" className="order-secondary-action" onClick={() => setCartOpen(false)}>Continue shopping</button><button type="button" className="order-primary-action" onClick={continueToOrderDetails} disabled={!cart.length}>Continue to details <ArrowRight size={18} /></button></> : null}
-            {checkoutStep === 2 ? <><button type="button" className="order-secondary-action" onClick={() => setCheckoutStep(1)}><ChevronLeft size={18} /> Back</button><button type="button" className="order-primary-action" onClick={continueToOrderConfirmation}>Review order <ArrowRight size={18} /></button></> : null}
-            {checkoutStep === 3 ? <><button type="button" className="order-secondary-action" onClick={() => setCheckoutStep(2)}><ChevronLeft size={18} /> Back</button><button type="button" className="order-primary-action" aria-busy={ordering} disabled={!cart.length || ordering || Boolean(prescriptionError) || (!previewMode && Boolean(turnstileSiteKey) && customerSessionAvailable !== true && !captchaToken)} onClick={submitOrder}>{ordering ? <LoaderCircle className="button-spinner" size={18} aria-hidden="true" /> : null}{ordering ? "Placing order…" : previewMode ? "Ordering unavailable" : turnstileSiteKey && customerSessionAvailable === null ? "Checking secure session…" : requestLocked ? "Retry secure order" : "Place order"}{!ordering ? <ArrowRight size={18} /> : null}</button></> : null}
+            {checkoutStep === 2 ? <><button type="button" className="order-secondary-action" onClick={() => setCheckoutStep(1)}><ChevronLeft size={18} /> Back</button><button type="button" className="order-primary-action" onClick={continueToOrderConfirmation}>Review request <ArrowRight size={18} /></button></> : null}
+            {checkoutStep === 3 ? <><button type="button" className="order-secondary-action" onClick={() => setCheckoutStep(2)}><ChevronLeft size={18} /> Back</button><button type="button" className="order-primary-action" aria-busy={ordering} disabled={!cart.length || ordering || Boolean(prescriptionError) || (!previewMode && Boolean(turnstileSiteKey) && customerSessionAvailable !== true && !captchaToken)} onClick={submitOrder}>{ordering ? <LoaderCircle className="button-spinner" size={18} aria-hidden="true" /> : null}{ordering ? "Sending request…" : previewMode ? "Requests unavailable" : turnstileSiteKey && customerSessionAvailable === null ? "Checking secure session…" : requestLocked ? "Retry secure request" : "Send availability request"}{!ordering ? <ArrowRight size={18} /> : null}</button></> : null}
           </footer> : null}
         </aside>
       </div> : null}
 
-      {offersOpen ? <section className={`offers-panel${!activeOrderId ? " is-empty" : ""}`} role="dialog" aria-modal="true" aria-labelledby="order-status-title" data-modal-root="order-status" tabIndex={-1}><div className="offers-head"><div><span>{activeOrderId ? `ORDER STATUS · ${activeOrderId.slice(0, 8).toUpperCase()}` : "MY ORDERS"}</span><h2 id="order-status-title">{!activeOrderId ? "No active orders" : activeOrderSelected ? "Your pharmacy" : activeOrderNoRecipients ? "No response available" : activeOrderExpired ? "Order expired" : "Pharmacies that confirmed your order"}</h2><p aria-live="polite">{!activeOrderId ? "Pharmacies that confirm a placed order will appear here." : offers.length ? `${offers.length} ${offers.length === 1 ? "pharmacy has" : "pharmacies have"} confirmed the complete order.` : activeOrderNoRecipients ? "No pharmacy received this order. Nothing was shared and you can close it safely." : activeOrderExpired ? "The response window ended before a pharmacy confirmed the complete order." : `Waiting for a pharmacy to confirm the complete order.${activeOrderMinutesRemaining != null ? ` About ${activeOrderMinutesRemaining} minutes remain.` : ""} This page updates automatically.`}</p></div><button type="button" data-autofocus onClick={() => setOffersOpen(false)} aria-label="Close order status"><X size={20} /></button></div>
+      {offersOpen ? <section className={`offers-panel${!activeOrderId ? " is-empty" : ""}`} role="dialog" aria-modal="true" aria-labelledby="order-status-title" data-modal-root="order-status" tabIndex={-1}><div className="offers-head"><div><span>{activeOrderId ? `REQUEST STATUS · ${activeOrderId.slice(0, 8).toUpperCase()}` : "MY REQUESTS"}</span><h2 id="order-status-title">{!activeOrderId ? "No active requests" : activeOrderSelected ? "Your pharmacy contact" : activeOrderNoRecipients ? "No response available" : activeOrderExpired ? "Request expired" : "Pharmacies that confirmed availability"}</h2><p aria-live="polite">{!activeOrderId ? "Pharmacies that confirm availability for a request will appear here." : offers.length ? `${offers.length} ${offers.length === 1 ? "pharmacy has" : "pharmacies have"} confirmed availability for all requested products.` : activeOrderNoRecipients ? "No pharmacy received this request. Nothing was shared and you can close it safely." : activeOrderExpired ? "The response window ended before a pharmacy confirmed availability." : `Waiting for a pharmacy to confirm availability.${activeOrderMinutesRemaining != null ? ` About ${activeOrderMinutesRemaining} minutes remain.` : ""} This page updates automatically.`}</p></div><button type="button" data-autofocus onClick={() => setOffersOpen(false)} aria-label="Close request status"><X size={20} /></button></div>
         {checkoutError ? <p className="form-error" role="alert"><CircleAlert size={15} /> {checkoutError}</p> : null}
-        {!activeOrderId ? <div className="offers-empty"><PackageCheck size={29} /><b>No active orders</b><p>Add products to your basket and place an order. Only pharmacies that confirm the complete order will appear here.</p><button type="button" className="primary-wide" onClick={() => { setOffersOpen(false); setCheckoutStep(1); setCartOpen(true); }}>Open order basket</button></div> : !offers.length ? <div className={`offers-empty ${activeOrderExpired || activeOrderNoRecipients ? "terminal" : ""}`}>{activeOrderExpired || activeOrderNoRecipients ? <CircleAlert size={29} /> : <Clock3 size={29} />}<b>{activeOrderNoRecipients ? "No pharmacy could receive this order" : activeOrderExpired ? "No pharmacy confirmed in time" : "Waiting for pharmacy confirmations"}</b><p>{activeOrderNoRecipients ? "Close this order and try again later. Your basket can be rebuilt from the catalogue." : activeOrderExpired ? "Close this expired order to start another one." : "Only pharmacies that can fulfil the complete order will appear here."}</p>{activeOrderExpired || activeOrderNoRecipients ? <button type="button" className="primary-wide" onClick={() => closeAndResetOrder("cancelled")} disabled={closingOrder}>{closingOrder ? "Closing order…" : "Close order"}</button> : null}</div> : <div className="quotes">{offers.map((offer) => <article key={offer.id}><div className="quote-brand"><span><Cross size={18} /></span><div><h3>{offer.pharmacyName}</h3><p>{offer.distanceM >= 0 ? `Approx. ${(offer.distanceM / 1_000).toFixed(1)} km away` : "National service area · confirm fulfilment"}</p></div></div><div className="availability complete"><Check size={15} />Complete order confirmed</div><div className="availability fulfilment"><PackageCheck size={15} />{offer.fulfilmentMethod === "pickup" ? "Pickup confirmed" : offer.fulfilmentMethod === "delivery" ? "Delivery confirmed" : "Pickup or delivery confirmed"}</div><div className="offer-items">{offer.items.map((item) => <div key={item.id}><b>{item.isSubstitute ? "Substitute proposed" : "Ordered product"}</b>{[item.product?.brand || item.offeredProductId, item.product?.strength, item.product?.packSize ? `Pack ${item.product.packSize}` : "", item.quantity ? `Qty ${item.quantity}` : "", item.unitPriceRwf ? `RWF ${rwf.format(item.unitPriceRwf)} each` : ""].filter(Boolean).length ? <small>{[item.product?.brand || item.offeredProductId, item.product?.strength, item.product?.packSize ? `Pack ${item.product.packSize}` : "", item.quantity ? `Qty ${item.quantity}` : "", item.unitPriceRwf ? `RWF ${rwf.format(item.unitPriceRwf)} each` : ""].filter(Boolean).join(" · ")}</small> : null}</div>)}</div><div className="quote-price"><span>Total</span><b>RWF {rwf.format(offer.totalRwf)}</b>{offer.readyInMinutes ? <small>Ready in about {offer.readyInMinutes} minutes</small> : null}</div><div className="quote-actions"><button type="button" onClick={() => chooseOffer(offer)} disabled={selectionLocked} aria-busy={selectingOfferId === offer.id}>{selectingOfferId === offer.id ? <LoaderCircle className="button-spinner" size={15} aria-hidden="true" /> : null}{offer.status === "selected" ? "Chosen" : selectionLocked ? "Choice closed" : selectingOfferId === offer.id ? "Selecting…" : "Choose pharmacy"}</button><span className="contact-locked"><ShieldCheck size={15} /> {selectionLocked ? "Pharmacy chosen" : "WhatsApp and MoMo unlock after choice"}</span></div></article>)}</div>}
-        {activeOrderSelected ? <div className="selected-contact">{selectedContact ? <><div><CircleCheck size={23} /><span><b>{selectedContact.pharmacyName} chosen</b><small>Use WhatsApp to arrange pickup or delivery. Use the phone&apos;s MoMo menu if you want to pay the pharmacy directly.</small></span></div><div>{selectedContact.momoCode ? <span className="momo-code"><Banknote size={16} /> MoMo code: <b>{selectedContact.momoCode}</b></span> : null}{whatsappUrl(selectedContact.whatsapp, `Hello, I chose ${selectedContact.pharmacyName} for my MED+250 order ${activeOrderId}. Please arrange pickup or delivery.`) ? <a onClick={() => trackMarketplaceEvent("whatsapp_handoff", { configured: true })} href={whatsappUrl(selectedContact.whatsapp, `Hello, I chose ${selectedContact.pharmacyName} for my MED+250 order ${activeOrderId}. Please arrange pickup or delivery.`) ?? undefined} target="_blank" rel="noreferrer"><MessageCircle size={16} /> Chat on WhatsApp</a> : null}{momoUssdUrl(selectedContact.momoCode) ? <a onClick={() => trackMarketplaceEvent("momo_handoff", { configured: true })} href={momoUssdUrl(selectedContact.momoCode) ?? undefined}><Banknote size={16} /> Pay with MoMo (*182#)</a> : null}</div></> : <div><CircleAlert size={23} /><span><b>Pharmacy contact unavailable</b><small>You can cancel this order and place it again.</small></span></div>}<div className="quote-actions"><button onClick={() => closeAndResetOrder("completed")} disabled={closingOrder}>{closingOrder ? "Updating order…" : "Finish order"}</button><button onClick={() => closeAndResetOrder("cancelled")} disabled={closingOrder}>Cancel order</button></div></div> : null}
+        {!activeOrderId ? <div className="offers-empty"><PackageCheck size={29} /><b>No active requests</b><p>Add products and send one availability request. Only pharmacies that confirm every requested product will appear here.</p><button type="button" className="primary-wide" onClick={() => { setOffersOpen(false); setCheckoutStep(1); setCartOpen(true); }}>Open request basket</button></div> : !offers.length ? <div className={`offers-empty ${activeOrderExpired || activeOrderNoRecipients ? "terminal" : ""}`}>{activeOrderExpired || activeOrderNoRecipients ? <CircleAlert size={29} /> : <Clock3 size={29} />}<b>{activeOrderNoRecipients ? "No pharmacy could receive this request" : activeOrderExpired ? "No pharmacy confirmed in time" : "Waiting for availability confirmations"}</b><p>{activeOrderNoRecipients ? "Close this request and try again later. Your basket can be rebuilt from the catalogue." : activeOrderExpired ? "Close this expired request to start another one." : "Only pharmacies that confirm every requested product will appear here. MED+250 publishes no pharmacy stock."}</p>{activeOrderExpired || activeOrderNoRecipients ? <button type="button" className="primary-wide" onClick={() => closeAndResetOrder("cancelled")} disabled={closingOrder}>{closingOrder ? "Closing request…" : "Close request"}</button> : null}</div> : <div className="quotes">{offers.map((offer) => <article key={offer.id}><div className="quote-brand"><span><Cross size={18} /></span><div><h3>{offer.pharmacyName}</h3><p>{offer.distanceM >= 0 ? `Approx. ${(offer.distanceM / 1_000).toFixed(1)} km away` : "National service area · confirm arrangements"}</p></div></div><div className="availability complete"><Check size={15} />All requested products confirmed</div><div className="availability fulfilment"><PackageCheck size={15} />{offer.fulfilmentMethod === "pickup" ? "Pickup possible" : offer.fulfilmentMethod === "delivery" ? "Delivery possible" : "Pickup or delivery possible"}</div><div className="offer-items">{offer.items.map((item) => { const itemDetails = [item.product?.brand || item.offeredProductId, item.product?.strength, item.product?.packSize ? `Pack ${item.product.packSize}` : "", item.quantity ? `Qty ${item.quantity}` : "", item.unitPriceRwf ? `Optional estimate RWF ${rwf.format(item.unitPriceRwf)} each` : ""].filter(Boolean); return <div key={item.id}><b>{item.isSubstitute ? "Substitute proposed" : "Requested product"}</b>{itemDetails.length ? <small>{itemDetails.join(" · ")}</small> : null}</div>; })}</div>{offer.totalRwf > 0 ? <div className="quote-price"><span>Optional pharmacy estimate</span><b>RWF {rwf.format(offer.totalRwf)}</b><small>{offer.readyInMinutes ? `Ready in about ${offer.readyInMinutes} minutes · ` : ""}Any price shown here is not final.</small></div> : offer.readyInMinutes ? <div className="quote-price"><small>Ready in about {offer.readyInMinutes} minutes</small></div> : null}<div className="quote-actions"><button type="button" onClick={() => chooseOffer(offer)} disabled={selectionLocked} aria-busy={selectingOfferId === offer.id}>{selectingOfferId === offer.id ? <LoaderCircle className="button-spinner" size={15} aria-hidden="true" /> : null}{offer.status === "selected" ? "Chosen" : selectionLocked ? "Choice closed" : selectingOfferId === offer.id ? "Selecting…" : "Continue with pharmacy"}</button><span className="contact-locked"><ShieldCheck size={15} /> {selectionLocked ? "Pharmacy chosen" : "WhatsApp contact unlocks after choice"}</span></div></article>)}</div>}
+        {activeOrderSelected ? <div className="selected-contact">{selectedContact ? <><div><CircleCheck size={23} /><span><b>{selectedContact.pharmacyName} confirmed availability</b><small>Continue on WhatsApp to reconfirm the exact product, final price, pickup or delivery, and whether you want to proceed.</small></span></div><div>{whatsappUrl(selectedContact.whatsapp, `Hello, ${selectedContact.pharmacyName} confirmed availability for my MED+250 request ${activeOrderId}. Please reconfirm the products, final price, and pickup or delivery details.`) ? <a onClick={() => trackMarketplaceEvent("whatsapp_handoff", { configured: true })} href={whatsappUrl(selectedContact.whatsapp, `Hello, ${selectedContact.pharmacyName} confirmed availability for my MED+250 request ${activeOrderId}. Please reconfirm the products, final price, and pickup or delivery details.`) ?? undefined} target="_blank" rel="noreferrer"><MessageCircle size={16} /> Continue on WhatsApp</a> : null}</div></> : <div><CircleAlert size={23} /><span><b>Pharmacy contact unavailable</b><small>You can close this request and try again.</small></span></div>}<div className="quote-actions"><button onClick={() => closeAndResetOrder("completed")} disabled={closingOrder}>{closingOrder ? "Updating request…" : "Finish request"}</button><button onClick={() => closeAndResetOrder("cancelled")} disabled={closingOrder}>Cancel request</button></div></div> : null}
       </section> : null}
 
       {portalOpen ? <div className="portal-overlay" role="presentation">
@@ -2080,17 +2154,16 @@ export default function Marketplace({
           {portalLoading ? <div className="inline-loading" role="status"><LoaderCircle className="button-spinner" size={17} /> Securely checking your pharmacy access…</div> : null}{portalMessage ? <p className="form-success" role="status" aria-live="polite"><CircleCheck size={15} /> {portalMessage}</p> : null}{portalError ? <p className="form-error" role="alert"><CircleAlert size={15} /> {portalError}</p> : null}
           {unregisteredPharmacyWhatsapp ? <div className="portal-exception-backdrop" role="presentation"><div className="portal-exception" role="alertdialog" aria-modal="true" aria-labelledby="unregistered-whatsapp-title" data-modal-root="unregistered-pharmacy" tabIndex={-1}><button data-autofocus onClick={() => setUnregisteredPharmacyWhatsapp("")} aria-label="Close"><X size={18} /></button><span><CircleAlert size={22} /></span><h3 id="unregistered-whatsapp-title">WhatsApp number not registered</h3><p>This number is not linked to a pharmacy in MED+250. Contact the administrator to register the pharmacy or ask for a contact correction.</p><a className="primary-wide" href={`https://wa.me/${unregisteredPharmacyWhatsapp}?text=${encodeURIComponent(`Hello MED+250 admin, please help register or correct pharmacy WhatsApp number +250${pharmacyWhatsapp}.`)}`} target="_blank" rel="noreferrer"><MessageCircle size={17} /> Contact admin on WhatsApp</a><button className="text-action" onClick={() => setUnregisteredPharmacyWhatsapp("")}>Try another number</button></div></div> : null}
         </section> : <section className="portal-shell" role="dialog" aria-modal="true" aria-labelledby="pharmacy-workspace-title" aria-busy={portalLoading} data-modal-root="portal-workspace" tabIndex={-1}>
-          <aside className="portal-sidebar"><Link className="brand" href="/"><BrandLogo /></Link><small>PHARMACY DESK</small><nav><button className={portalTab === "requests" ? "active" : ""} onClick={() => setPortalTab("requests")}><Bell size={18} /> Assigned orders {pharmacyRequests.length ? <b>{pharmacyRequests.length}</b> : null}</button><button className={portalTab === "prices" ? "active" : ""} onClick={() => setPortalTab("prices")}><Banknote size={18} /> Product prices</button><button className={portalTab === "profile" ? "active" : ""} onClick={() => setPortalTab("profile")}><HeartPulse size={18} /> Pharmacy profile</button></nav><div className="portal-user"><span>{activeMembership?.pharmacyName.slice(0, 2).toUpperCase()}</span><div><b>{activeMembership?.pharmacyName}</b><small>{activeMembership?.role}</small></div></div><button className="text-action" onClick={leavePharmacyPortal} disabled={portalLoading}>Sign out of pharmacy portal</button></aside>
-          <div className="portal-main"><div className="portal-top"><div><span>PHARMACY PORTAL</span><h2 id="pharmacy-workspace-title">{portalTab === "requests" ? "Assigned orders" : portalTab === "prices" ? "Contribute current prices" : "Pharmacy profile"}</h2><p>Only orders privately assigned to this pharmacy are shown.</p></div><button data-autofocus onClick={() => setPortalOpen(false)} aria-label="Close pharmacy portal"><X size={20} /></button></div>
+          <aside className="portal-sidebar"><Link className="brand" href="/"><BrandLogo /></Link><small>PHARMACY DESK</small><nav><button className={portalTab === "requests" ? "active" : ""} onClick={() => setPortalTab("requests")}><Bell size={18} /> Availability requests {pharmacyRequests.length ? <b>{pharmacyRequests.length}</b> : null}</button><button className={portalTab === "profile" ? "active" : ""} onClick={() => setPortalTab("profile")}><HeartPulse size={18} /> Pharmacy profile</button></nav><div className="portal-user"><span>{activeMembership?.pharmacyName.slice(0, 2).toUpperCase()}</span><div><b>{activeMembership?.pharmacyName}</b><small>{activeMembership?.role}</small></div></div><button className="text-action" onClick={leavePharmacyPortal} disabled={portalLoading}>Sign out of pharmacy portal</button></aside>
+          <div className="portal-main"><div className="portal-top"><div><span>PHARMACY PORTAL</span><h2 id="pharmacy-workspace-title">{portalTab === "requests" ? "Availability requests" : "Pharmacy profile"}</h2><p>Only private customer requests assigned to this pharmacy are shown. No pharmacy-specific stock or price list is published.</p></div><button data-autofocus onClick={() => setPortalOpen(false)} aria-label="Close pharmacy portal"><X size={20} /></button></div>
             {portalMessage ? <p className="form-success"><CircleCheck size={15} /> {portalMessage}</p> : null}{portalError ? <p className="form-error"><CircleAlert size={15} /> {portalError}</p> : null}
             {portalTab === "requests" ? <>
-              <div className="portal-metrics"><div><span><Bell size={18} /></span><p>OPEN ORDERS</p><b>{pharmacyRequests.length}</b><small>recipient-authorized only</small></div><div><span><Clock3 size={18} /></span><p>LOCATION VIEW</p><b>Approximate</b><small>coarse distance only</small></div><div><span><ShieldCheck size={18} /></span><p>CUSTOMER CHOICES</p><b>{pharmacySelectedOrders.length}</b><small>contact released after choice</small></div></div>
-              <div className="request-table-head"><div><h3>Open orders</h3><span>Real database results · live updates</span></div><button type="button" onClick={refreshPharmacyRequests} disabled={portalLoading} aria-busy={portalLoading}>{portalLoading ? <LoaderCircle className="button-spinner" size={15} aria-hidden="true" /> : <LocateFixed size={15} />} {portalLoading ? "Refreshing…" : "Refresh"}</button></div>
-              {pharmacyRequests.length ? <div className="request-list">{pharmacyRequests.map((request) => <article key={request.orderId}><div className="request-id"><span className="new">OPEN</span><b>{request.orderId.slice(0, 8).toUpperCase()}</b>{formatDate(request.createdAt) ? <small>{formatDate(request.createdAt)}</small> : null}</div><div><b>{request.distanceM >= 0 ? `Approx. ${(request.distanceM / 1_000).toFixed(1)} km away` : "National service request"}</b><small><MapPin size={12} /> Exact customer location remains private</small></div><div><b>{request.items.length} {request.items.length === 1 ? "product" : "products"}</b>{request.hasPrescription ? <small>Prescription unlocks only if the customer chooses you</small> : null}</div><div><b>{request.deliveryPreference}</b><small>Confirm only when you can serve this customer</small></div><button onClick={() => beginOffer(request)}>Review order <ArrowRight size={15} /></button></article>)}</div> : <div className="portal-empty"><PackageCheck size={29} /><b>No open order is assigned</b><p>New customer orders assigned to this pharmacy will appear here.</p></div>}
+              <div className="portal-metrics"><div><span><Bell size={18} /></span><p>OPEN REQUESTS</p><b>{pharmacyRequests.length}</b><small>recipient-authorized only</small></div><div><span><Clock3 size={18} /></span><p>LOCATION VIEW</p><b>Approximate</b><small>coarse distance only</small></div><div><span><ShieldCheck size={18} /></span><p>CUSTOMER CONNECTIONS</p><b>{pharmacySelectedOrders.length}</b><small>contact released after choice</small></div></div>
+              <div className="request-table-head"><div><h3>Open availability requests</h3><span>Private requests · live updates</span></div><button type="button" onClick={refreshPharmacyRequests} disabled={portalLoading} aria-busy={portalLoading}>{portalLoading ? <LoaderCircle className="button-spinner" size={15} aria-hidden="true" /> : <LocateFixed size={15} />} {portalLoading ? "Refreshing…" : "Refresh"}</button></div>
+              {pharmacyRequests.length ? <div className="request-list">{pharmacyRequests.map((request) => <article key={request.orderId}><div className="request-id"><span className="new">OPEN</span><b>{request.orderId.slice(0, 8).toUpperCase()}</b>{formatDate(request.createdAt) ? <small>{formatDate(request.createdAt)}</small> : null}</div><div><b>{request.distanceM >= 0 ? `Approx. ${(request.distanceM / 1_000).toFixed(1)} km away` : "National service request"}</b><small><MapPin size={12} /> Exact customer location remains private</small></div><div><b>{request.items.length} {request.items.length === 1 ? "product" : "products"}</b>{request.hasPrescription ? <small>Prescription unlocks only if the customer chooses you</small> : null}</div><div><b>{request.deliveryPreference}</b><small>Confirm availability; price is optional and not final</small></div><button onClick={() => beginOffer(request)}>Review request <ArrowRight size={15} /></button></article>)}</div> : <div className="portal-empty"><PackageCheck size={29} /><b>No open request is assigned</b><p>New customer availability requests assigned to this pharmacy will appear here.</p></div>}
               <div className="request-table-head"><div><h3>Customers who chose this pharmacy</h3><span>Contact and prescription access follow the customer&apos;s choice</span></div></div>
-              {pharmacySelectedOrders.length ? <div className="request-list selected-order-list">{pharmacySelectedOrders.map((order) => <article key={order.orderId}><div className="request-id"><span className="new">SELECTED</span><b>{order.reference}</b>{formatDate(order.selectedAt) ? <small>{formatDate(order.selectedAt)}</small> : null}</div><div><b>{order.deliveryPreference}</b><small>Arrange pickup or delivery directly</small></div>{whatsappUrl(order.customerWhatsapp, `Hello, I’m contacting you from ${activeMembership?.pharmacyName ?? "the pharmacy"} about MED+250 order ${order.reference}. Please confirm fulfilment details.`) ? <div><a href={whatsappUrl(order.customerWhatsapp, `Hello, I’m contacting you from ${activeMembership?.pharmacyName ?? "the pharmacy"} about MED+250 order ${order.reference}. Please confirm fulfilment details.`) ?? undefined} target="_blank" rel="noreferrer"><MessageCircle size={14} /> Contact on WhatsApp</a><small>Medication details are not included in the message</small></div> : null}{order.prescriptionUrl ? <div><a href={order.prescriptionUrl} target="_blank" rel="noreferrer"><FileText size={14} /> Open private prescription</a><small>Signed link expires within 10 minutes and never beyond the 24-hour selection window</small></div> : null}</article>)}</div> : <div className="portal-empty"><ShieldCheck size={29} /><b>No customer has chosen this pharmacy yet</b><p>Contact details and prescriptions stay unavailable until an offer is selected.</p></div>}
+              {pharmacySelectedOrders.length ? <div className="request-list selected-order-list">{pharmacySelectedOrders.map((order) => <article key={order.orderId}><div className="request-id"><span className="new">SELECTED</span><b>{order.reference}</b>{formatDate(order.selectedAt) ? <small>{formatDate(order.selectedAt)}</small> : null}</div><div><b>{order.deliveryPreference}</b><small>Arrange pickup or delivery directly</small></div>{whatsappUrl(order.customerWhatsapp, `Hello, I’m contacting you from ${activeMembership?.pharmacyName ?? "the pharmacy"} about MED+250 request ${order.reference}. Please confirm availability, final price, and fulfilment details.`) ? <div><a href={whatsappUrl(order.customerWhatsapp, `Hello, I’m contacting you from ${activeMembership?.pharmacyName ?? "the pharmacy"} about MED+250 request ${order.reference}. Please confirm availability, final price, and fulfilment details.`) ?? undefined} target="_blank" rel="noreferrer"><MessageCircle size={14} /> Contact on WhatsApp</a><small>Medication details are not included in the message</small></div> : null}{order.prescriptionUrl ? <div><a href={order.prescriptionUrl} target="_blank" rel="noreferrer"><FileText size={14} /> Open private prescription</a><small>Signed link expires within 10 minutes and never beyond the 24-hour selection window</small></div> : null}</article>)}</div> : <div className="portal-empty"><ShieldCheck size={29} /><b>No customer has chosen this pharmacy yet</b><p>Contact details and prescriptions stay unavailable until a pharmacy confirmation is chosen.</p></div>}
             </> : null}
-            {portalTab === "prices" ? <section className="portal-form" aria-busy={portalLoading}><div className="price-policy"><Sparkles size={19} /><p>Current pharmacy price contributions update the customer-facing minimum and maximum range.</p></div><label>Find product<input value={priceSearch} onChange={(event) => setPriceSearch(event.target.value)} placeholder="Brand or generic name" /></label><label>Product<select value={priceProductId} onChange={(event) => setPriceProductId(event.target.value)}><option value="">Choose a product</option>{filteredPriceProducts.map((product) => <option value={product.id} key={product.id}>{product.brand} {product.strength}</option>)}</select></label><label>Selling price (RWF)<input value={priceValue} onChange={(event) => setPriceValue(event.target.value.replace(/\D/g, ""))} inputMode="numeric" placeholder="e.g. 2500" /></label><button type="button" className="primary-wide" onClick={addPriceContribution} disabled={portalLoading}>{portalLoading ? <LoaderCircle className="button-spinner" size={17} aria-hidden="true" /> : null}{portalLoading ? "Saving price…" : "Save price"} {!portalLoading ? <ArrowRight size={17} /> : null}</button></section> : null}
             {portalTab === "profile" ? <section className="portal-form profile-summary">
               <div><Store size={22} /><span><b>{activeMembership?.pharmacyName}</b><small>Marketplace pharmacy</small></span></div>
               <dl>{activeMembership?.role ? <div><dt>Your role</dt><dd>{activeMembership.role}</dd></div> : null}{activeMembership?.whatsapp ? <div><dt>Primary WhatsApp</dt><dd>+{activeMembership.whatsapp}</dd></div> : null}{activeMembership?.momoCode ? <div><dt>MoMo merchant code</dt><dd>{activeMembership.momoCode}</dd></div> : null}</dl>
@@ -2110,7 +2183,7 @@ export default function Marketplace({
             </section> : null}
           </div>
         </section>}
-        {selectedRequest ? <section className="offer-editor"><div className="offers-head"><div><span>CONFIRM COMPLETE ORDER</span><h2>Order {selectedRequest.orderId.slice(0, 8).toUpperCase()}</h2><p>Confirm every product and price. Use a substitute only where the customer allowed it.</p></div><button onClick={() => setSelectedRequest(null)} aria-label="Close order confirmation"><X size={20} /></button></div><div className="offer-items">{selectedRequest.items.map((item) => <article key={item.orderItemId}><div><b>{item.productName}</b><small>{[`Qty ${item.quantity}`, item.packSize ? `Pack ${item.packSize}` : "", item.substitutesAllowed ? "A matching substitute is allowed" : "Exact product only"].filter(Boolean).join(" · ")}</small></div><label><input type="checkbox" checked={offerAvailability[item.orderItemId] ?? false} onChange={(event) => setOfferAvailability((current) => ({ ...current, [item.orderItemId]: event.target.checked }))} /> Confirm</label>{item.substitutesAllowed ? <label><input type="checkbox" checked={offerSubstitutes[item.orderItemId] ?? false} onChange={(event) => { const checked = event.target.checked; setOfferSubstitutes((current) => ({ ...current, [item.orderItemId]: checked })); setOfferProductIds((current) => ({ ...current, [item.orderItemId]: checked ? "" : item.productId })); }} /> Use substitute</label> : null}{offerSubstitutes[item.orderItemId] ? <label>Substitute product<select value={offerProductIds[item.orderItemId] ?? ""} onChange={(event) => setOfferProductIds((current) => ({ ...current, [item.orderItemId]: event.target.value }))}><option value="">Choose a matching product</option>{orderableCatalogue.filter((product) => product.id !== item.productId && isCompatibleSubstitute(product, item)).map((product) => <option value={product.id} key={product.id}>{[product.brand, product.strength, product.generic, product.packSize ? `Pack ${product.packSize}` : ""].filter(Boolean).join(" · ")}</option>)}</select></label> : null}<label>Unit price<input value={offerPrices[item.orderItemId] ?? ""} onChange={(event) => setOfferPrices((current) => ({ ...current, [item.orderItemId]: event.target.value.replace(/\D/g, "") }))} inputMode="numeric" placeholder="RWF" disabled={!(offerAvailability[item.orderItemId] ?? false)} /></label></article>)}</div><div className="offer-meta"><label>Fulfilment method<select value={offerFulfilmentMethod} onChange={(event) => setOfferFulfilmentMethod(event.target.value as "pickup" | "delivery" | "either")} disabled={selectedRequest.deliveryPreference !== "either"}>{selectedRequest.deliveryPreference === "either" ? <><option value="pickup">Pickup</option><option value="delivery">Delivery</option><option value="either">Pickup or delivery</option></> : <option value={selectedRequest.deliveryPreference}>{selectedRequest.deliveryPreference === "pickup" ? "Pickup" : "Delivery"}</option>}</select></label><label>Ready in minutes<input value={offerReadyMinutes} onChange={(event) => setOfferReadyMinutes(event.target.value.replace(/\D/g, ""))} /></label><label>Note<textarea value={offerNote} onChange={(event) => setOfferNote(event.target.value)} placeholder="Optional fulfilment note" /></label></div><button className="primary-wide" onClick={sendOffer} disabled={portalLoading}>Confirm complete order <ArrowRight size={17} /></button></section> : null}
+        {selectedRequest ? <section className="offer-editor"><div className="offers-head"><div><span>CONFIRM PRODUCT AVAILABILITY</span><h2>Request {selectedRequest.orderId.slice(0, 8).toUpperCase()}</h2><p>Confirm every product. Adding a price is optional; any price entered is private, indicative, and must be reconfirmed on WhatsApp.</p></div><button onClick={() => setSelectedRequest(null)} aria-label="Close availability confirmation"><X size={20} /></button></div><div className="offer-items">{selectedRequest.items.map((item) => <article key={item.orderItemId}><div><b>{item.productName}</b><small>{[`Qty ${item.quantity}`, item.packSize ? `Pack ${item.packSize}` : "", item.substitutesAllowed ? "A matching substitute is allowed" : "Exact product only"].filter(Boolean).join(" · ")}</small></div><label><input type="checkbox" checked={offerAvailability[item.orderItemId] ?? false} onChange={(event) => setOfferAvailability((current) => ({ ...current, [item.orderItemId]: event.target.checked }))} /> Available</label>{item.substitutesAllowed ? <label><input type="checkbox" checked={offerSubstitutes[item.orderItemId] ?? false} onChange={(event) => { const checked = event.target.checked; setOfferSubstitutes((current) => ({ ...current, [item.orderItemId]: checked })); setOfferProductIds((current) => ({ ...current, [item.orderItemId]: checked ? "" : item.productId })); }} /> Use substitute</label> : null}{offerSubstitutes[item.orderItemId] ? <label>Substitute product<select value={offerProductIds[item.orderItemId] ?? ""} onChange={(event) => setOfferProductIds((current) => ({ ...current, [item.orderItemId]: event.target.value }))}><option value="">Choose a matching product</option>{orderableCatalogue.filter((product) => product.id !== item.productId && isCompatibleSubstitute(product, item)).map((product) => <option value={product.id} key={product.id}>{[product.brand, product.strength, product.generic, product.packSize ? `Pack ${product.packSize}` : ""].filter(Boolean).join(" · ")}</option>)}</select></label> : null}<label>Optional price estimate<input value={offerPrices[item.orderItemId] ?? ""} onChange={(event) => setOfferPrices((current) => ({ ...current, [item.orderItemId]: event.target.value.replace(/\D/g, "") }))} inputMode="numeric" placeholder="RWF (optional)" disabled={!(offerAvailability[item.orderItemId] ?? false)} /></label></article>)}</div><div className="offer-meta"><label>Possible fulfilment<select value={offerFulfilmentMethod} onChange={(event) => setOfferFulfilmentMethod(event.target.value as "pickup" | "delivery" | "either")} disabled={selectedRequest.deliveryPreference !== "either"}>{selectedRequest.deliveryPreference === "either" ? <><option value="pickup">Pickup</option><option value="delivery">Delivery</option><option value="either">Pickup or delivery</option></> : <option value={selectedRequest.deliveryPreference}>{selectedRequest.deliveryPreference === "pickup" ? "Pickup" : "Delivery"}</option>}</select></label><label>Approximate ready time<input value={offerReadyMinutes} onChange={(event) => setOfferReadyMinutes(event.target.value.replace(/\D/g, ""))} /></label><label>Note<textarea value={offerNote} onChange={(event) => setOfferNote(event.target.value)} placeholder="Optional note for WhatsApp follow-up" /></label></div><button className="primary-wide" onClick={sendOffer} disabled={portalLoading}>Send availability confirmation <ArrowRight size={17} /></button></section> : null}
       </div> : null}
       {feedbackToast ? <div className={`feedback-toast ${feedbackToast.tone === "info" ? "is-info" : ""}`} role="status" aria-live="polite" aria-atomic="true"><CircleCheck size={20} /><span>{feedbackToast.message}</span><button type="button" onClick={() => setFeedbackToast(null)} aria-label="Dismiss notification"><X size={17} /></button></div> : null}
     </main>

@@ -9,7 +9,15 @@
       "required_evidence_types": ["operations_snapshot", "review_ledger"],
       "status": "pending",
       "acceptance": "The approved operating pharmacy set has authoritative premises coordinates with reviewer identity and durable source evidence, and strict operational health reports dispatch-ready coverage.",
-      "evidence": [],
+      "evidence": [
+        {
+          "type": "operations_snapshot",
+          "reference": "docs/launch/evidence/gps-operational-health-2026-07-16.json",
+          "sha256": "dfe1d210dc8d8674e4c1ebc56de82ff63ddfca2c7809565121e0f6d3ff823c2e",
+          "recorded_at": "2026-07-16T10:09:12Z",
+          "summary": "Privacy-safe production health snapshot confirming governed GPS and dispatch-ready coverage with no strict health findings."
+        }
+      ],
       "approved_by": null,
       "approved_role": null,
       "approved_at": null
@@ -20,7 +28,15 @@
       "required_evidence_types": ["operations_snapshot", "review_ledger"],
       "status": "pending",
       "acceptance": "The approved operating pharmacy set has current, pharmacy-authorised login-enabled WhatsApp contacts and the strict operational-health check passes.",
-      "evidence": [],
+      "evidence": [
+        {
+          "type": "operations_snapshot",
+          "reference": "docs/launch/evidence/whatsapp-operational-health-2026-07-16.json",
+          "sha256": "5583ba89955037177c373f7874736bcc7529ba13fa2552929a3fdafc4134099a",
+          "recorded_at": "2026-07-16T10:09:12Z",
+          "summary": "Privacy-safe production health snapshot confirming governed WhatsApp login coverage and no recent delivery failures."
+        }
+      ],
       "approved_by": null,
       "approved_role": null,
       "approved_at": null
@@ -85,8 +101,23 @@
       "owner": "MED+250 backend owner",
       "required_evidence_types": ["deployment_receipt", "test_record"],
       "status": "pending",
-      "acceptance": "The forward security migration and contract refresh are deployed using rotated credentials, and the privileged backend verifier returns contract 2026-07-14.1 with all invariants passing.",
-      "evidence": [],
+      "acceptance": "The forward security migrations and contract refresh are deployed using rotated credentials, and the privileged backend verifier returns contract 2026-07-16.7 with all invariants passing.",
+      "evidence": [
+        {
+          "type": "deployment_receipt",
+          "reference": "docs/launch/evidence/security-hardening-deployment-2026-07-16.json",
+          "sha256": "74e60e99a10672bb49f998e7e881f5f6fcc8e81f009bead4f4d137c7c328c498",
+          "recorded_at": "2026-07-16T10:09:12Z",
+          "summary": "Redacted production migration and backend contract deployment receipt for release 2026-07-16.7."
+        },
+        {
+          "type": "test_record",
+          "reference": "docs/launch/evidence/security-hardening-test-2026-07-16.json",
+          "sha256": "7ddce5509985207854b95dfb8ddfabfbdd15916dce428bff9ce812e84280398f",
+          "recorded_at": "2026-07-16T10:09:12Z",
+          "summary": "Production backend contract verification with every privacy, catalogue, pricing, audit, and privilege invariant passing."
+        }
+      ],
       "approved_by": null,
       "approved_role": null,
       "approved_at": null
@@ -97,7 +128,22 @@
       "required_evidence_types": ["deployment_receipt", "test_record"],
       "status": "pending",
       "acceptance": "The reviewed OTP, cleanup, geocoding and contact-review Edge Function versions are deployed and their protected-origin and least-privilege probes pass.",
-      "evidence": [],
+      "evidence": [
+        {
+          "type": "deployment_receipt",
+          "reference": "docs/launch/evidence/edge-functions-deployment-2026-07-16.json",
+          "sha256": "5756a365a7440197e6fcb210a866fd125686ea2224ceb496a483114127e54c7c",
+          "recorded_at": "2026-07-16T10:09:12Z",
+          "summary": "Redacted receipt for the six reviewed MED+250 production Edge Function deployments."
+        },
+        {
+          "type": "test_record",
+          "reference": "docs/launch/evidence/edge-functions-test-2026-07-16.json",
+          "sha256": "83934c99894fbc84052147f8c06aad4ff996bfbf357cd5b750336e7a5727f95c",
+          "recorded_at": "2026-07-16T10:09:12Z",
+          "summary": "Post-deployment protected-access probes and scheduled cleanup execution passed for all reviewed function surfaces."
+        }
+      ],
       "approved_by": null,
       "approved_role": null,
       "approved_at": null
@@ -130,7 +176,15 @@
       "required_evidence_types": ["signed_approval", "test_record"],
       "status": "pending",
       "acceptance": "The privacy owner approves the implemented retention periods and cleanup schedule, and a controlled cleanup run produces a healthy, non-stale aggregate signal.",
-      "evidence": [],
+      "evidence": [
+        {
+          "type": "test_record",
+          "reference": "docs/launch/evidence/prescription-retention-test-2026-07-16.json",
+          "sha256": "14925d74e8d1bc2e996e0fa2efcc488426f6a3c3766fc82d9226abc0203fd90c",
+          "recorded_at": "2026-07-16T10:09:12Z",
+          "summary": "Protected production retention cleanup completed successfully with a current aggregate privacy-safe health signal."
+        }
+      ],
       "approved_by": null,
       "approved_role": null,
       "approved_at": null
@@ -152,7 +206,22 @@
       "required_evidence_types": ["domain_verification", "test_record"],
       "status": "pending",
       "acceptance": "med250.gikundiro.com resolves through the intended Cloudflare account, TLS is healthy, the Worker custom-domain route is attached and the deployment verifier passes in live mode.",
-      "evidence": [],
+      "evidence": [
+        {
+          "type": "domain_verification",
+          "reference": "docs/launch/evidence/domain-verification-2026-07-16.json",
+          "sha256": "30bce277ef2d85f74b4ac2ed4afd6b5ac6ecb64a32e2a218757a36a349aa3758",
+          "recorded_at": "2026-07-16T10:09:12Z",
+          "summary": "Production custom-domain DNS, HTTPS, security-header, and Worker route verification passed."
+        },
+        {
+          "type": "test_record",
+          "reference": "docs/launch/evidence/domain-deployment-test-2026-07-16.json",
+          "sha256": "409f506b90625fd45a096323891d967f5a63f7b3589ce5d59db77bc6bebcf9ff",
+          "recorded_at": "2026-07-16T10:09:12Z",
+          "summary": "The seven-route live deployment test passed with current release assets, index controls, and required headers."
+        }
+      ],
       "approved_by": null,
       "approved_role": null,
       "approved_at": null

@@ -1,0 +1,7 @@
+beautifulsoup4==4.13.4
+httpx==0.28.1
+ImageHash==4.3.2
+opencv-python-headless==4.11.0.86
+Pillow==11.3.0
+rapidocr-onnxruntime==1.4.4
+rembg[cpu]==2.0.61

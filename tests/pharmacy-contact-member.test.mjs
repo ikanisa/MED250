@@ -5,7 +5,7 @@ import test from "node:test";
 const [client, marketplace, migration] = await Promise.all([
   readFile(new URL("../lib/dawanear-client.ts", import.meta.url), "utf8"),
   readFile(new URL("../app/marketplace.tsx", import.meta.url), "utf8"),
-  readFile(new URL("../supabase/migrations/20260713235500_expose_member_owned_pharmacy_contacts.sql", import.meta.url), "utf8"),
+  readFile(new URL("../supabase/migrations/20260713203240_expose_member_owned_pharmacy_contacts.sql", import.meta.url), "utf8"),
 ]);
 
 test("loads contacts only through the member-scoped RPC", () => {
