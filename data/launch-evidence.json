@@ -113,9 +113,9 @@
         {
           "type": "test_record",
           "reference": "docs/launch/evidence/security-hardening-test-2026-07-16.json",
-          "sha256": "115762636f9314a65bee86b019f4b043f6ee475e122da65da1c580578ac1f394",
-          "recorded_at": "2026-07-16T11:42:36Z",
-          "summary": "Production backend contract, SSL, scoped database-advisor and authentication configuration verification, protected DDL rejection, 164 Node tests, 43 Python tests, and dependency audits passed."
+          "sha256": "103a6375925a88287abc75af9c9549697d1c64938296beeed68e9871d8abb4da",
+          "recorded_at": "2026-07-16T12:21:13Z",
+          "summary": "Production backend contract, SSL, advisor scope, hosted-platform compatibility, protected DDL rejection and the complete release audit passed."
         }
       ],
       "approved_by": null,
