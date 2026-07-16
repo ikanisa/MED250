@@ -177,6 +177,11 @@ Gates:
 
 Required work:
 
+The current redacted snapshot is
+`docs/launch/evidence/cloudflare-account-verification-pending-2026-07-16.json`.
+It confirms one intended account and the production deployment are visible,
+but records that the interactive OAuth session still has 29 broad permissions.
+
 1. Create and install the least-privilege Cloudflare deployment token described above.
 2. Confirm the intended account, production Worker, custom-domain route, protected GitHub environment, and secret/variable ownership.
 3. Verify DNS, TLS, redirects, headers, robots, sitemap, and all seven representative routes.

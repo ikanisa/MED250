@@ -20,6 +20,7 @@ This runbook closes the 15 fail-closed production gates without weakening them o
 - The public catalogue and availability-request workflow are active. The protected release evidence gate remains incomplete and must not be represented as formally approved.
 - Public DNS resolves through Cloudflare. The active verification plan is `docs/launch/dns/med250-cloudflare-domain-plan.json`.
 - Wrangler is authenticated to the intended deployment account, but the current OAuth session has broad account-wide write scopes. The infrastructure owner must replace it with a narrowly scoped deploy credential before confirming least privilege.
+- The redacted pending account record is `docs/launch/evidence/cloudflare-account-verification-pending-2026-07-16.json`; it must remain unreferenced by the production registry until the replacement credential is verified and the infrastructure owner completes it.
 - Privileged Supabase verification is available through the protected connector and the live backend contract passes.
 - Supabase server-side Turnstile validation is enabled with the production widget. Missing and invalid tokens are rejected without creating users; one controlled valid-token browser test remains before the security owner can sign the gate.
 - The shared Supabase project currently reports an anonymous-user rate-limit value of 30, a one-hour JWT lifetime, and refresh-token rotation enabled. These project-wide settings still require a controlled impact test and security-owner approval.

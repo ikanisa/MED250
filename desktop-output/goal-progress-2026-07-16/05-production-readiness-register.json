@@ -130,6 +130,16 @@
       "passed": 0
     }
   },
+  "cloudflare_account_audit": {
+    "authenticated": true,
+    "visible_account_count": 1,
+    "credential_type": "interactive_oauth",
+    "reported_permission_count": 29,
+    "least_privilege_confirmed": false,
+    "production_deployment_visible": true,
+    "production_custom_domain": "med250.gikundiro.com",
+    "pending_artifact": "docs/launch/evidence/cloudflare-account-verification-pending-2026-07-16.json"
+  },
   "remaining_accountable_actions": [
     {
       "priority": 1,
