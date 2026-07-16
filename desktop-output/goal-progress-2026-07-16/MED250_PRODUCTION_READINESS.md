@@ -62,6 +62,8 @@ The refreshed Supabase audit reports database SSL enforcement active, all six re
 
 The prepared data-reuse ledger now inventories nine active source classes and binds them to 32 SHA-256 digests. It verifies that Amazon is used only for taxonomy and product-reference research, Amazon prices are absent, and the 128 populated central indicative prices come only from directly observed Rwanda catalogue references. The ledger remains pending because the data owner must resolve three provenance gaps and make the licence, publication, retention, refresh and withdrawal decisions.
 
+The pharmacy operations procedure is now consolidated in `docs/launch/PHARMACY_OPERATIONS_SOP.md`. It documents the implemented pharmacy-only model, nearby ranking plus national responder fallback, private item-level availability confirmation, non-final price handling, WhatsApp handoff, prescription access, cancellation, expiry, contact and GPS review, monitoring and incident response. The operations gate still requires named staffing and the operations lead's signed approval.
+
 ## Strict release gaps
 
 `npm run launch:evidence:verify:live` correctly reports 15 pending gates. Some already have complete technical evidence but still require accountable approval.
@@ -69,7 +71,7 @@ The prepared data-reuse ledger now inventories nine active source classes and bi
 | Area | Exact remaining work | Owner |
 | --- | --- | --- |
 | GPS and WhatsApp | Complete authoritative review ledgers and approve the intended production pharmacy set | Operations |
-| Pharmacy procedures | Sign dispatch, escalation, expiry, cancellation, prescription, and incident procedures | Operations lead |
+| Pharmacy procedures | Assign named roles, review `docs/launch/PHARMACY_OPERATIONS_SOP.md`, and complete its prepared signed-approval artifact | Operations lead |
 | Regulatory model | Approve the Rwanda marketplace model and applicable conditions | Legal/compliance |
 | Source reuse | Complete `docs/launch/evidence/data-reuse-review-ledger-pending-2026-07-16.json`, resolve three snapshot/retention gaps, and approve reuse/publication of all nine active source classes | Data owner |
 | Duplicate registers | Decide all 51 groups in the synchronized review ledger | Regulatory data reviewer |

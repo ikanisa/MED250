@@ -48,6 +48,8 @@ Required work:
 
 Current aggregate evidence already records 93 GPS-ready pharmacies, 300 pharmacies with WhatsApp coverage, 338 login-enabled WhatsApp contacts, and 300 dispatch-ready pharmacies. These counts do not replace record-level approval.
 
+The complete procedure is `docs/launch/PHARMACY_OPERATIONS_SOP.md`. Review it against the intended production pharmacy set, assign the named operating and escalation roles in the controlled staff register, and complete `docs/launch/evidence/pharmacy-operations-approval-pending-2026-07-16.json`. If the operating model changes, update the procedure, repeat the relevant tests and replace the recorded procedure digest before signing.
+
 ### Legal and regulatory
 
 Gate:

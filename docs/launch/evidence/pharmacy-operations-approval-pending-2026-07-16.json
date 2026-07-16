@@ -1,0 +1,63 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_PHARMACY_OPERATIONS_APPROVED",
+  "evidence_type": "signed_approval",
+  "status": "pending",
+  "title": "MED+250 pharmacy marketplace operations procedure approval",
+  "summary": "Owner-ready approval record for the implemented pharmacy-only, information-first operating procedure. Technical behavior is documented, but named staffing, operational acceptance and signature remain the responsibility of the MED+250 operations lead.",
+  "recorded_at": "2026-07-16T13:54:12+02:00",
+  "recorded_by": "MED+250 operations procedure audit",
+  "recorded_role": "Release evidence preparer",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Pharmacy-only information marketplace model",
+      "status": "passed",
+      "detail": "The procedure states that only pharmacies participate, catalogue products and optional From-RWF values remain central, pharmacy stock and pharmacy-specific public price lists are unsupported, and an order is optional after WhatsApp reconfirmation."
+    },
+    {
+      "name": "Dispatch and national fallback procedure",
+      "status": "passed",
+      "detail": "The procedure matches the current routing contract: verified nearby pharmacies are prioritized, at most 20 eligible responders receive a request, and unverified proximity is presented only as national service coverage."
+    },
+    {
+      "name": "Availability confirmation and price boundaries",
+      "status": "passed",
+      "detail": "The procedure requires item-by-item availability, governed substitutes, optional private non-final pharmacy estimates, and reconfirmation of final price and fulfilment on WhatsApp."
+    },
+    {
+      "name": "Selection, prescription, cancellation and expiry",
+      "status": "passed",
+      "detail": "The procedure preserves pre-selection privacy, the two-hour availability window, the 24-hour selected-pharmacy access window, customer-controlled closure and the implemented prescription-retention boundaries."
+    },
+    {
+      "name": "Contact, location and incident governance",
+      "status": "passed",
+      "detail": "The procedure requires single-record contact and location review, prohibits inferred WhatsApp or GPS approval, and defines identity, privacy, routing, regulatory and outage incident actions."
+    },
+    {
+      "name": "Named production staff assignments",
+      "status": "blocked",
+      "detail": "The operations lead has not yet recorded the named operations, pharmacy review, support, security, privacy and regulatory escalation contacts in the controlled staff register."
+    },
+    {
+      "name": "Operational acceptance and signature",
+      "status": "pending",
+      "detail": "The operations lead must review the procedure against the intended production pharmacy set, confirm it is operationally usable, record conditions if any, and sign this artifact."
+    }
+  ],
+  "procedure_reference": "docs/launch/PHARMACY_OPERATIONS_SOP.md",
+  "procedure_sha256": "7719c4975ce29b06e10c29865156e39c9abcf5c05ae635a65858b09f50379624",
+  "decision": null,
+  "approved_by": null,
+  "approved_role": null,
+  "approved_at": null,
+  "completion_instructions": [
+    "Assign named people to every accountable role in the controlled staff register and test the escalation channels.",
+    "Review the procedure against the intended production pharmacy set and record any approved conditions or limitations.",
+    "Confirm the procedure digest still matches docs/launch/PHARMACY_OPERATIONS_SOP.md.",
+    "Set every check to passed, set decision to approved, add the named approver, role and timezone-qualified timestamp, and set status to complete.",
+    "Validate the completed artifact strictly, record its SHA-256 digest in data/launch-evidence.json and confirm the gate only after the registry validates."
+  ]
+}
