@@ -1,0 +1,82 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_GPS_READY",
+  "evidence_type": "review_ledger",
+  "status": "pending",
+  "title": "MED+250 authoritative pharmacy GPS readiness review ledger",
+  "summary": "Redacted aggregate ledger for record-level pharmacy premises review. Ninety-three active pharmacy records currently have governed GPS evidence; the remaining active records require an approved coordinate decision or an explicit production-scope decision.",
+  "recorded_at": "2026-07-16T13:55:39+02:00",
+  "recorded_by": "MED+250 pharmacy evidence audit",
+  "recorded_role": "Release evidence preparer",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Authoritative registry population",
+      "status": "passed",
+      "detail": "The review population is bound to the 769-row current Rwanda FDA retail-pharmacy release file and the matching aggregate production health snapshot."
+    },
+    {
+      "name": "Approved GPS evidence",
+      "status": "passed",
+      "detail": "Ninety-three pharmacy records have exact current-registry name and locality matches to a Government of Rwanda geospatial source with the governed accuracy rule."
+    },
+    {
+      "name": "No fabricated proximity",
+      "status": "passed",
+      "detail": "Records without approved coordinates are not assigned invented coordinates or a fabricated distance; the application uses the national-service label for unverified proximity."
+    },
+    {
+      "name": "Full active-registry review",
+      "status": "blocked",
+      "detail": "Six hundred seventy-six active pharmacy records do not yet have approved GPS evidence. The operations owner must approve authoritative premises evidence or explicitly remove each unresolved record from the intended GPS-ready production scope."
+    },
+    {
+      "name": "Record-level owner decisions",
+      "status": "pending",
+      "detail": "A controlled private ledger must record one decision per active pharmacy with reviewer identity, source version, evidence outcome and timezone-qualified review timestamp."
+    }
+  ],
+  "reviewed_by": null,
+  "reviewer_role": null,
+  "reviewed_at": null,
+  "total_records": 769,
+  "pending_records": 676,
+  "blocked_records": 0,
+  "approved_records": 93,
+  "source_candidate_records": 291,
+  "source_review_records": 198,
+  "source_digests": {
+    "rwanda_fda_retail_pharmacy_registry": "977b4d35036d178b45191f98de55e574e848755f1153df252a7a621665b583a9",
+    "rwanda_government_gis_manifest": "b3cdb3142e002e8d478c192c63a1a86a16174f95b84b36df7372df2c03238adb",
+    "rwanda_government_gis_source_snapshot": "111e825a27f427e4f8a9563e629e8f234b3bb0f3f0c216c1d2229c45dd4ba68a",
+    "rwanda_government_gis_approved_matches": "d9de8fec06aa39b18d7f0d77ead22ba52c2b1b165dd4d0cc5f44579352d04421",
+    "rwanda_government_gis_review_queue": "521b78ea95c25d962af6743a0001e8c3e7ec6189059a737462d34e19bc6459d8",
+    "production_gps_health_snapshot": "dfe1d210dc8d8674e4c1ebc56de82ff63ddfca2c7809565121e0f6d3ff823c2e"
+  },
+  "private_review_fields": [
+    "registry entry key",
+    "production-scope decision",
+    "source type and version",
+    "premises identity result",
+    "locality match result",
+    "accuracy result",
+    "decision",
+    "reviewer",
+    "reviewed timestamp",
+    "redacted rationale"
+  ],
+  "allowed_decisions": [
+    "approved_authoritative_gps",
+    "excluded_from_gps_ready_production_scope",
+    "pending_authoritative_evidence"
+  ],
+  "completion_instructions": [
+    "Keep the row-level ledger in the controlled operations location because it contains precise pharmacy locations.",
+    "Decide every active pharmacy record and make the intended GPS-ready production scope match actual routing and customer presentation.",
+    "Do not approve a Google Maps link, generated search URL or name-only candidate as authoritative premises GPS.",
+    "Regenerate the aggregate production health snapshot after applying every approved or excluded decision.",
+    "Set pending_records and blocked_records to zero, add the named reviewer, role and timestamp, set every check to passed, and set status to complete.",
+    "Validate this redacted artifact strictly and add it to data/launch-evidence.json with its exact SHA-256 digest."
+  ]
+}

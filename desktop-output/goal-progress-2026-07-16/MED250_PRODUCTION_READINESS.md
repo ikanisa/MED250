@@ -64,13 +64,15 @@ The prepared data-reuse ledger now inventories nine active source classes and bi
 
 The pharmacy operations procedure is now consolidated in `docs/launch/PHARMACY_OPERATIONS_SOP.md`. It documents the implemented pharmacy-only model, nearby ranking plus national responder fallback, private item-level availability confirmation, non-final price handling, WhatsApp handoff, prescription access, cancellation, expiry, contact and GPS review, monitoring and incident response. The operations gate still requires named staffing and the operations lead's signed approval.
 
+Redacted GPS and WhatsApp review-ledger shells are also prepared. They bind the current aggregate state to authoritative source digests without exposing coordinates or phone values: 93 of 769 active pharmacies have approved GPS, and 300 of 769 have governed WhatsApp coverage through 338 enabled login contacts. Operations must finish the controlled row-level reviews and reconcile the approved scopes with actual routing before either gate can be confirmed.
+
 ## Strict release gaps
 
 `npm run launch:evidence:verify:live` correctly reports 15 pending gates. Some already have complete technical evidence but still require accountable approval.
 
 | Area | Exact remaining work | Owner |
 | --- | --- | --- |
-| GPS and WhatsApp | Complete authoritative review ledgers and approve the intended production pharmacy set | Operations |
+| GPS and WhatsApp | Complete the prepared redacted ledger shells from private row-level reviews and reconcile approved scopes with actual routing | Operations |
 | Pharmacy procedures | Assign named roles, review `docs/launch/PHARMACY_OPERATIONS_SOP.md`, and complete its prepared signed-approval artifact | Operations lead |
 | Regulatory model | Approve the Rwanda marketplace model and applicable conditions | Legal/compliance |
 | Source reuse | Complete `docs/launch/evidence/data-reuse-review-ledger-pending-2026-07-16.json`, resolve three snapshot/retention gaps, and approve reuse/publication of all nine active source classes | Data owner |

@@ -1,7 +1,7 @@
 {
   "schema_version": "1",
   "release": "med250-production",
-  "captured_at": "2026-07-16T11:54:12Z",
+  "captured_at": "2026-07-16T11:55:39Z",
   "objective_complete": false,
   "public_origin": "https://med250.gikundiro.com",
   "release_decision": "conditional_hold",
@@ -172,6 +172,24 @@
     ],
     "remaining_owner_action": "Assign named operating and escalation roles, confirm the procedure is operationally usable for the intended pharmacy set, and sign the redacted approval artifact."
   },
+  "pharmacy_readiness_review_ledgers": {
+    "gps": {
+      "status": "pending_record_level_review",
+      "active_pharmacies": 769,
+      "approved_records": 93,
+      "pending_records": 676,
+      "artifact": "docs/launch/evidence/gps-readiness-review-ledger-pending-2026-07-16.json"
+    },
+    "whatsapp": {
+      "status": "pending_record_level_review",
+      "active_pharmacies": 769,
+      "approved_pharmacies": 300,
+      "approved_login_contacts": 338,
+      "pending_pharmacies": 469,
+      "artifact": "docs/launch/evidence/whatsapp-readiness-review-ledger-pending-2026-07-16.json"
+    },
+    "privacy_boundary": "Precise coordinates and contact values remain in controlled private ledgers; release artifacts contain only aggregate counts and immutable source digests."
+  },
   "remaining_accountable_actions": [
     {
       "priority": 1,
@@ -193,7 +211,7 @@
     {
       "priority": 3,
       "owner": "MED+250 operations",
-      "action": "Complete and sign the authoritative GPS and pharmacy-authorised WhatsApp review ledgers for the intended production pharmacy set. Do not invent coordinates, contacts, stock, or pharmacy-specific prices.",
+      "action": "Complete the controlled row-level GPS and pharmacy-authorised WhatsApp reviews, then finish docs/launch/evidence/gps-readiness-review-ledger-pending-2026-07-16.json and docs/launch/evidence/whatsapp-readiness-review-ledger-pending-2026-07-16.json. Reconcile the approved scopes with actual routing and portal access. Do not invent coordinates, contacts, stock, or pharmacy-specific prices.",
       "closes": [
         "MED250_GATE_GPS_READY",
         "MED250_GATE_WHATSAPP_READY"

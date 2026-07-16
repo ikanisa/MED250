@@ -50,6 +50,13 @@ Current aggregate evidence already records 93 GPS-ready pharmacies, 300 pharmaci
 
 The complete procedure is `docs/launch/PHARMACY_OPERATIONS_SOP.md`. Review it against the intended production pharmacy set, assign the named operating and escalation roles in the controlled staff register, and complete `docs/launch/evidence/pharmacy-operations-approval-pending-2026-07-16.json`. If the operating model changes, update the procedure, repeat the relevant tests and replace the recorded procedure digest before signing.
 
+Use these redacted aggregate ledger shells for the record-level readiness decisions:
+
+- `docs/launch/evidence/gps-readiness-review-ledger-pending-2026-07-16.json`
+- `docs/launch/evidence/whatsapp-readiness-review-ledger-pending-2026-07-16.json`
+
+Keep precise coordinates and contact values in the controlled private ledgers. The release artifacts contain only aggregate counts, source digests, allowed decisions and completion instructions.
+
 ### Legal and regulatory
 
 Gate:
