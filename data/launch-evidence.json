@@ -132,16 +132,16 @@
         {
           "type": "deployment_receipt",
           "reference": "docs/launch/evidence/edge-functions-deployment-2026-07-16.json",
-          "sha256": "c6134375a5918c61bb0deae67fa1dcce1abc991c39321dd89e113485502e17b0",
-          "recorded_at": "2026-07-16T12:19:05Z",
-          "summary": "Redacted receipt confirming the six reviewed functions remain active and the retired untracked research tombstone was removed."
+          "sha256": "421dd3e3cf1cba5995e29fdb0a95aba20e3c277da0d2bca322b97db16ff50709",
+          "recorded_at": "2026-07-16T12:57:41Z",
+          "summary": "Redacted receipt confirming the six reviewed functions remain active and the shared-project env-dump deployment is a JWT-protected constant HTTP 410 retirement tombstone pending any owner-authorised deletion."
         },
         {
           "type": "test_record",
           "reference": "docs/launch/evidence/edge-functions-test-2026-07-16.json",
-          "sha256": "2852ec3bdeaef793cb7d029182eb0fa0d758a7230337c888433984c9580b8edf",
-          "recorded_at": "2026-07-16T12:19:05Z",
-          "summary": "Fresh protected-access probes passed for all six reviewed functions, and the retired endpoint is unavailable."
+          "sha256": "fec985b759715eae8ef380eaff4ca12d7ca058911de00f76c593f24daa2491ae",
+          "recorded_at": "2026-07-16T12:57:41Z",
+          "summary": "Fresh protected-access probes passed for all six reviewed functions; env-dump unauthenticated access returned HTTP 401 and its deployed retirement-tombstone source passed focused security review."
         }
       ],
       "approved_by": null,

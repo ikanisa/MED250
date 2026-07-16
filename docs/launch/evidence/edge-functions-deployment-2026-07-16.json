@@ -5,8 +5,8 @@
   "evidence_type": "deployment_receipt",
   "status": "complete",
   "title": "Reviewed MED+250 production Edge Function deployment",
-  "summary": "All six reviewed MED+250 Edge Functions remain active at the deployed production versions, and the untracked retired research tombstone was removed from the shared project.",
-  "recorded_at": "2026-07-16T12:19:05Z",
+  "summary": "All six reviewed MED+250 Edge Functions remain active at the deployed production versions. The shared project also contains unrelated legacy functions; the active env-dump version 6 deployment was separately verified as a JWT-protected constant HTTP 410 retirement tombstone and was not deleted without shared-project owner approval.",
+  "recorded_at": "2026-07-16T12:57:41Z",
   "recorded_by": "Codex automated verifier",
   "recorded_role": "Release verification agent",
   "redactions_confirmed": true,
@@ -32,9 +32,9 @@
       "detail": "All six functions report the handler-managed authentication configuration declared in the reviewed Supabase project file; no reviewed MED+250 function is missing or inactive."
     },
     {
-      "name": "Retired research function removed",
+      "name": "Retired diagnostic function safely contained",
       "status": "passed",
-      "detail": "The untracked MED+250 research function contained only a retired HTTP 410 tombstone, had no repository dependency, and was deleted. The production inventory now contains exactly the six reviewed MED+250 functions, and the retired endpoint returns HTTP 404."
+      "detail": "The shared-project env-dump function remains active at version 6 with gateway JWT verification enabled. Its complete deployed source was downloaded and reviewed: it reads no environment variables, performs no database, network, filesystem, logging, parsing, or dynamic-code operation, and returns only a constant non-cacheable HTTP 410 retirement response. Source SHA-256: 6d4791cda6b77ead56f54cfdc9740cb983864ec9f56f8b976a2e038e9da46d4e. Deletion remains a shared-project owner decision."
     },
     {
       "name": "Current hosted project compatibility",
