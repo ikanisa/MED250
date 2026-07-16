@@ -111,9 +111,15 @@ class ProductImagePipelineTests(unittest.TestCase):
             60,
         )
         images = [
-            MODULE.ProcessedImage(verified, b"a", 1400, 1400, 99, "a" * 64, "0" * 16, True),
-            MODULE.ProcessedImage(verified, b"b", 1400, 1400, 98, "b" * 64, "1" * 16, True),
-            MODULE.ProcessedImage(unverified, b"c", 1400, 1400, 97, "c" * 64, "2" * 16, True),
+            MODULE.ProcessedImage(
+                verified, b"a", 1400, 1400, 99, "a" * 64, "0" * 16, True
+            ),
+            MODULE.ProcessedImage(
+                verified, b"b", 1400, 1400, 98, "b" * 64, "1" * 16, True
+            ),
+            MODULE.ProcessedImage(
+                unverified, b"c", 1400, 1400, 97, "c" * 64, "2" * 16, True
+            ),
         ]
         self.assertFalse(MODULE.images_have_verified_rights(images))
         self.assertFalse(
@@ -121,6 +127,38 @@ class ProductImagePipelineTests(unittest.TestCase):
                 {"status": "published", "payload": {"images": [{}, {}, {}]}}
             )
         )
+
+    def test_published_checkpoint_candidates_can_be_force_reprocessed(self):
+        product = MODULE.Product(
+            id="p",
+            name="Example Product",
+            brand="Example",
+            generic="",
+            strength="",
+            form="",
+            pack_size="",
+            manufacturer="",
+            source_url="",
+            asin="",
+            group="consumer",
+        )
+        checkpoint = {
+            "status": "published",
+            "payload": {
+                "images": [
+                    {
+                        "image_url": "https://retailer.example/example.webp",
+                        "source_page_url": "https://retailer.example/example",
+                        "source_domain": "retailer.example",
+                        "source_kind": "specialist_retailer",
+                        "rights_basis": MODULE.AUTOMATED_PROVENANCE,
+                        "priority": 65,
+                        "rights_verified": False,
+                    }
+                ]
+            },
+        }
+        self.assertEqual(len(MODULE.checkpoint_candidates(product, checkpoint)), 1)
 
     def test_publisher_refuses_storage_upload_when_live_rights_guard_is_unsafe(self):
         class Response:
@@ -277,6 +315,33 @@ class ProductImagePipelineTests(unittest.TestCase):
         self.assertEqual(
             MODULE.inferred_source_kind("https://www.amazon.com/dp/B004L5JCZ4", product),
             ("marketplace_api", 72),
+        )
+
+    def test_expands_marketplace_thumbnails_to_original_images(self):
+        amazon = MODULE.Candidate(
+            "p",
+            "https://m.media-amazon.com/images/I/example._AC_SL500_.jpg",
+            "https://www.amazon.com/dp/example",
+            "amazon.com",
+            "marketplace_api",
+            MODULE.AUTOMATED_PROVENANCE,
+            72,
+        )
+        walmart = MODULE.replace(
+            amazon,
+            image_url=(
+                "https://i5.walmartimages.com/seo/example.jpeg"
+                "?odnHeight=580&odnWidth=580&odnBg=FFFFFF"
+            ),
+            source_domain="walmart.com",
+        )
+        self.assertEqual(
+            MODULE.high_resolution_candidate_variants(amazon)[0].image_url,
+            "https://m.media-amazon.com/images/I/example.jpg",
+        )
+        self.assertEqual(
+            MODULE.high_resolution_candidate_variants(walmart)[0].image_url,
+            "https://i5.walmartimages.com/seo/example.jpeg",
         )
 
     def test_measurements_match_equivalent_pack_sizes(self):

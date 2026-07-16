@@ -5,8 +5,8 @@
   "evidence_type": "test_record",
   "status": "complete",
   "title": "Production backend contract and catalogue security verification",
-  "summary": "The privileged aggregate verifier passed every database, privacy, catalogue, pricing, image, audit, realtime, and least-privilege invariant; fresh hosted-platform checks remain healthy and the complete release audit passes.",
-  "recorded_at": "2026-07-16T12:21:13Z",
+  "summary": "After forward repair of live image-governance drift, the privileged aggregate verifier again passes every database, privacy, catalogue, pricing, image, audit, realtime, and least-privilege invariant. Operational health is healthy, the public image bucket is empty, and the expanded regression and dependency-security suites pass.",
+  "recorded_at": "2026-07-16T13:12:09Z",
   "recorded_by": "Codex automated verifier",
   "recorded_role": "Release verification agent",
   "redactions_confirmed": true,
@@ -39,7 +39,7 @@
     {
       "name": "Database advisor scope",
       "status": "passed",
-      "detail": "The shared project reports 95 security findings and 109 performance findings. MED+250 has zero performance warnings; its security warnings are limited to the intentional catalogue GraphQL surface, the exact ownership-checked authenticated RPC allowlist, and required anonymous customer sign-in. Ten informational RLS-without-policy findings are deliberate deny-by-default tables."
+      "detail": "Fresh management-plane advisors report 95 security and 109 performance findings across the shared project, with zero ERROR-level findings and zero MED+250 ERROR-level findings. MED+250 warnings remain scoped to intentional public catalogue surfaces, ownership-checked authenticated workflows, required anonymous customer access, and known performance advisories requiring separate shared-project review."
     },
     {
       "name": "Authentication configuration",
@@ -49,12 +49,12 @@
     {
       "name": "Product-image reuse-rights boundary",
       "status": "passed",
-      "detail": "The live contract reports zero unsafe public images, zero partial galleries, zero catalogue image links, an empty public Storage bucket, a validated explicit-rights constraint, verified-only public RLS, an enabled independent approval trigger, and an enabled DDL governance guard."
+      "detail": "The final live contract reports zero unsafe public images, zero partial galleries, zero approved image rows, 72 retained unverified provenance rows, no catalogue links to those rows, an empty public Storage bucket, a validated explicit-rights constraint, verified-only public RLS, an enabled independent approval trigger, and an enabled DDL governance guard."
     },
     {
       "name": "Product-image DDL guard",
       "status": "passed",
-      "detail": "The live database rejected an unauthorized verified-rights constraint drop with SQLSTATE 42501, and the complete 164-test Node suite independently reproduced the protected DDL behavior in PGlite."
+      "detail": "The live database rejected an unauthorized verified-rights constraint drop with SQLSTATE 42501, and the complete 166-test Node suite independently reproduced the protected DDL behavior plus the exact unsafe-drift repair in PGlite."
     },
     {
       "name": "Node dependency vulnerability audit",
@@ -69,7 +69,7 @@
     {
       "name": "Integrated automated regression suite",
       "status": "passed",
-      "detail": "The complete regression run finished 164 Node tests and 43 Python pipeline tests with zero failures."
+      "detail": "The complete regression run finished 166 Node tests and 45 Python pipeline tests with zero failures."
     },
     {
       "name": "Current hosted Supabase platform",
@@ -84,11 +84,11 @@
     {
       "name": "Complete preview-safe release audit",
       "status": "passed",
-      "detail": "The latest release check passed dependency audits, lint, source validation, catalogue quality, 43 Python tests, 164 Node tests, performance budgets, application build and strict Cloudflare dry run."
+      "detail": "The complete preview-safe release check passed evidence validation, dependency audits, lint, source validation, catalogue quality, 45 Python tests, application build, 166 Node tests, performance budgets, and strict Cloudflare dry run. The strict live release command remains intentionally blocked by the 15 pending owner-controlled launch approvals."
     }
   ],
   "executed_by": "Codex automated verifier",
   "executor_role": "Release verification agent",
-  "started_at": "2026-07-16T11:04:00Z",
-  "completed_at": "2026-07-16T12:21:13Z"
+  "started_at": "2026-07-16T13:01:05Z",
+  "completed_at": "2026-07-16T13:12:09Z"
 }

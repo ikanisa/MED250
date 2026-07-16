@@ -106,16 +106,16 @@
         {
           "type": "deployment_receipt",
           "reference": "docs/launch/evidence/security-hardening-deployment-2026-07-16.json",
-          "sha256": "06be315c1d256ec5546eb3a1806fc382737b28bb1382ed7da2e2719a815e1c25",
-          "recorded_at": "2026-07-16T11:36:10Z",
-          "summary": "Redacted production migration and backend contract deployment receipt for release 2026-07-16.10."
+          "sha256": "7404d58e6884dbdeef1877e2c0bd9403882a010ff8786b7ba528da4425208013",
+          "recorded_at": "2026-07-16T13:10:34Z",
+          "summary": "Redacted receipt for forward migration 20260716190000, live verified-rights governance restoration, unsafe-worker containment and public Storage cleanup."
         },
         {
           "type": "test_record",
           "reference": "docs/launch/evidence/security-hardening-test-2026-07-16.json",
-          "sha256": "103a6375925a88287abc75af9c9549697d1c64938296beeed68e9871d8abb4da",
-          "recorded_at": "2026-07-16T12:21:13Z",
-          "summary": "Production backend contract, SSL, advisor scope, hosted-platform compatibility, protected DDL rejection and the complete release audit passed."
+          "sha256": "2d12c9fdeee208aae093a656fba5b6534aef60f55996a891ec5035021e419622",
+          "recorded_at": "2026-07-16T13:12:09Z",
+          "summary": "Post-repair production contract, operational health, advisor scope, empty public image Storage, protected DDL and expanded regression audits passed."
         }
       ],
       "approved_by": null,

@@ -853,6 +853,41 @@ def inferred_source_kind(page_url: str, product: Product) -> tuple[str, int]:
     return "specialist_retailer", 65
 
 
+def high_resolution_candidate_variants(candidate: Candidate) -> list[Candidate]:
+    variants = [candidate]
+    image_url = candidate.image_url
+    amazon_match = re.match(
+        r"^(https://m\.media-amazon\.com/images/I/.+?)\._[^/]+_"
+        r"\.(jpe?g|png|webp)(?:\?.*)?$",
+        image_url,
+        re.I,
+    )
+    if amazon_match:
+        variants.insert(
+            0,
+            replace(
+                candidate,
+                image_url=f"{amazon_match.group(1)}.{amazon_match.group(2)}",
+                priority=candidate.priority + 8,
+                declared_width=max(candidate.declared_width, 1500),
+                declared_height=max(candidate.declared_height, 1500),
+            ),
+        )
+    if source_domain(image_url).endswith("walmartimages.com") and "?" in image_url:
+        original = image_url.split("?", 1)[0]
+        variants.insert(
+            0,
+            replace(
+                candidate,
+                image_url=original,
+                priority=candidate.priority + 6,
+                declared_width=max(candidate.declared_width, 1500),
+                declared_height=max(candidate.declared_height, 1500),
+            ),
+        )
+    return variants
+
+
 def product_image_search_queries(product: Product) -> list[str]:
     if product.group == "medicine":
         exact_name = compact_spaces(product.name)
@@ -1329,7 +1364,7 @@ def normalize_image(
 
     expected_measurements = measurements(" ".join([product.strength, product.pack_size]))
     if expected_measurements:
-        observed_measurements = measurements(image_text)
+        observed_measurements = measurements(" ".join([candidate.title, image_text]))
         if observed_measurements and (
             measurements_conflict(expected_measurements, observed_measurements)
             or not measurements_match(expected_measurements, observed_measurements)
@@ -1756,12 +1791,12 @@ def discover_candidates(
             pass
     if public_search:
         try:
-            public_candidates = duckduckgo_image_candidates(product, web)
+            public_candidates = bing_image_candidates(product, web)
         except Exception:
             public_candidates = []
-        if len(public_candidates) < 30:
+        if not public_candidates:
             try:
-                public_candidates.extend(bing_image_candidates(product, web))
+                public_candidates.extend(duckduckgo_image_candidates(product, web))
             except Exception:
                 pass
         output.extend(public_candidates)
@@ -1769,8 +1804,13 @@ def discover_candidates(
         output.extend(google_cse_candidates(product, web, google_key, google_engine, policy))
     except Exception:
         pass
+    expanded = [
+        variant
+        for candidate in output
+        for variant in high_resolution_candidate_variants(candidate)
+    ]
     unique: dict[str, Candidate] = {}
-    for candidate in output:
+    for candidate in expanded:
         key = canonical_url(candidate.image_url)
         if (
             candidate.product_id != product.id
@@ -1857,7 +1897,10 @@ def checkpoint_candidates(
     product: Product,
     checkpoint_record: dict[str, Any] | None,
 ) -> list[Candidate]:
-    if not checkpoint_record or checkpoint_record.get("status") != "ready":
+    if not checkpoint_record or checkpoint_record.get("status") not in {
+        "ready",
+        "published",
+    }:
         return []
     payload = checkpoint_record.get("payload")
     rows = payload.get("images") if isinstance(payload, dict) else None

@@ -5,8 +5,8 @@
   "evidence_type": "deployment_receipt",
   "status": "complete",
   "title": "MED+250 production security and catalogue contract deployment",
-  "summary": "The reviewed database migrations were applied to production, the migration ledger was reconciled, and unverified product imagery was removed from public catalogue and Storage exposure.",
-  "recorded_at": "2026-07-16T11:36:10Z",
+  "summary": "A fresh privileged verification detected direct product-image governance drift despite an unchanged contract version. Forward migration 20260716190000 restored the verified-rights constraint, RLS policy, service publisher, runtime trigger, and DDL guard; unverified images were removed from catalogue and Storage exposure, and unsafe detached workers were stopped.",
+  "recorded_at": "2026-07-16T13:10:34Z",
   "recorded_by": "Codex automated verifier",
   "recorded_role": "Release verification agent",
   "redactions_confirmed": true,
@@ -14,7 +14,7 @@
     {
       "name": "Migration ledger alignment",
       "status": "passed",
-      "detail": "All 60 production-authorised local MED+250 migrations are present in the production ledger with matching names. Two earlier quarantined MED+250 migrations remain visible as historical ledger entries in the shared project; their unsafe image-publication and browser-candidate effects are explicitly remediated by later governed migrations."
+      "detail": "All 61 production-authorised local MED+250 migrations are present in the production ledger with matching versions and names. Repair migration 20260716190000 is recorded as reassert_verified_product_image_governance. Earlier quarantined effects remain historical only and are superseded by later governed migrations."
     },
     {
       "name": "Publication audit enforcement",
@@ -24,7 +24,7 @@
     {
       "name": "Verified product-image publication boundary",
       "status": "passed",
-      "detail": "All 51 rights-unverified image rows are non-public and catalogue image links are cleared. The latest remediation removed 21 unverified or orphaned Storage objects, bringing the cumulative recorded removal count to 69, without emitting identifiers; the bucket is empty. A validated constraint, verified-only RLS policy, service publication RPC, independent approval trigger, and DDL event guard enforce the boundary."
+      "detail": "All 72 rights-unverified image rows are retained only as non-approved provenance records; zero catalogue links point to them. The incident remediation removed 30 unverified or orphaned public Storage objects without emitting identifiers, and a delayed final check found the bucket empty. A validated constraint, verified-only RLS policy, service publication RPC, independent approval trigger, and DDL event guard enforce the boundary."
     },
     {
       "name": "Governance DDL rejection",
@@ -40,11 +40,16 @@
       "name": "Deployment contract refresh",
       "status": "passed",
       "detail": "The production backend contract was refreshed to version 2026-07-16.10 and requires explicit reuse-rights verification in the schema constraint, publication RPC, public RLS policy, independent runtime approval trigger, and DDL governance guard."
+    },
+    {
+      "name": "Unsafe worker containment",
+      "status": "passed",
+      "detail": "Two detached image-worker process groups using a rejected loop script were stopped. The rejected script and migration were removed from executable paths, the Python publisher again verifies the full rights-governance contract before every upload and publication call, and unverified galleries are retained for review without upload."
     }
   ],
   "deployed_by": "Codex release operator",
   "deployer_role": "Automated backend release operator",
-  "deployed_at": "2026-07-16T11:34:58Z",
+  "deployed_at": "2026-07-16T13:06:08Z",
   "environment": "MED+250 production database",
-  "release_identifier": "med250-backend-contract-2026-07-16.10"
+  "release_identifier": "med250-backend-contract-2026-07-16.10-repair-20260716190000"
 }
