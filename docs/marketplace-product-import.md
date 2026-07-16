@@ -7,10 +7,21 @@ All products, including medicines and Amazon-first consumer products, belong to 
 ## Dataset and validation
 
 - Source dataset: `outputs/019f66ce-d480-7a90-9bb7-ee6e417b5ce7/corrected/research/corrected-catalog-dataset-2026-07-15.json`
+- Consolidated workbook: `outputs/019f66ce-d480-7a90-9bb7-ee6e417b5ce7/corrected/Rwanda_Marketplace_Amazon_First_Catalog_4680.xlsx`
 - Expected import: 2,200 unique ASINs
 - Required taxonomy coverage: all 25 department/subcategory pairs, with at least 50 quality-screened products in each pair
 - Canonical-title audit: incomplete Amazon search labels are repaired from product metadata, exact duplicate titles are collapsed, and irrelevant search noise is excluded through `data/imports/amazon-product-quality-overrides-2026-07-16.json`
 - Validation: `npm run data:validate-marketplace-products`
+
+The current validated artifact set is bound to these SHA-256 values:
+
+- Raw Amazon research snapshot: `0479c4e4d4950f443abaf2c716a9e32c83d77829e88ba4960f68070a4355c6a5`
+- Corrected import dataset: `5000580eb85403a58de8e604bdd055b25b22958ae5755206913a070bcae31383`
+- Consolidated 4,680-record workbook: `6919e5c0728d1d6e1431844c99e1a96935a4b3b7f29fe60f0adb6a1aa8853f20`
+
+The workbook contains nine sheets: executive summary, 2,200 consumer products, 2,480 FDA medicines, combined index, category coverage, Supabase mapping, source register, QA and methodology, and data dictionary. Its final formula-error scan is empty, all 25 taxonomy pairs pass the 50-product floor, Amazon-price coverage is zero, and 128 rows carry a directly observed Rwanda central indicative-price reference.
+
+The `outputs/` directory is intentionally not version-controlled. Before the data-reuse gate can be approved, the data owner must place the raw snapshot, corrected dataset and exact workbook in an approved durable evidence store without changing their recorded digests.
 
 ## Repeatable import
 

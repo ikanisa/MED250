@@ -6,7 +6,7 @@
   "status": "pending",
   "title": "MED+250 active source-data reuse and provenance review ledger",
   "summary": "Redacted source-class inventory for the active medicine, consumer-product, pharmacy, contact, geospatial and central indicative-price data. Technical provenance is recorded, but publication and operational reuse still require a named data-owner decision.",
-  "recorded_at": "2026-07-16T13:49:21+02:00",
+  "recorded_at": "2026-07-16T14:31:00+02:00",
   "recorded_by": "MED+250 automated provenance audit",
   "recorded_role": "Release evidence preparer",
   "redactions_confirmed": true,
@@ -34,7 +34,7 @@
     {
       "name": "Immutable raw source snapshots",
       "status": "blocked",
-      "detail": "The active derived files are hashed, but retained raw snapshots are incomplete: the Rwanda FDA register source files are absent, the duty-roster manifest contains an unresolved source digest placeholder, and the Amazon research snapshot is local and ignored by Git."
+      "detail": "The active Amazon raw snapshot, corrected dataset and final 4,680-record workbook are hashed, but durable retention remains incomplete: the Rwanda FDA register source files are absent, the duty-roster manifest contains an unresolved source digest placeholder, and the Amazon artifact set remains local and ignored by Git."
     },
     {
       "name": "Licence and reuse permission decisions",
@@ -54,7 +54,9 @@
   "pending_records": 6,
   "blocked_records": 3,
   "source_digests": {
+    "amazon_raw_research_snapshot": "0479c4e4d4950f443abaf2c716a9e32c83d77829e88ba4960f68070a4355c6a5",
     "amazon_catalogue_research_snapshot": "5000580eb85403a58de8e604bdd055b25b22958ae5755206913a070bcae31383",
+    "amazon_catalogue_workbook": "6919e5c0728d1d6e1431844c99e1a96935a4b3b7f29fe60f0adb6a1aa8853f20",
     "amazon_quality_overrides": "6aa58e301563b923a1c3d2e34eaece8df6583ff2d75a9ca1c05c01dc980418c8",
     "amazon_price_removal_migration": "e4fb93862ef39d69177d06565147efd800fc296da290f0bd0f81de7a947b1e29",
     "rwanda_fda_source_manifest": "e0dbd473389b1cc57f8a9b8c4de30e6e4daba13393b40977d722c98ecae17fad",
@@ -161,7 +163,9 @@
       "refresh_cadence": "Revalidate product identity, category relevance and availability before any material catalogue refresh",
       "withdrawal_action": "Unpublish affected consumer products when reuse is not approved, identity is uncertain or the reference is withdrawn",
       "digest_keys": [
+        "amazon_raw_research_snapshot",
         "amazon_catalogue_research_snapshot",
+        "amazon_catalogue_workbook",
         "amazon_quality_overrides",
         "amazon_price_removal_migration"
       ],
