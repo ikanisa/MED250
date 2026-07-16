@@ -46,8 +46,8 @@ next-env.d.ts
 /supabase/.temp/
 /.venv-product-images/
 /data/product-images/cache/
-/data/product-images/checkpoint.sqlite3
-/data/product-images/report.json
+/data/product-images/checkpoint*.sqlite3
+/data/product-images/report*.json
 **/__pycache__/
 *.py[cod]
 

@@ -3,21 +3,21 @@
 The pipeline covers the complete 4,680-row source dataset and, during a
 production run, filters it to products currently visible in the live Supabase
 catalogue. A product is published only after exactly three distinct,
-high-resolution, background-free images pass validation.
+high-resolution, background-free images pass identity and quality validation.
 
 ## Source priority
 
 Use sources in this order:
 
-1. Licensed supplier/manufacturer feeds supplied with `--source-manifest`.
+1. Manufacturer pages and licensed supplier feeds supplied with
+   `--source-manifest`.
 2. Manufacturer product pages and their original high-resolution assets.
-3. Amazon or other marketplace image results discovered by public image search.
-4. Specialist pharmacy, retailer, and marketplace product listings.
+3. Amazon and other major marketplace product listings.
+4. Specialist pharmacy, retailer, and ecommerce product listings.
 
-Public image discovery is enabled by default and needs no search API key.
-`rights_basis` is optional; when omitted, the script records that the public
-listing was discovered automatically and that reuse rights were not
-independently verified. Source page and original image URLs are always stored.
+Public discovery records the exact source page and source image URL for
+traceability. Manifests and source policies are optional overrides, not a
+publication prerequisite.
 
 Example manifest:
 
@@ -27,7 +27,7 @@ Example manifest:
     "product_id": "rwanda-fda-hm-0001",
     "source_page_url": "https://manufacturer.example/products/atop-250-100",
     "source_kind": "manufacturer",
-    "rights_basis": "Manufacturer product page approved for MED+250 catalogue use.",
+    "rights_basis": "Manufacturer product page.",
     "priority": 100,
     "images": [
       "https://manufacturer.example/images/atop-front.jpg",
@@ -44,8 +44,8 @@ maps the ASIN to `AMZ-{ASIN}`.
 ## Install
 
 Use Python 3.11 or newer in a dedicated virtual environment because the
-security-supported `rembg` and Pillow releases require a modern runtime and
-`rembg` installs an ONNX runtime:
+security-supported `rembg`, Pillow, and RapidOCR releases require a modern
+runtime and install an ONNX runtime:
 
 ```sh
 python3.11 -m venv .venv-product-images
@@ -58,8 +58,8 @@ The requirement files use exact versions and `npm run security:audit:python`
 checks every pin against the OSV vulnerability database. Do not relax the pins
 or install the image pipeline into the macOS system Python.
 
-The source policy and manifests are optional accelerators. Without them, the
-script searches public product listings automatically.
+The source policy and manifests are optional. Without them, the script uses
+built-in public product-image discovery and records source provenance.
 
 Google Custom Search is optional and only works for existing API customers:
 
@@ -74,7 +74,7 @@ partner/manufacturer exports in the manifest format.
 
 ## Supabase setup
 
-Apply `supabase/migrations/20260716140000_product_image_gallery.sql`. It creates:
+Apply the image-gallery migration. It creates:
 
 - the public-read, service-write `dawanear_product_images` table;
 - the public `product-images` Storage bucket;
@@ -112,6 +112,23 @@ python scripts/enrich_product_images.py \
 The command exits non-zero if any selected live product has fewer than three
 validated images. Storage paths contain the processed image SHA-256, making
 repeated runs idempotent and avoiding stale overwritten CDN assets.
+
+On the linked MED+250 macOS operator machine, run the secret-free wrapper in a
+Terminal session so the process retains access to the external catalogue drive:
+
+```sh
+osascript -e 'tell application "Terminal" to do script \
+  "cd /Volumes/PRO-G40/MED250 && \
+   ./scripts/run_product_image_enrichment.zsh \
+   >> /tmp/med250-product-images-live.log 2>&1"'
+```
+
+The wrapper retrieves the authenticated Supabase CLI token from macOS Keychain,
+resolves the server-side project key in memory, verifies the dedicated
+`.venv-product-images` runtime is Python 3.11+ with every exact dependency pin,
+and resumes from the SQLite checkpoint. It fails closed instead of falling back
+to the macOS system Python. Separate `--offset`, `--limit`, `--checkpoint`, and
+`--report` arguments can be used to run non-overlapping shards in parallel.
 
 ## Verify
 

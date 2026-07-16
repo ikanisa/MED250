@@ -6,7 +6,7 @@ Decision: conditional hold pending accountable evidence
 
 ## Current outcome
 
-The complete machine-executable implementation and verification scope is passing. The public MED+250 catalogue is live, the current seven-route deployment verifies successfully, the Supabase contract is at `2026-07-16.7`, all six reviewed Edge Functions are deployed and protected, prescription cleanup is scheduled, and the central catalogue model is enforced.
+The complete machine-executable implementation and verification scope is passing. The public MED+250 catalogue is live, the current seven-route deployment verifies successfully, the Supabase contract is at `2026-07-16.8`, all six reviewed Edge Functions are deployed and protected, prescription cleanup is scheduled, the central catalogue model is enforced, and product imagery now fails closed unless exact reuse rights are explicitly verified.
 
 The strict production release cannot yet be honestly marked complete. Its remaining work consists of accountable human approvals, authoritative data decisions, credential rotation evidence, controlled security tests, and physical-device UAT. These are release evidence requirements, not unresolved application defects.
 

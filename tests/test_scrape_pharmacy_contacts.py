@@ -187,6 +187,18 @@ class PharmacyScraperTests(unittest.TestCase):
             )
         )
 
+    def test_google_phone_revalidation_preserves_only_public_numbers(self):
+        result = {
+            "phone_number": "+250788111111; +250722222222",
+            "public_phone_numbers": "+250788111111",
+            "google_maps_phone_numbers": "+250722222222",
+            "phone_source": "public_evidence_csv+google_maps_browser",
+        }
+        stripped = MODULE.without_google_phone(result)
+        self.assertEqual(stripped["phone_number"], "+250788111111")
+        self.assertEqual(stripped["google_maps_phone_numbers"], "")
+        self.assertEqual(stripped["phone_source"], "public_evidence_csv")
+
     def test_candidate_scoring_rewards_exact_name_and_locality(self):
         row = {
             "name": "PRECIOUS PHARMACY LTD",

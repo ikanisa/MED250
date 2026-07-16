@@ -1260,6 +1260,10 @@ body { background:var(--clay-page-cool); }
   background-size:160% 160%;
   transition:background-position .25s ease,transform .2s ease,box-shadow .2s ease;
 }
+.header-search button svg {
+  color:var(--color-white)!important;
+  stroke:currentColor;
+}
 .header-search button:hover,.network-strip>button:hover,.primary-wide:hover,.shop-button:hover,.product-detail-buy button:hover,.info-callout a:hover,.state-page a:hover,.state-page button:hover {
   background-position:100% 50%;
 }
@@ -1721,6 +1725,11 @@ textarea:focus,
   color:var(--color-ink-soft);
   background:linear-gradient(145deg,var(--alpha-white-30),var(--alpha-white-30));
   box-shadow:none;
+}
+.site-header .bag-button>b {
+  color:var(--color-white)!important;
+  -webkit-text-fill-color:var(--color-white);
+  background:var(--clay-action);
 }
 .location-button:hover,
 .delivery-location:hover,

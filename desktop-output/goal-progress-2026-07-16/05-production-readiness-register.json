@@ -62,7 +62,7 @@
     "seller_model": "Only pharmacies participate as fulfilment sellers. Products and indicative prices are central; pharmacies privately confirm availability and may optionally add a non-final estimate during customer interaction."
   },
   "backend": {
-    "contract_version": "2026-07-16.7",
+    "contract_version": "2026-07-16.8",
     "migration_ledger": "aligned_at_last_privileged_verification",
     "publication_audit_constraint": "active",
     "edge_functions": {

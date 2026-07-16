@@ -84,3 +84,18 @@ python3 scripts/scrape_pharmacy_contacts.py \
 A high-confidence resolved listing/page URL replaces the generated search URL when Google exposes one. Ambiguous and unmatched rows retain a pharmacy-specific Google Maps search URL, so all 725 rows have a useful Maps link without falsely attaching another pharmacy's listing. Phones remain blank where no sufficiently reliable public phone can be found; the audit file makes those gaps explicit.
 
 These outputs are evidence candidates, not production approval. A public phone or Maps phone must never be inferred to be an authorized pharmacy WhatsApp identity. Production contact promotion still requires the governed single-record review workflow, exact source evidence, and an accountable reviewer.
+
+After two complete runs, generate one policy-sanitized private reviewer packet:
+
+```bash
+npm run ops:contacts:candidates:packet
+```
+
+The command reapplies the current pharmacy-identity guard, removes stale
+resolved listings and Maps phones that no longer satisfy it, reconciles the
+December evidence against the authoritative May 2026 retail register, and
+writes only ignored private files under `work/`. Its generated SQL is an
+unapplied review candidate: it can create phone-only contacts and evidence
+links, never WhatsApp identities or login permission. Do not apply it until
+the registry-review, source-reuse, and accountable operations approvals are
+complete.

@@ -119,10 +119,14 @@ Turnstile positive-path test:
 
 1. Use the production hostname in a controlled browser.
 2. Complete the real production widget.
-3. Create only a disposable anonymous Supabase identity.
-4. Do not submit an availability request and do not contact a pharmacy.
-5. Delete the disposable identity.
-6. Record the redacted result and confirm that missing and invalid tokens remain rejected.
+3. Put the short-lived token only in the operator process environment.
+4. Run `npm run security:turnstile:verify -- --require-valid` with the protected
+   Supabase URL, publishable key, and server key in that same process.
+5. The verifier first proves missing and invalid tokens cannot create users,
+   creates only one disposable anonymous identity with the valid token, revokes
+   its session, deletes it, and confirms the aggregate user count is restored.
+6. Do not submit an availability request or contact a pharmacy.
+7. Retain the redacted command result without the token or identity.
 
 Rate-limit test:
 
@@ -139,7 +143,7 @@ Gates:
 - `MED250_GATE_SECURITY_HARDENING_DEPLOYED`
 - `MED250_GATE_EDGE_FUNCTIONS_DEPLOYED`
 
-The required deployment and test artifacts already exist. The backend owner must inspect them, verify the current live contract remains `2026-07-16.7`, verify the six function versions and protected probes, and add their name, role, and timezone-qualified approval to the registry. If privileged credentials have since changed, rerun:
+The required deployment and test artifacts already exist. The backend owner must inspect them, verify the current live contract remains `2026-07-16.8`, verify the six function versions and protected probes, and add their name, role, and timezone-qualified approval to the registry. If privileged credentials have since changed, rerun:
 
 ```sh
 npm run backend:verify

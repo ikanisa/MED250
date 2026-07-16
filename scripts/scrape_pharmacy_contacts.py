@@ -655,12 +655,10 @@ class GoogleMapsBrowser:
             'a[href^="tel:"], [data-tooltip*="phone" i]'
           )
         ];
-        const pageText = document.querySelector('[role="main"]')?.innerText || document.body?.innerText || '';
-        const visiblePhones = pageText.match(/(?<!\\d)(?:(?:\\+|00)?250[\\s().-]*|0)(?:(?:7[2389])|(?:2\\d))(?:[\\s().-]*\\d){7}(?!\\d)/g) || [];
         return {
           name: first(['h1.DUwDvf','h1','[role="main"] h1']),
           address: first(['button[data-item-id="address"]','[data-item-id="address"]','button[aria-label^="Address:"]']),
-          phone: [...phoneElements.map(text), ...phoneElements.map(el => el.getAttribute('href') || ''), ...visiblePhones].join(' | ')
+          phone: [...phoneElements.map(text), ...phoneElements.map(el => el.getAttribute('href') || '')].join(' | ')
         };
         """
         return dict(self.driver.execute_script(script) or {})
@@ -956,19 +954,76 @@ def merge_observations(previous: dict[str, Any] | None, current: dict[str, Any])
     return merged
 
 
-def has_trusted_phone(result: dict[str, Any] | None) -> bool:
+def sanitize_observation(
+    result: dict[str, Any],
+    source_row: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Remove stale resolved listings that no longer satisfy identity policy."""
+    sanitized = dict(result)
+    source = source_row or result
+    maps_url = clean_maps_url(sanitized.get("google_maps_url"))
+    if "/maps/place/" not in maps_url:
+        return sanitized
+    score, evidence = candidate_score(
+        source.get("name", ""),
+        source.get("district", ""),
+        source.get("sector", ""),
+        source.get("cell", ""),
+        sanitized.get("matched_name", ""),
+        sanitized.get("matched_address", ""),
+    )
+    identity_valid = (
+        str(sanitized.get("match_status") or "").startswith("matched")
+        and has_pharmacy_identity_evidence(
+            source.get("name", ""),
+            sanitized.get("matched_name", ""),
+            sanitized.get("matched_address", ""),
+            evidence,
+        )
+    )
+    if identity_valid:
+        return sanitized
+
+    public_phones = extract_rwanda_phones(
+        sanitized.get("public_phone_numbers")
+        or (
+            sanitized.get("phone_number")
+            if sanitized.get("phone_source")
+            in {"public_evidence_csv", "public_evidence_csv+google_maps_browser"}
+            else ""
+        )
+    )
+    sanitized["public_phone_numbers"] = unique_join(public_phones)
+    sanitized["google_maps_phone_numbers"] = ""
+    sanitized["phone_number"] = unique_join(public_phones)
+    sanitized["phone_source"] = "public_evidence_csv" if public_phones else ""
+    sanitized["google_maps_url"] = maps_search_url(source)
+    sanitized["maps_url_source"] = "generated_google_maps_search"
+    sanitized["match_status"] = (
+        "phone_from_public_evidence"
+        if public_phones
+        else ("needs_review" if score >= 0.58 else "unmatched")
+    )
+    return sanitized
+
+
+def has_trusted_phone(
+    result: dict[str, Any] | None,
+    source_row: dict[str, Any] | None = None,
+) -> bool:
     if not result:
         return False
     if extract_rwanda_phones(result.get("public_phone_numbers")):
         return True
     if result.get("phone_source") in {"public_evidence_csv", "public_evidence_csv+google_maps_browser"}:
         return bool(extract_rwanda_phones(result.get("phone_number")))
+    source = source_row or result
     maps_url = clean_maps_url(result.get("google_maps_url"))
     _, evidence = candidate_score(
-        result.get("name", ""),
-        result.get("district", ""),
-        result.get("sector", ""),
-        result.get("cell", ""),
+        source.get("name", ""),
+        source.get("district", ""),
+        source.get("sector", ""),
+        source.get("cell", ""),
         result.get("matched_name", ""),
         result.get("matched_address", ""),
     )
@@ -976,7 +1031,7 @@ def has_trusted_phone(result: dict[str, Any] | None) -> bool:
         str(result.get("match_status") or "").startswith("matched")
         and "/maps/place/" in maps_url
         and has_pharmacy_identity_evidence(
-            result.get("name", ""),
+            source.get("name", ""),
             result.get("matched_name", ""),
             result.get("matched_address", ""),
             evidence,
@@ -987,6 +1042,26 @@ def has_trusted_phone(result: dict[str, Any] | None) -> bool:
             )
         )
     )
+
+
+def without_google_phone(result: dict[str, Any] | None) -> dict[str, Any] | None:
+    if not result:
+        return result
+    stripped = dict(result)
+    public_phones = extract_rwanda_phones(
+        stripped.get("public_phone_numbers")
+        or (
+            stripped.get("phone_number")
+            if stripped.get("phone_source")
+            in {"public_evidence_csv", "public_evidence_csv+google_maps_browser"}
+            else ""
+        )
+    )
+    stripped["public_phone_numbers"] = unique_join(public_phones)
+    stripped["google_maps_phone_numbers"] = ""
+    stripped["phone_number"] = unique_join(public_phones)
+    stripped["phone_source"] = "public_evidence_csv" if public_phones else ""
+    return stripped
 
 
 def atomic_write_csv(path: Path, rows: Sequence[dict[str, Any]], columns: Sequence[str]) -> None:
@@ -1008,7 +1083,13 @@ def atomic_write_csv(path: Path, rows: Sequence[dict[str, Any]], columns: Sequen
 
 def combine(source_rows: Sequence[dict[str, str]], results: dict[int, dict[str, Any]]) -> list[dict[str, Any]]:
     return [
-        {**row, **(results.get(int(row["source_serial"])) or blank_result(row))}
+        {
+            **row,
+            **sanitize_observation(
+                results.get(int(row["source_serial"])) or blank_result(row),
+                row,
+            ),
+        }
         for row in source_rows
     ]
 
@@ -1047,6 +1128,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--only-missing-phone",
         action="store_true",
         help="Search only rows that still lack a trusted official or canonical Maps phone",
+    )
+    parser.add_argument(
+        "--revalidate-google-phones",
+        action="store_true",
+        help="Recheck rows with Google phones and replace prior Google phone observations",
     )
     parser.add_argument("--expected-rows", type=int, default=725)
     parser.add_argument("--start-serial", type=int, default=1)
@@ -1105,6 +1191,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             cached = store.get(fingerprint, row)
             if cached is not None:
                 serial = int(row["source_serial"])
+                cached = sanitize_observation(cached, row)
                 previous_results[serial] = cached
                 results[serial] = cached
                 if not args.refresh and (
@@ -1118,12 +1205,25 @@ def main(argv: Sequence[str] | None = None) -> int:
             if int(row["source_serial"]) >= args.start_serial
             and (not args.end_serial or int(row["source_serial"]) <= args.end_serial)
         ]
+        if args.revalidate_google_phones:
+            selected = [
+                row
+                for row in selected
+                if extract_rwanda_phones(
+                    previous_results.get(int(row["source_serial"]), {}).get(
+                        "google_maps_phone_numbers"
+                    )
+                )
+            ]
         if args.only_missing_phone:
             selected = [
                 row
                 for row in selected
                 if evidence.match(row) is None
-                and not has_trusted_phone(previous_results.get(int(row["source_serial"])))
+                and not has_trusted_phone(
+                    previous_results.get(int(row["source_serial"])),
+                    row,
+                )
             ]
         if args.missing_phone_first:
             selected.sort(key=lambda row: (evidence.match(row) is not None, int(row["source_serial"])))
@@ -1168,7 +1268,13 @@ def main(argv: Sequence[str] | None = None) -> int:
                     results[serial] = result
                     store.put(fingerprint, row, result)
                     raise
-            result = merge_observations(previous_results.get(serial), result)
+            previous = previous_results.get(serial)
+            if args.revalidate_google_phones:
+                previous = without_google_phone(previous)
+            result = sanitize_observation(
+                merge_observations(previous, result),
+                row,
+            )
             results[serial] = result
             store.put(fingerprint, row, result)
             processed += 1

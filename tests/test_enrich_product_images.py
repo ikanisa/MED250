@@ -44,6 +44,83 @@ class ProductImagePipelineTests(unittest.TestCase):
         self.assertTrue(
             all(item.rights_basis == MODULE.AUTOMATED_PROVENANCE for item in result["AMZ-B004L5JCZ4"])
         )
+        self.assertTrue(
+            all(not item.rights_verified for item in result["AMZ-B004L5JCZ4"])
+        )
+
+    def test_manifest_requires_explicit_true_for_reuse_rights(self):
+        payload = [
+            {
+                "product_id": "p1",
+                "source_page_url": "https://manufacturer.example/products/p1",
+                "source_kind": "manufacturer",
+                "rights_basis": "Signed manufacturer catalogue licence.",
+                "rights_verified": True,
+                "images": ["https://manufacturer.example/images/p1.jpg"],
+            },
+            {
+                "product_id": "p2",
+                "source_page_url": "https://manufacturer.example/products/p2",
+                "source_kind": "manufacturer",
+                "rights_basis": "Unreviewed manufacturer page.",
+                "rights_verified": "yes",
+                "images": ["https://manufacturer.example/images/p2.jpg"],
+            },
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "rights.json"
+            path.write_text(json.dumps(payload), encoding="utf-8")
+            result = MODULE.load_candidate_manifests([path])
+        self.assertTrue(result["p1"][0].rights_verified)
+        self.assertFalse(result["p2"][0].rights_verified)
+
+    def test_publication_payload_carries_explicit_rights_decision(self):
+        candidate = MODULE.Candidate(
+            "p",
+            "https://manufacturer.example/i.jpg",
+            "https://manufacturer.example/p",
+            "manufacturer.example",
+            "manufacturer",
+            "Signed manufacturer catalogue licence.",
+            100,
+            rights_verified=True,
+        )
+        image = MODULE.ProcessedImage(
+            candidate, b"a", 1400, 1400, 99, "a" * 64, "0" * 16, True
+        )
+        self.assertIs(image.publication_payload()["rights_verified"], True)
+
+    def test_publication_gate_rejects_unverified_gallery_and_old_checkpoint(self):
+        verified = MODULE.Candidate(
+            "p",
+            "https://manufacturer.example/i.jpg",
+            "https://manufacturer.example/p",
+            "manufacturer.example",
+            "manufacturer",
+            "Signed manufacturer catalogue licence.",
+            100,
+            rights_verified=True,
+        )
+        unverified = MODULE.Candidate(
+            "p",
+            "https://retailer.example/i.jpg",
+            "https://retailer.example/p",
+            "retailer.example",
+            "specialist_retailer",
+            MODULE.AUTOMATED_PROVENANCE,
+            60,
+        )
+        images = [
+            MODULE.ProcessedImage(verified, b"a", 1400, 1400, 99, "a" * 64, "0" * 16, True),
+            MODULE.ProcessedImage(verified, b"b", 1400, 1400, 98, "b" * 64, "1" * 16, True),
+            MODULE.ProcessedImage(unverified, b"c", 1400, 1400, 97, "c" * 64, "2" * 16, True),
+        ]
+        self.assertFalse(MODULE.images_have_verified_rights(images))
+        self.assertFalse(
+            MODULE.checkpoint_is_rights_verified_publication(
+                {"status": "published", "payload": {"images": [{}, {}, {}]}}
+            )
+        )
 
     def test_rejects_private_and_non_http_urls(self):
         with self.assertRaises(MODULE.PipelineError):
@@ -109,11 +186,15 @@ class ProductImagePipelineTests(unittest.TestCase):
             "Approved manufacturer page.",
             100,
         )
+        candidates = [
+            MODULE.replace(candidate, image_url=f"https://example.com/{name}.jpg")
+            for name in ("a", "b", "c", "d")
+        ]
         images = [
-            MODULE.ProcessedImage(candidate, b"a", 1400, 1400, 99, "a" * 64, "0000000000000000", True),
-            MODULE.ProcessedImage(candidate, b"b", 1400, 1400, 98, "b" * 64, "0000000000000001", True),
-            MODULE.ProcessedImage(candidate, b"c", 1400, 1400, 97, "c" * 64, "ffffffffffffffff", True),
-            MODULE.ProcessedImage(candidate, b"d", 1400, 1400, 96, "d" * 64, "0f0f0f0f0f0f0f0f", True),
+            MODULE.ProcessedImage(candidates[0], b"a", 1400, 1400, 99, "a" * 64, "0000000000000000", True),
+            MODULE.ProcessedImage(candidates[1], b"b", 1400, 1400, 98, "b" * 64, "0000000000000001", True),
+            MODULE.ProcessedImage(candidates[2], b"c", 1400, 1400, 97, "c" * 64, "ffffffffffffffff", True),
+            MODULE.ProcessedImage(candidates[3], b"d", 1400, 1400, 96, "d" * 64, "0f0f0f0f0f0f0f0f", True),
         ]
         selected = MODULE.select_distinct_images(images)
         self.assertEqual(
@@ -185,6 +266,73 @@ class ProductImagePipelineTests(unittest.TestCase):
                 "Aveeno Daily Moisturizing Cocoa Butter Body Wash 18 oz",
             ),
             0.5,
+        )
+
+    def test_medicine_identity_rejects_unrelated_spectrum_supplement(self):
+        product = MODULE.Product(
+            id="rwanda-fda-hm-0907",
+            name="SPECTRUM-250",
+            brand="SPECTRUM-250",
+            generic="Ciprofloxacin",
+            strength="250 mg",
+            form="Tablets",
+            pack_size="Box/10",
+            manufacturer="LABORATOIRES COOPER PHARMA",
+            source_url="",
+            asin="",
+            group="medicine",
+        )
+        unrelated = MODULE.Candidate(
+            product.id,
+            "https://example.com/antler-velvet-full-spectrum-250-mg.jpg",
+            "https://example.com/antler-velvet-full-spectrum-250-mg",
+            "example.com",
+            "specialist_retailer",
+            MODULE.AUTOMATED_PROVENANCE,
+            65,
+            "Antler Velvet Full Spectrum 250 Mg by Planetary Herbals",
+        )
+        exact = MODULE.Candidate(
+            product.id,
+            "https://example.com/spectrum-250.jpg",
+            "https://example.com/spectrum-250",
+            "example.com",
+            "specialist_retailer",
+            MODULE.AUTOMATED_PROVENANCE,
+            65,
+            "SPECTRUM-250 ciprofloxacine 250 mg",
+        )
+        self.assertFalse(
+            MODULE.medicine_identity_evidence(
+                product,
+                "Antler Velvet Full Spectrum 250 Mg Planetary Herbals",
+            )
+        )
+        self.assertTrue(
+            MODULE.medicine_identity_evidence(
+                product,
+                "Spectrum ciprofloxacine 250 mg Cooper",
+            )
+        )
+        self.assertLess(MODULE.candidate_identity_score(product, unrelated), 0.85)
+        self.assertGreaterEqual(MODULE.candidate_identity_score(product, exact), 0.95)
+
+    def test_reads_text_from_current_and_legacy_rapidocr_results(self):
+        modern = type("RapidOutput", (), {"txts": ("PARACETAMOL", "500 MG")})()
+        legacy = (
+            [
+                ([[0, 0], [1, 0], [1, 1], [0, 1]], "PARACETAMOL", 0.99),
+                ([[0, 0], [1, 0], [1, 1], [0, 1]], "500 MG", 0.98),
+            ],
+            [0.01, 0.01, 0.01],
+        )
+        self.assertEqual(
+            MODULE.rapidocr_text_items(modern),
+            ["PARACETAMOL", "500 MG"],
+        )
+        self.assertEqual(
+            MODULE.rapidocr_text_items(legacy),
+            ["PARACETAMOL", "500 MG"],
         )
 
 

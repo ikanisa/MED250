@@ -6,7 +6,7 @@
   "status": "complete",
   "title": "Production backend contract and catalogue security verification",
   "summary": "The privileged aggregate verifier passed every database, privacy, catalogue, pricing, image, audit, realtime, and least-privilege invariant, and the complete Node and pinned Python dependency audits reported no known vulnerabilities.",
-  "recorded_at": "2026-07-16T10:38:03Z",
+  "recorded_at": "2026-07-16T11:06:19Z",
   "recorded_by": "Codex automated verifier",
   "recorded_role": "Release verification agent",
   "redactions_confirmed": true,
@@ -14,7 +14,7 @@
     {
       "name": "Backend contract version",
       "status": "passed",
-      "detail": "The expected and observed production backend contract versions both equal 2026-07-16.7."
+      "detail": "The expected and observed production backend contract versions both equal 2026-07-16.8."
     },
     {
       "name": "Catalogue governance",
@@ -32,6 +32,11 @@
       "detail": "Every expected protected table and function boundary passed without unexpected anonymous or authenticated access."
     },
     {
+      "name": "Product-image reuse-rights boundary",
+      "status": "passed",
+      "detail": "The live contract reports zero unsafe public images, zero approved unverified images, zero catalogue image links, an empty public Storage bucket, and a validated explicit-rights database constraint."
+    },
+    {
       "name": "Node dependency vulnerability audit",
       "status": "passed",
       "detail": "The complete production and development dependency tree reported zero known vulnerabilities after replacing the vulnerable development-only esbuild dependency."
@@ -39,16 +44,16 @@
     {
       "name": "Python dependency vulnerability audit",
       "status": "passed",
-      "detail": "All nine exactly pinned scraper and product-image dependencies reported zero known vulnerabilities in OSV; secure Python 3.11 wheels were also verified available."
+      "detail": "All ten exactly pinned scraper and product-image dependencies reported zero known vulnerabilities in OSV; the dedicated secure Python runtime passed its dependency consistency check."
     },
     {
       "name": "Integrated automated regression suite",
       "status": "passed",
-      "detail": "The release gate completed 151 Node tests and 32 Python pipeline tests with zero failures."
+      "detail": "The release gate completed 159 Node tests and 41 Python pipeline tests with zero failures."
     }
   ],
   "executed_by": "Codex automated verifier",
   "executor_role": "Release verification agent",
-  "started_at": "2026-07-16T10:08:45Z",
-  "completed_at": "2026-07-16T10:38:03Z"
+  "started_at": "2026-07-16T11:04:00Z",
+  "completed_at": "2026-07-16T11:06:19Z"
 }

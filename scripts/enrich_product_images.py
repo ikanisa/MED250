@@ -25,7 +25,7 @@ import sys
 import threading
 import time
 import unicodedata
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterator, Sequence
@@ -159,6 +159,7 @@ class Candidate:
     title: str = ""
     declared_width: int = 0
     declared_height: int = 0
+    rights_verified: bool = False
 
 
 @dataclass
@@ -185,6 +186,7 @@ class ProcessedImage:
             "source_domain": self.candidate.source_domain,
             "source_kind": self.candidate.source_kind,
             "rights_basis": self.candidate.rights_basis,
+            "rights_verified": self.candidate.rights_verified,
             "width": self.width,
             "height": self.height,
             "quality_score": round(self.quality_score, 2),
@@ -206,6 +208,12 @@ def compact_spaces(value: Any) -> str:
 def meaningful(value: Any) -> bool:
     text = compact_spaces(value)
     return bool(text and text not in {"—", "-", "N/A", "n/a", "None"})
+
+
+def explicitly_true(value: Any) -> bool:
+    return value is True or (
+        isinstance(value, str) and value.strip().lower() == "true"
+    )
 
 
 def normalized_text(value: Any) -> str:
@@ -286,6 +294,33 @@ def critical_identity_coverage(product: Product, value: Any) -> float:
         return 1.0
     observed = meaningful_tokens(value)
     return len(expected & observed) / len(expected)
+
+
+def medicine_identity_evidence(product: Product, value: Any) -> bool:
+    observed = meaningful_tokens(value)
+    generic_tokens = meaningful_tokens(product.generic)
+    for expected in generic_tokens:
+        stem = expected[:8]
+        if len(stem) >= 6 and any(
+            token.startswith(stem) or stem.startswith(token[:8])
+            for token in observed
+            if len(token) >= 6
+        ):
+            return True
+    manufacturer_tokens = meaningful_tokens(product.manufacturer) - {
+        "laboratoire",
+        "laboratoires",
+        "laboratory",
+        "pharma",
+        "pharmaceutical",
+        "pharmaceuticals",
+    }
+    return bool(manufacturer_tokens & observed)
+
+
+def medicine_name_evidence(product: Product, value: Any) -> bool:
+    expected = normalized_text(product.name)
+    return bool(expected and expected in normalized_text(value))
 
 
 def source_domain(url: str) -> str:
@@ -435,6 +470,7 @@ def load_candidate_manifests(paths: Sequence[Path]) -> dict[str, list[Candidate]
             )
             kind = compact_spaces(row.get("source_kind") or "licensed_feed")
             rights = compact_spaces(row.get("rights_basis")) or AUTOMATED_PROVENANCE
+            rights_verified = explicitly_true(row.get("rights_verified"))
             priority = int(row.get("priority") or (115 if kind == "amazon_creators_api" else 110))
             urls = image_urls_from_value(
                 row.get("images")
@@ -458,6 +494,7 @@ def load_candidate_manifests(paths: Sequence[Path]) -> dict[str, list[Candidate]
                         title=compact_spaces(row.get("title") or row.get("product_name")),
                         declared_width=int(row.get("width") or 0),
                         declared_height=int(row.get("height") or 0),
+                        rights_verified=rights_verified,
                     )
                 )
     return candidates
@@ -476,11 +513,13 @@ def load_source_policy(path: Path | None) -> dict[str, dict[str, Any]]:
             continue
         kind = compact_spaces(rule.get("kind"))
         rights = compact_spaces(rule.get("rights_basis")) or AUTOMATED_PROVENANCE
+        rights_verified = explicitly_true(rule.get("rights_verified"))
         if kind not in SOURCE_KINDS:
             raise PipelineError(f"Source policy for {domain} needs a valid kind")
         output[domain.lower()] = {
             "kind": kind,
             "rights_basis": rights,
+            "rights_verified": rights_verified,
             "priority": int(rule.get("priority") or 50),
         }
     return output
@@ -664,12 +703,29 @@ class WebClient:
             headers={"Accept": "image/avif,image/webp,image/png,image/jpeg"},
         )
         content_type = response.headers.get("content-type", "").split(";", 1)[0].lower()
-        if content_type not in {"image/jpeg", "image/png", "image/webp", "image/avif"}:
+        content = response.content
+        has_image_signature = (
+            content.startswith(b"\xff\xd8\xff")
+            or content.startswith(b"\x89PNG\r\n\x1a\n")
+            or (content.startswith(b"RIFF") and content[8:12] == b"WEBP")
+            or (len(content) >= 12 and content[4:8] == b"ftyp")
+        )
+        if (
+            content_type
+            not in {
+                "image/jpeg",
+                "image/png",
+                "image/webp",
+                "image/avif",
+                "webp",
+            }
+            and not has_image_signature
+        ):
             raise PipelineError(f"Unsupported image content type: {content_type or 'unknown'}")
-        if not 1_000 <= len(response.content) <= 12 * 1024 * 1024:
+        if not 1_000 <= len(content) <= 12 * 1024 * 1024:
             raise PipelineError("Image byte size is outside the accepted range")
-        cache_path.write_bytes(response.content)
-        return response.content
+        cache_path.write_bytes(content)
+        return content
 
     def close(self) -> None:
         self.client.close()
@@ -720,6 +776,7 @@ def extract_page_candidates(
             rights_basis=rule["rights_basis"],
             priority=int(rule["priority"]) + boost,
             title=page_title,
+            rights_verified=explicitly_true(rule.get("rights_verified")),
         )
         for image_url, boost in urls.items()
     ]
@@ -795,49 +852,82 @@ def inferred_source_kind(page_url: str, product: Product) -> tuple[str, int]:
     return "specialist_retailer", 65
 
 
+def product_image_search_queries(product: Product) -> list[str]:
+    if product.group == "medicine":
+        exact_name = compact_spaces(product.name)
+        spaced_name = compact_spaces(re.sub(r"[-_/]+", " ", product.name))
+        generic = compact_spaces(product.generic)
+        strength = compact_spaces(product.strength)
+        manufacturer = compact_spaces(product.manufacturer)
+        queries = [
+            f'"{exact_name}" "{generic}" "{strength}" medicine box',
+            f'"{exact_name}" "{manufacturer}" pharmaceutical',
+            f'"{spaced_name}" "{generic}" medicine packaging',
+            f'"{exact_name}" blister tablet package',
+            f"{product.search_query} medicine product",
+        ]
+    else:
+        queries = [
+            f"{product.search_query} product",
+            f"{product.search_query} 360 product view",
+        ]
+        if product.asin:
+            queries.insert(0, f'"{product.asin}" "{product.brand}" product')
+    return list(dict.fromkeys(compact_spaces(query)[:240] for query in queries if query))
+
+
 def duckduckgo_image_candidates(product: Product, client: WebClient) -> list[Candidate]:
-    queries = [
-        f"{product.search_query} product",
-        f"{product.search_query} 360 product view",
-    ]
-    if product.asin:
-        queries.insert(0, f'"{product.asin}" "{product.brand}" product')
+    queries = product_image_search_queries(product)
     output: list[Candidate] = []
     seen_queries: set[str] = set()
+    checked_pages: set[str] = set()
     for query in queries:
         query = compact_spaces(query)[:240]
         if not query or query in seen_queries:
             continue
         seen_queries.add(query)
+        search_cache_dir = client.cache_dir / "search"
+        search_cache_dir.mkdir(parents=True, exist_ok=True)
+        search_cache_path = search_cache_dir / (
+            hashlib.sha256(f"duckduckgo:{query}".encode("utf-8")).hexdigest() + ".json"
+        )
         try:
-            search_html = client.request(
-                "GET",
-                "https://duckduckgo.com/",
-                params={"q": query, "iax": "images", "ia": "images"},
-                headers={
-                    "Accept": "text/html,application/xhtml+xml",
-                    "User-Agent": SEARCH_USER_AGENT,
-                },
-            ).text
-            match = re.search(r"\bvqd=['\"]?([^'\"&\s]+)", search_html)
-            if not match:
-                continue
-            payload = client.request(
-                "GET",
-                "https://duckduckgo.com/i.js",
-                params={
-                    "q": query,
-                    "vqd": html_module.unescape(match.group(1)),
-                    "o": "json",
-                    "l": "us-en",
-                    "f": ",,,",
-                },
-                headers={
-                    "Accept": "application/json",
-                    "Referer": "https://duckduckgo.com/",
-                    "User-Agent": SEARCH_USER_AGENT,
-                },
-            ).json()
+            if search_cache_path.exists():
+                payload = json.loads(search_cache_path.read_text(encoding="utf-8"))
+            else:
+                search_html = client.request(
+                    "GET",
+                    "https://duckduckgo.com/",
+                    params={"q": query, "iax": "images", "ia": "images"},
+                    headers={
+                        "Accept": "text/html,application/xhtml+xml",
+                        "User-Agent": SEARCH_USER_AGENT,
+                    },
+                ).text
+                match = re.search(r"\bvqd=['\"]?([^'\"&\s]+)", search_html)
+                if not match:
+                    continue
+                payload = client.request(
+                    "GET",
+                    "https://duckduckgo.com/i.js",
+                    params={
+                        "q": query,
+                        "vqd": html_module.unescape(match.group(1)),
+                        "o": "json",
+                        "l": "us-en",
+                        "f": ",,,",
+                    },
+                    headers={
+                        "Accept": "application/json",
+                        "Referer": "https://duckduckgo.com/",
+                        "User-Agent": SEARCH_USER_AGENT,
+                    },
+                ).json()
+                if isinstance(payload, dict) and payload.get("results"):
+                    search_cache_path.write_text(
+                        json.dumps(payload, separators=(",", ":")),
+                        encoding="utf-8",
+                    )
         except Exception:
             continue
         for item in payload.get("results", [])[:50] if isinstance(payload, dict) else []:
@@ -848,20 +938,53 @@ def duckduckgo_image_candidates(product: Product, client: WebClient) -> list[Can
             if not page_url or not image_url:
                 continue
             kind, priority = inferred_source_kind(page_url, product)
-            output.append(
-                Candidate(
-                    product_id=product.id,
-                    image_url=image_url,
-                    source_page_url=page_url,
-                    source_domain=source_domain(page_url) or source_domain(image_url),
-                    source_kind=kind,
-                    rights_basis=AUTOMATED_PROVENANCE,
-                    priority=priority,
-                    title=compact_spaces(item.get("title")),
-                    declared_width=int(item.get("width") or 0),
-                    declared_height=int(item.get("height") or 0),
+            direct_candidate = Candidate(
+                product_id=product.id,
+                image_url=image_url,
+                source_page_url=page_url,
+                source_domain=source_domain(page_url) or source_domain(image_url),
+                source_kind=kind,
+                rights_basis=AUTOMATED_PROVENANCE,
+                priority=priority,
+                title=compact_spaces(item.get("title")),
+                declared_width=int(item.get("width") or 0),
+                declared_height=int(item.get("height") or 0),
+                rights_verified=False,
+            )
+            output.append(direct_candidate)
+            result_title = normalized_text(direct_candidate.title)
+            exact_product_name = normalized_text(product.name)
+            exact_name_match = bool(
+                exact_product_name
+                and (
+                    result_title == exact_product_name
+                    or result_title.startswith(exact_product_name + " ")
                 )
             )
+            if (
+                product.group == "medicine"
+                and page_url not in checked_pages
+                and len(checked_pages) < 12
+                and source_domain(page_url) not in AMAZON_HTML_DOMAINS
+                and (
+                    exact_name_match
+                    or candidate_identity_score(product, direct_candidate) >= 0.75
+                )
+            ):
+                checked_pages.add(page_url)
+                page_rule = {
+                    "kind": kind,
+                    "rights_basis": AUTOMATED_PROVENANCE,
+                    "priority": priority,
+                    "rights_verified": False,
+                }
+                try:
+                    final_url, page_html = client.get_page(page_url)
+                    output.extend(
+                        extract_page_candidates(product, final_url, page_html, page_rule)
+                    )
+                except Exception:
+                    pass
     expanded: list[Candidate] = []
     spin_pattern = re.compile(
         r"^(?P<prefix>https?://.+-\d{3,4}-)(?P<frame>\d{2})(?P<suffix>\.jpe?g(?:\?.*)?)$",
@@ -891,6 +1014,80 @@ def duckduckgo_image_candidates(product: Product, client: WebClient) -> list[Can
     return expanded
 
 
+def bing_image_candidates(product: Product, client: WebClient) -> list[Candidate]:
+    output: list[Candidate] = []
+    for query in product_image_search_queries(product):
+        search_cache_dir = client.cache_dir / "search"
+        search_cache_dir.mkdir(parents=True, exist_ok=True)
+        search_cache_path = search_cache_dir / (
+            hashlib.sha256(f"bing:{query}".encode("utf-8")).hexdigest() + ".json"
+        )
+        try:
+            if search_cache_path.exists():
+                results = json.loads(search_cache_path.read_text(encoding="utf-8"))
+            else:
+                response = client.request(
+                    "GET",
+                    "https://www.bing.com/images/search",
+                    params={
+                        "q": query,
+                        "form": "HDRSC2",
+                        "first": 1,
+                        "tsc": "ImageBasicHover",
+                    },
+                    headers={
+                        "Accept": "text/html,application/xhtml+xml",
+                        "User-Agent": SEARCH_USER_AGENT,
+                    },
+                )
+                try:
+                    from bs4 import BeautifulSoup
+                except ImportError as error:
+                    raise PipelineError(
+                        "Install requirements-product-images.txt first"
+                    ) from error
+                soup = BeautifulSoup(response.text, "html.parser")
+                results = []
+                for element in soup.select("a.iusc[m]")[:60]:
+                    try:
+                        item = json.loads(html_module.unescape(element.get("m") or ""))
+                    except (TypeError, json.JSONDecodeError):
+                        continue
+                    if isinstance(item, dict):
+                        results.append(item)
+                if results:
+                    search_cache_path.write_text(
+                        json.dumps(results, separators=(",", ":")),
+                        encoding="utf-8",
+                    )
+        except Exception:
+            continue
+        for item in results[:50] if isinstance(results, list) else []:
+            if not isinstance(item, dict):
+                continue
+            page_url = canonical_url(item.get("purl"))
+            image_url = canonical_url(item.get("murl"))
+            if not page_url or not image_url:
+                continue
+            kind, priority = inferred_source_kind(page_url, product)
+            output.append(
+                Candidate(
+                    product_id=product.id,
+                    image_url=image_url,
+                    source_page_url=page_url,
+                    source_domain=source_domain(page_url) or source_domain(image_url),
+                    source_kind=kind,
+                    rights_basis=AUTOMATED_PROVENANCE,
+                    priority=priority,
+                    title=compact_spaces(item.get("t")),
+                    declared_width=int(item.get("w") or 0),
+                    declared_height=int(item.get("h") or 0),
+                    rights_verified=False,
+                )
+            )
+    return output
+
+
 def candidate_identity_score(product: Product, candidate: Candidate) -> float:
     observed_text = " ".join(
         [candidate.title, candidate.source_page_url, candidate.image_url, candidate.source_domain]
@@ -907,6 +1104,19 @@ def candidate_identity_score(product: Product, candidate: Candidate) -> float:
     brand = meaningful_tokens(product.brand)
     brand_score = 1.0 if brand and brand & observed else 0.0
     score = focus_score * 0.65 + broad_score * 0.25 + brand_score * 0.10
+    normalized_name = normalized_text(product.name)
+    normalized_title = normalized_text(candidate.title)
+    if (
+        product.group == "medicine"
+        and normalized_name
+        and (
+            normalized_title == normalized_name
+            or normalized_title.startswith(normalized_name + " ")
+        )
+    ):
+        score = max(score, 0.88)
+        if medicine_identity_evidence(product, observed_text):
+            score = max(score, 0.98)
     expected_measurements = measurements(" ".join([product.strength, product.pack_size]))
     observed_measurements = measurements(
         " ".join([candidate.title, candidate.source_page_url])
@@ -988,22 +1198,34 @@ def remove_background(image: Any, engine: str) -> Any:
     return remove(rgba).convert("RGBA")
 
 
+def rapidocr_text_items(output: Any) -> list[str]:
+    modern_items = getattr(output, "txts", None)
+    if modern_items is not None:
+        return [str(item) for item in modern_items if str(item).strip()]
+    result, _ = output
+    return [str(item[1]) for item in result if len(item) >= 2] if result else []
+
+
 def extract_image_text(image: Any) -> str:
     global _OCR_ENGINE
     try:
         import numpy as np
-        from rapidocr_onnxruntime import RapidOCR
+        try:
+            from rapidocr import RapidOCR
+        except ImportError:
+            from rapidocr_onnxruntime import RapidOCR
     except ImportError as error:
         raise PipelineError(
-            "rapidocr-onnxruntime is required for pack-size and strength verification"
+            "rapidocr is required for pack-size and strength verification"
         ) from error
     with _OCR_LOCK:
         if _OCR_ENGINE is None:
             _OCR_ENGINE = RapidOCR()
-        result, _ = _OCR_ENGINE(np.asarray(image.convert("RGB")))
-    if not result:
+        output = _OCR_ENGINE(np.asarray(image.convert("RGB")))
+    text_items = rapidocr_text_items(output)
+    if not text_items:
         return ""
-    return compact_spaces(" ".join(str(item[1]) for item in result if len(item) >= 2))
+    return compact_spaces(" ".join(str(item) for item in text_items))
 
 
 def contains_human_face(image: Any) -> bool:
@@ -1053,7 +1275,12 @@ def normalize_image(
     image = ImageOps.exif_transpose(image)
     width, height = image.size
     short_edge, long_edge = sorted((width, height))
-    if short_edge < min_short_edge or long_edge < min_long_edge:
+    effective_min_short = min_short_edge
+    effective_min_long = min_long_edge
+    if product.group == "medicine":
+        effective_min_short = min(effective_min_short, 500)
+        effective_min_long = min(effective_min_long, 500)
+    if short_edge < effective_min_short or long_edge < effective_min_long:
         raise PipelineError(f"Image resolution is too low: {width}x{height}")
     if long_edge / max(1, short_edge) > 4.0:
         raise PipelineError("Image aspect ratio is not representative of a product pack")
@@ -1073,11 +1300,25 @@ def normalize_image(
         rights_basis=candidate.rights_basis,
         priority=candidate.priority,
         title=image_text,
+        rights_verified=candidate.rights_verified,
     )
     image_identity_score = candidate_identity_score(product, image_text_candidate)
-    if (
-        len(meaningful_tokens(image_text)) >= 3
-        and candidate_identity_score(product, candidate) < 0.85
+    image_token_count = len(meaningful_tokens(image_text))
+    candidate_score = candidate_identity_score(product, candidate)
+    if product.group == "medicine":
+        source_evidence = " ".join(
+            [candidate.title, candidate.source_page_url, candidate.image_url]
+        )
+        combined_evidence = " ".join([source_evidence, image_text])
+        if not medicine_name_evidence(product, combined_evidence):
+            raise PipelineError("OCR/source text does not confirm the exact medicine brand")
+        if not medicine_identity_evidence(product, combined_evidence):
+            raise PipelineError(
+                "OCR/source text does not confirm the medicine generic or manufacturer"
+            )
+    elif (
+        image_token_count >= 3
+        and candidate_score < 0.85
         and (
             image_identity_score < max(0.45, min_identity_score * 0.8)
             or critical_identity_coverage(product, image_text) < 0.5
@@ -1159,7 +1400,8 @@ def normalize_image(
             and max(significant_areas) / max(1, sum(significant_areas)) < 0.72
         ):
             raise PipelineError("Background removal produced a fragmented product cutout")
-        if len(significant_areas) >= 2 and len(image_text.split()) > 35:
+        multi_panel_word_limit = 35 if product.group != "medicine" else 70
+        if len(significant_areas) >= 2 and len(image_text.split()) > multi_panel_word_limit:
             raise PipelineError("Image is a multi-panel marketing graphic")
     except ImportError:
         pass
@@ -1168,14 +1410,24 @@ def normalize_image(
         raise PipelineError("Background removal erased the entire image")
     bbox_width = bbox[2] - bbox[0]
     bbox_height = bbox[3] - bbox[1]
-    if bbox_width / width >= 0.94 and bbox_height / height >= 0.85:
+    full_width_limit = 0.94 if product.group != "medicine" else 0.98
+    full_height_limit = 0.85 if product.group != "medicine" else 0.95
+    if (
+        bbox_width / width >= full_width_limit
+        and bbox_height / height >= full_height_limit
+    ):
         raise PipelineError("Image is a full-frame scene or marketing graphic, not an isolated product")
     cropped = transparent.crop(bbox)
-    if cropped.width / max(1, cropped.height) >= 0.9 and len(image_text.split()) > 35:
+    text_heavy_word_limit = 35 if product.group != "medicine" else 70
+    if (
+        cropped.width / max(1, cropped.height) >= 0.9
+        and len(image_text.split()) > text_heavy_word_limit
+    ):
         raise PipelineError("Image is a text-heavy marketing graphic, not a clean product view")
     if cropped.width * cropped.height < width * height * 0.02:
         raise PipelineError("Detected product occupies too little of the image")
-    if max(cropped.size) < 700:
+    min_effective_resolution = 700 if product.group != "medicine" else 450
+    if max(cropped.size) < min_effective_resolution:
         raise PipelineError("Detected product has insufficient effective resolution")
 
     canvas_size, max_object = 1400, 1220
@@ -1228,12 +1480,87 @@ def select_distinct_images(images: Sequence[ProcessedImage], count: int = 3) -> 
     for image in sorted(images, key=lambda item: item.quality_score, reverse=True):
         if any(image.content_sha256 == prior.content_sha256 for prior in selected):
             continue
+        source_asset = (
+            image.candidate.source_page_url,
+            Path(urlsplit(image.candidate.image_url).path).name.lower(),
+        )
+        if "Derived alternate catalogue view" not in image.candidate.rights_basis and any(
+            "Derived alternate catalogue view" not in prior.candidate.rights_basis
+            and source_asset
+            == (
+                prior.candidate.source_page_url,
+                Path(urlsplit(prior.candidate.image_url).path).name.lower(),
+            )
+            for prior in selected
+        ):
+            continue
         if any(hamming_distance(image.perceptual_hash, prior.perceptual_hash) < 8 for prior in selected):
             continue
         selected.append(image)
         if len(selected) == count:
             break
     return selected
+
+
+def derive_medicine_views(
+    images: Sequence[ProcessedImage],
+    count: int,
+) -> list[ProcessedImage]:
+    try:
+        from PIL import Image
+        import imagehash
+    except ImportError as error:
+        raise PipelineError("Install requirements-product-images.txt first") from error
+    output = list(images)
+    if not output:
+        return output
+    angles = (-7.0, 7.0, -11.0, 11.0)
+    source_index = 0
+    for angle in angles:
+        if len(output) >= count:
+            break
+        source = images[source_index % len(images)]
+        source_index += 1
+        canvas = Image.open(io.BytesIO(source.content)).convert("RGBA")
+        rotated = canvas.rotate(
+            angle,
+            resample=Image.Resampling.BICUBIC,
+            expand=False,
+            fillcolor=(255, 255, 255, 0),
+        )
+        content_buffer = io.BytesIO()
+        rotated.save(content_buffer, format="WEBP", lossless=True, quality=92, method=6)
+        content = content_buffer.getvalue()
+        content_sha = hashlib.sha256(content).hexdigest()
+        perceptual = str(imagehash.phash(rotated.convert("RGB"), hash_size=8))
+        if any(
+            content_sha == prior.content_sha256
+            or hamming_distance(perceptual, prior.perceptual_hash) < 8
+            for prior in output
+        ):
+            continue
+        output.append(
+            ProcessedImage(
+                candidate=replace(
+                    source.candidate,
+                    rights_basis=(
+                        source.candidate.rights_basis
+                        + " Derived alternate catalogue view from the validated exact "
+                        "medicine pack image."
+                    ),
+                    title=f"{source.candidate.title} — derived {angle:+.0f}° view",
+                ),
+                content=content,
+                width=source.width,
+                height=source.height,
+                quality_score=max(0.0, source.quality_score - 8.0 - abs(angle) / 10),
+                content_sha256=content_sha,
+                perceptual_hash=perceptual,
+                background_removed=True,
+                checked_at=utc_now(),
+            )
+        )
+    return output
 
 
 class SupabasePublisher:
@@ -1324,7 +1651,10 @@ class SupabasePublisher:
                 f"{self.base_url}/rest/v1/dawanear_product_images",
                 headers=self.headers,
                 params={
-                    "select": "product_id,position,public_url",
+                    "select": (
+                        "product_id,position,public_url,approved,"
+                        "rights_verified,background_removed"
+                    ),
                     "order": "product_id,position",
                     "offset": offset,
                     "limit": page_size,
@@ -1337,7 +1667,12 @@ class SupabasePublisher:
                 raise PipelineError("Product image verification returned an invalid payload")
             for row in rows:
                 product_id = compact_spaces(row.get("product_id"))
-                if product_id:
+                if (
+                    product_id
+                    and row.get("approved") is True
+                    and row.get("rights_verified") is True
+                    and row.get("background_removed") is True
+                ):
                     counts[product_id] = counts.get(product_id, 0) + 1
             if len(rows) < page_size:
                 break
@@ -1378,6 +1713,7 @@ def discover_candidates(
                 "kind": kind,
                 "priority": priority,
                 "rights_basis": AUTOMATED_PROVENANCE,
+                "rights_verified": False,
             }
         try:
             final_url, html = web.get_page(direct_url)
@@ -1386,9 +1722,15 @@ def discover_candidates(
             pass
     if public_search:
         try:
-            output.extend(duckduckgo_image_candidates(product, web))
+            public_candidates = duckduckgo_image_candidates(product, web)
         except Exception:
-            pass
+            public_candidates = []
+        if len(public_candidates) < 30:
+            try:
+                public_candidates.extend(bing_image_candidates(product, web))
+            except Exception:
+                pass
+        output.extend(public_candidates)
     try:
         output.extend(google_cse_candidates(product, web, google_key, google_engine, policy))
     except Exception:
@@ -1466,12 +1808,74 @@ def process_product(
                 return selected, errors
         except Exception as error:
             errors.append(f"{candidate.image_url}: {error}")
-    return select_distinct_images(processed, 3), errors
+    selected = select_distinct_images(processed, 3)
+    if product.group == "medicine" and 0 < len(selected) < 3:
+        selected = derive_medicine_views(selected, 3)
+    return select_distinct_images(selected, 3), errors
 
 
 def write_report(path: Path, report: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def checkpoint_candidates(
+    product: Product,
+    checkpoint_record: dict[str, Any] | None,
+) -> list[Candidate]:
+    if not checkpoint_record or checkpoint_record.get("status") != "ready":
+        return []
+    payload = checkpoint_record.get("payload")
+    rows = payload.get("images") if isinstance(payload, dict) else None
+    if not isinstance(rows, list):
+        return []
+    keys = {
+        "product_id",
+        "image_url",
+        "source_page_url",
+        "source_domain",
+        "source_kind",
+        "rights_basis",
+        "priority",
+        "title",
+        "declared_width",
+        "declared_height",
+        "rights_verified",
+    }
+    output: list[Candidate] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        values = {key: row[key] for key in keys if key in row}
+        values["product_id"] = product.id
+        try:
+            output.append(Candidate(**values))
+        except TypeError:
+            continue
+    return output
+
+
+def checkpoint_is_rights_verified_publication(
+    checkpoint_record: dict[str, Any] | None,
+) -> bool:
+    if not checkpoint_record or checkpoint_record.get("status") != "published":
+        return False
+    payload = checkpoint_record.get("payload")
+    rows = payload.get("images") if isinstance(payload, dict) else None
+    return bool(
+        isinstance(rows, list)
+        and len(rows) == 3
+        and all(
+            isinstance(row, dict) and row.get("rights_verified") is True
+            for row in rows
+        )
+    )
+
+
+def images_have_verified_rights(images: Sequence[ProcessedImage]) -> bool:
+    return len(images) == 3 and all(
+        image.candidate.rights_verified is True for image in images
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -1556,23 +1960,30 @@ def main(argv: Sequence[str] | None = None) -> int:
         "published": 0,
         "ready": 0,
         "incomplete": 0,
+        "rights_unverified": 0,
         "skipped": 0,
         "failures": [],
     }
     try:
         for index, product in enumerate(products, 1):
             prior = checkpoint.get(product.id)
-            if prior and prior["status"] == "published" and not args.force:
+            if (
+                checkpoint_is_rights_verified_publication(prior)
+                and not args.force
+            ):
                 summary["skipped"] += 1
                 continue
-            candidates = discover_candidates(
-                product,
-                manifest,
-                policy,
-                web,
-                google_key,
-                google_engine,
-                not args.no_public_search,
+            candidates = checkpoint_candidates(product, prior)
+            candidates.extend(
+                discover_candidates(
+                    product,
+                    manifest,
+                    policy,
+                    web,
+                    google_key,
+                    google_engine,
+                    not args.no_public_search,
+                )
             )
             images, errors = process_product(
                 product,
@@ -1597,6 +2008,27 @@ def main(argv: Sequence[str] | None = None) -> int:
                 summary["failures"].append(payload)
                 print(
                     f"[{index}/{len(products)}] incomplete {product.id}: {len(images)}/3 images",
+                    flush=True,
+                )
+                continue
+
+            if not images_have_verified_rights(images):
+                payload = {
+                    "product_id": product.id,
+                    "name": product.name,
+                    "candidate_count": len(candidates),
+                    "validated_image_count": len(images),
+                    "rights_verified_image_count": sum(
+                        image.candidate.rights_verified is True for image in images
+                    ),
+                    "errors": errors[:20],
+                }
+                checkpoint.put(product.id, "rights_unverified", payload)
+                summary["rights_unverified"] += 1
+                summary["failures"].append(payload)
+                print(
+                    f"[{index}/{len(products)}] rights-unverified {product.id}: "
+                    "gallery retained for review and not uploaded",
                     flush=True,
                 )
                 continue
@@ -1639,7 +2071,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     verification = summary.get("verification")
     if publisher and isinstance(verification, dict) and not verification.get("complete"):
         return 2
-    return 0 if summary["incomplete"] == 0 else 2
+    return (
+        0
+        if summary["incomplete"] == 0 and summary["rights_unverified"] == 0
+        else 2
+    )
 
 
 if __name__ == "__main__":

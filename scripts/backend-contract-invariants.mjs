@@ -1,4 +1,4 @@
-export const expectedBackendContractVersion = "2026-07-16.7";
+export const expectedBackendContractVersion = "2026-07-16.8";
 
 export function assessBackendContract(contract) {
   const failures = [];
@@ -88,13 +88,17 @@ export function assessBackendContract(contract) {
   requireInvariant(contract?.product_images?.coverage_required === false, "The backend incorrectly requires fabricated image coverage for every product.");
   requireInvariant(contract?.product_images?.missing_images_hidden === true, "Products without verified images are not guaranteed to remain visually blank.");
   requireInvariant(contract?.product_images?.generated_placeholders_allowed === false, "Generated product-image placeholders are incorrectly permitted.");
+  requireInvariant(contract?.product_images?.rights_verified_required === true, "Product-image publication does not require explicit reuse-rights verification.");
+  requireInvariant(contract?.product_images?.rights_verified_column_exists === true, "Product-image reuse-rights verification state is missing.");
+  requireInvariant(contract?.product_images?.approved_rights_constraint_validated === true, "Approved product images are not database-constrained to verified rights.");
+  requireInvariant(contract?.product_images?.public_policy_requires_verified === true, "Product-image public RLS does not require verified reuse rights.");
   requireInvariant(contract?.product_images?.partial_product_count === 0, "At least one published product gallery is incomplete or internally inconsistent.");
   requireInvariant(
     contract?.product_images?.complete_product_count + contract?.product_images?.missing_product_count
       === contract?.product_images?.live_product_count,
     "Product image coverage counts do not reconcile with the live catalogue.",
   );
-  requireInvariant(contract?.product_images?.unsafe_image_count === 0, "An unapproved or background-bearing product image is published.");
+  requireInvariant(contract?.product_images?.unsafe_image_count === 0, "A rights-unverified or background-bearing product image is published.");
   requireInvariant(contract?.monitoring?.health_exists === true, "Operational-health RPC is missing.");
   requireInvariant(contract?.monitoring?.health_security_definer === true, "Operational-health RPC is not SECURITY DEFINER.");
   requireInvariant(contract?.monitoring?.health_search_path_locked === true, "Operational-health RPC search path is mutable.");

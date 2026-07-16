@@ -116,6 +116,7 @@ class DecemberEnrichmentTests(unittest.TestCase):
         self.assertIn("'phone'", sql)
         self.assertNotIn("'whatsapp'", sql.lower())
         self.assertIn("pharmacy.google_maps_url is null", sql)
+        self.assertIn("pharmacy.google_maps_url like 'https://www.google.com/maps/search/%'", sql)
         self.assertIn("pharmacy.geocode_status <> 'verified'", sql)
 
 

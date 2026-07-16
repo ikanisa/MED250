@@ -463,7 +463,10 @@ set google_maps_url = source.google_maps_url,
 from med250_december_2025_enrichment as source
 where pharmacy.registry_entry_key = source.registry_entry_key
   and source.google_maps_url <> ''
-  and pharmacy.google_maps_url is null
+  and (
+    pharmacy.google_maps_url is null
+    or pharmacy.google_maps_url like 'https://www.google.com/maps/search/%'
+  )
   and pharmacy.geocode_status <> 'verified';
 
 do $$

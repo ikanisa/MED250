@@ -174,6 +174,18 @@ test("keeps product cards free of verification and technical ranking labels", as
   assert.match(marketplace, /consumerProduct && \(taxonomyLabels\.has\(normalized\)/);
 });
 
+test("keeps the basket count light on its primary gradient badge", async () => {
+  const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+
+  assert.match(css, /\.site-header \.bag-button>b\s*\{[\s\S]*color:var\(--color-white\)!important;[\s\S]*-webkit-text-fill-color:var\(--color-white\);[\s\S]*background:var\(--clay-action\);/);
+});
+
+test("keeps the header search icon light on its primary gradient button", async () => {
+  const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+
+  assert.match(css, /\.header-search button svg\s*\{[\s\S]*color:var\(--color-white\)!important;[\s\S]*stroke:currentColor;/);
+});
+
 test("accepts only privacy-safe bucketed marketplace telemetry", async () => {
   const telemetry = await readFile(new URL("../app/api/telemetry/route.ts", import.meta.url), "utf8");
   const observability = await readFile(new URL("../lib/marketplace-observability.ts", import.meta.url), "utf8");
