@@ -184,6 +184,9 @@ test("publishes central indicative price columns through the RLS-protected catal
 
 test("storefront loads and searches the unified catalogue with exact taxonomy fields", () => {
   assert.match(client, /dawanear_all_product_catalog/);
+  assert.match(client, /export async function loadCatalogueProductsByIds/);
+  assert.match(client, /MAX_BASKET_PRODUCT_IDS = 100/);
+  assert.match(client, /\.in\("id", ids\.slice\(index, index \+ BASKET_PRODUCT_QUERY_SIZE\)\)/);
   assert.match(client, /dawanear_search_marketplace_catalogue/);
   assert.match(client, /subcategory: stringValue\(row, "subcategory"\)/);
   assert.match(taxonomy, /product\.subcategory/);

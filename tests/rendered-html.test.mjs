@@ -753,6 +753,9 @@ test("opens the basket after add and provides a rotating product gallery", async
   ]);
 
   assert.match(marketplace, /function add\(product: Product\)[\s\S]*setCartOpen\(true\);[\s\S]*product_added/);
+  assert.match(marketplace, /loadCatalogueProductsByIds\(productIds\)/);
+  assert.match(marketplace, /\.\.\.refreshed,[\s\S]*quantity: item\.quantity,[\s\S]*substitutesAllowed: Boolean\(item\.substitutesAllowed\)/);
+  assert.match(marketplace, /order-review-item[\s\S]*<ProductVisual product=\{item\} small \/>/);
   assert.match(marketplace, /className="order-added-feedback"[\s\S]*<span><b>\{recentlyAddedBrand\}<\/b><small>/);
   assert.match(marketplace, /className="cart-item-copy"/);
   assert.match(marketplace, /function ProductGallery/);

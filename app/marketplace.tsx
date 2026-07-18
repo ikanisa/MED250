@@ -61,6 +61,7 @@ import {
   hasAnonymousCustomerSession,
   hasPermanentPharmacySession,
   loadCatalogue,
+  loadCatalogueProductsByIds,
   loadCatalogueTaxonomy,
   loadCustomerProfile,
   loadMyActiveOrders,
@@ -1036,6 +1037,7 @@ export default function Marketplace({
   const previousFilterStateRef = useRef<string | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartHydrated, setCartHydrated] = useState(false);
+  const cartProductIdsKey = useMemo(() => [...new Set(cart.map((item) => item.id))].sort().join("|"), [cart]);
   const [cartOpen, setCartOpen] = useState(false);
   const [checkoutStep, setCheckoutStep] = useState<CheckoutStep>(1);
   const previousCheckoutStepRef = useRef<CheckoutStep>(checkoutStep);
@@ -1348,6 +1350,31 @@ export default function Marketplace({
     if (!cartHydrated) return;
     window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
   }, [cart, cartHydrated]);
+
+  useEffect(() => {
+    if (!cartHydrated || !backendConfigured || !cartProductIdsKey) return;
+    let active = true;
+    const productIds = cartProductIdsKey.split("|");
+
+    void loadCatalogueProductsByIds(productIds)
+      .then((products) => {
+        if (!active || !products.length) return;
+        const refreshedProducts = new Map(products.map((product) => [product.id, product]));
+        setCart((current) => current.map((item) => {
+          const refreshed = refreshedProducts.get(item.id);
+          return refreshed ? {
+            ...refreshed,
+            quantity: item.quantity,
+            substitutesAllowed: Boolean(item.substitutesAllowed),
+          } : item;
+        }));
+      })
+      .catch(() => {
+        // Keep the safe persisted snapshot when the network is unavailable.
+      });
+
+    return () => { active = false; };
+  }, [cartHydrated, cartProductIdsKey]);
 
   useEffect(() => {
     let savedPreferences: CustomerPreferences | null = null;

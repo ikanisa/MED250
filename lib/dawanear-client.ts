@@ -13,6 +13,8 @@ import {
 const PRESCRIPTION_BUCKET = "dawanear-prescriptions";
 const MAX_PRESCRIPTION_BYTES = 10 * 1024 * 1024;
 const MAX_PAGE_SIZE = 1_000;
+const MAX_BASKET_PRODUCT_IDS = 100;
+const BASKET_PRODUCT_QUERY_SIZE = 50;
 
 const PRESCRIPTION_TYPES: Readonly<Record<string, string>> = {
   "application/pdf": "pdf",
@@ -732,6 +734,31 @@ export async function loadCatalogueTaxonomy(): Promise<CatalogueTaxonomyRow[]> {
 
 export async function loadCatalogue(requestedPageSize = MAX_PAGE_SIZE): Promise<Product[]> {
   const rows = await loadAllRows("dawanear_all_product_catalog", "brand_name", requestedPageSize);
+  return rows.map(mapProduct);
+}
+
+/**
+ * Refreshes persisted basket snapshots from the current public catalogue.
+ * Basket state intentionally stores enough product data to work offline, but
+ * older snapshots can predate newly published names, prices, or images.
+ */
+export async function loadCatalogueProductsByIds(productIds: string[]): Promise<Product[]> {
+  const ids = [...new Set(productIds.map((id) => id.trim()).filter(Boolean))];
+  if (!ids.length) return [];
+  if (ids.length > MAX_BASKET_PRODUCT_IDS) {
+    throw new Error(`A basket can refresh no more than ${MAX_BASKET_PRODUCT_IDS} products at once.`);
+  }
+
+  const client = requireCustomerBackend();
+  const rows: JsonRecord[] = [];
+  for (let index = 0; index < ids.length; index += BASKET_PRODUCT_QUERY_SIZE) {
+    const { data, error } = await client
+      .from("dawanear_all_product_catalog")
+      .select("*")
+      .in("id", ids.slice(index, index + BASKET_PRODUCT_QUERY_SIZE));
+    if (error) rethrow("Could not refresh basket products", error);
+    rows.push(...asRows(data));
+  }
   return rows.map(mapProduct);
 }
 
