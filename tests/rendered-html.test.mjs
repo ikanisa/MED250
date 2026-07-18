@@ -739,6 +739,7 @@ test("removes the pharmacy callout and uses the requested pharmacy label", async
 
   assertCataloguedMessage(marketplace, "navigation.pharmacies", "For Pharmacies");
   assert.doesNotMatch(marketplace, /Represent a pharmacy\?|Open pharmacy portal|>Pharmacy portal</);
+  assert.doesNotMatch(marketplace, /inventory\.cd4aeead1c2e/);
   assert.doesNotMatch(marketplace, /href="\/accessibility"|className="network-strip"/);
   assert.doesNotMatch(sitemap, /accessibility/);
 });
