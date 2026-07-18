@@ -17,6 +17,7 @@ const REQUIRED_ROUTES = Object.freeze([
   "/sw.js",
   "/offline.html",
 ]);
+const WORKER_ROUTES = Object.freeze(REQUIRED_ROUTES.slice(0, 7));
 
 function normalizedHeaders(headers) {
   if (headers instanceof Headers) return Object.fromEntries(headers.entries());
@@ -39,6 +40,15 @@ export function assessDeploymentEvidence({ origin, mode, records, expectedRevisi
     ...record,
     headers: normalizedHeaders(record.headers),
   }]));
+
+  if (expectedRevision) {
+    for (const route of WORKER_ROUTES) {
+      const observed = byRoute.get(route)?.headers["x-med250-release-revision"] ?? null;
+      if (observed !== expectedRevision) {
+        errors.push(`${route}: X-MED250-Release-Revision does not match the expected release (${expectedRevision})`);
+      }
+    }
+  }
 
   for (const route of REQUIRED_ROUTES) {
     const record = byRoute.get(route);
@@ -76,9 +86,6 @@ export function assessDeploymentEvidence({ origin, mode, records, expectedRevisi
     const requiresWorkerRevision = hostname !== "med250-rwanda.ikanisa.chatgpt.site" || mode !== "catalog";
     if (requiresWorkerRevision && !/^[A-Za-z0-9._-]{7,64}$/.test(releaseRevision ?? "")) {
       errors.push("/: X-MED250-Release-Revision is missing or invalid");
-    }
-    if (expectedRevision && releaseRevision !== expectedRevision) {
-      errors.push(`/: X-MED250-Release-Revision does not match the expected release (${expectedRevision})`);
     }
     if (!home.body.includes("MED+250") || !home.body.includes("Health and everyday care") || !home.body.includes("Find them all at your nearest pharmacy")) {
       errors.push("/: marketplace identity or primary proposition is missing");

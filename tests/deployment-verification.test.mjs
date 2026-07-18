@@ -38,13 +38,15 @@ function records(origin, mode) {
     "/sw.js",
     "/offline.html",
   ];
-  return paths.map((route) => ({
+  return paths.map((route, index) => ({
     route,
     status: 200,
     finalOrigin: origin,
     headers: route === "/" ? {
       ...securityHeaders,
       ...(mode === "preview" ? { "x-robots-tag": "noindex, nofollow" } : {}),
+    } : index < 7 ? {
+      "x-med250-release-revision": securityHeaders["x-med250-release-revision"],
     } : {},
     body: route === "/"
       ? "<title>MED+250</title><h1>Health and everyday care. <em>Find them all at your nearest pharmacy.</em></h1>"
@@ -97,6 +99,21 @@ test("requires an exact release revision when one is supplied", () => {
   });
   assert.equal(mismatched.status, "failed");
   assert.ok(mismatched.errors.some((error) => error.includes("does not match the expected release")));
+});
+
+test("rejects a mixed-revision Worker deployment even when the homepage is current", () => {
+  const origin = "https://med250.gikundiro.com";
+  const evidenceRecords = records(origin, "live");
+  const categories = evidenceRecords.find((record) => record.route === "/categories");
+  categories.headers["x-med250-release-revision"] = "fedcba9876543210fedcba9876543210fedcba98";
+  const result = assessDeploymentEvidence({
+    origin,
+    mode: "live",
+    records: evidenceRecords,
+    expectedRevision: securityHeaders["x-med250-release-revision"],
+  });
+  assert.equal(result.status, "failed");
+  assert.match(result.errors.join("\n"), /\/categories: X-MED250-Release-Revision does not match/);
 });
 
 test("builds a durable receipt without response bodies or unapproved headers", () => {
