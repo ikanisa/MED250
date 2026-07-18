@@ -15,6 +15,7 @@ const MAX_PRESCRIPTION_BYTES = 10 * 1024 * 1024;
 const MAX_PAGE_SIZE = 1_000;
 const MAX_BASKET_PRODUCT_IDS = 100;
 const BASKET_PRODUCT_QUERY_SIZE = 50;
+const MAX_FEATURED_IMAGE_IDS = 24;
 
 const PRESCRIPTION_TYPES: Readonly<Record<string, string>> = {
   "application/pdf": "pdf",
@@ -56,6 +57,12 @@ export type Product = {
   descriptionSourceUrl?: string | null;
   isOrderable: boolean;
   accent?: string;
+};
+
+export type ProductImagePresentation = {
+  productId: string;
+  qualityScore: number;
+  sourceKind: string;
 };
 
 export type CartItem = Product & {
@@ -760,6 +767,34 @@ export async function loadCatalogueProductsByIds(productIds: string[]): Promise<
     rows.push(...asRows(data));
   }
   return rows.map(mapProduct);
+}
+
+/**
+ * Loads the approved lead-image quality metadata used to rank prominent
+ * storefront placements. Ordinary catalogue order must not decide which
+ * source asset is enlarged into a featured visual.
+ */
+export async function loadProductImagePresentation(productIds: string[]): Promise<ProductImagePresentation[]> {
+  const ids = [...new Set(productIds.map((id) => id.trim()).filter(Boolean))];
+  if (!ids.length) return [];
+  if (ids.length > MAX_FEATURED_IMAGE_IDS) {
+    throw new Error(`Featured image ranking accepts no more than ${MAX_FEATURED_IMAGE_IDS} products at once.`);
+  }
+
+  const client = requireCustomerBackend();
+  const { data, error } = await client
+    .from("dawanear_product_images")
+    .select("product_id, quality_score, source_kind")
+    .in("product_id", ids)
+    .eq("position", 1)
+    .eq("approved", true);
+  if (error) rethrow("Could not load featured image quality", error);
+
+  return asRows(data).map((row) => ({
+    productId: requiredString(row, "product image presentation", "product_id"),
+    qualityScore: Math.max(0, Math.min(100, numericValue(row, "quality_score") ?? 0)),
+    sourceKind: stringValue(row, "source_kind"),
+  }));
 }
 
 /**

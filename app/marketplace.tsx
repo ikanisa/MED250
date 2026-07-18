@@ -63,6 +63,7 @@ import {
   loadCatalogue,
   loadCatalogueProductsByIds,
   loadCatalogueTaxonomy,
+  loadProductImagePresentation,
   loadCustomerProfile,
   loadMyActiveOrders,
   loadMyPharmacies,
@@ -94,6 +95,7 @@ import {
   type PharmacyRequestItem,
   type PharmacySelectedOrder,
   type Product,
+  type ProductImagePresentation,
   type CatalogueTaxonomyRow,
 } from "../lib/dawanear-client";
 import { getPharmacySupabase } from "../lib/supabase";
@@ -1022,6 +1024,10 @@ export default function Marketplace({
   const [catalogueLoading, setCatalogueLoading] = useState(false);
   const [catalogueError, setCatalogueError] = useState("");
   const [catalogueRetryKey, setCatalogueRetryKey] = useState(0);
+  const [featuredImageRanking, setFeaturedImageRanking] = useState<{
+    candidateKey: string;
+    rows: Map<string, ProductImagePresentation>;
+  }>(() => ({ candidateKey: "", rows: new Map() }));
   const [sort, setSort] = useState("relevance");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [catalogueUrlHydrated, setCatalogueUrlHydrated] = useState(false);
@@ -1856,10 +1862,45 @@ export default function Marketplace({
     });
     return [...groups.values()].toSorted((left, right) => right.products.length - left.products.length || left.label.localeCompare(right.label));
   }, [visibleProducts]);
-  const hierarchyFeaturedProducts = useMemo(
-    () => visibleProducts.filter((product) => Boolean(product.imageUrl ?? product.imageUrls?.[0])).slice(0, 5),
+  const featuredImageCandidates = useMemo(
+    () => visibleProducts.filter((product) => Boolean(product.imageUrl ?? product.imageUrls?.[0])).slice(0, 12),
     [visibleProducts],
   );
+  const featuredImageCandidateKey = useMemo(
+    () => featuredImageCandidates.map((product) => product.id).join("|"),
+    [featuredImageCandidates],
+  );
+
+  useEffect(() => {
+    if (initialProductId || !backendConfigured || !featuredImageCandidateKey) return undefined;
+    let cancelled = false;
+    const ids = featuredImageCandidateKey.split("|");
+    void loadProductImagePresentation(ids)
+      .then((rows) => {
+        if (cancelled) return;
+        setFeaturedImageRanking({
+          candidateKey: featuredImageCandidateKey,
+          rows: new Map(rows.map((row) => [row.productId, row])),
+        });
+      })
+      .catch(() => {
+        if (!cancelled) setFeaturedImageRanking({ candidateKey: featuredImageCandidateKey, rows: new Map() });
+      });
+    return () => { cancelled = true; };
+  }, [featuredImageCandidateKey, initialProductId]);
+
+  const hierarchyFeaturedProducts = useMemo(() => {
+    if (featuredImageRanking.candidateKey !== featuredImageCandidateKey) return [];
+    return featuredImageCandidates
+      .map((product, index) => ({
+        product,
+        index,
+        qualityScore: featuredImageRanking.rows.get(product.id)?.qualityScore ?? -1,
+      }))
+      .toSorted((left, right) => right.qualityScore - left.qualityScore || left.index - right.index)
+      .slice(0, 5)
+      .map(({ product }) => product);
+  }, [featuredImageCandidateKey, featuredImageCandidates, featuredImageRanking]);
   const showCatalogueHierarchy = !query.trim()
     && prescriptionFilter === "all"
     && formFilter === "all"
