@@ -2366,6 +2366,8 @@ a:active { transform:translateY(1px); }
   background:linear-gradient(165deg,var(--surface-lavender) 0%,var(--surface-control) 58%,var(--surface-mint) 100%);
   box-shadow:inset -1px 0 0 var(--alpha-violet-12);
 }
+.portal-sidebar>small,
+.portal-sidebar .text-action { color:var(--color-ink-soft); }
 .portal-sidebar nav button { color:var(--color-muted); }
 .portal-sidebar nav button.active {
   color:var(--color-ink-soft);

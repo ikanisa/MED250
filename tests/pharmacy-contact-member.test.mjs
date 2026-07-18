@@ -2,9 +2,10 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const [client, marketplace, migration, runtimeCatalogJson] = await Promise.all([
+const [client, marketplace, css, migration, runtimeCatalogJson] = await Promise.all([
   readFile(new URL("../lib/dawanear-client.ts", import.meta.url), "utf8"),
   readFile(new URL("../app/marketplace.tsx", import.meta.url), "utf8"),
+  readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
   readFile(new URL("../supabase/migrations/20260713203240_expose_member_owned_pharmacy_contacts.sql", import.meta.url), "utf8"),
   readFile(new URL("../data/localization/runtime-messages.en-RW.json", import.meta.url), "utf8"),
 ]);
@@ -50,4 +51,8 @@ test("shows member-owned MoMo and verified map details without exposing other ph
   assert.match(marketplace, /activeMembership\?\.momoCode/);
   assert.match(marketplace, /activeMembership\.googleMapsUrl/);
   assert.match(marketplace, /activeMembership\.latitude\.toFixed\(6\)/);
+});
+
+test("keeps the pharmacy desk label readable on the light portal sidebar", () => {
+  assert.match(css, /\.portal-sidebar>small,\s*\n\.portal-sidebar \.text-action \{ color:var\(--color-ink-soft\); \}/);
 });
