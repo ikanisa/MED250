@@ -604,6 +604,7 @@ type CatalogueHierarchyItem = {
   label: string;
   value: string;
   department: string;
+  imageUrl?: string | null;
 };
 
 type CatalogueProductGroup = {
@@ -626,6 +627,79 @@ function SubcategoryIcon({ label }: { label: string }) {
             ? Brush
             : PackageCheck;
   return <Icon size={18} />;
+}
+
+function SubcategoryRail({
+  activeCategory,
+  contextLabel,
+  items,
+  onSelectCategory,
+}: {
+  activeCategory: string;
+  contextLabel: string;
+  items: CatalogueHierarchyItem[];
+  onSelectCategory: (category: string) => void;
+}) {
+  const railRef = useRef<HTMLElement>(null);
+  const pausedRef = useRef(false);
+
+  useEffect(() => {
+    const rail = railRef.current;
+    if (!rail || items.length < 2 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
+    let frame = 0;
+    let previousTime = performance.now();
+    let direction = 1;
+
+    const animate = (time: number) => {
+      const maxScroll = Math.max(0, rail.scrollWidth - rail.clientWidth);
+      if (!pausedRef.current && document.visibilityState === "visible" && maxScroll > 0) {
+        const elapsed = Math.min(time - previousTime, 48);
+        rail.scrollLeft += elapsed * 0.032 * direction;
+        if (rail.scrollLeft >= maxScroll - 1) direction = -1;
+        if (rail.scrollLeft <= 1) direction = 1;
+      }
+      previousTime = time;
+      frame = window.requestAnimationFrame(animate);
+    };
+
+    frame = window.requestAnimationFrame(animate);
+    return () => window.cancelAnimationFrame(frame);
+  }, [items.length]);
+
+  const setPaused = (paused: boolean) => { pausedRef.current = paused; };
+  const renderItem = (item: CatalogueHierarchyItem) => <button
+    type="button"
+    key={`${item.department}-${item.value}`}
+    className={activeCategory === item.value ? "is-active" : ""}
+    aria-pressed={activeCategory === item.value}
+    onClick={() => onSelectCategory(item.value)}
+  >
+    <span className="subcategory-rail-media" aria-hidden="true">
+      {/* Catalogue product images are already optimized at their public source. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={item.imageUrl ?? "/marketplace/hero-pharmacy-still-life.webp"} alt="" loading="lazy" decoding="async" />
+      <i><SubcategoryIcon label={item.label} /></i>
+    </span>
+    <b>{item.label}</b>
+  </button>;
+
+  return <nav
+    ref={railRef}
+    className="subcategory-rail"
+    aria-label={marketplaceFormatMessage("inventory.545b56483487", [contextLabel])}
+    onPointerEnter={() => setPaused(true)}
+    onPointerLeave={() => setPaused(false)}
+    onTouchStart={() => setPaused(true)}
+    onTouchEnd={() => setPaused(false)}
+    onFocusCapture={() => setPaused(true)}
+    onBlurCapture={(event) => {
+      if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setPaused(false);
+    }}
+  >
+    <div className="subcategory-rail-track">
+      <div className="subcategory-rail-sequence">{items.map((item) => renderItem(item))}</div>
+    </div>
+  </nav>;
 }
 
 function productHierarchyValue(product: Product) {
@@ -701,18 +775,12 @@ function CatalogueHierarchy({
       <p>{marketplaceFormatMessage("catalogue.collection_description", [contextLabel.toLocaleLowerCase()])}</p>
     </header>
 
-    {items.length ? <nav className="subcategory-rail" aria-label={marketplaceFormatMessage("inventory.545b56483487", [contextLabel])}>
-      {items.map((item) => <button
-        type="button"
-        key={`${item.department}-${item.value}`}
-        className={activeCategory === item.value ? "is-active" : ""}
-        aria-pressed={activeCategory === item.value}
-        onClick={() => onSelectCategory(item.value)}
-      >
-        <span aria-hidden="true"><SubcategoryIcon label={item.label} /></span>
-        <b>{item.label}</b>
-      </button>)}
-    </nav> : null}
+    {items.length ? <SubcategoryRail
+      activeCategory={activeCategory}
+      contextLabel={contextLabel}
+      items={items}
+      onSelectCategory={onSelectCategory}
+    /> : null}
 
     {featuredProducts.length >= 3 ? <section className="featured-collection" aria-labelledby="featured-collection-title">
       <div className="catalogue-group-heading">
@@ -1049,6 +1117,7 @@ export default function Marketplace({
     candidateKey: string;
     rows: Map<string, ProductImagePresentation>;
   }>(() => ({ candidateKey: "", rows: new Map() }));
+  const [subcategoryRepresentativeImages, setSubcategoryRepresentativeImages] = useState<Map<string, string | null>>(() => new Map());
   const [sort, setSort] = useState("relevance");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [catalogueUrlHydrated, setCatalogueUrlHydrated] = useState(false);
@@ -1863,6 +1932,64 @@ export default function Marketplace({
     }
     return items;
   }, [availableTaxonomy, hierarchyDepartment]);
+  const hierarchyRepresentativeKey = useMemo(
+    () => hierarchyItems.map((item) => item.value).join("|"),
+    [hierarchyItems],
+  );
+  const localSubcategoryRepresentativeImages = useMemo(() => {
+    const representatives = new Map<string, string>();
+    visibleProducts.forEach((product) => {
+      const imageUrl = product.imageUrl ?? product.imageUrls?.[0] ?? null;
+      const value = productHierarchyValue(product);
+      if (imageUrl && value && !representatives.has(value)) representatives.set(value, imageUrl);
+    });
+    return representatives;
+  }, [visibleProducts]);
+
+  useEffect(() => {
+    if (!backendConfigured || initialProductId || !hierarchyRepresentativeKey) return undefined;
+    const missingItems = hierarchyItems.filter((item) => (
+      !localSubcategoryRepresentativeImages.has(item.value)
+      && !subcategoryRepresentativeImages.has(item.value)
+    ));
+    if (!missingItems.length) return undefined;
+    let cancelled = false;
+
+    void Promise.allSettled(missingItems.map(async (item) => {
+      const result = await searchCatalogue({
+        category: backendCategoryFor(item.value),
+        limit: 8,
+        sort: "relevance",
+      });
+      const representative = result.products.find((product) => Boolean(product.imageUrl ?? product.imageUrls?.[0]));
+      const imageUrl = representative?.imageUrl ?? representative?.imageUrls?.[0] ?? null;
+      return [item.value, imageUrl] as const;
+    })).then((results) => {
+      if (cancelled) return;
+      setSubcategoryRepresentativeImages((current) => {
+        const next = new Map(current);
+        results.forEach((result, index) => {
+          next.set(
+            missingItems[index].value,
+            result.status === "fulfilled" ? result.value[1] : null,
+          );
+        });
+        return next;
+      });
+    });
+    return () => { cancelled = true; };
+  }, [hierarchyItems, hierarchyRepresentativeKey, initialProductId, localSubcategoryRepresentativeImages, subcategoryRepresentativeImages]);
+
+  const hierarchyItemsWithImages = useMemo(() => hierarchyItems.map((item) => {
+    const departmentImage = departmentPresentation.find((presentation) => presentation.department === item.department)?.image;
+    return {
+      ...item,
+      imageUrl: localSubcategoryRepresentativeImages.get(item.value)
+        ?? subcategoryRepresentativeImages.get(item.value)
+        ?? departmentImage
+        ?? "/marketplace/hero-pharmacy-still-life.webp",
+    };
+  }), [hierarchyItems, localSubcategoryRepresentativeImages, subcategoryRepresentativeImages]);
   const hierarchyGroups = useMemo<CatalogueProductGroup[]>(() => {
     const groups = new Map<string, CatalogueProductGroup>();
     visibleProducts.forEach((product) => {
@@ -2895,7 +3022,7 @@ export default function Marketplace({
           {showCatalogueHierarchy ? <CatalogueHierarchy
             contextLabel={hierarchyDepartment}
             activeCategory={category}
-            items={hierarchyItems}
+            items={hierarchyItemsWithImages}
             featuredProducts={hierarchyFeaturedProducts}
             groups={hierarchyGroups}
             previewMode={previewMode && !publicCatalogMode}
