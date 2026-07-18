@@ -965,6 +965,27 @@ function parseCustomerWhatsapp(country: CountryCode, nationalNumber: string) {
   return phone?.isValid() ? phone.number.replace(/^\+/, "") : null;
 }
 
+function InternationalPhoneInput({
+  country,
+  id,
+  nationalNumber,
+  onCountryChange,
+  onNationalNumberChange,
+}: {
+  country: CountryCode;
+  id: string;
+  nationalNumber: string;
+  onCountryChange: (country: CountryCode) => void;
+  onNationalNumberChange: (nationalNumber: string) => void;
+}) {
+  return <div className="portal-phone-input">
+    <select value={country} onChange={(event) => onCountryChange(event.target.value as CountryCode)} aria-label={marketplaceMessage("inventory.36ca78914773")}>
+      {whatsappCountries.map((item) => <option value={item.country} key={item.country}>{item.name} (+{item.callingCode})</option>)}
+    </select>
+    <input id={id} value={nationalNumber} onChange={(event) => onNationalNumberChange(event.target.value.replace(/\D/g, "").slice(0, 15))} placeholder={marketplaceMessage("inventory.7df127cda4fc")} inputMode="tel" autoComplete="tel-national" />
+  </div>;
+}
+
 function splitCustomerWhatsapp(value: string | null | undefined) {
   const digits = value?.replace(/\D/g, "") ?? "";
   const phone = digits ? parsePhoneNumberFromString(`+${digits}`) : undefined;
@@ -1097,6 +1118,7 @@ export default function Marketplace({
   const [portalMessage, setPortalMessage] = useState("");
   const [portalStage, setPortalStage] = useState<"signin" | "otp" | "workspace">("signin");
   const [portalTab, setPortalTab] = useState<PortalTab>("requests");
+  const [pharmacyWhatsappCountry, setPharmacyWhatsappCountry] = useState<CountryCode>("RW");
   const [pharmacyWhatsapp, setPharmacyWhatsapp] = useState("");
   const [pharmacyOtp, setPharmacyOtp] = useState("");
   const [pharmacyOtpChallengeId, setPharmacyOtpChallengeId] = useState("");
@@ -1112,6 +1134,7 @@ export default function Marketplace({
   const [offerReadyMinutes, setOfferReadyMinutes] = useState("20");
   const [offerFulfilmentMethod, setOfferFulfilmentMethod] = useState<"pickup" | "delivery" | "either">("either");
   const [offerNote, setOfferNote] = useState("");
+  const [contactEditWhatsappCountry, setContactEditWhatsappCountry] = useState<CountryCode>("RW");
   const [contactEditWhatsapp, setContactEditWhatsapp] = useState("");
   const [contactEditType, setContactEditType] = useState<"phone" | "whatsapp">("whatsapp");
   const [contactEditAction, setContactEditAction] = useState<"add" | "update">("add");
@@ -1122,6 +1145,8 @@ export default function Marketplace({
   const deferredPortalCatalogueQuery = useDeferredValue(portalCatalogueQuery);
   const [centralPriceDrafts, setCentralPriceDrafts] = useState<Record<string, string>>({});
   const [submittingPriceProductId, setSubmittingPriceProductId] = useState<string | null>(null);
+  const pharmacyWhatsappE164 = parseCustomerWhatsapp(pharmacyWhatsappCountry, pharmacyWhatsapp);
+  const contactEditWhatsappE164 = parseCustomerWhatsapp(contactEditWhatsappCountry, contactEditWhatsapp);
   const activePharmacyId = activeMembership?.pharmacyId ?? null;
   const activeModalKey = unregisteredPharmacyWhatsapp
     ? "unregistered-pharmacy"
@@ -2496,13 +2521,13 @@ export default function Marketplace({
     setPortalError("");
     setPortalMessage("");
     setUnregisteredPharmacyWhatsapp("");
-    if (!/^7[2389]\d{7}$/.test(pharmacyWhatsapp)) {
-      setPortalError(marketplaceMessage("inventory.d0086b94d44c"));
+    if (!pharmacyWhatsappE164) {
+      setPortalError(marketplaceMessage("inventory.94b5cd21062a"));
       return;
     }
     setPortalLoading(true);
     try {
-      const challenge = await requestPharmacyWhatsappOtp(`250${pharmacyWhatsapp}`);
+      const challenge = await requestPharmacyWhatsappOtp(pharmacyWhatsappE164);
       if (!challenge.registered) {
         setUnregisteredPharmacyWhatsapp(challenge.adminWhatsapp || MED250_ADMIN_WHATSAPP);
         return;
@@ -2527,7 +2552,8 @@ export default function Marketplace({
     }
     setPortalLoading(true);
     try {
-      await verifyPharmacyWhatsappOtp(`250${pharmacyWhatsapp}`, pharmacyOtpChallengeId, pharmacyOtp);
+      if (!pharmacyWhatsappE164) throw new Error(marketplaceMessage("inventory.94b5cd21062a"));
+      await verifyPharmacyWhatsappOtp(pharmacyWhatsappE164, pharmacyOtpChallengeId, pharmacyOtp);
       const rows = await loadMyPharmacies();
       if (!rows.length) {
         await signOutPharmacy();
@@ -2557,8 +2583,8 @@ export default function Marketplace({
     if (!activeMembership) return;
     setPortalError("");
     setPortalMessage("");
-    if (!/^7[2389]\d{7}$/.test(contactEditWhatsapp)) {
-      setPortalError(marketplaceMessage("inventory.8700969b174c"));
+    if (!contactEditWhatsappE164) {
+      setPortalError(marketplaceMessage("inventory.94b5cd21062a"));
       return;
     }
     setPortalLoading(true);
@@ -2568,12 +2594,13 @@ export default function Marketplace({
         action: contactEditAction,
         contactType: contactEditType,
         contactId: contactEditAction === "update" ? contactEditContactId : null,
-        e164: `250${contactEditWhatsapp}`,
+        e164: contactEditWhatsappE164,
       });
       const contactState = await loadMyPharmacyContacts(activeMembership.pharmacyId);
       setPharmacyContacts(contactState.contacts);
       setPendingContactEdits(contactState.pendingRequests);
       setContactEditWhatsapp("");
+      setContactEditWhatsappCountry("RW");
       setContactEditAction("add");
       setContactEditContactId(null);
       setPortalMessage(marketplaceMessage("inventory.0dddd387651d"));
@@ -2585,10 +2612,12 @@ export default function Marketplace({
   }
 
   function beginContactReplacement(contact: PharmacyContact) {
+    const parsedContact = splitCustomerWhatsapp(contact.e164);
     setContactEditAction("update");
     setContactEditType(contact.contactType);
     setContactEditContactId(contact.id);
-    setContactEditWhatsapp(contact.e164.replace(/^250/, ""));
+    setContactEditWhatsappCountry(parsedContact?.country ?? "RW");
+    setContactEditWhatsapp(parsedContact?.nationalNumber ?? "");
   }
 
   async function requestContactRemoval(contact: PharmacyContact) {
@@ -3033,9 +3062,9 @@ export default function Marketplace({
 
       {portalOpen ? <div className="portal-overlay" role="presentation">
         {portalStage !== "workspace" ? <section className="portal-auth" role="dialog" aria-modal="true" aria-labelledby="pharmacy-signin-title" aria-describedby="pharmacy-signin-progress" aria-busy={portalLoading} data-modal-root="portal-auth" tabIndex={-1}><button className="portal-close" data-autofocus onClick={() => setPortalOpen(false)} aria-label={marketplaceMessage("inventory.ff49c2a5683a")}><X size={20} /></button><Link className="brand" href="/"><BrandLogo /></Link><ol className="wizard-progress" id="pharmacy-signin-progress" aria-label={marketplaceMessage("inventory.b7374f8f7224")}><li className="active" aria-current={portalStage === "signin" ? "step" : undefined}><span>1</span> {marketplaceMessage("inventory.6a40edf1fc87")}</li><li className={portalStage === "otp" ? "active" : ""} aria-current={portalStage === "otp" ? "step" : undefined}><span>2</span> {marketplaceMessage("request.verify_step")}</li><li><span>3</span> {marketplaceMessage("inventory.87bb59ba2f92")}</li></ol><h2 id="pharmacy-signin-title">{portalStage === "signin" ? marketplaceMessage("inventory.3be818907a1b") : marketplaceMessage("inventory.76305e161c53")}</h2>
-          {portalStage === "signin" ? <><label>{marketplaceMessage("inventory.ec21453f9cd8")}<div className="portal-phone-input"><span>+250</span><input value={pharmacyWhatsapp} onChange={(event) => setPharmacyWhatsapp(event.target.value.replace(/\D/g, "").slice(0, 9))} placeholder="78 000 0000" inputMode="tel" autoComplete="tel" /></div></label><button className="primary-wide" onClick={sendPharmacyCode} disabled={portalLoading}><MessageCircle size={17} /> {portalLoading ? marketplaceMessage("inventory.e6ddec3d9dee") : marketplaceMessage("whatsapp.send_code")}</button></> : <><small className="portal-otp-note">{marketplaceFormatMessage("inventory.5b55f450da05", [pharmacyWhatsapp])}</small><label>{marketplaceMessage("inventory.3ee75029c70e")}<input value={pharmacyOtp} onChange={(event) => setPharmacyOtp(event.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="000000" inputMode="numeric" autoComplete="one-time-code" maxLength={6} /></label><button className="primary-wide" onClick={verifyPharmacyCode} disabled={portalLoading}>{portalLoading ? marketplaceMessage("inventory.63bbd08c916b") : marketplaceMessage("inventory.b733e7e84f03")} <ArrowRight size={17} /></button><button className="text-action" onClick={() => { setPortalStage("signin"); setPharmacyOtp(""); setPharmacyOtpChallengeId(""); setPortalError(""); setPortalMessage(""); }} disabled={portalLoading}>{marketplaceMessage("inventory.d9a6909304b4")}</button></>}
+          {portalStage === "signin" ? <><label htmlFor="pharmacy-whatsapp">{marketplaceMessage("inventory.ec21453f9cd8")}<InternationalPhoneInput id="pharmacy-whatsapp" country={pharmacyWhatsappCountry} nationalNumber={pharmacyWhatsapp} onCountryChange={setPharmacyWhatsappCountry} onNationalNumberChange={setPharmacyWhatsapp} /></label><button className="primary-wide" onClick={sendPharmacyCode} disabled={portalLoading || !pharmacyWhatsappE164}><MessageCircle size={17} /> {portalLoading ? marketplaceMessage("inventory.e6ddec3d9dee") : marketplaceMessage("whatsapp.send_code")}</button></> : <><small className="portal-otp-note">{marketplaceFormatMessage("inventory.5b55f450da05", [pharmacyWhatsappE164 ? `+${pharmacyWhatsappE164}` : pharmacyWhatsapp])}</small><label>{marketplaceMessage("inventory.3ee75029c70e")}<input value={pharmacyOtp} onChange={(event) => setPharmacyOtp(event.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="000000" inputMode="numeric" autoComplete="one-time-code" maxLength={6} /></label><button className="primary-wide" onClick={verifyPharmacyCode} disabled={portalLoading}>{portalLoading ? marketplaceMessage("inventory.63bbd08c916b") : marketplaceMessage("inventory.b733e7e84f03")} <ArrowRight size={17} /></button><button className="text-action" onClick={() => { setPortalStage("signin"); setPharmacyOtp(""); setPharmacyOtpChallengeId(""); setPortalError(""); setPortalMessage(""); }} disabled={portalLoading}>{marketplaceMessage("inventory.d9a6909304b4")}</button></>}
           {portalLoading ? <div className="inline-loading" role="status"><LoaderCircle className="button-spinner" size={17} /> {marketplaceMessage("inventory.5427e58e229f")}</div> : null}{portalMessage ? <p className="form-success" role="status" aria-live="polite"><CircleCheck size={15} /> {portalMessage}</p> : null}{portalError ? <p className="form-error" role="alert"><CircleAlert size={15} /> {portalError}</p> : null}
-          {unregisteredPharmacyWhatsapp ? <div className="portal-exception-backdrop" role="presentation"><div className="portal-exception" role="alertdialog" aria-modal="true" aria-labelledby="unregistered-whatsapp-title" data-modal-root="unregistered-pharmacy" tabIndex={-1}><button data-autofocus onClick={() => setUnregisteredPharmacyWhatsapp("")} aria-label={marketplaceMessage("inventory.7d9eb7acb13e")}><X size={18} /></button><span><CircleAlert size={22} /></span><h3 id="unregistered-whatsapp-title">{marketplaceMessage("inventory.46ea2bdb2842")}</h3><p>{marketplaceMessage("inventory.f3cfa4c022bb")}</p><a className="primary-wide" href={`https://wa.me/${unregisteredPharmacyWhatsapp}?text=${encodeURIComponent(`Hello MED+250 admin, please help register or correct pharmacy WhatsApp number +250${pharmacyWhatsapp}.`)}`} target="_blank" rel="noreferrer"><MessageCircle size={17} /> {marketplaceMessage("inventory.1a0cae1ddbf6")}</a><button className="text-action" onClick={() => setUnregisteredPharmacyWhatsapp("")}>{marketplaceMessage("inventory.bfe883b9dbb7")}</button></div></div> : null}
+          {unregisteredPharmacyWhatsapp ? <div className="portal-exception-backdrop" role="presentation"><div className="portal-exception" role="alertdialog" aria-modal="true" aria-labelledby="unregistered-whatsapp-title" data-modal-root="unregistered-pharmacy" tabIndex={-1}><button data-autofocus onClick={() => setUnregisteredPharmacyWhatsapp("")} aria-label={marketplaceMessage("inventory.7d9eb7acb13e")}><X size={18} /></button><span><CircleAlert size={22} /></span><h3 id="unregistered-whatsapp-title">{marketplaceMessage("inventory.46ea2bdb2842")}</h3><p>{marketplaceMessage("inventory.f3cfa4c022bb")}</p><a className="primary-wide" href={`https://wa.me/${unregisteredPharmacyWhatsapp}?text=${encodeURIComponent(`Hello MED+250 admin, please help register or correct pharmacy WhatsApp number +${pharmacyWhatsappE164 ?? pharmacyWhatsapp}.`)}`} target="_blank" rel="noreferrer"><MessageCircle size={17} /> {marketplaceMessage("inventory.1a0cae1ddbf6")}</a><button className="text-action" onClick={() => setUnregisteredPharmacyWhatsapp("")}>{marketplaceMessage("inventory.bfe883b9dbb7")}</button></div></div> : null}
         </section> : <section className="portal-shell" role="dialog" aria-modal="true" aria-labelledby="pharmacy-workspace-title" aria-busy={portalLoading} data-modal-root="portal-workspace" tabIndex={-1}>
           <aside className="portal-sidebar"><Link className="brand" href="/"><BrandLogo /></Link><small>{marketplaceMessage("inventory.ff540cf154c2")}</small><nav><button className={portalTab === "requests" ? "active" : ""} onClick={() => setPortalTab("requests")}><Bell size={18} /> {marketplaceMessage("inventory.900b67c87ae0")} {pharmacyRequests.length ? <b>{pharmacyRequests.length}</b> : null}</button><button className={portalTab === "catalogue" ? "active" : ""} onClick={() => setPortalTab("catalogue")}><ShoppingBag size={18} /> {marketplaceMessage("inventory.fdb14e852a0c")}</button><button className={portalTab === "profile" ? "active" : ""} onClick={() => setPortalTab("profile")}><HeartPulse size={18} /> {marketplaceMessage("inventory.83e71ff6cc83")}</button></nav><div className="portal-user"><span>{activeMembership?.pharmacyName.slice(0, 2).toUpperCase()}</span><div><b>{activeMembership?.pharmacyName}</b><small>{activeMembership?.role}</small></div></div><button className="text-action" onClick={leavePharmacyPortal} disabled={portalLoading}>{marketplaceMessage("inventory.f20b73d631ff")}</button></aside>
           <div className="portal-main"><div className="portal-top"><div><h2 id="pharmacy-workspace-title">{portalTab === "requests" ? marketplaceMessage("inventory.900b67c87ae0") : portalTab === "catalogue" ? marketplaceMessage("inventory.718622df41f1") : marketplaceMessage("inventory.83e71ff6cc83")}</h2>{portalTab === "catalogue" ? null : <p>{marketplaceMessage("inventory.004ed96e7d9a")}</p>}</div><button data-autofocus onClick={() => setPortalOpen(false)} aria-label={marketplaceMessage("inventory.ff49c2a5683a")}><X size={20} /></button></div>
@@ -3060,8 +3089,8 @@ export default function Marketplace({
                 {pendingContactEdits.length ? <div className="pending-contact-edits"><b>{marketplaceMessage("inventory.f1c45f3f1314")}</b>{pendingContactEdits.map((request) => <span key={request.id}>{[`${request.action} ${request.contactType}`, request.requestedE164 ? `+${request.requestedE164}` : "", formatDate(request.createdAt)].filter(Boolean).join(" · ")}</span>)}</div> : null}
                 <h3>{contactEditAction === "update" ? marketplaceMessage("inventory.6679d4e5fc66") : marketplaceMessage("inventory.8f691322f91b")}</h3>
                 <label>{marketplaceMessage("inventory.9c37f4ab2257")}<select value={contactEditType} onChange={(event) => { setContactEditType(event.target.value === "phone" ? "phone" : "whatsapp"); setContactEditAction("add"); setContactEditContactId(null); }}><option value="whatsapp">{marketplaceMessage("inventory.6a40edf1fc87")}</option><option value="phone">{marketplaceMessage("inventory.63dceb8800b2")}</option></select></label>
-                <label>{contactEditAction === "update" ? marketplaceMessage("inventory.a21e3d266c8a") : marketplaceMessage("inventory.7df127cda4fc")}<div className="portal-phone-input"><span>+250</span><input value={contactEditWhatsapp} onChange={(event) => setContactEditWhatsapp(event.target.value.replace(/\D/g, "").slice(0, 9))} placeholder="78 000 0000" inputMode="tel" autoComplete="tel" /></div></label>
-                <button className="primary-wide" onClick={requestContactEdit} disabled={portalLoading || !/^7[2389]\d{7}$/.test(contactEditWhatsapp)}>{portalLoading ? marketplaceMessage("inventory.49195f559e4a") : contactEditAction === "update" ? marketplaceMessage("inventory.af1326d8095e") : marketplaceMessage("inventory.ca06556af647")}<ArrowRight size={17} /></button>
+                <label htmlFor="pharmacy-contact-number">{contactEditAction === "update" ? marketplaceMessage("inventory.a21e3d266c8a") : marketplaceMessage("inventory.7df127cda4fc")}<InternationalPhoneInput id="pharmacy-contact-number" country={contactEditWhatsappCountry} nationalNumber={contactEditWhatsapp} onCountryChange={setContactEditWhatsappCountry} onNationalNumberChange={setContactEditWhatsapp} /></label>
+                <button className="primary-wide" onClick={requestContactEdit} disabled={portalLoading || !contactEditWhatsappE164}>{portalLoading ? marketplaceMessage("inventory.49195f559e4a") : contactEditAction === "update" ? marketplaceMessage("inventory.af1326d8095e") : marketplaceMessage("inventory.ca06556af647")}<ArrowRight size={17} /></button>
                 {contactEditAction === "update" ? <button className="text-action" type="button" onClick={() => { setContactEditAction("add"); setContactEditContactId(null); setContactEditWhatsapp(""); }}>{marketplaceMessage("inventory.694ab4b7524f")}</button> : null}
               </div>
             </section> : null}

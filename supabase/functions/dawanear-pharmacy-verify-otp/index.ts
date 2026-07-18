@@ -12,7 +12,7 @@ import {
   json,
   normalizeChallengeId,
   normalizeOtp,
-  normalizeRwandaPhone,
+  normalizeInternationalPhone,
 } from "../_shared/dawanear-pharmacy-auth.ts";
 
 Deno.serve(async (request: Request) => {
@@ -24,7 +24,7 @@ Deno.serve(async (request: Request) => {
     if (request.method !== "POST") throw new HttpError("Method not allowed.", 405);
 
     const body = await request.json().catch(() => ({}));
-    const phone = normalizeRwandaPhone(body?.phone);
+    const phone = normalizeInternationalPhone(body?.phone);
     const challengeId = normalizeChallengeId(body?.challengeId);
     const code = normalizeOtp(body?.code);
     const codeHash = await hashOtp(phone, code);

@@ -33,7 +33,8 @@ test("supports real add, replacement and removal requests in the pharmacy profil
   assert.match(marketplace, /requestContactRemoval[\s\S]*action: "remove"/);
   assert.match(marketplace, /pendingContactEdits/);
   assert.doesNotMatch(marketplace, /contactEditNote/);
-  assert.match(marketplace, /disabled=\{portalLoading \|\| !\/\^7\[2389\]\\d\{7\}\$\/\.test\(contactEditWhatsapp\)\}/);
+  assert.match(marketplace, /<InternationalPhoneInput id="pharmacy-contact-number"/);
+  assert.match(marketplace, /disabled=\{portalLoading \|\| !contactEditWhatsappE164\}/);
   assert.doesNotMatch(marketplace, /Request a WhatsApp update/);
 });
 

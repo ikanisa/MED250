@@ -384,7 +384,7 @@ test("server-renders an immediate catalogue and keeps connected previews on pagi
   assert.match(marketplace, /if \(!resolvedImageUrl\) return null/);
   assert.match(marketplace, /if \(approvedImages\.length !== 3\) return null/);
   assert.match(marketplace, /cardImageUrl \? <Link className="product-image-wrap"/);
-  assert.match(brandLogo, /med-plus-250-wordmark-220\.png/);
+  assert.match(brandLogo, /med-plus-250-wordmark-transparent\.png/);
   assert.doesNotMatch(brandLogo, /med-plus-250-wordmark\.png/);
 });
 
@@ -646,7 +646,7 @@ test("requires international customer WhatsApp and restores on-device order pref
   assert.match(marketplace, /isLegacyManualLocation/);
   assert.doesNotMatch(marketplace, /optional · saved to your customer profile/);
   assert.doesNotMatch(marketplace, /Anonymous sign-in is an identity control/);
-  assert.match(client, /normalizeCustomerWhatsapp/);
+  assert.match(client, /normalizeInternationalWhatsapp/);
   assert.match(migration, /\^\[1-9\]\[0-9\]\{7,14\}\$/);
   assert.match(migration, /Pharmacy identity and OTP[\s\S]*Rwanda-only/);
 });
@@ -1102,6 +1102,35 @@ test("uses WhatsApp Cloud OTP only for pharmacy portal access", async () => {
   assert.equal(manifest.matched_contact_rows, 288);
   assert.equal(manifest.matched_pharmacies, 267);
   assert.doesNotMatch(sendOtp, /console\.log\([^\n]*code/);
+});
+
+test("supports international pharmacy WhatsApp numbers and transparent logos", async () => {
+  const [marketplace, client, sendOtp, verifyOtp, migration, brandLogo, css, transparentLogo] = await Promise.all([
+    readFile(new URL("../app/marketplace.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../lib/dawanear-client.ts", import.meta.url), "utf8"),
+    readFile(new URL("../supabase/functions/dawanear-pharmacy-send-otp/index.ts", import.meta.url), "utf8"),
+    readFile(new URL("../supabase/functions/dawanear-pharmacy-verify-otp/index.ts", import.meta.url), "utf8"),
+    readFile(new URL("../supabase/migrations/20260718134000_expand_pharmacy_whatsapp_e164.sql", import.meta.url), "utf8"),
+    readFile(new URL("../app/brand-logo.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+    readFile(new URL("../public/brand/med-plus-250-wordmark-transparent.png", import.meta.url)),
+  ]);
+
+  assert.match(marketplace, /function InternationalPhoneInput/);
+  assert.match(marketplace, /whatsappCountries\.map/);
+  assert.match(marketplace, /disabled=\{portalLoading \|\| !pharmacyWhatsappE164\}/);
+  assert.doesNotMatch(marketplace, /<span>\+250<\/span>/);
+  assert.doesNotMatch(marketplace, /`250\$\{pharmacyWhatsapp\}`/);
+  assert.match(client, /function normalizeInternationalWhatsapp/);
+  assert.match(sendOtp, /normalizeInternationalPhone/);
+  assert.match(verifyOtp, /normalizeInternationalPhone/);
+  assert.match(migration, /\^\[1-9\]\[0-9\]\{7,14\}\$/);
+  assert.match(migration, /dawanear_issue_pharmacy_otp/);
+  assert.match(migration, /dawanear_consume_pharmacy_otp/);
+  assert.match(migration, /dawanear_request_pharmacy_contact_edit/);
+  assert.match(brandLogo, /med-plus-250-wordmark-transparent\.png/);
+  assert.match(css, /\.official-brand-logo\s*\{[\s\S]*?background:transparent;/);
+  assert.deepEqual([...transparentLogo.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
 });
 
 test("validates pharmacy OTP origins before any authentication side effect", async () => {

@@ -504,18 +504,7 @@ function requireInteger(value: number, label: string, minimum: number, maximum: 
   return value;
 }
 
-function normalizeRwandaWhatsapp(value: string | null | undefined): string | null {
-  if (!value?.trim()) return null;
-  let digits = value.replace(/\D/g, "");
-  if (digits.startsWith("0")) digits = `250${digits.slice(1)}`;
-  else if (digits.length === 9 && digits.startsWith("7")) digits = `250${digits}`;
-  if (!/^2507[2389]\d{7}$/.test(digits)) {
-    throw new Error("Enter a valid Rwanda mobile number, for example +250 788 123 456.");
-  }
-  return digits;
-}
-
-function normalizeCustomerWhatsapp(value: string | null | undefined): string | null {
+function normalizeInternationalWhatsapp(value: string | null | undefined): string | null {
   if (!value?.trim()) return null;
   const digits = value.replace(/\D/g, "");
   if (!/^[1-9]\d{7,14}$/.test(digits)) {
@@ -607,7 +596,7 @@ export async function loadCustomerProfile(): Promise<CustomerProfile | null> {
 }
 
 export async function requestCustomerWhatsappOtp(phone: string): Promise<CustomerWhatsappOtpChallenge> {
-  const normalizedPhone = normalizeCustomerWhatsapp(phone);
+  const normalizedPhone = normalizeInternationalWhatsapp(phone);
   if (!normalizedPhone) throw new Error("Enter the WhatsApp number you want to verify.");
   await ensureAnonymousCustomer();
   const client = requireCustomerBackend();
@@ -628,7 +617,7 @@ export async function verifyCustomerWhatsappOtp(
   challengeId: string,
   token: string,
 ): Promise<VerifiedCustomerWhatsapp> {
-  const normalizedPhone = normalizeCustomerWhatsapp(phone);
+  const normalizedPhone = normalizeInternationalWhatsapp(phone);
   if (!normalizedPhone) throw new Error("Enter the WhatsApp number you want to verify.");
   const cleanedToken = token.replace(/\s/g, "");
   if (!/^\d{6}$/.test(cleanedToken)) throw new Error("Enter the complete 6-digit WhatsApp code.");
@@ -945,7 +934,7 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
   const substitutesAllowed = input.substitutesAllowed
     ?? input.items.some((item) => item.substitutesAllowed === true);
   const items = orderItemsPayload(input.items, substitutesAllowed);
-  const whatsapp = normalizeCustomerWhatsapp(input.whatsapp);
+  const whatsapp = normalizeInternationalWhatsapp(input.whatsapp);
   if (!whatsapp) throw new Error("WhatsApp number is required.");
   const user = await ensureAnonymousCustomer();
   const prescriptionPath = input.prescriptionPath?.trim() || null;
@@ -1202,7 +1191,7 @@ type PharmacyWhatsappOtpSession = {
 
 export async function requestPharmacyWhatsappOtp(phone: string): Promise<PharmacyWhatsappOtpChallenge | PharmacyWhatsappNotRegistered> {
   const client = requirePharmacyBackend();
-  const normalizedPhone = normalizeRwandaWhatsapp(phone);
+  const normalizedPhone = normalizeInternationalWhatsapp(phone);
   if (!normalizedPhone) throw new Error("Enter the pharmacy WhatsApp number.");
   const { data, error } = await client.functions.invoke<(PharmacyWhatsappOtpChallenge | PharmacyWhatsappNotRegistered) & { error?: string }>(
     "dawanear-pharmacy-send-otp",
@@ -1229,7 +1218,7 @@ export async function verifyPharmacyWhatsappOtp(phone: string, challengeId: stri
   const client = requirePharmacyBackend();
   const cleanedToken = token.replace(/\s/g, "");
   if (!/^\d{6}$/.test(cleanedToken)) throw new Error("Enter the complete 6-digit WhatsApp code.");
-  const normalizedPhone = normalizeRwandaWhatsapp(phone);
+  const normalizedPhone = normalizeInternationalWhatsapp(phone);
   if (!normalizedPhone) throw new Error("Enter the pharmacy WhatsApp number.");
   if (!/^[0-9a-f-]{36}$/i.test(challengeId)) throw new Error("Send a new WhatsApp code.");
 
@@ -1565,8 +1554,8 @@ export async function requestPharmacyContactEdit(input: {
 }): Promise<string> {
   await requirePermanentPharmacyUser("Could not submit the pharmacy contact update");
   const client = requirePharmacyBackend();
-  const normalized = input.action === "remove" ? null : normalizeRwandaWhatsapp(input.e164 || "");
-  if (input.action !== "remove" && !normalized) throw new Error("Enter a valid Rwanda mobile number.");
+  const normalized = input.action === "remove" ? null : normalizeInternationalWhatsapp(input.e164 || "");
+  if (input.action !== "remove" && !normalized) throw new Error("Enter a valid international mobile number.");
   if ((input.action === "update" || input.action === "remove") && !input.contactId) {
     throw new Error("Choose the linked contact to change.");
   }
@@ -1591,7 +1580,7 @@ export async function submitPharmacyClaim(input: PharmacyClaimInput): Promise<Ph
   const payload = {
     pharmacy_id: requireNonEmpty(input.pharmacyId, "Pharmacy ID"),
     contact_email: normalizeEmail(input.contactEmail),
-    contact_phone: normalizeRwandaWhatsapp(input.contactPhone),
+    contact_phone: normalizeInternationalWhatsapp(input.contactPhone),
     note: input.note?.trim() || null,
   };
   const { data, error } = await client

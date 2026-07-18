@@ -9,7 +9,7 @@ import {
   hashOtp,
   HttpError,
   json,
-  normalizeRwandaPhone,
+  normalizeInternationalPhone,
   requestSourceHash,
   sendWhatsappOtp,
 } from "../_shared/dawanear-pharmacy-auth.ts";
@@ -25,7 +25,7 @@ Deno.serve(async (request: Request) => {
     if (request.method !== "POST") throw new HttpError("Method not allowed.", 405);
 
     const body = await request.json().catch(() => ({}));
-    const phone = normalizeRwandaPhone(body?.phone);
+    const phone = normalizeInternationalPhone(body?.phone);
     const client = adminClient();
     const sourceHash = await requestSourceHash(request);
 
