@@ -8,6 +8,7 @@ const [client, marketplace, migration, runtimeCatalogJson] = await Promise.all([
   readFile(new URL("../supabase/migrations/20260713203240_expose_member_owned_pharmacy_contacts.sql", import.meta.url), "utf8"),
   readFile(new URL("../data/localization/runtime-messages.en-RW.json", import.meta.url), "utf8"),
 ]);
+const profileMigration = await readFile(new URL("../supabase/migrations/20260718150000_extend_member_pharmacy_profile.sql", import.meta.url), "utf8");
 const runtimeMessages = JSON.parse(runtimeCatalogJson).messages;
 
 test("loads contacts only through the member-scoped RPC", () => {
@@ -30,5 +31,23 @@ test("supports real add, replacement and removal requests in the pharmacy profil
   assert.match(marketplace, /action: contactEditAction/);
   assert.match(marketplace, /requestContactRemoval[\s\S]*action: "remove"/);
   assert.match(marketplace, /pendingContactEdits/);
+  assert.doesNotMatch(marketplace, /contactEditNote/);
+  assert.match(marketplace, /disabled=\{portalLoading \|\| !\/\^7\[2389\]\\d\{7\}\$\/\.test\(contactEditWhatsapp\)\}/);
   assert.doesNotMatch(marketplace, /Request a WhatsApp update/);
+});
+
+test("shows member-owned MoMo and verified map details without exposing other pharmacies", () => {
+  assert.match(profileMigration, /dawanear_my_pharmacies\(\)/);
+  assert.match(profileMigration, /membership\.user_id = v_user_id/);
+  assert.match(profileMigration, /pharmacy\.momo_code/);
+  assert.match(profileMigration, /coalesce\(pharmacy\.google_formatted_address, pharmacy\.sector_cell_raw\)/);
+  assert.match(profileMigration, /pharmacy\.google_maps_url/);
+  assert.match(profileMigration, /extensions\.st_y/);
+  assert.match(profileMigration, /extensions\.st_x/);
+  assert.match(client, /address: nullableString\(row, "address"\)/);
+  assert.match(client, /googleMapsUrl: nullableString\(row, "google_maps_url"\)/);
+  assert.match(marketplace, /activeMembership\.role\.charAt\(0\)\.toUpperCase\(\)/);
+  assert.match(marketplace, /activeMembership\?\.momoCode/);
+  assert.match(marketplace, /activeMembership\.googleMapsUrl/);
+  assert.match(marketplace, /activeMembership\.latitude\.toFixed\(6\)/);
 });

@@ -819,7 +819,7 @@ function ProductCard({
 
 type PharmacyCataloguePanelProps = {
   products: Product[];
-  total: number;
+  catalogueProducts: Product[];
   query: string;
   drafts: Record<string, string>;
   submittingProductId: string | null;
@@ -828,9 +828,22 @@ type PharmacyCataloguePanelProps = {
   onSubmit: (product: Product) => void;
 };
 
+function portalProductTypeLabel(product: Product) {
+  const subcategory = product.subcategory?.trim();
+  if (subcategory) return subcategory;
+  const department = catalogueDepartmentForProduct(product).label;
+  const formGroup = catalogueFormGroup(product);
+  if (department === "Medicines") {
+    if (formGroup !== "other") return formGroup.charAt(0).toUpperCase() + formGroup.slice(1);
+    return product.form.trim() || department;
+  }
+  if (product.category !== department) return product.category;
+  return product.productType.replace(/[_-]+/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
 function PharmacyCataloguePanel({
   products,
-  total,
+  catalogueProducts,
   query,
   drafts,
   submittingProductId,
@@ -839,25 +852,73 @@ function PharmacyCataloguePanel({
   onSubmit,
 }: PharmacyCataloguePanelProps) {
   const [visibleCount, setVisibleCount] = useState(PORTAL_PRODUCT_BATCH_SIZE);
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [productTypeFilter, setProductTypeFilter] = useState("all");
+  const [catalogueSort, setCatalogueSort] = useState<"relevance" | "az" | "za" | "category" | "price-low" | "price-high">("relevance");
   const loadMoreRef = useRef<HTMLDivElement>(null);
-  const visibleProducts = products.slice(0, visibleCount);
-  const hasMoreProducts = visibleCount < products.length;
+  const categoryOptions = useMemo(() => Array.from(new Set(catalogueProducts.map((product) => catalogueDepartmentForProduct(product).label).filter(Boolean))).toSorted((left, right) => left.localeCompare(right)), [catalogueProducts]);
+  const productsInCategory = useMemo(() => categoryFilter === "all"
+    ? catalogueProducts
+    : catalogueProducts.filter((product) => catalogueDepartmentForProduct(product).label === categoryFilter), [catalogueProducts, categoryFilter]);
+  const productTypeOptions = useMemo(() => Array.from(new Set(productsInCategory.map(portalProductTypeLabel).filter(Boolean))).toSorted((left, right) => left.localeCompare(right)), [productsInCategory]);
+  const effectiveProductTypeFilter = productTypeFilter === "all" || productTypeOptions.includes(productTypeFilter) ? productTypeFilter : "all";
+  const filteredProducts = useMemo(() => {
+    const result = products.filter((product) => {
+      if (categoryFilter !== "all" && catalogueDepartmentForProduct(product).label !== categoryFilter) return false;
+      if (effectiveProductTypeFilter === "all") return true;
+      return portalProductTypeLabel(product) === effectiveProductTypeFilter;
+    });
+    if (catalogueSort === "relevance") return result;
+    return result.toSorted((left, right) => {
+      if (catalogueSort === "az" || catalogueSort === "za") {
+        const comparison = customerProductTitle(left.brand).localeCompare(customerProductTitle(right.brand));
+        return catalogueSort === "az" ? comparison : -comparison;
+      }
+      if (catalogueSort === "category") {
+        return catalogueDepartmentForProduct(left).label.localeCompare(catalogueDepartmentForProduct(right).label)
+          || (left.subcategory ?? "").localeCompare(right.subcategory ?? "")
+          || customerProductTitle(left.brand).localeCompare(customerProductTitle(right.brand));
+      }
+      const leftHasPrice = hasPriceData(left);
+      const rightHasPrice = hasPriceData(right);
+      if (leftHasPrice !== rightHasPrice) return leftHasPrice ? -1 : 1;
+      if (!leftHasPrice) return customerProductTitle(left.brand).localeCompare(customerProductTitle(right.brand));
+      const comparison = left.indicativePriceRwf - right.indicativePriceRwf;
+      return catalogueSort === "price-low" ? comparison : -comparison;
+    });
+  }, [catalogueSort, categoryFilter, effectiveProductTypeFilter, products]);
+  const visibleProducts = filteredProducts.slice(0, visibleCount);
+  const hasMoreProducts = visibleCount < filteredProducts.length;
 
   useEffect(() => {
     const sentinel = loadMoreRef.current;
     if (!sentinel || !hasMoreProducts || typeof IntersectionObserver === "undefined") return undefined;
     const observer = new IntersectionObserver(([entry]) => {
       if (!entry.isIntersecting) return;
-      setVisibleCount((count) => Math.min(count + PORTAL_PRODUCT_BATCH_SIZE, products.length));
+      setVisibleCount((count) => Math.min(count + PORTAL_PRODUCT_BATCH_SIZE, filteredProducts.length));
     }, { rootMargin: "700px 0px", threshold: 0.01 });
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [hasMoreProducts, products.length, visibleCount]);
+  }, [filteredProducts.length, hasMoreProducts, visibleCount]);
+
+  function resetCatalogueControls() {
+    setCategoryFilter("all");
+    setProductTypeFilter("all");
+    setCatalogueSort("relevance");
+    onQueryChange("");
+    setVisibleCount(PORTAL_PRODUCT_BATCH_SIZE);
+  }
 
   return <section className="pharmacy-catalogue-panel" aria-label={marketplaceMessage("inventory.2d3278c26218")}>
     <div className="pharmacy-catalogue-tools">
-      <div><p>{marketplaceFormatMessage("catalogue.product_count", [marketplaceNumber(total)])}</p></div>
+      <div><p aria-live="polite">{marketplaceFormatMessage("catalogue.product_count", [marketplaceNumber(filteredProducts.length)])}</p></div>
       <label><Search size={17} aria-hidden="true" /><input value={query} onChange={(event) => { onQueryChange(boundedCatalogueQuery(event.target.value)); setVisibleCount(PORTAL_PRODUCT_BATCH_SIZE); }} placeholder={marketplaceMessage("inventory.c44cd62c1bdf")} aria-label={marketplaceMessage("inventory.b6891c685f60")} /></label>
+    </div>
+    <div className="pharmacy-catalogue-filters" aria-label={marketplaceMessage("inventory.2d3278c26218")}>
+      <label><span>{marketplaceMessage("inventory.292c06f0045a")}</span><select value={categoryFilter} onChange={(event) => { setCategoryFilter(event.target.value); setProductTypeFilter("all"); setVisibleCount(PORTAL_PRODUCT_BATCH_SIZE); }}><option value="all">{marketplaceMessage("catalogue.all_categories")}</option>{categoryOptions.map((option) => <option value={option} key={option}>{option}</option>)}</select></label>
+      <label><span>{marketplaceMessage("inventory.6fee4ea29a07")}</span><select value={effectiveProductTypeFilter} onChange={(event) => { setProductTypeFilter(event.target.value); setVisibleCount(PORTAL_PRODUCT_BATCH_SIZE); }}><option value="all">{marketplaceMessage("inventory.718622df41f1")}</option>{productTypeOptions.map((option) => <option value={option} key={option}>{option}</option>)}</select></label>
+      <label><span>{marketplaceMessage("inventory.bec69036aa27")}</span><select value={catalogueSort} onChange={(event) => { setCatalogueSort(event.target.value as typeof catalogueSort); setVisibleCount(PORTAL_PRODUCT_BATCH_SIZE); }}><option value="relevance">{marketplaceMessage("inventory.d83ab68f7428")}</option><option value="az">{marketplaceMessage("inventory.bb05620585b6")}</option><option value="za">{marketplaceMessage("inventory.ac2bd92e706d")}</option><option value="category">{marketplaceMessage("inventory.292c06f0045a")}</option><option value="price-low">{marketplaceMessage("product.price_label")} ↑</option><option value="price-high">{marketplaceMessage("product.price_label")} ↓</option></select></label>
+      <button type="button" onClick={resetCatalogueControls} disabled={!query && categoryFilter === "all" && productTypeFilter === "all" && catalogueSort === "relevance"}><SlidersHorizontal size={15} aria-hidden="true" /> {marketplaceMessage("inventory.daee7606b339")}</button>
     </div>
     {visibleProducts.length ? <div className="pharmacy-catalogue-list">
       {visibleProducts.map((product) => {
@@ -1044,7 +1105,6 @@ export default function Marketplace({
   const [offerFulfilmentMethod, setOfferFulfilmentMethod] = useState<"pickup" | "delivery" | "either">("either");
   const [offerNote, setOfferNote] = useState("");
   const [contactEditWhatsapp, setContactEditWhatsapp] = useState("");
-  const [contactEditNote, setContactEditNote] = useState("");
   const [contactEditType, setContactEditType] = useState<"phone" | "whatsapp">("whatsapp");
   const [contactEditAction, setContactEditAction] = useState<"add" | "update">("add");
   const [contactEditContactId, setContactEditContactId] = useState<string | null>(null);
@@ -2441,13 +2501,11 @@ export default function Marketplace({
         contactType: contactEditType,
         contactId: contactEditAction === "update" ? contactEditContactId : null,
         e164: `250${contactEditWhatsapp}`,
-        note: contactEditNote,
       });
       const contactState = await loadMyPharmacyContacts(activeMembership.pharmacyId);
       setPharmacyContacts(contactState.contacts);
       setPendingContactEdits(contactState.pendingRequests);
       setContactEditWhatsapp("");
-      setContactEditNote("");
       setContactEditAction("add");
       setContactEditContactId(null);
       setPortalMessage(marketplaceMessage("inventory.0dddd387651d"));
@@ -2463,7 +2521,6 @@ export default function Marketplace({
     setContactEditType(contact.contactType);
     setContactEditContactId(contact.id);
     setContactEditWhatsapp(contact.e164.replace(/^250/, ""));
-    setContactEditNote(`Replace ${contact.displayNumber} after direct verification`);
   }
 
   async function requestContactRemoval(contact: PharmacyContact) {
@@ -2923,10 +2980,10 @@ export default function Marketplace({
               <div className="request-table-head"><div><h3>{marketplaceMessage("inventory.676b68693b41")}</h3><span>{marketplaceMessage("inventory.b3a7eb1621d5")}</span></div></div>
               {pharmacySelectedOrders.length ? <div className="request-list selected-order-list">{pharmacySelectedOrders.map((order) => <article key={order.orderId}><div className="request-id"><span className="new">{marketplaceMessage("inventory.6a6df4a0eec5")}</span><b>{order.reference}</b>{formatDate(order.selectedAt) ? <small>{formatDate(order.selectedAt)}</small> : null}</div><div><b>{order.deliveryPreference}</b><small>{marketplaceMessage("inventory.5279fac93b6e")}</small></div>{whatsappUrl(order.customerWhatsapp, `Hello, I’m contacting you from ${activeMembership?.pharmacyName ?? "the pharmacy"} about MED+250 request ${order.reference}. Please confirm availability, final price, and fulfilment details.`) ? <div><a href={whatsappUrl(order.customerWhatsapp, `Hello, I’m contacting you from ${activeMembership?.pharmacyName ?? "the pharmacy"} about MED+250 request ${order.reference}. Please confirm availability, final price, and fulfilment details.`) ?? undefined} target="_blank" rel="noreferrer"><MessageCircle size={14} /> {marketplaceMessage("inventory.8f110bac8951")}</a><small>{marketplaceMessage("inventory.43c1a5cb912f")}</small></div> : null}{order.prescriptionUrl ? <div><a href={order.prescriptionUrl} target="_blank" rel="noreferrer"><FileText size={14} /> {marketplaceMessage("inventory.976734763508")}</a><small>{marketplaceMessage("inventory.20a9b8ecc18e")}</small></div> : null}</article>)}</div> : <div className="portal-empty"><ShieldCheck size={29} /><b>{marketplaceMessage("inventory.26faa8bd8f43")}</b><p>{marketplaceMessage("inventory.4fb51cf5b034")}</p></div>}
             </> : null}
-            {portalTab === "catalogue" ? <PharmacyCataloguePanel products={portalCatalogueMatches} total={portalCatalogueMatches.length} query={portalCatalogueQuery} drafts={centralPriceDrafts} submittingProductId={submittingPriceProductId} onQueryChange={setPortalCatalogueQuery} onDraftChange={(productId, value) => setCentralPriceDrafts((current) => ({ ...current, [productId]: value }))} onSubmit={(product) => { void recordCentralPrice(product); }} /> : null}
+            {portalTab === "catalogue" ? <PharmacyCataloguePanel products={portalCatalogueMatches} catalogueProducts={pharmacyCatalogue} query={portalCatalogueQuery} drafts={centralPriceDrafts} submittingProductId={submittingPriceProductId} onQueryChange={setPortalCatalogueQuery} onDraftChange={(productId, value) => setCentralPriceDrafts((current) => ({ ...current, [productId]: value }))} onSubmit={(product) => { void recordCentralPrice(product); }} /> : null}
             {portalTab === "profile" ? <section className="portal-form profile-summary">
               <div><Store size={22} /><span><b>{activeMembership?.pharmacyName}</b><small>{marketplaceMessage("inventory.72612ddb720c")}</small></span></div>
-              <dl>{activeMembership?.role ? <div><dt>{marketplaceMessage("inventory.09bdccc5fb69")}</dt><dd>{activeMembership.role}</dd></div> : null}{activeMembership?.whatsapp ? <div><dt>{marketplaceMessage("inventory.70f74acb1403")}</dt><dd>+{activeMembership.whatsapp}</dd></div> : null}{activeMembership?.momoCode ? <div><dt>{marketplaceMessage("inventory.9300a99b30e3")}</dt><dd>{activeMembership.momoCode}</dd></div> : null}</dl>
+              <dl>{activeMembership?.role ? <div><dt>{marketplaceMessage("inventory.09bdccc5fb69")}</dt><dd>{activeMembership.role.charAt(0).toUpperCase() + activeMembership.role.slice(1).toLowerCase()}</dd></div> : null}{activeMembership?.whatsapp ? <div><dt>{marketplaceMessage("inventory.70f74acb1403")}</dt><dd>+{activeMembership.whatsapp}</dd></div> : null}{activeMembership?.momoCode ? <div><dt>{marketplaceMessage("inventory.9300a99b30e3")}</dt><dd>{activeMembership.momoCode}</dd></div> : null}{activeMembership?.address || (activeMembership?.latitude != null && activeMembership.longitude != null) ? <div><dt>{marketplaceMessage("inventory.ef4903cec8c5")}</dt><dd className="pharmacy-profile-location">{activeMembership.address ? activeMembership.googleMapsUrl ? <a href={activeMembership.googleMapsUrl} target="_blank" rel="noreferrer"><MapPin size={14} aria-hidden="true" /> {activeMembership.address}</a> : <span>{activeMembership.address}</span> : null}{activeMembership.latitude != null && activeMembership.longitude != null ? <small>{activeMembership.latitude.toFixed(6)}, {activeMembership.longitude.toFixed(6)}</small> : null}</dd></div> : null}</dl>
               <p>{marketplaceMessage("inventory.e149bc6f0f0d")}</p>
               <div className="contact-edit-panel">
                 <h3>{marketplaceMessage("inventory.6ed73037f10e")}</h3>
@@ -2936,9 +2993,8 @@ export default function Marketplace({
                 <h3>{contactEditAction === "update" ? marketplaceMessage("inventory.6679d4e5fc66") : marketplaceMessage("inventory.8f691322f91b")}</h3>
                 <label>{marketplaceMessage("inventory.9c37f4ab2257")}<select value={contactEditType} onChange={(event) => { setContactEditType(event.target.value === "phone" ? "phone" : "whatsapp"); setContactEditAction("add"); setContactEditContactId(null); }}><option value="whatsapp">{marketplaceMessage("inventory.6a40edf1fc87")}</option><option value="phone">{marketplaceMessage("inventory.63dceb8800b2")}</option></select></label>
                 <label>{contactEditAction === "update" ? marketplaceMessage("inventory.a21e3d266c8a") : marketplaceMessage("inventory.7df127cda4fc")}<div className="portal-phone-input"><span>+250</span><input value={contactEditWhatsapp} onChange={(event) => setContactEditWhatsapp(event.target.value.replace(/\D/g, "").slice(0, 9))} placeholder="78 000 0000" inputMode="tel" autoComplete="tel" /></div></label>
-                <label>{marketplaceMessage("inventory.65f77f1a614f")}<textarea value={contactEditNote} onChange={(event) => setContactEditNote(event.target.value)} maxLength={1000} placeholder={marketplaceMessage("inventory.f41e301f1918")} /></label>
-                <button className="primary-wide" onClick={requestContactEdit} disabled={portalLoading}>{portalLoading ? marketplaceMessage("inventory.49195f559e4a") : contactEditAction === "update" ? marketplaceMessage("inventory.af1326d8095e") : marketplaceMessage("inventory.ca06556af647")}<ArrowRight size={17} /></button>
-                {contactEditAction === "update" ? <button className="text-action" type="button" onClick={() => { setContactEditAction("add"); setContactEditContactId(null); setContactEditWhatsapp(""); setContactEditNote(""); }}>{marketplaceMessage("inventory.694ab4b7524f")}</button> : null}
+                <button className="primary-wide" onClick={requestContactEdit} disabled={portalLoading || !/^7[2389]\d{7}$/.test(contactEditWhatsapp)}>{portalLoading ? marketplaceMessage("inventory.49195f559e4a") : contactEditAction === "update" ? marketplaceMessage("inventory.af1326d8095e") : marketplaceMessage("inventory.ca06556af647")}<ArrowRight size={17} /></button>
+                {contactEditAction === "update" ? <button className="text-action" type="button" onClick={() => { setContactEditAction("add"); setContactEditContactId(null); setContactEditWhatsapp(""); }}>{marketplaceMessage("inventory.694ab4b7524f")}</button> : null}
               </div>
             </section> : null}
           </div>

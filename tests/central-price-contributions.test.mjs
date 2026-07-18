@@ -50,7 +50,15 @@ test("pharmacy portal exposes the full searchable catalogue in lazy batches of t
   assert.match(marketplace, /const PORTAL_PRODUCT_BATCH_SIZE = 20/);
   assert.match(marketplace, /new IntersectionObserver/);
   assert.match(marketplace, /count \+ PORTAL_PRODUCT_BATCH_SIZE/);
-  assert.match(marketplace, /products\.slice\(0, visibleCount\)/);
+  assert.match(marketplace, /filteredProducts\.slice\(0, visibleCount\)/);
+  assert.match(marketplace, /className="pharmacy-catalogue-filters"/);
+  assert.match(marketplace, /const \[categoryFilter, setCategoryFilter\] = useState\("all"\)/);
+  assert.match(marketplace, /const \[productTypeFilter, setProductTypeFilter\] = useState\("all"\)/);
+  assert.match(marketplace, /const \[catalogueSort, setCatalogueSort\]/);
+  assert.match(marketplace, /catalogueDepartmentForProduct\(product\)\.label !== categoryFilter/);
+  assert.match(marketplace, /portalProductTypeLabel\(product\) === effectiveProductTypeFilter/);
+  assert.match(marketplace, /if \(leftHasPrice !== rightHasPrice\) return leftHasPrice \? -1 : 1/);
+  assert.match(marketplace, /setVisibleCount\(PORTAL_PRODUCT_BATCH_SIZE\)/);
   assert.match(marketplace, /marketplaceMessage\("inventory\.718622df41f1"\)/);
   assert.doesNotMatch(marketplace, /pharmacy-catalogue-pagination/);
   assert.doesNotMatch(marketplace, /marketplaceMessage\("inventory\.aa815bddbd5a"\)/);
@@ -67,5 +75,7 @@ test("pharmacy portal exposes the full searchable catalogue in lazy batches of t
   assert.match(styles, /\.pharmacy-catalogue-list/);
   assert.match(styles, /content-visibility:auto/);
   assert.match(styles, /\.pharmacy-catalogue-sentinel/);
+  assert.match(styles, /\.pharmacy-catalogue-filters/);
+  assert.match(styles, /@media \(max-width:430px\)[\s\S]*\.pharmacy-catalogue-filters \{ grid-template-columns:1fr; \}/);
   assert.match(styles, /\.portal-mobile-tabs/);
 });

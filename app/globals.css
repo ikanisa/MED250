@@ -653,6 +653,11 @@ footer>small { grid-column:1/-1; border-top:1px solid var(--alpha-white-12); pad
 .pharmacy-catalogue-tools p { margin:4px 0 0; color:var(--color-disabled); font-size:9px; }
 .pharmacy-catalogue-tools>label { width:min(410px,48%); min-height:43px; padding:0 12px; display:flex; align-items:center; gap:8px; border:1px solid var(--line); border-radius:10px; background:var(--clay-surface); color:var(--color-muted); }
 .pharmacy-catalogue-tools input { min-width:0; width:100%; border:0; outline:0; background:transparent; color:var(--ink); }
+.pharmacy-catalogue-filters { margin:-2px 0 14px; padding:10px; display:grid; grid-template-columns:minmax(145px,1fr) minmax(145px,1fr) minmax(145px,1fr) auto; align-items:end; gap:9px; border:1px solid var(--clay-border); border-radius:14px; background:linear-gradient(135deg,var(--surface-lavender-soft),var(--surface-page) 52%,var(--surface-mint)); box-shadow:var(--clay-shadow-soft); }
+.pharmacy-catalogue-filters label { min-width:0; display:flex; flex-direction:column; gap:5px; color:var(--color-muted); font-size:8px; font-weight:850; }
+.pharmacy-catalogue-filters select { width:100%; min-height:39px; padding:0 30px 0 10px; border:1px solid var(--clay-border); border-radius:9px; background:linear-gradient(145deg,var(--surface-page),var(--surface-lavender-soft)); color:var(--ink); font-size:10px; font-weight:750; }
+.pharmacy-catalogue-filters>button { min-height:39px; padding:0 12px; display:flex; align-items:center; justify-content:center; gap:6px; border:1px solid var(--clay-border); border-radius:9px; background:linear-gradient(145deg,var(--surface-lavender),var(--surface-blush)); color:var(--ink); font-size:9px; font-weight:850; cursor:pointer; }
+.pharmacy-catalogue-filters>button:disabled { opacity:.45; cursor:not-allowed; }
 .pharmacy-catalogue-panel>.price-policy { margin-bottom:14px; }
 .pharmacy-catalogue-list { overflow:hidden; border:1px solid var(--clay-border); border-radius:12px; background:var(--clay-surface); }
 .pharmacy-catalogue-list>article { min-height:82px; padding:11px 13px; display:grid; grid-template-columns:minmax(260px,1.5fr) minmax(150px,.7fr) minmax(180px,.8fr) auto; align-items:center; gap:15px; border-bottom:1px solid var(--clay-border); }
@@ -699,12 +704,14 @@ footer>small { grid-column:1/-1; border-top:1px solid var(--alpha-white-12); pad
   .portal-mobile-tabs button.active { border-color:var(--clay-border-strong); background:var(--clay-action); color:var(--color-white); }
   .pharmacy-catalogue-tools { align-items:stretch; flex-direction:column; }
   .pharmacy-catalogue-tools>label { width:100%; }
+  .pharmacy-catalogue-filters { grid-template-columns:1fr 1fr; }
   .pharmacy-catalogue-list>article { grid-template-columns:1fr auto; gap:10px; }
   .pharmacy-central-price { text-align:right; }
   .pharmacy-price-input { grid-column:1; }
   .pharmacy-catalogue-list>article>button { grid-column:2; align-self:end; }
 }
 @media (max-width:430px) {
+  .pharmacy-catalogue-filters { grid-template-columns:1fr; }
   .pharmacy-catalogue-list>article { grid-template-columns:1fr; }
   .pharmacy-central-price { text-align:left; }
   .pharmacy-price-input,.pharmacy-catalogue-list>article>button { grid-column:1; }
@@ -1132,6 +1139,9 @@ select,textarea { font:inherit; }
 .profile-summary dl { margin:20px 0; border-top:1px solid var(--line); }
 .profile-summary dl>div { padding:12px 0; display:flex; justify-content:space-between; gap:15px; border-bottom:1px solid var(--line); }
 .profile-summary dt { color:var(--color-disabled); font-size:9px; }.profile-summary dd { margin:0; font-size:10px; font-weight:800; }
+.pharmacy-profile-location { max-width:min(480px,70%); display:flex; align-items:flex-end; flex-direction:column; gap:5px; text-align:right; }
+.pharmacy-profile-location a { display:inline-flex; align-items:center; justify-content:flex-end; gap:5px; color:var(--color-violet); }
+.pharmacy-profile-location small { color:var(--color-muted); font-size:8px; }
 .profile-summary>p { color:var(--color-disabled); font-size:9px; line-height:1.55; }
 .contact-edit-panel { margin-top:22px; padding-top:20px; border-top:1px solid var(--line); }
 .contact-edit-panel h3 { margin:0; font:800 18px/1.15 var(--font-display); }

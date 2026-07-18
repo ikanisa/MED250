@@ -142,6 +142,10 @@ export type PharmacyMembership = {
   status: string;
   whatsapp: string | null;
   momoCode: string | null;
+  address: string | null;
+  googleMapsUrl: string | null;
+  latitude: number | null;
+  longitude: number | null;
   onlineLicenseVerified: boolean;
 };
 
@@ -1191,6 +1195,10 @@ function mapMembership(row: JsonRecord): PharmacyMembership {
     status: stringValue(row, "status", "membership_status") || "active",
     whatsapp: nullableString(row, "whatsapp"),
     momoCode: nullableString(row, "momo_code"),
+    address: nullableString(row, "address"),
+    googleMapsUrl: nullableString(row, "google_maps_url"),
+    latitude: numericValue(row, "latitude"),
+    longitude: numericValue(row, "longitude"),
     onlineLicenseVerified: booleanValue(row, false, "online_license_verified", "onlineLicenseVerified"),
   };
 }
