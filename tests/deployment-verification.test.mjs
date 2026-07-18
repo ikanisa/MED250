@@ -4,6 +4,8 @@ import test from "node:test";
 
 import {
   assessDeploymentEvidence,
+  buildDeploymentEvidence,
+  parseArguments,
   validateDeploymentOrigin,
 } from "../scripts/verify-deployed-site.mjs";
 
@@ -19,6 +21,7 @@ const securityHeaders = {
   "strict-transport-security": "max-age=31536000; includeSubDomains",
   "x-content-type-options": "nosniff",
   "x-frame-options": "DENY",
+  "x-med250-release-revision": "0123456789abcdef0123456789abcdef01234567",
   "x-request-id": "123e4567-e89b-12d3-a456-426614174000",
 };
 
@@ -28,9 +31,12 @@ function records(origin, mode) {
     "/categories",
     "/category/medicines",
     "/product/rwanda-fda-hm-0734",
+    "/product/AMZ-B004L5JCZ4",
     "/robots.txt",
     "/sitemap.xml",
     "/manifest.webmanifest",
+    "/sw.js",
+    "/offline.html",
   ];
   return paths.map((route) => ({
     route,
@@ -41,12 +47,18 @@ function records(origin, mode) {
       ...(mode === "preview" ? { "x-robots-tag": "noindex, nofollow" } : {}),
     } : {},
     body: route === "/"
-      ? "<title>MED+250</title><h1>Connect with a pharmacy that has it</h1>"
+      ? "<title>MED+250</title><h1>Health and everyday care. <em>Find them all at your nearest pharmacy.</em></h1>"
       : route === "/robots.txt"
         ? mode === "preview" ? "User-Agent: *\nDisallow: /" : `User-Agent: *\nAllow: /\nSitemap: ${origin}/sitemap.xml`
         : route === "/sitemap.xml"
-          ? mode === "preview" ? "<urlset></urlset>" : `<urlset>${`<url><loc>${origin}/product/example</loc></url>`.repeat(2_400)}</urlset>`
-          : "ok",
+          ? mode === "preview" ? "<urlset></urlset>" : `<urlset><url><loc>${origin}/product/rwanda-fda-hm-0001</loc></url><url><loc>${origin}/product/AMZ-B004L5JCZ4</loc></url>${`<url><loc>${origin}/product/example</loc></url>`.repeat(4_598)}</urlset>`
+          : route === "/manifest.webmanifest"
+            ? JSON.stringify({ id: "/", scope: "/", display: "standalone", description: "Send availability requests to eligible pharmacies." })
+            : route === "/sw.js"
+              ? 'const OFFLINE_URL = "/offline.html"; url.pathname.startsWith("/api/");'
+              : route === "/offline.html"
+                ? "<h1>You are offline</h1><p>MED+250 will never show a request as sent while you are offline.</p>"
+                : "ok",
   }));
 }
 
@@ -57,19 +69,93 @@ test("accepts a protected preview deployment", () => {
 
 test("accepts an indexable live custom domain", () => {
   const origin = "https://med250.gikundiro.com";
-  assert.deepEqual(assessDeploymentEvidence({ origin, mode: "live", records: records(origin, "live") }).errors, []);
+  const result = assessDeploymentEvidence({
+    origin,
+    mode: "live",
+    records: records(origin, "live"),
+    expectedRevision: securityHeaders["x-med250-release-revision"],
+  });
+  assert.deepEqual(result.errors, []);
+  assert.equal(result.releaseRevision, "0123456789abcdef0123456789abcdef01234567");
+});
+
+test("requires an exact release revision when one is supplied", () => {
+  const origin = "https://med250.gikundiro.com";
+  const matching = assessDeploymentEvidence({
+    origin,
+    mode: "live",
+    records: records(origin, "live"),
+    expectedRevision: securityHeaders["x-med250-release-revision"],
+  });
+  assert.deepEqual(matching.errors, []);
+
+  const mismatched = assessDeploymentEvidence({
+    origin,
+    mode: "live",
+    records: records(origin, "live"),
+    expectedRevision: "fedcba9876543210fedcba9876543210fedcba98",
+  });
+  assert.equal(mismatched.status, "failed");
+  assert.ok(mismatched.errors.some((error) => error.includes("does not match the expected release")));
+});
+
+test("builds a durable receipt without response bodies or unapproved headers", () => {
+  const origin = "https://med250.gikundiro.com";
+  const evidenceRecords = records(origin, "live");
+  evidenceRecords[0].headers["set-cookie"] = "secret=value";
+  const result = assessDeploymentEvidence({
+    origin,
+    mode: "live",
+    records: evidenceRecords,
+    expectedRevision: securityHeaders["x-med250-release-revision"],
+  });
+  const evidence = buildDeploymentEvidence({
+    result,
+    records: evidenceRecords,
+    expectedRevision: securityHeaders["x-med250-release-revision"],
+    capturedAt: "2026-07-18T12:00:00.000Z",
+    verifierSha256: "a".repeat(64),
+  });
+  assert.equal(evidence.status, "passed");
+  assert.equal(evidence.releaseRevisionExpectation, "matched");
+  assert.equal(evidence.routes.length, 10);
+  assert.equal(evidence.routes[0].bodySha256.length, 64);
+  assert.equal(evidence.routes[0].headers["set-cookie"], undefined);
+  assert.equal("body" in evidence.routes[0], false);
 });
 
 test("accepts an indexable public catalog on Sites", () => {
   const origin = "https://med250-rwanda.ikanisa.chatgpt.site";
   assert.deepEqual(assessDeploymentEvidence({ origin, mode: "catalog", records: records(origin, "catalog") }).errors, []);
   assert.equal(validateDeploymentOrigin(origin, "catalog"), origin);
+  assert.throws(
+    () => validateDeploymentOrigin("https://med250.gikundiro.com", "catalog"),
+    /governed MED\+250 Sites origin/,
+  );
 });
 
-test("accepts the public Sites deployment as a live ordering origin", () => {
+test("keeps the public Sites deployment catalog-only", () => {
   const origin = "https://med250-rwanda.ikanisa.chatgpt.site";
-  assert.deepEqual(assessDeploymentEvidence({ origin, mode: "live", records: records(origin, "live") }).errors, []);
-  assert.equal(validateDeploymentOrigin(origin, "live"), origin);
+  const result = assessDeploymentEvidence({ origin, mode: "live", records: records(origin, "live") });
+  assert.equal(result.status, "failed");
+  assert.match(result.errors.join("\n"), /catalog-only/);
+  assert.throws(() => validateDeploymentOrigin(origin, "live"), /canonical MED\+250 production domain/);
+});
+
+test("requires immutable Git provenance for every live CLI verification", () => {
+  const origin = "https://med250.gikundiro.com";
+  assert.throws(
+    () => parseArguments(["--url", origin, "--mode", "live"]),
+    /exact lowercase 40-character Git release revision/,
+  );
+  assert.throws(
+    () => parseArguments(["--url", origin, "--mode", "live", "--expected-revision", "artifact-1234567"]),
+    /exact lowercase 40-character Git release revision/,
+  );
+  assert.equal(
+    parseArguments(["--url", origin, "--mode", "live", "--expected-revision", securityHeaders["x-med250-release-revision"]]).expectedRevision,
+    securityHeaders["x-med250-release-revision"],
+  );
 });
 
 test("detects indexing, security-header, redirect and sitemap failures", () => {
@@ -77,14 +163,16 @@ test("detects indexing, security-header, redirect and sitemap failures", () => {
   const evidence = records(origin, "live");
   evidence[0].headers["x-robots-tag"] = "noindex, nofollow";
   delete evidence[0].headers["content-security-policy"];
+  delete evidence[0].headers["x-med250-release-revision"];
   evidence[1].finalOrigin = "https://unexpected.example";
   evidence.find((record) => record.route === "/sitemap.xml").body = "<urlset></urlset>";
   const result = assessDeploymentEvidence({ origin, mode: "live", records: evidence });
   assert.equal(result.status, "failed");
   assert.ok(result.errors.some((error) => error.includes("redirected outside")));
   assert.ok(result.errors.some((error) => error.includes("Content-Security-Policy")));
+  assert.ok(result.errors.some((error) => error.includes("X-MED250-Release-Revision")));
   assert.ok(result.errors.some((error) => error.includes("unexpectedly blocked")));
-  assert.ok(result.errors.some((error) => error.includes("at least 2,400")));
+  assert.ok(result.errors.some((error) => error.includes("at least 4,600")));
 });
 
 test("requires HTTPS and a custom domain for live verification", () => {
@@ -111,27 +199,65 @@ test("keeps preview and production Workers isolated behind manual protected depl
   assert.equal(wrangler.vars.MED250_RELEASE_MODE, "preview");
   assert.equal(wrangler.env.production.name, "med250-marketplace-gikundiro");
   assert.equal(wrangler.env.production.workers_dev, false);
+  assert.equal(wrangler.env.production.preview_urls, false);
   assert.equal(wrangler.env.production.vars.MED250_RELEASE_MODE, "live");
+  assert.equal(wrangler.env.production.vars.NEXT_PUBLIC_MED250_DEPLOYMENT_MODE, "live");
+  assert.equal(wrangler.env.production.vars.NEXT_PUBLIC_MED250_DEPLOYMENT_ORIGIN, "https://med250.gikundiro.com");
+  assert.equal(wrangler.env.production.vars.NEXT_PUBLIC_MARKETPLACE_MODE, "live");
+  assert.equal(wrangler.env.production.vars.NEXT_PUBLIC_SITE_URL, "https://med250.gikundiro.com");
+  assert.equal(wrangler.env.production.vars.NEXT_PUBLIC_MED250_OBSERVABILITY, "cloud");
   assert.deepEqual(wrangler.env.production.routes.map((route) => route.pattern), [
     "med250.gikundiro.com",
   ]);
   assert.match(packageJson.scripts["build:production"], /CLOUDFLARE_ENV=production/);
+  assert.match(packageJson.scripts["build:sites"], /NEXT_PUBLIC_MED250_DEPLOYMENT_MODE=catalog/);
+  assert.match(packageJson.scripts["build:sites"], /NEXT_PUBLIC_MARKETPLACE_MODE=catalog/);
+  assert.match(packageJson.scripts["build:sites"], /NEXT_PUBLIC_SITE_URL=https:\/\/med250-rwanda\.ikanisa\.chatgpt\.site/);
+  assert.match(packageJson.scripts["sites:verify:catalog"], /--mode catalog/);
+  assert.match(packageJson.scripts["test:sites:catalog"], /npm run build:sites/);
+  assert.match(packageJson.scripts["test:sites:catalog"], /NEXT_PUBLIC_MARKETPLACE_MODE=catalog/);
   assert.match(packageJson.scripts["release:check:live"], /npm run test:preview/);
   assert.match(packageJson.scripts["release:check:live"], /npm run test:production/);
   assert.match(packageJson.scripts["release:check:live"], /wrangler deploy --env production --dry-run --strict/);
-  assert.match(packageJson.scripts["deploy:live"], /wrangler deploy --env production --strict/);
+  assert.match(packageJson.scripts["deploy:live"], /wrangler deploy --env production --keep-vars --strict/);
   assert.match(packageJson.scripts["cloudflare:check:production"], /wrangler deploy --env production --dry-run --strict/);
+  assert.match(packageJson.scripts["cloudflare:check:gikundiro"], /prepare:gikundiro/);
+  assert.match(packageJson.scripts["cloudflare:check:gikundiro"], /wrangler\.gikundiro\.json --keep-vars --dry-run --strict/);
+  assert.match(packageJson.scripts["deploy:gikundiro"], /wrangler\.gikundiro\.json --keep-vars --strict/);
   assert.match(quality, /npm run release:check/);
   assert.match(deployment, /workflow_dispatch:/);
   assert.doesNotMatch(deployment, /\n\s+push:/);
   assert.match(deployment, /environment: med250-production/);
   assert.match(deployment, /DEPLOY MED250 LIVE/);
   assert.match(deployment, /npm run uat:verify:live/);
-  assert.match(deployment, /npm run backend:verify && npm run ops:health:strict/);
+  assert.match(deployment, /npm run backend:verify[\s\S]*npm run backend:verify:description-reviewer[\s\S]*npm run ops:health:strict/);
   assert.match(deployment, /SUPABASE_SECRET_KEY:[^\n]*secrets\.SUPABASE_SECRET_KEY/);
+  assert.match(deployment, /MED250_ADMIN_TOKEN:[^\n]*secrets\.MED250_ADMIN_TOKEN/);
+  assert.match(deployment, /MED250_DESCRIPTION_REVIEWER_PROBE_PRODUCT_ID:[^\n]*vars\.MED250_DESCRIPTION_REVIEWER_PROBE_PRODUCT_ID/);
+  assert.match(deployment, /MED250_DESCRIPTION_REVIEWER_PROBE_EXPECTED_UPDATED_AT:[^\n]*vars\.MED250_DESCRIPTION_REVIEWER_PROBE_EXPECTED_UPDATED_AT/);
   assert.doesNotMatch(deployment.split("steps:")[0], /SUPABASE_SECRET_KEY/);
   assert.match(deployment, /cloudflare\/wrangler-action@[0-9a-f]{40}/);
-  assert.match(deployment, /command: deploy --env production --strict/);
+  assert.match(deployment, /command: deploy --strict --var MED250_RELEASE_MODE:preview --var MED250_RELEASE_REVISION:\$\{\{ github\.sha \}\}/);
+  assert.match(deployment, /command: deploy --env production --keep-vars --strict --var MED250_RELEASE_MODE:live --var MED250_RELEASE_REVISION:\$\{\{ github\.sha \}\}/);
   assert.match(deployment, /deployment:verify[\s\S]*--mode preview/);
-  assert.match(deployment, /deployment:verify[\s\S]*--mode live/);
+  assert.match(deployment, /catalogue:verify:live/);
+  assert.match(deployment, /deployment:verify[\s\S]*--mode live --expected-revision "\$\{\{ github\.sha \}\}"/);
+});
+
+test("prepares an immutable live-only config from the generated vinext artifact", async () => {
+  const source = await readFile(new URL("../scripts/prepare-gikundiro-worker.mjs", import.meta.url), "utf8");
+  assert.match(source, /name: "med250-marketplace-gikundiro"/);
+  assert.match(source, /workers_dev: false/);
+  assert.match(source, /preview_urls: false/);
+  assert.match(source, /pattern: "med250\.gikundiro\.com", custom_domain: true/);
+  assert.match(source, /revisionPattern = \/\^\[a-f0-9\]\{40\}\$\//);
+  assert.match(source, /execFileAsync\("git", \["rev-parse", "HEAD"\]/);
+  assert.match(source, /MED250_RELEASE_REVISION: releaseRevision/);
+  assert.match(source, /NEXT_PUBLIC_MED250_DEPLOYMENT_MODE: "live"/);
+  assert.match(source, /NEXT_PUBLIC_MED250_DEPLOYMENT_ORIGIN: deploymentOrigin/);
+  assert.match(source, /NEXT_PUBLIC_MARKETPLACE_MODE: "live"/);
+  assert.match(source, /NEXT_PUBLIC_SITE_URL: deploymentOrigin/);
+  assert.match(source, /NEXT_PUBLIC_MED250_OBSERVABILITY: "cloud"/);
+  assert.match(source, /delete generated\[generatedOnlyKey\]/);
+  assert.doesNotMatch(source, /\.dev\.vars/);
 });

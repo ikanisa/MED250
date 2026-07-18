@@ -6,7 +6,7 @@ Decision owner: MED+250 legal and compliance
 
 Release: `med250-production`
 
-Implemented backend contract: `2026-07-16.10`
+Implemented backend contract: `2026-07-18.3`
 
 ## Purpose and status
 
@@ -20,7 +20,7 @@ MED+250 currently implements the following model:
 
 1. MED+250 is an information-first online intermediary connecting customers with pharmacies.
 2. Only pharmacies are sellers and fulfilment parties. The platform does not support independent marketplace sellers.
-3. One central catalogue contains medicines and consumer health products. The live aggregate currently reports 4,659 active and requestable products: 2,459 medicines and 2,200 consumer products.
+3. One central catalogue contains medicines and consumer health products. The approved release target contains 4,657 publishable products after governed exclusions: 2,459 medicines and 2,198 consumer products. Production must be reconciled after the retirement migration is applied.
 4. Products and any public `From RWF` values are centrally maintained. Public pharmacy-specific stock and pharmacy-specific catalogue price lists are not supported.
 5. A customer may send a private availability request. This is not a completed sale or a final order.
 6. Verified nearby pharmacies are prioritised where approved premises coordinates exist. A stable national responder fallback may include an otherwise eligible pharmacy without approved coordinates; it must not be described as nearby.

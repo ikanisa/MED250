@@ -13,6 +13,9 @@ verify_jwt = false
 [functions.review-marketplace-products]
 verify_jwt = false
 
+[functions.review-product-descriptions]
+verify_jwt = false
+
 [functions.cleanup-prescriptions]
 verify_jwt = false
 
@@ -23,4 +26,20 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.dawanear-pharmacy-verify-otp]
+verify_jwt = false
+
+# Customer OTP functions require the signed-in browser session JWT and keep the
+# default gateway verification enabled.
+[functions.dawanear-customer-send-otp]
+verify_jwt = true
+
+[functions.dawanear-customer-verify-otp]
+verify_jwt = true
+
+# Cron authentication and Meta webhook signatures are verified inside these
+# handlers, so neither endpoint relies on a browser JWT.
+[functions.dispatch-whatsapp-notifications]
+verify_jwt = false
+
+[functions.whatsapp-webhook]
 verify_jwt = false

@@ -81,14 +81,27 @@ export function backendCategoryFor(value: string) {
 
 type TaxonomyProduct = Pick<Product, "category" | "prescriptionStatus" | "department" | "subcategory">;
 
-export function nonPrescriptionTaxonomyForProduct(product: TaxonomyProduct) {
-  if (product.prescriptionStatus !== "non_prescription") return null;
-  const directDepartment = NON_PRESCRIPTION_TAXONOMY.find((department) => (
+function findNonPrescriptionDepartment(product: TaxonomyProduct) {
+  return NON_PRESCRIPTION_TAXONOMY.find((department) => (
     department.label === product.department
     || department.label === product.category
     || department.legacyCategory === product.category
     || department.subcategories.includes(product.category)
-  ));
+  )) ?? null;
+}
+
+export function catalogueDepartmentForProduct(product: TaxonomyProduct) {
+  const nonPrescriptionDepartment = findNonPrescriptionDepartment(product);
+  if (nonPrescriptionDepartment) return { label: nonPrescriptionDepartment.label, href: nonPrescriptionDepartment.href };
+  if (product.department === "Medicines" || product.category === "Medicines") {
+    return { label: "Medicines", href: "/category/medicines" };
+  }
+  return { label: product.department || product.category || "Products", href: "/categories" };
+}
+
+export function nonPrescriptionTaxonomyForProduct(product: TaxonomyProduct) {
+  if (product.prescriptionStatus !== "non_prescription") return null;
+  const directDepartment = findNonPrescriptionDepartment(product);
   if (!directDepartment) return null;
   // A subcategory is a data field, not a prediction from the product name.
   // If the catalogue row does not carry one, callers must not render a label.

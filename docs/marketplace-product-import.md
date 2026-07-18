@@ -1,6 +1,6 @@
 # MED+250 Amazon-first product catalogue
 
-MED+250 keeps the 2,200 Amazon-first consumer products separate from the 2,480-row Rwanda FDA medicine register. Both feed one central customer catalogue. The database retains its pre-existing `dawanear_*` namespace strictly as an internal compatibility layer; it is not a marketplace or customer-facing brand.
+MED+250 retains the 2,200-row Amazon-first consumer source snapshot separately from the 2,480-row Rwanda FDA medicine register. Governed exclusions currently remove two book/search-noise rows, so 2,198 consumer products feed the central customer catalogue. The database retains its pre-existing `dawanear_*` namespace strictly as an internal compatibility layer; it is not a marketplace or customer-facing brand.
 
 All products, including medicines and Amazon-first consumer products, belong to one central catalogue. Product records never own a pharmacy identity. The central product record may carry a non-final indicative “From RWF” price. MED+250 does not publish pharmacy-specific price lists or stock. Pharmacies privately confirm availability for a customer request and may optionally include a non-final estimate before continuing on WhatsApp.
 
@@ -8,7 +8,7 @@ All products, including medicines and Amazon-first consumer products, belong to 
 
 - Source dataset: `outputs/019f66ce-d480-7a90-9bb7-ee6e417b5ce7/corrected/research/corrected-catalog-dataset-2026-07-15.json`
 - Consolidated workbook: `outputs/019f66ce-d480-7a90-9bb7-ee6e417b5ce7/corrected/Rwanda_Marketplace_Amazon_First_Catalog_4680.xlsx`
-- Expected import: 2,200 unique ASINs
+- Expected governed import: 2,198 unique ASINs from the traceable 2,200-row source snapshot
 - Required taxonomy coverage: all 25 department/subcategory pairs, with at least 50 quality-screened products in each pair
 - Canonical-title audit: incomplete Amazon search labels are repaired from product metadata, exact duplicate titles are collapsed, and irrelevant search noise is excluded through `data/imports/amazon-product-quality-overrides-2026-07-16.json`
 - Validation: `npm run data:validate-marketplace-products`

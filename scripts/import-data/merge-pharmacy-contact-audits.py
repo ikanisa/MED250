@@ -73,12 +73,25 @@ def merge_audits(audits: Sequence[list[dict[str, str]]]) -> list[dict[str, Any]]
     return output
 
 
-def summarize(rows: Sequence[dict[str, Any]], inputs: Sequence[Path], output: Path) -> dict[str, Any]:
+def table_rows(rows: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Project the merged audit into the user-facing registry enrichment table."""
+    return [
+        {column: row.get(column, "") for column in POLICY.OUTPUT_COLUMNS}
+        for row in rows
+    ]
+
+
+def summarize(
+    rows: Sequence[dict[str, Any]],
+    inputs: Sequence[Path],
+    output: Path,
+    table_output: Path | None = None,
+) -> dict[str, Any]:
     statuses: dict[str, int] = {}
     for row in rows:
         status = str(row.get("match_status") or "pending")
         statuses[status] = statuses.get(status, 0) + 1
-    return {
+    summary = {
         "schema_version": "1",
         "source_row_count": len(rows),
         "input_count": len(inputs),
@@ -102,6 +115,11 @@ def summarize(rows: Sequence[dict[str, Any]], inputs: Sequence[Path], output: Pa
         "production_contacts_promoted": 0,
         "whatsapp_identities_created": 0,
     }
+    if table_output:
+        summary["table_output"] = str(table_output)
+        summary["table_output_sha256"] = file_sha256(table_output)
+        summary["table_columns"] = list(POLICY.OUTPUT_COLUMNS)
+    return summary
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -110,6 +128,14 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--input", action="append", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument(
+        "--table-output",
+        type=Path,
+        help=(
+            "Optional 725-row registry table containing the source columns plus "
+            "phone_number and google_maps_url"
+        ),
+    )
     parser.add_argument("--summary-output", type=Path)
     return parser
 
@@ -119,7 +145,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         rows = merge_audits([read_complete_audit(path) for path in args.input])
         POLICY.atomic_write_csv(args.output, rows, POLICY.AUDIT_COLUMNS)
-        summary = summarize(rows, args.input, args.output)
+        if args.table_output:
+            POLICY.atomic_write_csv(
+                args.table_output,
+                table_rows(rows),
+                POLICY.OUTPUT_COLUMNS,
+            )
+        summary = summarize(rows, args.input, args.output, args.table_output)
         if args.summary_output:
             args.summary_output.parent.mkdir(parents=True, exist_ok=True)
             args.summary_output.write_text(

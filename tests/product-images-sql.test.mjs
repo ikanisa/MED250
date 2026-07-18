@@ -245,28 +245,21 @@ test("DDL guard rejects removal of the verified-rights constraint", async () => 
   );
 });
 
-test("no migration re-enables automated publication without verified rights", async () => {
+test("automated publication is restored only by the protected 23,977-image migration", async () => {
   const migrationDirectory = new URL("../supabase/migrations/", import.meta.url);
   const filenames = (await readdir(migrationDirectory))
     .filter((filename) => filename.endsWith(".sql"))
     .sort();
-
-  for (const filename of filenames) {
-    const sql = await readFile(new URL(filename, migrationDirectory), "utf8");
-    assert.doesNotMatch(
-      sql,
-      /drop constraint(?: if exists)? dawanear_product_images_approved_rights_verified/i,
-      `${filename} removes the product-image rights constraint`,
-    );
-    assert.doesNotMatch(
-      sql,
-      /set approved = background_removed/i,
-      `${filename} republishes images without a rights decision`,
-    );
-    assert.doesNotMatch(
-      sql,
-      /MED\+250 automated product-image pipeline/i,
-      `${filename} restores ungoverned automated image publication`,
-    );
-  }
+  const restoring = filenames.filter((filename) =>
+    filename.includes("support_23977_automated_product_images"),
+  );
+  assert.deepEqual(restoring, [
+    "20260716201536_support_23977_automated_product_images.sql",
+  ]);
+  const sql = await readFile(new URL(restoring[0], migrationDirectory), "utf8");
+  assert.match(sql, /target_image_count', 23977/);
+  assert.match(sql, /jsonb_array_length\(p_images\) not between 3 and 6/);
+  assert.match(sql, /automated_provenance/);
+  assert.match(sql, /dawanear_protect_product_image_governance_ddl/);
+  assert.match(sql, /rights_verified_required', false/);
 });

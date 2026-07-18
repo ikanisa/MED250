@@ -65,7 +65,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: 4.110.0
-          command: deploy --strict
+          command: deploy --strict --var MED250_RELEASE_MODE:preview --var MED250_RELEASE_REVISION:${{ github.sha }}
       - name: Verify protected deployment
         env:
           DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
@@ -101,6 +101,8 @@ jobs:
       MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED: ${{ vars.MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED }}
       MED250_GATE_DOMAIN_DNS_VERIFIED: ${{ vars.MED250_GATE_DOMAIN_DNS_VERIFIED }}
       MED250_GATE_PHYSICAL_UAT_PASSED: ${{ vars.MED250_GATE_PHYSICAL_UAT_PASSED }}
+      MED250_DESCRIPTION_REVIEWER_PROBE_PRODUCT_ID: ${{ vars.MED250_DESCRIPTION_REVIEWER_PROBE_PRODUCT_ID }}
+      MED250_DESCRIPTION_REVIEWER_PROBE_EXPECTED_UPDATED_AT: ${{ vars.MED250_DESCRIPTION_REVIEWER_PROBE_EXPECTED_UPDATED_AT }}
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
@@ -113,15 +115,21 @@ jobs:
       - name: Verify privileged production backend
         env:
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
-        run: npm run backend:verify && npm run ops:health:strict
+          MED250_ADMIN_TOKEN: ${{ secrets.MED250_ADMIN_TOKEN }}
+        run: |
+          npm run backend:verify
+          npm run backend:verify:description-reviewer -- --product-id "$MED250_DESCRIPTION_REVIEWER_PROBE_PRODUCT_ID" --expected-updated-at "$MED250_DESCRIPTION_REVIEWER_PROBE_EXPECTED_UPDATED_AT"
+          npm run ops:health:strict
       - name: Run unprivileged production release checks
         run: npm run lint && npm run data:validate && npm run data:quality && npm run test:preview && npm run test:production && npm run performance:budget && wrangler deploy --env production --dry-run --strict
+      - name: Verify source-bound live catalogue
+        run: npm run catalogue:verify:live
       - name: Deploy production Worker
         uses: cloudflare/wrangler-action@9acf94ace14e7dc412b076f2c5c20b8ce93c79cd # v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: 4.110.0
-          command: deploy --env production --strict
+          command: deploy --env production --keep-vars --strict --var MED250_RELEASE_MODE:live --var MED250_RELEASE_REVISION:${{ github.sha }}
       - name: Verify production deployment
-        run: npm run deployment:verify -- --url "$NEXT_PUBLIC_SITE_URL" --mode live
+        run: npm run deployment:verify -- --url "$NEXT_PUBLIC_SITE_URL" --mode live --expected-revision "${{ github.sha }}"

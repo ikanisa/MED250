@@ -6,7 +6,7 @@ This tool therefore never imports the older 725-row register as replacement
 rows. It links old evidence to current rows by pharmacy name and locality,
 keeps ambiguous records in a review CSV, and emits an idempotent migration for:
 
-* phone-only contacts (never WhatsApp/login identities), and
+* Rwanda mobile phone contacts in international form, and
 * Google Maps page URLs only when the browser match was accepted.
 
 Verified geocodes and existing Maps URLs are never overwritten.
@@ -254,7 +254,7 @@ def phone_metadata(row: dict[str, Any]) -> dict[str, Any]:
         return {}
     if not re.fullmatch(r"2507[2389][0-9]{7}", phone):
         raise ImportBuildError(
-            f"Invalid Rwanda mobile phone on December row {row['december_source_serial']}: {phone}"
+            f"Invalid Rwanda mobile on December row {row['december_source_serial']}: {phone}"
         )
     if source == "google_maps_browser":
         return {

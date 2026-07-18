@@ -25,6 +25,7 @@ import random
 import re
 import shutil
 import sqlite3
+import subprocess
 import sys
 import tempfile
 import time
@@ -65,6 +66,15 @@ AUDIT_COLUMNS = [
     "phone_evidence_reference",
     "maps_url_source",
     "search_mode",
+    "maps_page_type",
+    "coverage_status",
+    "details_hydrated",
+    "query_attempts",
+    "candidates_found",
+    "candidates_inspected",
+    "feed_scroll_rounds",
+    "place_pages_scanned",
+    "phone_extraction_methods",
     "query_used",
     "checked_at",
     "error",
@@ -212,6 +222,30 @@ def has_pharmacy_identity_evidence(
     return explicit_pharmacy_identity or exact_name_with_precise_locality
 
 
+def strong_maps_discovery(
+    row: dict[str, str],
+    candidate_name: str,
+    candidate_context: str,
+    score: float,
+    evidence: dict[str, bool],
+) -> bool:
+    """True when more query variants are unlikely to improve place identity."""
+    if not has_pharmacy_identity_evidence(
+        row.get("name", ""),
+        candidate_name,
+        candidate_context,
+        evidence,
+    ):
+        return False
+    if evidence.get("exact_name") and score >= 0.90:
+        return True
+    return (
+        score >= 0.84
+        and evidence.get("district", False)
+        and name_similarity(row.get("name", ""), candidate_name) >= 0.85
+    )
+
+
 def maps_search_url(row: dict[str, str]) -> str:
     query = ", ".join(
         part for part in [row["name"], row["sector"], row["district"], row["province"], "Rwanda"] if part
@@ -225,20 +259,34 @@ def browser_maps_search_url(row: dict[str, str]) -> str:
 
 
 def browser_maps_search_urls(row: dict[str, str], deep: bool = False) -> list[str]:
+    original_name = compact_spaces(row.get("name"))
+    without_legal_suffix = compact_spaces(
+        re.sub(
+            r"\b(?:LTD|LIMITED|SARL|COMPANY|CO)\b[. ]*",
+            " ",
+            original_name,
+            flags=re.I,
+        )
+    )
+    brand = normalized_name(original_name)
+    brand_pharmacy = compact_spaces(f"{brand} Pharmacy") if brand else ""
     queries = [
-        [row.get("name", ""), row.get("cell", ""), row.get("sector", ""), row.get("district", ""), "Rwanda"],
+        [original_name, row.get("cell", ""), row.get("sector", ""), row.get("district", ""), "Rwanda"],
     ]
     if deep:
         queries.extend(
             [
-                [row.get("name", ""), row.get("district", ""), "Rwanda"],
+                [original_name, row.get("district", ""), "Rwanda"],
                 [
-                    normalized_name(row.get("name", "")),
+                    without_legal_suffix,
                     row.get("sector", ""),
                     row.get("district", ""),
                     "Rwanda",
                 ],
-                [row.get("name", ""), row.get("province", ""), "Rwanda"],
+                [brand_pharmacy, row.get("district", ""), "Rwanda"],
+                [original_name, row.get("province", ""), "Rwanda"],
+                [brand, row.get("sector", ""), row.get("district", ""), "Rwanda"],
+                [original_name, "Rwanda"],
             ]
         )
     output: list[str] = []
@@ -265,6 +313,11 @@ def clean_maps_url(value: Any) -> str:
 
 
 def normalize_rwanda_phone(value: Any) -> str:
+    """Return a Rwanda mobile in international display form, or an empty string.
+
+    MED+250 uses mobile contacts for calling and WhatsApp. Fixed lines are
+    intentionally excluded instead of being rewritten as fabricated mobiles.
+    """
     raw = compact_spaces(value)
     if not raw:
         return ""
@@ -273,11 +326,11 @@ def normalize_rwanda_phone(value: Any) -> str:
     digits = re.sub(r"\D", "", raw)
     if digits.startswith("00250"):
         digits = digits[2:]
-    if digits.startswith("250") and len(digits) == 12:
+    if re.fullmatch(r"2507[2389][0-9]{7}", digits):
         return "+" + digits
-    if digits.startswith("0") and len(digits) == 10:
+    if re.fullmatch(r"07[2389][0-9]{7}", digits):
         return "+250" + digits[1:]
-    if len(digits) == 9 and digits.startswith(("7", "2")):
+    if re.fullmatch(r"7[2389][0-9]{7}", digits):
         return "+250" + digits
     return ""
 
@@ -285,7 +338,7 @@ def normalize_rwanda_phone(value: Any) -> str:
 def extract_rwanda_phones(value: Any) -> list[str]:
     text = compact_spaces(value)
     candidates = re.findall(
-        r"(?<!\d)(?:(?:\+|00)?250[\s().-]*|0)(?:(?:7[2389])|(?:2\d))(?:[\s().-]*\d){7}(?!\d)",
+        r"(?<!\d)(?:(?:(?:\+|00)?250[\s().-]*|0)7[2389]|7[2389])(?:[\s().-]*\d){7}(?!\d)",
         text,
     )
     if not candidates:
@@ -408,6 +461,15 @@ def blank_result(row: dict[str, str], status: str = "pending") -> dict[str, Any]
         "phone_evidence_reference": "",
         "maps_url_source": "generated_google_maps_search",
         "search_mode": "",
+        "maps_page_type": "not_checked",
+        "coverage_status": "not_checked",
+        "details_hydrated": "false",
+        "query_attempts": "0",
+        "candidates_found": "0",
+        "candidates_inspected": "0",
+        "feed_scroll_rounds": "0",
+        "place_pages_scanned": "0",
+        "phone_extraction_methods": "",
         "query_used": "",
         "checked_at": "",
         "error": "",
@@ -576,6 +638,8 @@ class GoogleMapsBrowser:
         self.timeout = timeout
         self.deep_search = deep_search
         self.max_candidates = max(1, max_candidates)
+        self.surface_timeout = min(max(8.0, timeout), 20.0)
+        self.details_timeout = min(max(7.0, timeout * 0.45), 14.0)
 
     def close(self) -> None:
         try:
@@ -621,6 +685,54 @@ class GoogleMapsBrowser:
         signals = ["UNUSUAL TRAFFIC", "AUTOMATED QUERIES", "NOT A ROBOT", "VERIFY YOU ARE HUMAN", "OUR SYSTEMS HAVE DETECTED"]
         return any(signal in text for signal in signals)
 
+    def _page_state(self) -> dict[str, Any]:
+        script = """
+        const body = (document.body?.innerText || '').toLowerCase();
+        const h1 = document.querySelector('h1.DUwDvf, h1.fontHeadlineLarge, [role="main"] h1, h1');
+        const feed = document.querySelector('[role="feed"]');
+        const articles = document.querySelectorAll('[role="article"]').length;
+        const placeLinks = document.querySelectorAll('a[href*="/maps/place/"]').length;
+        const noResults = /no results found|can't find|couldn.t find|not found on google maps/.test(body);
+        return {
+          h1: (h1?.innerText || h1?.getAttribute('aria-label') || '').trim(),
+          hasFeed: Boolean(feed), articles, placeLinks, noResults,
+          url: location.href, title: document.title
+        };
+        """
+        return dict(self.driver.execute_script(script) or {})
+
+    def _wait_for_surface(self) -> dict[str, Any]:
+        """Wait for a hydrated place, a result feed, or a conclusive empty state."""
+        from selenium.webdriver.support.ui import WebDriverWait
+
+        def ready(_driver: Any) -> dict[str, Any] | bool:
+            if self._blocked():
+                return {"blocked": True}
+            state = self._page_state()
+            if (
+                state.get("h1")
+                or state.get("hasFeed")
+                or int(state.get("articles") or 0) > 0
+                or int(state.get("placeLinks") or 0) > 0
+                or state.get("noResults")
+            ):
+                return state
+            return False
+
+        try:
+            state = WebDriverWait(
+                self.driver,
+                self.surface_timeout,
+                poll_frequency=0.25,
+            ).until(ready)
+        except Exception:
+            state = self._page_state()
+        if state.get("blocked") or self._blocked():
+            raise ScraperError(
+                "Google Maps blocked automated browsing; rerun headed after a cooldown"
+            )
+        return dict(state)
+
     def _listing_candidates(self) -> list[dict[str, str]]:
         script = """
         const result = [];
@@ -629,14 +741,74 @@ class GoogleMapsBrowser:
           const href = a.href || '';
           if (!href || seen.has(href)) continue;
           seen.add(href);
-          const card = a.closest('[role="article"]') || a.parentElement;
-          const name = (a.getAttribute('aria-label') || a.innerText || card?.querySelector('.fontHeadlineSmall')?.innerText || '').trim();
+          const card = a.closest('[role="article"]') || a.closest('[jsaction]') || a.parentElement;
+          const name = (a.getAttribute('aria-label') || card?.querySelector('.fontHeadlineSmall')?.innerText || a.innerText || '').trim();
           const text = (card?.innerText || '').trim();
           result.push({href, name, text});
         }
         return result;
         """
         return list(self.driver.execute_script(script) or [])
+
+    def _collect_scrolled_candidates(
+        self,
+        row: dict[str, str],
+    ) -> tuple[list[dict[str, str]], int]:
+        """Collect virtualized result cards while scrolling the Maps feed."""
+        by_url: dict[str, dict[str, str]] = {}
+        stable_rounds = 0
+        rounds = 0
+        max_rounds = 5 if self.deep_search else 3
+        while rounds <= max_rounds and stable_rounds < 2:
+            before = len(by_url)
+            for candidate in self._listing_candidates():
+                href = clean_maps_url(candidate.get("href"))
+                if not href:
+                    continue
+                candidate = {**candidate, "href": href}
+                candidate["phone"] = unique_join(
+                    extract_rwanda_phones(candidate.get("text"))
+                )
+                existing = by_url.get(href)
+                if not existing or len(candidate.get("text", "")) > len(
+                    existing.get("text", "")
+                ):
+                    by_url[href] = candidate
+            strong_match_visible = False
+            for candidate in by_url.values():
+                score, evidence = candidate_score(
+                    row["name"],
+                    row["district"],
+                    row["sector"],
+                    row["cell"],
+                    candidate.get("name", ""),
+                    candidate.get("text", ""),
+                )
+                if strong_maps_discovery(
+                    row,
+                    candidate.get("name", ""),
+                    candidate.get("text", ""),
+                    score,
+                    evidence,
+                ):
+                    strong_match_visible = True
+                    break
+            stable_rounds = stable_rounds + 1 if len(by_url) == before else 0
+            if strong_match_visible or rounds == max_rounds or stable_rounds >= 2:
+                break
+            scrolled = self.driver.execute_script(
+                """
+                const feed = document.querySelector('[role="feed"]');
+                if (!feed) return false;
+                feed.scrollTo({top: feed.scrollHeight, behavior: 'instant'});
+                return true;
+                """
+            )
+            if not scrolled:
+                break
+            rounds += 1
+            time.sleep(0.75)
+        return list(by_url.values()), rounds
 
     def _place_details(self) -> dict[str, str]:
         script = """
@@ -648,62 +820,291 @@ class GoogleMapsBrowser:
           }
           return '';
         };
-        const phoneElements = [
-          ...document.querySelectorAll(
-            '[data-item-id^="phone:tel:"], [data-item-id*="phone"], ' +
-            'button[aria-label^="Phone:"], button[aria-label^="Call"], ' +
-            'a[href^="tel:"], [data-tooltip*="phone" i]'
-          )
+        const main = document.querySelector('[role="main"]') || document;
+        const selectors = [
+          '[data-item-id^="phone:tel:"]', '[data-item-id*="phone"]',
+          'button[aria-label^="Phone:"]', 'button[aria-label*=" phone" i]',
+          'button[aria-label^="Call"]', 'a[href^="tel:"]',
+          '[data-tooltip*="phone" i]', '[title*="phone" i]',
+          '[itemprop="telephone"]', 'meta[itemprop="telephone"]'
         ];
+        const phoneElements = [...new Set(selectors.flatMap(selector => [...main.querySelectorAll(selector)]))];
+        const phoneValues = [];
+        const methods = [];
+        for (const el of phoneElements) {
+          for (const [method, value] of [
+            ['aria_label', el.getAttribute('aria-label')],
+            ['data_item_id', el.getAttribute('data-item-id')],
+            ['tel_href', el.getAttribute('href')],
+            ['visible_text', el.innerText],
+            ['content', el.getAttribute('content')],
+            ['title', el.getAttribute('title')],
+            ['tooltip', el.getAttribute('data-tooltip')]
+          ]) {
+            if ((value || '').trim()) { phoneValues.push(value.trim()); methods.push(method); }
+          }
+        }
         return {
-          name: first(['h1.DUwDvf','h1','[role="main"] h1']),
+          name: first(['h1.DUwDvf','h1.fontHeadlineLarge','[role="main"] h1','h1']),
           address: first(['button[data-item-id="address"]','[data-item-id="address"]','button[aria-label^="Address:"]']),
-          phone: [...phoneElements.map(text), ...phoneElements.map(el => el.getAttribute('href') || '')].join(' | ')
+          phone: phoneValues.join(' | '),
+          phone_methods: [...new Set(methods)].join(';'),
+          details_hydrated: Boolean(first(['h1.DUwDvf','h1.fontHeadlineLarge','[role="main"] h1','h1']))
         };
         """
         return dict(self.driver.execute_script(script) or {})
 
+    def _scroll_details_panel(self) -> None:
+        try:
+            self.driver.execute_script(
+                """
+                const main = document.querySelector('[role="main"]') || document.body;
+                const scrollers = [main, ...main.querySelectorAll('div')]
+                  .filter(el => el.scrollHeight > el.clientHeight + 80);
+                for (const el of scrollers.slice(0, 5)) el.scrollTop = el.scrollHeight;
+                """
+            )
+            time.sleep(0.35)
+        except Exception:
+            pass
+
+    def _accessibility_phone_text(self) -> str:
+        """Use Chrome's accessibility tree when Maps changes visible selectors."""
+        try:
+            tree = self.driver.execute_cdp_cmd("Accessibility.getFullAXTree", {})
+        except Exception:
+            return ""
+        values: list[str] = []
+        for node in tree.get("nodes", []):
+            name = compact_spaces((node.get("name") or {}).get("value"))
+            if not name:
+                continue
+            if re.search(r"\b(?:PHONE|CALL|TEL)\b", name, re.I) and extract_rwanda_phones(name):
+                values.append(name)
+        return unique_join(values)
+
+    def _share_place_url(self) -> str:
+        """Resolve the canonical place URL from Maps' public Share dialog."""
+        from selenium.webdriver.support.ui import WebDriverWait
+
+        try:
+            clicked = self.driver.execute_script(
+                """
+                const main = document.querySelector('[role="main"]') || document;
+                const button = [...main.querySelectorAll('button')].find(el => {
+                  const label = (el.getAttribute('aria-label') || el.innerText || '').trim();
+                  return /^share$/i.test(label) || (el.getAttribute('jsaction') || '').includes('placeActions.share');
+                });
+                if (!button) return false;
+                button.click();
+                return true;
+                """
+            )
+            if not clicked:
+                return ""
+            shared_url = WebDriverWait(
+                self.driver,
+                3.0,
+                poll_frequency=0.2,
+            ).until(
+                lambda driver: driver.execute_script(
+                    "return document.querySelector('[role=\"dialog\"] input[readonly][value]')?.value || ''"
+                )
+            )
+            shared_url = compact_spaces(shared_url)
+            self.driver.execute_script(
+                """
+                const close = document.querySelector('[role="dialog"] button[aria-label="Close"]');
+                if (close) close.click();
+                """
+            )
+            if not shared_url.startswith(("https://maps.app.goo.gl/", "https://goo.gl/maps/")):
+                return clean_maps_url(shared_url)
+            process = subprocess.run(
+                [
+                    "curl",
+                    "-LsS",
+                    "--max-time",
+                    "12",
+                    "-o",
+                    "/dev/null",
+                    "-w",
+                    "%{url_effective}",
+                    shared_url,
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+                text=True,
+            )
+            return clean_maps_url(process.stdout)
+        except Exception:
+            try:
+                self.driver.execute_script(
+                    "document.querySelector('[role=\"dialog\"] button[aria-label=\"Close\"]')?.click()"
+                )
+            except Exception:
+                pass
+            return ""
+
+    def _hydrate_place_details(self) -> dict[str, Any]:
+        """Wait for Maps SPA hydration, scan the full panel, then use fallbacks."""
+        self._wait_for_surface()
+        started = time.monotonic()
+        best: dict[str, Any] = {
+            "name": "",
+            "address": "",
+            "phone": "",
+            "phone_methods": "",
+            "details_hydrated": False,
+        }
+        first_name_at: float | None = None
+        while time.monotonic() - started < self.details_timeout:
+            current = self._place_details()
+            now = time.monotonic()
+            for key in ("name", "address"):
+                if compact_spaces(current.get(key)):
+                    best[key] = compact_spaces(current[key])
+            phones = unique_join(
+                [
+                    *extract_rwanda_phones(best.get("phone")),
+                    *extract_rwanda_phones(current.get("phone")),
+                ]
+            )
+            if phones:
+                best["phone"] = phones
+                best["phone_methods"] = unique_join(
+                    [best.get("phone_methods", ""), current.get("phone_methods", "")]
+                )
+            best["details_hydrated"] = bool(
+                best.get("name") and (best.get("address") or best.get("phone"))
+            )
+            if best.get("name") and first_name_at is None:
+                first_name_at = now
+            if best.get("phone") and best.get("details_hydrated"):
+                break
+            if first_name_at is not None and now - first_name_at >= 2.25:
+                break
+            time.sleep(0.25)
+
+        self._scroll_details_panel()
+        final = self._place_details()
+        for key in ("name", "address"):
+            if compact_spaces(final.get(key)):
+                best[key] = compact_spaces(final[key])
+        dom_phones = extract_rwanda_phones(final.get("phone"))
+        if dom_phones:
+            best["phone"] = unique_join(
+                [*extract_rwanda_phones(best.get("phone")), *dom_phones]
+            )
+            best["phone_methods"] = unique_join(
+                [best.get("phone_methods", ""), final.get("phone_methods", "")]
+            )
+        if not best.get("phone"):
+            accessible = self._accessibility_phone_text()
+            accessible_phones = extract_rwanda_phones(accessible)
+            if accessible_phones:
+                best["phone"] = unique_join(accessible_phones)
+                best["phone_methods"] = unique_join(
+                    [best.get("phone_methods", ""), "accessibility_tree"]
+                )
+        best["details_hydrated"] = bool(
+            best.get("name") and (best.get("address") or best.get("phone"))
+        )
+        best["href"] = clean_maps_url(self.driver.current_url)
+        if best.get("name") and "/maps/place/" not in best["href"]:
+            shared_place_url = self._share_place_url()
+            if shared_place_url:
+                best["href"] = shared_place_url
+        return best
+
     def scrape(self, row: dict[str, str]) -> dict[str, Any]:
         query_urls = browser_maps_search_urls(row, self.deep_search)
         candidates_by_url: dict[str, dict[str, str]] = {}
-        direct_details: list[dict[str, str]] = []
+        direct_details: list[dict[str, Any]] = []
+        attempted_queries: list[str] = []
+        page_types: set[str] = set()
+        feed_scroll_rounds = 0
+        place_pages_scanned = 0
         for query_url in query_urls:
+            attempted_queries.append(query_url)
             self.driver.get(query_url)
             self._wait()
             self._dismiss_consent()
-            time.sleep(1.0)
-            if self._blocked():
-                raise ScraperError("Google Maps blocked automated browsing; rerun headed after a cooldown")
-            details = self._place_details()
-            current_url = clean_maps_url(self.driver.current_url)
-            if details.get("name") and "/maps/place/" in current_url:
-                direct_details.append({**details, "href": current_url})
+            state = self._wait_for_surface()
+            if state.get("h1"):
+                page_types.add("place")
+                details = self._hydrate_place_details()
+                place_pages_scanned += 1
+                current_url = clean_maps_url(details.get("href") or self.driver.current_url)
+                if "/maps/place/" in current_url:
+                    direct_details.append({**details, "href": current_url})
                 direct_score, direct_evidence = candidate_score(
                     row["name"],
                     row["district"],
                     row["sector"],
                     row["cell"],
-                    details["name"],
-                    details["address"],
+                    details.get("name", ""),
+                    details.get("address", ""),
                 )
                 if (
-                    direct_score >= 0.97
-                    and direct_evidence["exact_name"]
-                    and has_pharmacy_identity_evidence(
-                        row["name"],
-                        details["name"],
-                        details["address"],
+                    "/maps/place/" in current_url
+                    and extract_rwanda_phones(details.get("phone"))
+                    and strong_maps_discovery(
+                        row,
+                        details.get("name", ""),
+                        details.get("address", ""),
+                        direct_score,
                         direct_evidence,
                     )
-                    and extract_rwanda_phones(details.get("phone"))
                 ):
                     break
-            for candidate in self._listing_candidates():
+            if state.get("hasFeed") or int(state.get("articles") or 0) > 0:
+                page_types.add("feed")
+                candidates, scroll_rounds = self._collect_scrolled_candidates(row)
+                feed_scroll_rounds += scroll_rounds
+            else:
+                candidates = self._listing_candidates()
+            if state.get("noResults"):
+                page_types.add("no_results")
+            for candidate in candidates:
                 href = clean_maps_url(candidate.get("href"))
                 if href:
-                    candidates_by_url.setdefault(href, {**candidate, "href": href})
+                    candidate = {**candidate, "href": href}
+                    candidate["phone"] = unique_join(
+                        [
+                            *extract_rwanda_phones(candidate.get("phone")),
+                            *extract_rwanda_phones(candidate.get("text")),
+                        ]
+                    )
+                    existing = candidates_by_url.get(href)
+                    if not existing or len(candidate.get("text", "")) > len(
+                        existing.get("text", "")
+                    ):
+                        candidates_by_url[href] = candidate
+            strong_discovery = False
+            for candidate in candidates:
+                discovery_score, discovery_evidence = candidate_score(
+                    row["name"],
+                    row["district"],
+                    row["sector"],
+                    row["cell"],
+                    candidate.get("name", ""),
+                    candidate.get("text", ""),
+                )
+                if strong_maps_discovery(
+                    row,
+                    candidate.get("name", ""),
+                    candidate.get("text", ""),
+                    discovery_score,
+                    discovery_evidence,
+                ):
+                    strong_discovery = True
+                    break
+            if strong_discovery:
+                break
 
-        ranked: list[tuple[float, dict[str, str], dict[str, bool]]] = []
+        ranked: list[tuple[float, dict[str, Any], dict[str, bool]]] = []
         for candidate in candidates_by_url.values():
             score, evidence = candidate_score(
                 row["name"], row["district"], row["sector"], row["cell"], candidate["name"], candidate["text"]
@@ -724,26 +1125,60 @@ class GoogleMapsBrowser:
                 "address": "",
                 "phone": "",
                 "url": "",
-                "query": " | ".join(query_urls),
+                "query": " | ".join(attempted_queries),
                 "search_mode": "deep" if self.deep_search else "standard",
+                "maps_page_type": "+".join(sorted(page_types)) or "unresolved",
+                "coverage_status": "no_place_candidate",
+                "details_hydrated": False,
+                "query_attempts": len(attempted_queries),
+                "candidates_found": 0,
+                "candidates_inspected": 0,
+                "feed_scroll_rounds": feed_scroll_rounds,
+                "place_pages_scanned": place_pages_scanned,
+                "phone_extraction_methods": "",
             }
 
-        inspected: list[tuple[float, dict[str, str], dict[str, bool]]] = []
+        inspected: list[tuple[float, dict[str, Any], dict[str, bool]]] = []
         seen_urls: set[str] = set()
+        inspected_count = 0
         for preliminary_score, candidate, _ in ranked:
             url = clean_maps_url(candidate.get("href"))
             if not url or url in seen_urls or len(inspected) >= self.max_candidates:
                 continue
             seen_urls.add(url)
-            if candidate.get("phone") and candidate.get("address"):
-                details = candidate
-            else:
-                self.driver.get(url)
-                self._wait()
-                time.sleep(0.9)
-                details = {**self._place_details(), "href": clean_maps_url(self.driver.current_url) or url}
+            card_phones = extract_rwanda_phones(
+                candidate.get("phone") or candidate.get("text")
+            )
+            phone_came_from_card = bool(card_phones) and not candidate.get(
+                "details_hydrated"
+            )
+            details: dict[str, Any] = (
+                dict(candidate)
+                if candidate.get("details_hydrated") and candidate.get("address")
+                else {}
+            )
+            if not details:
+                try:
+                    self.driver.get(url)
+                    self._wait()
+                    state = self._wait_for_surface()
+                    if state.get("h1"):
+                        details = self._hydrate_place_details()
+                        page_types.add("place")
+                        place_pages_scanned += 1
+                except Exception:
+                    details = {}
+            inspected_count += 1
             name = compact_spaces(details.get("name")) or compact_spaces(candidate.get("name"))
             address = compact_spaces(details.get("address")) or compact_spaces(candidate.get("text"))
+            detail_phones = extract_rwanda_phones(details.get("phone"))
+            phone = unique_join([*card_phones, *detail_phones])
+            extraction_methods = unique_join(
+                [
+                    "result_card" if phone_came_from_card else "",
+                    details.get("phone_methods", "") if detail_phones else "",
+                ]
+            )
             score, evidence = candidate_score(
                 row["name"], row["district"], row["sector"], row["cell"], name, address
             )
@@ -753,12 +1188,22 @@ class GoogleMapsBrowser:
                     {
                         "name": name,
                         "address": address,
-                        "phone": details.get("phone", ""),
+                        "phone": phone,
                         "href": clean_maps_url(details.get("href")) or url,
+                        "phone_methods": extraction_methods,
+                        "details_hydrated": bool(details.get("details_hydrated")),
                     },
                     evidence,
                 )
             )
+            if phone and strong_maps_discovery(
+                row,
+                name,
+                address,
+                score,
+                evidence,
+            ):
+                break
             if preliminary_score < 0.45 and score < 0.45:
                 break
         inspected.sort(key=lambda item: item[0], reverse=True)
@@ -780,6 +1225,14 @@ class GoogleMapsBrowser:
         )
         accepted = score >= 0.84 and (margin >= 0.08 or exact_local) and pharmacy_identity
         status = "matched" if accepted else ("needs_review" if score >= 0.58 else "unmatched")
+        if accepted and phone:
+            coverage_status = "phone_extracted"
+        elif accepted and details.get("details_hydrated"):
+            coverage_status = "place_fully_scanned_no_phone"
+        elif accepted:
+            coverage_status = "matched_place_incomplete"
+        else:
+            coverage_status = "no_confident_place"
         return {
             "status": status,
             "score": score,
@@ -788,8 +1241,17 @@ class GoogleMapsBrowser:
             "address": address,
             "phone": phone if accepted else "",
             "url": url if accepted else "",
-            "query": " | ".join(query_urls),
+            "query": " | ".join(attempted_queries),
             "search_mode": "deep" if self.deep_search else "standard",
+            "maps_page_type": "+".join(sorted(page_types)) or "unresolved",
+            "coverage_status": coverage_status,
+            "details_hydrated": bool(details.get("details_hydrated")),
+            "query_attempts": len(attempted_queries),
+            "candidates_found": len(ranked),
+            "candidates_inspected": inspected_count,
+            "feed_scroll_rounds": feed_scroll_rounds,
+            "place_pages_scanned": place_pages_scanned,
+            "phone_extraction_methods": details.get("phone_methods", "") if accepted else "",
         }
 
 
@@ -828,6 +1290,15 @@ def enrich_row(
             "matched_name": maps["name"] or result["matched_name"],
             "matched_address": maps["address"] or result["matched_address"],
             "search_mode": maps.get("search_mode", ""),
+            "maps_page_type": maps.get("maps_page_type", ""),
+            "coverage_status": maps.get("coverage_status", ""),
+            "details_hydrated": str(bool(maps.get("details_hydrated"))).lower(),
+            "query_attempts": str(maps.get("query_attempts", 0)),
+            "candidates_found": str(maps.get("candidates_found", 0)),
+            "candidates_inspected": str(maps.get("candidates_inspected", 0)),
+            "feed_scroll_rounds": str(maps.get("feed_scroll_rounds", 0)),
+            "place_pages_scanned": str(maps.get("place_pages_scanned", 0)),
+            "phone_extraction_methods": maps.get("phone_extraction_methods", ""),
             "query_used": maps["query"],
             "checked_at": utc_now(),
         }
@@ -860,9 +1331,13 @@ def enrich_row(
 
 def browser_result_complete(result: dict[str, Any], require_deep: bool = False) -> bool:
     """True after Maps was actually queried, including a valid no-match result."""
+    coverage = compact_spaces(result.get("coverage_status"))
     return (
         bool(result.get("query_used"))
         and (not require_deep or result.get("search_mode") == "deep")
+        and coverage
+        and coverage
+        not in {"not_checked", "browser_error", "blocked", "matched_place_incomplete"}
         and result.get("match_status") not in {
         "browser_error",
         "blocked",
@@ -886,6 +1361,35 @@ def merge_observations(previous: dict[str, Any] | None, current: dict[str, Any])
     current_url = clean_maps_url(merged.get("google_maps_url"))
     previous_is_place = "/maps/place/" in previous_url
     current_is_place = "/maps/place/" in current_url
+    previous_coverage = compact_spaces(previous.get("coverage_status"))
+    current_coverage = compact_spaces(current.get("coverage_status"))
+    if previous_coverage not in {"", "not_checked"} and current_coverage in {
+        "",
+        "not_checked",
+    }:
+        for field in (
+            "google_maps_url",
+            "maps_url_source",
+            "match_status",
+            "match_confidence",
+            "match_margin",
+            "matched_name",
+            "matched_address",
+            "search_mode",
+            "maps_page_type",
+            "coverage_status",
+            "details_hydrated",
+            "query_attempts",
+            "candidates_found",
+            "candidates_inspected",
+            "feed_scroll_rounds",
+            "place_pages_scanned",
+            "phone_extraction_methods",
+            "query_used",
+            "checked_at",
+            "error",
+        ):
+            merged[field] = previous.get(field, merged.get(field, ""))
     _, previous_evidence = candidate_score(
         merged.get("name", ""),
         merged.get("district", ""),
@@ -1257,6 +1761,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 result.update(
                     {
                         "match_status": "blocked" if blocked else "browser_error",
+                        "coverage_status": "blocked" if blocked else "browser_error",
+                        "maps_page_type": "blocked" if blocked else "error",
                         "checked_at": utc_now(),
                         "error": message,
                     }
@@ -1297,17 +1803,33 @@ def main(argv: Sequence[str] | None = None) -> int:
         write_outputs(args.output, audit, rows, results)
         final_rows = combine(rows, results)
         statuses: dict[str, int] = {}
+        coverage: dict[str, int] = {}
         for row in final_rows:
             status = str(row.get("match_status") or "pending")
             statuses[status] = statuses.get(status, 0) + 1
+            coverage_state = str(row.get("coverage_status") or "not_checked")
+            coverage[coverage_state] = coverage.get(coverage_state, 0) + 1
         summary = {
             "extracted": len(rows),
             "selected": len(selected),
             "processed_this_run": processed,
             "errors_this_run": errors,
             "phone_rows": sum(bool(row.get("phone_number")) for row in final_rows),
+            "google_maps_phone_rows": sum(
+                bool(extract_rwanda_phones(row.get("google_maps_phone_numbers")))
+                for row in final_rows
+            ),
             "maps_url_rows": sum(bool(row.get("google_maps_url")) for row in final_rows),
+            "direct_place_url_rows": sum(
+                "/maps/place/" in str(row.get("google_maps_url") or "")
+                for row in final_rows
+            ),
+            "details_hydrated_rows": sum(
+                str(row.get("details_hydrated") or "").lower() == "true"
+                for row in final_rows
+            ),
             "statuses": statuses,
+            "coverage": coverage,
             "contact_evidence_records": len(evidence.records),
             "output": str(args.output),
             "audit": str(audit),

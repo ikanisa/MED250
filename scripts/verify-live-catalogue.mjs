@@ -1,0 +1,318 @@
+import { createHash } from "node:crypto";
+import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
+
+const PAGE_SIZE = 120;
+const DEFAULT_SOURCE_INDEX = "data/product-sitemap-index.json";
+const DEPARTMENTS = Object.freeze([
+  "Medicines",
+  "Beauty & Personal Care",
+  "Baby",
+  "Health & Household",
+]);
+const SEARCH_CASES = Object.freeze([
+  { id: "paracetamol", query: "paracetamol", expectedTokens: ["paracetamol"] },
+  { id: "zinc", query: "zinc", expectedTokens: ["zinc"] },
+  { id: "omeprazole", query: "omeprazole", expectedTokens: ["omeprazole"] },
+  { id: "typo", query: "brinzolamde", expectedTokens: ["brinzolamide"] },
+  { id: "french", query: "douleur", expectedTokens: ["paracetamol", "ibuprofen", "diclofenac"] },
+  { id: "kinyarwanda", query: "ububabare", expectedTokens: ["paracetamol", "ibuprofen", "diclofenac"] },
+]);
+
+function sha256(value) {
+  return createHash("sha256").update(value).digest("hex");
+}
+
+export function validateSupabaseOrigin(value) {
+  const url = new URL(value);
+  if (url.protocol !== "https:") throw new Error("Live catalogue verification requires HTTPS.");
+  if (url.username || url.password || url.search || url.hash) throw new Error("The Supabase URL cannot contain credentials, query parameters, or a fragment.");
+  if (url.pathname !== "/") throw new Error("The Supabase URL must be an origin without a path.");
+  if (!/^[a-z0-9]{20}\.supabase\.co$/.test(url.hostname)) throw new Error("The live catalogue URL must use a Supabase project origin.");
+  return url.origin;
+}
+
+function parseArguments(values) {
+  const parsed = {
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ?? "",
+    sourceIndex: DEFAULT_SOURCE_INDEX,
+    evidenceOutput: "",
+    concurrency: 4,
+  };
+  for (let index = 0; index < values.length; index += 2) {
+    const flag = values[index];
+    const value = values[index + 1];
+    if (!value) throw new Error(`Missing value for ${flag}.`);
+    if (flag === "--url") parsed.url = value;
+    else if (flag === "--source-index") parsed.sourceIndex = value;
+    else if (flag === "--evidence-output") parsed.evidenceOutput = value;
+    else if (flag === "--concurrency") parsed.concurrency = Number(value);
+    else throw new Error(`Unknown argument ${flag}.`);
+  }
+  if (!parsed.url) throw new Error("NEXT_PUBLIC_SUPABASE_URL or --url is required.");
+  if (!Number.isInteger(parsed.concurrency) || parsed.concurrency < 1 || parsed.concurrency > 6) {
+    throw new Error("--concurrency must be an integer from 1 to 6.");
+  }
+  return parsed;
+}
+
+async function boundedResponseText(response, limit = 5 * 1024 * 1024) {
+  const declared = Number(response.headers.get("content-length") ?? 0);
+  if (declared > limit) throw new Error("Catalogue response exceeded the verification body limit.");
+  if (!response.body) return "";
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let body = "";
+  let size = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) return body + decoder.decode();
+    size += value.byteLength;
+    if (size > limit) {
+      await reader.cancel("verification body limit exceeded");
+      throw new Error("Catalogue response exceeded the verification body limit.");
+    }
+    body += decoder.decode(value, { stream: true });
+  }
+}
+
+async function requestCatalogue({ endpoint, publishableKey, query = "", category = "All products", sort = "relevance", limit = PAGE_SIZE, offset = 0 }) {
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      apikey: publishableKey,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      p_query: query,
+      p_category: category,
+      p_prescription_status: "all",
+      p_form_group: "all",
+      p_availability: "all",
+      p_sort: sort,
+      p_limit: limit,
+      p_offset: offset,
+    }),
+    signal: AbortSignal.timeout(20_000),
+  });
+  const body = await boundedResponseText(response);
+  if (!response.ok) throw new Error(`Catalogue RPC returned HTTP ${response.status}.`);
+  let rows;
+  try {
+    rows = JSON.parse(body);
+  } catch {
+    throw new Error("Catalogue RPC returned invalid JSON.");
+  }
+  if (!Array.isArray(rows)) throw new Error("Catalogue RPC did not return a row array.");
+  return {
+    offset,
+    status: response.status,
+    rows,
+    bodySha256: sha256(body),
+  };
+}
+
+async function mapWithConcurrency(values, concurrency, operation) {
+  const results = new Array(values.length);
+  let nextIndex = 0;
+  async function worker() {
+    while (nextIndex < values.length) {
+      const index = nextIndex;
+      nextIndex += 1;
+      results[index] = await operation(values[index], index);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(concurrency, values.length) }, worker));
+  return results;
+}
+
+function numericTotal(rows) {
+  return rows.length ? Number(rows[0]?.total_count ?? 0) : 0;
+}
+
+function sampledSearch(searchCase, response) {
+  return {
+    id: searchCase.id,
+    query: searchCase.query,
+    expectedTokens: searchCase.expectedTokens,
+    total: numericTotal(response.rows),
+    bodySha256: response.bodySha256,
+    sample: response.rows.slice(0, 5).map((row) => ({
+      id: String(row.id ?? ""),
+      brand: String(row.brand_name ?? ""),
+      generic: String(row.generic_name ?? ""),
+      explanation: String(row.match_explanation ?? ""),
+    })),
+  };
+}
+
+export function assessLiveCatalogueEvidence({ sourceIds, pages, pageSize = PAGE_SIZE, departments, searches }) {
+  const errors = [];
+  const sortedPages = [...pages].sort((left, right) => left.offset - right.offset);
+  const expectedSourceIds = [...new Set(sourceIds)].sort();
+  if (expectedSourceIds.length !== sourceIds.length) errors.push("Source index contains duplicate product IDs.");
+  if (!sortedPages.length) errors.push("No catalogue pages were captured.");
+
+  const observedTotal = sortedPages.length ? numericTotal(sortedPages[0].rows) : 0;
+  const expectedPageCount = observedTotal ? Math.ceil(observedTotal / pageSize) : 0;
+  if (sortedPages.length !== expectedPageCount) errors.push(`Expected ${expectedPageCount} catalogue pages, captured ${sortedPages.length}.`);
+
+  const observedIds = [];
+  for (let index = 0; index < sortedPages.length; index += 1) {
+    const page = sortedPages[index];
+    const expectedOffset = index * pageSize;
+    if (page.offset !== expectedOffset) errors.push(`Catalogue page offset ${expectedOffset} was not captured in sequence.`);
+    const expectedRows = index === sortedPages.length - 1 ? observedTotal - expectedOffset : pageSize;
+    if (page.rows.length !== expectedRows) errors.push(`Catalogue page at offset ${page.offset} returned ${page.rows.length} rows; expected ${expectedRows}.`);
+    if (page.rows.some((row) => numericTotal([row]) !== observedTotal)) errors.push(`Catalogue total changed within the page at offset ${page.offset}.`);
+    observedIds.push(...page.rows.map((row) => String(row.id ?? "")));
+  }
+
+  const duplicateIds = [...new Set(observedIds.filter((id, index) => id && observedIds.indexOf(id) !== index))].sort();
+  if (duplicateIds.length) errors.push(`Catalogue pagination returned ${duplicateIds.length} duplicate product IDs.`);
+  if (observedIds.some((id) => !id)) errors.push("Catalogue pagination returned a row without a product ID.");
+
+  const observedIdSet = new Set(observedIds);
+  const sourceIdSet = new Set(expectedSourceIds);
+  const missingSourceIds = expectedSourceIds.filter((id) => !observedIdSet.has(id));
+  const unexpectedLiveIds = [...observedIdSet].filter((id) => !sourceIdSet.has(id)).sort();
+  if (observedTotal !== expectedSourceIds.length) errors.push(`Live catalogue total ${observedTotal} does not match the governed source total ${expectedSourceIds.length}.`);
+  if (missingSourceIds.length) errors.push(`Live catalogue is missing ${missingSourceIds.length} governed source products.`);
+  if (unexpectedLiveIds.length) errors.push(`Live catalogue contains ${unexpectedLiveIds.length} products outside the governed source index.`);
+  if (!observedIds[24]) errors.push("Product 25 was not reachable.");
+  if (!observedIds[119]) errors.push("Product 120 was not reachable.");
+  if (observedTotal && !observedIds[observedTotal - 1]) errors.push("The final catalogue product was not reachable.");
+
+  for (const department of DEPARTMENTS) {
+    const evidence = departments.find((entry) => entry.department === department);
+    if (!evidence || evidence.total < 1) errors.push(`${department}: no live catalogue products were returned.`);
+  }
+
+  for (const searchCase of SEARCH_CASES) {
+    const evidence = searches.find((entry) => entry.id === searchCase.id);
+    if (!evidence || evidence.total < 1 || !evidence.sample.length) {
+      errors.push(`${searchCase.id}: live search returned no results for ${searchCase.query}.`);
+      continue;
+    }
+    const searchable = evidence.sample.map(({ brand, generic }) => `${brand} ${generic}`.toLowerCase()).join(" ");
+    if (!searchCase.expectedTokens.some((token) => searchable.includes(token))) {
+      errors.push(`${searchCase.id}: sampled live results were not relevant to ${searchCase.query}.`);
+    }
+  }
+
+  return {
+    status: errors.length ? "failed" : "passed",
+    expectedTotal: expectedSourceIds.length,
+    observedTotal,
+    expectedPageCount,
+    capturedPageCount: sortedPages.length,
+    observedIdSha256: sha256([...observedIdSet].sort().join("\n")),
+    duplicateIds,
+    missingSourceIds,
+    unexpectedLiveIds,
+    boundaryProducts: {
+      product25: observedIds[24] ?? null,
+      product120: observedIds[119] ?? null,
+      finalProduct: observedTotal ? observedIds[observedTotal - 1] ?? null : null,
+    },
+    errors,
+  };
+}
+
+async function writeEvidence(outputPath, evidence) {
+  const absolutePath = resolve(outputPath);
+  await mkdir(dirname(absolutePath), { recursive: true });
+  const temporaryPath = `${absolutePath}.${process.pid}.tmp`;
+  await writeFile(temporaryPath, `${JSON.stringify(evidence, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
+  await rename(temporaryPath, absolutePath);
+}
+
+async function main() {
+  const args = parseArguments(process.argv.slice(2));
+  const origin = validateSupabaseOrigin(args.url);
+  const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim() ?? "";
+  if (!/^sb_publishable_[A-Za-z0-9_-]{20,}$/.test(publishableKey)) {
+    throw new Error("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY must be a modern public publishable key.");
+  }
+  const sourcePath = resolve(args.sourceIndex);
+  const sourceBytes = await readFile(sourcePath);
+  const sourceRows = JSON.parse(sourceBytes);
+  if (!Array.isArray(sourceRows) || sourceRows.some((row) => !row?.id)) throw new Error("The governed source index is invalid.");
+  const sourceIds = sourceRows.map(({ id }) => String(id));
+  const endpoint = `${origin}/rest/v1/rpc/dawanear_search_marketplace_catalogue`;
+
+  const firstPage = await requestCatalogue({ endpoint, publishableKey, sort: "az", offset: 0 });
+  const observedTotal = numericTotal(firstPage.rows);
+  if (!Number.isInteger(observedTotal) || observedTotal < 1 || observedTotal > 10_120) throw new Error("The live catalogue total is outside the verifier boundary.");
+  const offsets = Array.from({ length: Math.ceil(observedTotal / PAGE_SIZE) - 1 }, (_, index) => (index + 1) * PAGE_SIZE);
+  const remainingPages = await mapWithConcurrency(offsets, args.concurrency, (offset) => requestCatalogue({ endpoint, publishableKey, sort: "az", offset }));
+  const pages = [firstPage, ...remainingPages];
+
+  const departmentResponses = await mapWithConcurrency(DEPARTMENTS, args.concurrency, (department) => requestCatalogue({
+    endpoint,
+    publishableKey,
+    category: department,
+    sort: "az",
+    limit: 1,
+  }));
+  const departments = departmentResponses.map((response, index) => ({
+    department: DEPARTMENTS[index],
+    total: numericTotal(response.rows),
+    sampleId: response.rows[0]?.id ?? null,
+    bodySha256: response.bodySha256,
+  }));
+
+  const searchResponses = await mapWithConcurrency(SEARCH_CASES, args.concurrency, (searchCase) => requestCatalogue({
+    endpoint,
+    publishableKey,
+    query: searchCase.query,
+    limit: 5,
+  }));
+  const searches = searchResponses.map((response, index) => sampledSearch(SEARCH_CASES[index], response));
+  const assessment = assessLiveCatalogueEvidence({ sourceIds, pages, departments, searches });
+  const verifierSource = await readFile(new URL(import.meta.url));
+  const evidence = {
+    schemaVersion: "1.0",
+    capturedAt: new Date().toISOString(),
+    origin,
+    rpc: "dawanear_search_marketplace_catalogue",
+    ...assessment,
+    source: {
+      path: args.sourceIndex,
+      sha256: sha256(sourceBytes),
+      productCount: sourceIds.length,
+    },
+    pages: pages.map((page) => ({
+      offset: page.offset,
+      rowCount: page.rows.length,
+      total: numericTotal(page.rows),
+      bodySha256: page.bodySha256,
+    })),
+    departments,
+    searches,
+    verifier: {
+      path: "scripts/verify-live-catalogue.mjs",
+      sha256: sha256(verifierSource),
+    },
+  };
+  if (args.evidenceOutput) await writeEvidence(args.evidenceOutput, evidence);
+  console.log(JSON.stringify({
+    status: evidence.status,
+    origin: evidence.origin,
+    expectedTotal: evidence.expectedTotal,
+    observedTotal: evidence.observedTotal,
+    capturedPageCount: evidence.capturedPageCount,
+    boundaryProducts: evidence.boundaryProducts,
+    departmentTotals: Object.fromEntries(departments.map(({ department, total }) => [department, total])),
+    searchTotals: Object.fromEntries(searches.map(({ id, total }) => [id, total])),
+    errors: evidence.errors,
+  }, null, 2));
+  if (evidence.errors.length) process.exitCode = 1;
+}
+
+const isMain = process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url;
+if (isMain) main().catch((error) => {
+  console.error(JSON.stringify({ status: "error", error: error.message }, null, 2));
+  process.exitCode = 1;
+});

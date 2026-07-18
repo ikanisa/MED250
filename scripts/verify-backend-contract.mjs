@@ -1,48 +1,74 @@
+import { pathToFileURL } from "node:url";
+
 import {
   assessBackendContract,
   expectedBackendContractVersion,
 } from "./backend-contract-invariants.mjs";
 
-const supabaseUrl = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "").trim();
-const secretKey = (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim();
-
-function stop(message) {
-  console.error(JSON.stringify({ status: "configuration_error", error: message }, null, 2));
-  process.exit(2);
+export function resolveBackendContractEndpoint(environment = process.env) {
+  const rawUrl = String(environment.SUPABASE_URL || environment.NEXT_PUBLIC_SUPABASE_URL || "").trim();
+  if (!rawUrl) throw new Error("SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL is required.");
+  let base;
+  try { base = new URL(rawUrl); }
+  catch { throw new Error("The Supabase URL must be an HTTPS *.supabase.co origin."); }
+  if (
+    base.protocol !== "https:"
+    || !base.hostname.endsWith(".supabase.co")
+    || base.username
+    || base.password
+    || base.search
+    || base.hash
+    || !new Set(["", "/"]).has(base.pathname)
+  ) {
+    throw new Error("The Supabase URL must be an HTTPS *.supabase.co origin.");
+  }
+  return new URL("/rest/v1/rpc/dawanear_backend_contract", base);
 }
 
-if (!supabaseUrl) stop("SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL is required.");
-if (!secretKey) stop("SUPABASE_SECRET_KEY or SUPABASE_SERVICE_ROLE_KEY is required in the process environment.");
-
-let endpoint;
-try {
-  const base = new URL(supabaseUrl);
-  if (base.protocol !== "https:" || !base.hostname.endsWith(".supabase.co")) throw new Error("invalid Supabase host");
-  endpoint = new URL("/rest/v1/rpc/dawanear_backend_contract", base);
-} catch {
-  stop("The Supabase URL must be an HTTPS *.supabase.co origin.");
+export async function verifyBackendContract({
+  environment = process.env,
+  fetchImpl = fetch,
+} = {}) {
+  const secretKey = String(environment.SUPABASE_SECRET_KEY || environment.SUPABASE_SERVICE_ROLE_KEY || "").trim();
+  if (!secretKey) throw new Error("SUPABASE_SECRET_KEY or SUPABASE_SERVICE_ROLE_KEY is required in the process environment.");
+  const response = await fetchImpl(resolveBackendContractEndpoint(environment), {
+    method: "POST",
+    headers: {
+      apikey: secretKey,
+      Authorization: `Bearer ${secretKey}`,
+      "Content-Type": "application/json",
+    },
+    body: "{}",
+    redirect: "error",
+    signal: AbortSignal.timeout(15_000),
+  });
+  if (!response.ok) throw new Error(`Backend contract RPC returned HTTP ${response.status}.`);
+  let contract;
+  try { contract = await response.json(); }
+  catch { throw new Error("Backend contract RPC did not return valid JSON."); }
+  const failures = assessBackendContract(contract);
+  return {
+    status: failures.length ? "failed" : "passed",
+    expectedVersion: expectedBackendContractVersion,
+    observedVersion: contract?.contract_version ?? null,
+    generatedAt: contract?.generated_at ?? null,
+    failures,
+    contract,
+  };
 }
 
-const response = await fetch(endpoint, {
-  method: "POST",
-  headers: {
-    apikey: secretKey,
-    Authorization: `Bearer ${secretKey}`,
-    "Content-Type": "application/json",
-  },
-  body: "{}",
-});
-if (!response.ok) stop(`Backend contract RPC returned HTTP ${response.status}.`);
+async function main() {
+  try {
+    const result = await verifyBackendContract();
+    console.log(JSON.stringify(result, null, 2));
+    if (result.failures.length) process.exitCode = 1;
+  } catch (error) {
+    console.error(JSON.stringify({
+      status: "configuration_error",
+      error: error instanceof Error ? error.message : "Backend verification failed.",
+    }, null, 2));
+    process.exitCode = 2;
+  }
+}
 
-const contract = await response.json();
-const failures = assessBackendContract(contract);
-
-console.log(JSON.stringify({
-  status: failures.length ? "failed" : "passed",
-  expectedVersion: expectedBackendContractVersion,
-  observedVersion: contract?.contract_version ?? null,
-  generatedAt: contract?.generated_at ?? null,
-  failures,
-  contract,
-}, null, 2));
-if (failures.length) process.exitCode = 1;
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) await main();

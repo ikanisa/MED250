@@ -66,7 +66,7 @@ export function errorResponse(request: Request, error: unknown): Response {
   const status = error instanceof HttpError ? error.status : 500;
   const publicMessage = error instanceof HttpError
     ? error.message
-    : "Pharmacy WhatsApp verification is temporarily unavailable.";
+    : "WhatsApp verification is temporarily unavailable.";
   const retryAfter = error instanceof HttpError ? error.retryAfter : undefined;
   let headers: Record<string, string> = { "Vary": "Origin" };
   try {
@@ -109,6 +109,15 @@ export function normalizeRwandaPhone(value: unknown): string {
   return digits;
 }
 
+export function normalizeInternationalPhone(value: unknown): string {
+  if (typeof value !== "string") throw new HttpError("Enter a valid international WhatsApp number.");
+  const digits = value.replace(/\D/g, "");
+  if (!/^[1-9]\d{7,14}$/.test(digits)) {
+    throw new HttpError("Enter a valid international WhatsApp number including its country code.");
+  }
+  return digits;
+}
+
 export function normalizeOtp(value: unknown): string {
   const digits = typeof value === "string" ? value.replace(/\D/g, "") : "";
   if (!/^\d{6}$/.test(digits)) throw new HttpError("Enter the complete 6-digit WhatsApp code.");
@@ -138,6 +147,10 @@ function otpSecret(): string {
 
 export async function hashOtp(phone: string, code: string): Promise<string> {
   return sha256(`${phone}:pharmacy_login:${code}:${otpSecret()}`);
+}
+
+export async function hashCustomerOtp(userId: string, phone: string, code: string): Promise<string> {
+  return sha256(`${userId}:${phone}:customer_registration:${code}:${otpSecret()}`);
 }
 
 export async function requestSourceHash(request: Request): Promise<string> {
@@ -212,7 +225,11 @@ export async function eligiblePharmacies(client: SupabaseClient, phone: string):
   return (data ?? []) as EligiblePharmacy[];
 }
 
-export async function sendWhatsappOtp(phone: string, code: string): Promise<void> {
+export async function sendWhatsappOtp(
+  phone: string,
+  code: string,
+  templateNameOverride?: string,
+): Promise<void> {
   const accessToken = firstEnv(
     "WHATSAPP_ACCESS_TOKEN",
     "WHATSAPP_CLOUD_API_TOKEN",
@@ -224,11 +241,11 @@ export async function sendWhatsappOtp(phone: string, code: string): Promise<void
     "WHATSAPP_CLOUD_PHONE_NUMBER_ID",
     "WABA_PHONE_NUMBER_ID",
   );
-  const templateName = firstEnv(
-    "WHATSAPP_TEMPLATE_NAME",
-    "WHATSAPP_CLOUD_OTP_TEMPLATE_NAME",
-    "WABA_OTP_TEMPLATE_NAME",
-  );
+  const templateName = templateNameOverride?.trim() || firstEnv(
+      "WHATSAPP_TEMPLATE_NAME",
+      "WHATSAPP_CLOUD_OTP_TEMPLATE_NAME",
+      "WABA_OTP_TEMPLATE_NAME",
+    );
   const language = env("WHATSAPP_TEMPLATE_LANGUAGE") || env("WHATSAPP_CLOUD_TEMPLATE_LANGUAGE_CODE") || "en_US";
   const graphVersion = env("WHATSAPP_GRAPH_API_VERSION") || env("WHATSAPP_CLOUD_API_VERSION") || "v25.0";
   const buttonIndex = env("WHATSAPP_TEMPLATE_URL_BUTTON_INDEX") || "0";
@@ -253,9 +270,18 @@ export async function sendWhatsappOtp(phone: string, code: string): Promise<void
 
   if (!response.ok) {
     const body = await response.text();
-    console.error("WhatsApp Cloud API rejected the pharmacy OTP", response.status, body.slice(0, 500));
+    console.error("WhatsApp Cloud API rejected an OTP", response.status, body.slice(0, 500));
     throw new HttpError("Could not deliver the WhatsApp code. Please try again.", 502);
   }
+}
+
+export async function authenticatedCustomer(request: Request): Promise<{ id: string; isAnonymous: boolean }> {
+  const authorization = request.headers.get("authorization")?.trim() ?? "";
+  const token = authorization.match(/^Bearer\s+(.+)$/i)?.[1]?.trim() ?? "";
+  if (!token) throw new HttpError("Start a secure customer session before verifying WhatsApp.", 401);
+  const { data, error } = await anonClient().auth.getUser(token);
+  if (error || !data.user) throw new HttpError("Your customer session expired. Refresh and try again.", 401);
+  return { id: data.user.id, isAnonymous: data.user.is_anonymous === true };
 }
 
 export async function internalEmailForPhone(phone: string): Promise<string> {

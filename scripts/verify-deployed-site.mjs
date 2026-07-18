@@ -1,15 +1,21 @@
 import { pathToFileURL } from "node:url";
 import { lookup } from "node:dns/promises";
 import { isIP } from "node:net";
+import { createHash } from "node:crypto";
+import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
 
 const REQUIRED_ROUTES = Object.freeze([
   "/",
   "/categories",
   "/category/medicines",
   "/product/rwanda-fda-hm-0734",
+  "/product/AMZ-B004L5JCZ4",
   "/robots.txt",
   "/sitemap.xml",
   "/manifest.webmanifest",
+  "/sw.js",
+  "/offline.html",
 ]);
 
 function normalizedHeaders(headers) {
@@ -17,8 +23,18 @@ function normalizedHeaders(headers) {
   return Object.fromEntries(Object.entries(headers ?? {}).map(([key, value]) => [key.toLowerCase(), String(value)]));
 }
 
-export function assessDeploymentEvidence({ origin, mode, records }) {
+export function assessDeploymentEvidence({ origin, mode, records, expectedRevision = "" }) {
   const errors = [];
+  const hostname = new URL(origin).hostname;
+  if (mode === "live" && !/^[a-f0-9]{40}$/.test(expectedRevision)) {
+    errors.push("/: live verification requires the exact lowercase 40-character Git release revision");
+  }
+  if (mode === "live" && hostname === "med250-rwanda.ikanisa.chatgpt.site") {
+    errors.push("/: the public Sites origin is catalog-only and cannot be verified as a live ordering origin");
+  }
+  if (mode === "catalog" && hostname !== "med250-rwanda.ikanisa.chatgpt.site") {
+    errors.push("/: catalog verification is restricted to the governed Sites origin");
+  }
   const byRoute = new Map(records.map((record) => [record.route, {
     ...record,
     headers: normalizedHeaders(record.headers),
@@ -35,6 +51,7 @@ export function assessDeploymentEvidence({ origin, mode, records }) {
   }
 
   const home = byRoute.get("/");
+  let releaseRevision = null;
   if (home) {
     const requiredHeaders = {
       "cross-origin-opener-policy": "same-origin",
@@ -55,7 +72,15 @@ export function assessDeploymentEvidence({ origin, mode, records }) {
     }
     if (!/^[0-9a-f-]{36}$/i.test(home.headers["x-request-id"] ?? "")) errors.push("/: X-Request-Id is missing or invalid");
     if (!home.headers["server-timing"]?.includes("app;dur=")) errors.push("/: Server-Timing is missing");
-    if (!home.body.includes("MED+250") || !home.body.includes("Connect with a pharmacy that has it")) {
+    releaseRevision = home.headers["x-med250-release-revision"] ?? null;
+    const requiresWorkerRevision = hostname !== "med250-rwanda.ikanisa.chatgpt.site" || mode !== "catalog";
+    if (requiresWorkerRevision && !/^[A-Za-z0-9._-]{7,64}$/.test(releaseRevision ?? "")) {
+      errors.push("/: X-MED250-Release-Revision is missing or invalid");
+    }
+    if (expectedRevision && releaseRevision !== expectedRevision) {
+      errors.push(`/: X-MED250-Release-Revision does not match the expected release (${expectedRevision})`);
+    }
+    if (!home.body.includes("MED+250") || !home.body.includes("Health and everyday care") || !home.body.includes("Find them all at your nearest pharmacy")) {
       errors.push("/: marketplace identity or primary proposition is missing");
     }
     if (mode === "preview" && home.headers["x-robots-tag"] !== "noindex, nofollow") {
@@ -66,6 +91,26 @@ export function assessDeploymentEvidence({ origin, mode, records }) {
 
   const robots = byRoute.get("/robots.txt")?.body ?? "";
   const sitemap = byRoute.get("/sitemap.xml")?.body ?? "";
+  const manifest = byRoute.get("/manifest.webmanifest")?.body ?? "";
+  const serviceWorker = byRoute.get("/sw.js")?.body ?? "";
+  const offlinePage = byRoute.get("/offline.html")?.body ?? "";
+  try {
+    const parsedManifest = JSON.parse(manifest);
+    if (parsedManifest.id !== "/" || parsedManifest.scope !== "/" || parsedManifest.display !== "standalone") {
+      errors.push("/manifest.webmanifest: install identity, scope, or display mode is incorrect");
+    }
+    if (!/availability requests/i.test(parsedManifest.description ?? "") || /place one order/i.test(parsedManifest.description ?? "")) {
+      errors.push("/manifest.webmanifest: description does not match the availability-request model");
+    }
+  } catch {
+    errors.push("/manifest.webmanifest: response is not valid JSON");
+  }
+  if (!serviceWorker.includes('const OFFLINE_URL = "/offline.html"') || !serviceWorker.includes('url.pathname.startsWith("/api/")')) {
+    errors.push("/sw.js: safe offline navigation or API exclusion is missing");
+  }
+  if (!offlinePage.includes("You are offline") || !offlinePage.includes("never show a request as sent while you are offline")) {
+    errors.push("/offline.html: explicit non-transactional offline state is missing");
+  }
   if (mode === "preview") {
     if (!/User-Agent:\s*\*[\s\S]*Disallow:\s*\//i.test(robots)) errors.push("/robots.txt: preview does not disallow crawling");
     if (/<url>/i.test(sitemap)) errors.push("/sitemap.xml: preview unexpectedly publishes URLs");
@@ -73,32 +118,101 @@ export function assessDeploymentEvidence({ origin, mode, records }) {
     if (!/User-Agent:\s*\*[\s\S]*Allow:\s*\//i.test(robots)) errors.push("/robots.txt: live deployment does not allow public routes");
     if (!robots.includes(`${origin}/sitemap.xml`)) errors.push("/robots.txt: sitemap origin does not match the deployment");
     const urlCount = (sitemap.match(/<url>/gi) ?? []).length;
-    if (urlCount < 2_400) errors.push(`/sitemap.xml: expected at least 2,400 URLs, received ${urlCount}`);
-    if (!sitemap.includes(`${origin}/product/`)) errors.push("/sitemap.xml: product URLs do not use the deployment origin");
+    if (urlCount < 4_600) errors.push(`/sitemap.xml: expected at least 4,600 URLs, received ${urlCount}`);
+    if (!sitemap.includes(`${origin}/product/rwanda-fda-hm-`)) errors.push("/sitemap.xml: medicine URLs do not use the deployment origin");
+    if (!sitemap.includes(`${origin}/product/AMZ-`)) errors.push("/sitemap.xml: approved consumer-product URLs are missing");
   }
 
   return {
     status: errors.length ? "failed" : "passed",
     origin,
     mode,
+    releaseRevision,
     routeCount: records.length,
     errors,
   };
 }
 
-function parseArguments(values) {
-  const parsed = { url: "", mode: "" };
+export function parseArguments(values) {
+  const parsed = { url: "", mode: "", expectedRevision: "", evidenceOutput: "" };
   for (let index = 0; index < values.length; index += 2) {
     const flag = values[index];
     const value = values[index + 1];
     if (!value) throw new Error(`Missing value for ${flag}.`);
     if (flag === "--url") parsed.url = value;
     else if (flag === "--mode") parsed.mode = value;
+    else if (flag === "--expected-revision") parsed.expectedRevision = value;
+    else if (flag === "--evidence-output") parsed.evidenceOutput = value;
     else throw new Error(`Unknown argument ${flag}.`);
   }
   if (!parsed.url) throw new Error("--url is required.");
   if (!new Set(["preview", "catalog", "live"]).has(parsed.mode)) throw new Error("--mode must be preview, catalog, or live.");
+  if (parsed.mode === "live" && !/^[a-f0-9]{40}$/.test(parsed.expectedRevision)) {
+    throw new Error("Live verification requires --expected-revision with the exact lowercase 40-character Git release revision.");
+  }
+  if (parsed.mode !== "live" && parsed.expectedRevision && !/^[A-Za-z0-9._-]{7,64}$/.test(parsed.expectedRevision)) {
+    throw new Error("--expected-revision must be 7-64 letters, numbers, dots, underscores, or hyphens.");
+  }
   return parsed;
+}
+
+function sha256(value) {
+  return createHash("sha256").update(value).digest("hex");
+}
+
+const EVIDENCE_HEADERS = Object.freeze([
+  "content-security-policy",
+  "cross-origin-opener-policy",
+  "cross-origin-resource-policy",
+  "permissions-policy",
+  "referrer-policy",
+  "server-timing",
+  "strict-transport-security",
+  "x-content-type-options",
+  "x-frame-options",
+  "x-med250-release-revision",
+  "x-request-id",
+  "x-robots-tag",
+]);
+
+export function buildDeploymentEvidence({ result, records, expectedRevision = "", capturedAt, verifierSha256 }) {
+  return {
+    schemaVersion: "1.0",
+    capturedAt,
+    status: result.status,
+    origin: result.origin,
+    mode: result.mode,
+    observedReleaseRevision: result.releaseRevision,
+    expectedReleaseRevision: expectedRevision || null,
+    releaseRevisionExpectation: expectedRevision
+      ? result.releaseRevision === expectedRevision ? "matched" : "mismatched"
+      : "not_supplied",
+    routeCount: result.routeCount,
+    routes: records.map((record) => {
+      const headers = normalizedHeaders(record.headers);
+      return {
+        route: record.route,
+        status: record.status,
+        finalOrigin: record.finalOrigin,
+        headers: Object.fromEntries(EVIDENCE_HEADERS.flatMap((name) => headers[name] ? [[name, headers[name]]] : [])),
+        bodyBytes: Buffer.byteLength(record.body),
+        bodySha256: sha256(record.body),
+      };
+    }),
+    errors: result.errors,
+    verifier: {
+      path: "scripts/verify-deployed-site.mjs",
+      sha256: verifierSha256,
+    },
+  };
+}
+
+async function writeEvidence(outputPath, evidence) {
+  const absolutePath = resolve(outputPath);
+  await mkdir(dirname(absolutePath), { recursive: true });
+  const temporaryPath = `${absolutePath}.${process.pid}.tmp`;
+  await writeFile(temporaryPath, `${JSON.stringify(evidence, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
+  await rename(temporaryPath, absolutePath);
 }
 
 export function validateDeploymentOrigin(value, mode) {
@@ -109,12 +223,11 @@ export function validateDeploymentOrigin(value, mode) {
   if (mode === "live" && /\.(?:workers|pages)\.dev$/i.test(url.hostname)) {
     throw new Error("Live verification requires the production custom domain, not a workers.dev or pages.dev URL.");
   }
-  const liveHostnames = new Set([
-    "med250.gikundiro.com",
-    "med250-rwanda.ikanisa.chatgpt.site",
-  ]);
-  if (mode === "live" && !liveHostnames.has(url.hostname)) {
-    throw new Error("Live verification is restricted to the MED+250 production domains.");
+  if (mode === "live" && url.hostname !== "med250.gikundiro.com") {
+    throw new Error("Live verification is restricted to the canonical MED+250 production domain.");
+  }
+  if (mode === "catalog" && url.hostname !== "med250-rwanda.ikanisa.chatgpt.site") {
+    throw new Error("Catalog verification is restricted to the governed MED+250 Sites origin.");
   }
   return url.origin;
 }
@@ -168,7 +281,7 @@ async function fetchDeploymentRoute(origin, route, sitesBypassToken = "") {
     await assertPublicHostname(target.hostname);
     const response = await fetch(target, {
       headers: {
-        Accept: route.endsWith(".txt") || route.endsWith(".xml") ? "text/plain,*/*" : "text/html,*/*",
+        Accept: route.endsWith(".txt") || route.endsWith(".xml") || route.endsWith(".js") ? "text/plain,*/*" : "text/html,*/*",
         ...(sitesBypassToken ? { "OAI-Sites-Authorization": `Bearer ${sitesBypassToken}` } : {}),
       },
       redirect: "manual",
@@ -198,7 +311,23 @@ async function main() {
       body,
     };
   }));
-  const result = assessDeploymentEvidence({ origin, mode: args.mode, records });
+  const result = assessDeploymentEvidence({
+    origin,
+    mode: args.mode,
+    records,
+    expectedRevision: args.expectedRevision,
+  });
+  if (args.evidenceOutput) {
+    const verifierSource = await readFile(new URL(import.meta.url), "utf8");
+    const evidence = buildDeploymentEvidence({
+      result,
+      records,
+      expectedRevision: args.expectedRevision,
+      capturedAt: new Date().toISOString(),
+      verifierSha256: sha256(verifierSource),
+    });
+    await writeEvidence(args.evidenceOutput, evidence);
+  }
   console.log(JSON.stringify(result, null, 2));
   if (result.errors.length) process.exitCode = 1;
 }

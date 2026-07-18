@@ -1,11 +1,17 @@
 {
   "name": "MED+250 Rwanda Pharmacy Marketplace",
   "short_name": "MED+250",
-  "description": "Find pharmacy products, place one order, and compare confirmations from nearby pharmacies in Rwanda.",
+  "description": "Search pharmacy products and send availability requests to eligible pharmacies in Rwanda.",
+  "id": "/",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "lang": "en-RW",
+  "dir": "ltr",
   "background_color": "#f6f8ff",
   "theme_color": "#f6f8ff",
+  "categories": ["medical", "health", "shopping"],
+  "prefer_related_applications": false,
   "icons": [
     { "src": "/brand/app-icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "/brand/app-icon-512.png", "sizes": "512x512", "type": "image/png" }

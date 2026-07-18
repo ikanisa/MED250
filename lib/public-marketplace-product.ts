@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type { CatalogueTaxonomyRow, Product } from "./dawanear-client";
 
 type CatalogueRow = Record<string, unknown>;
@@ -23,6 +24,17 @@ function textArray(row: CatalogueRow, field: string) {
     return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === "string").map((item) => item.trim()).filter(Boolean) : [];
   } catch {
     return value.split("|").map((item) => item.trim()).filter(Boolean);
+  }
+}
+
+function httpsUrl(row: CatalogueRow, field: string) {
+  const value = text(row, field);
+  if (!value) return null;
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === "https:" ? parsed.toString() : null;
+  } catch {
+    return null;
   }
 }
 
@@ -61,7 +73,7 @@ async function fetchPublicRows(endpoint: URL, publishableKey: string): Promise<C
   }
 }
 
-export async function getPublicCatalogueTaxonomy(): Promise<CatalogueTaxonomyRow[]> {
+export const getPublicCatalogueTaxonomy = cache(async function getPublicCatalogueTaxonomy(): Promise<CatalogueTaxonomyRow[]> {
   const connection = publicSupabaseEndpoint("/rest/v1/dawanear_catalogue_taxonomy");
   if (!connection) return [];
   connection.endpoint.searchParams.set("select", "department,subcategory,product_count");
@@ -76,9 +88,9 @@ export async function getPublicCatalogueTaxonomy(): Promise<CatalogueTaxonomyRow
       productCount: Math.max(0, Math.round(number(row, "product_count"))),
     }))
     .filter((row) => row.department && row.productCount > 0);
-}
+});
 
-export async function getPublicProductImages(id: string): Promise<string[]> {
+export const getPublicProductImages = cache(async function getPublicProductImages(id: string): Promise<string[]> {
   const productId = id.trim();
   if (!/^[A-Za-z0-9-]{1,80}$/.test(productId)) return [];
 
@@ -95,10 +107,10 @@ export async function getPublicProductImages(id: string): Promise<string[]> {
   return rows
     .map((row) => text(row, "public_url"))
     .filter(Boolean);
-}
+});
 
 /** Loads one already-approved public product through the same RLS boundary as the storefront. */
-export async function getPublicMarketplaceProduct(id: string): Promise<Product | null> {
+export const getPublicMarketplaceProduct = cache(async function getPublicMarketplaceProduct(id: string): Promise<Product | null> {
   const productId = id.trim();
   if (!/^[A-Za-z0-9-]{1,80}$/.test(productId)) return null;
 
@@ -144,7 +156,9 @@ export async function getPublicMarketplaceProduct(id: string): Promise<Product |
     indicativePriceUpdatedAt: text(row, "indicative_price_updated_at") || null,
     imageUrl: imageUrls[0] || text(row, "image_url") || null,
     imageUrls: imageUrls.length ? imageUrls : textArray(row, "image_urls"),
-    amazonProductUrl: text(row, "amazon_product_url") || null,
+    description: text(row, "description") || null,
+    descriptionSourceName: text(row, "description_source_name") || null,
+    descriptionSourceUrl: httpsUrl(row, "description_source_url"),
     isOrderable: row.is_orderable === true,
   };
-}
+});

@@ -6,6 +6,10 @@ import {
   assessBackendContract,
   expectedBackendContractVersion,
 } from "../scripts/backend-contract-invariants.mjs";
+import {
+  resolveBackendContractEndpoint,
+  verifyBackendContract,
+} from "../scripts/verify-backend-contract.mjs";
 
 function validContract() {
   return {
@@ -91,14 +95,48 @@ function validContract() {
       coverage_required: false,
       missing_images_hidden: true,
       generated_placeholders_allowed: false,
-      rights_verified_required: true,
+      publication_mode: "automated_provenance",
+      rights_verified_required: false,
       rights_verified_column_exists: true,
-      approved_rights_constraint_validated: true,
-      public_policy_requires_verified: true,
+      approved_rights_constraint_validated: false,
+      public_policy_requires_verified: false,
+      public_policy_requires_background_removed: true,
+      minimum_images_per_product: 3,
+      maximum_images_per_product: 6,
+      target_image_count: 23977,
       publication_guard_trigger_exists: true,
       ddl_guard_event_trigger_exists: true,
       partial_product_count: 0,
       unsafe_image_count: 0,
+    },
+    product_descriptions: {
+      columns_complete: true,
+      evidence_constraint_validated: true,
+      review_guard_enabled: true,
+      approved_description_count: 0,
+      approved_without_complete_evidence_count: 0,
+      public_projection_leak_count: 0,
+      approved_projection_missing_count: 0,
+      unapproved_descriptions_hidden: true,
+      rights_verification_required: true,
+      source_digest_required: true,
+      named_review_required: true,
+    },
+    product_description_workflow: {
+      review_table_exists: true,
+      review_table_rls: true,
+      review_table_deny_by_default: true,
+      review_table_service_only: true,
+      immutable_audit_trigger: true,
+      review_function_exists: true,
+      review_function_security_definer: true,
+      review_function_search_path_locked: true,
+      service_role_can_review: true,
+      anon_can_review: false,
+      authenticated_can_review: false,
+      audit_constraint_trigger_enabled: true,
+      approved_without_current_audit_count: 0,
+      single_product_only: true,
     },
     monitoring: {
       health_exists: true,
@@ -107,6 +145,24 @@ function validContract() {
       anon_can_execute_health: false,
       authenticated_can_execute_health: false,
       service_role_can_execute_health: true,
+    },
+    trust_metrics: {
+      function_exists: true,
+      security_definer: true,
+      stable: true,
+      search_path_locked: true,
+      public_can_execute: false,
+      anon_can_execute: true,
+      authenticated_can_execute: true,
+      service_role_can_execute: true,
+      approval_table_exists: true,
+      approval_table_rls: true,
+      approval_table_deny_by_default: true,
+      public_can_read_approvals: false,
+      anon_can_read_approvals: false,
+      authenticated_can_read_approvals: false,
+      service_role_can_read_approvals: true,
+      approval_rows_with_incomplete_evidence: 0,
     },
     pharmacy_privacy: {
       anon_can_read_pharmacies: false,
@@ -160,21 +216,21 @@ function validContract() {
     prescriptions: { bucket_exists: true, cleanup_claims_rls: true },
     realtime: { orders: true, offers: true, notifications: true },
     api_surface: {
-      function_count: 29,
-      expected_function_count: 29,
+      function_count: 31,
+      expected_function_count: 31,
       public_execute_count: 0,
-      anonymous_security_definer_count: 0,
+      anonymous_security_definer_count: 1,
       mutable_security_definer_path_count: 0,
-      expected_authenticated_security_definer_count: 13,
+      expected_authenticated_security_definer_count: 14,
       missing_authenticated_security_definer_count: 0,
       unexpected_authenticated_security_definer_count: 0,
     },
     table_surface: {
-      table_count: 22,
-      expected_table_count: 22,
+      table_count: 24,
+      expected_table_count: 24,
       rls_disabled_count: 0,
       anonymous_select_count: 0,
-      expected_deny_by_default_count: 9,
+      expected_deny_by_default_count: 11,
       missing_deny_by_default_count: 0,
       unexpected_deny_by_default_count: 0,
       expected_authenticated_select_count: 9,
@@ -186,6 +242,29 @@ function validContract() {
 
 test("accepts the complete MED+250 backend deployment contract", () => {
   assert.deepEqual(assessBackendContract(validContract()), []);
+});
+
+test("verifies the aggregate contract through one clean Supabase origin", async () => {
+  const environment = {
+    SUPABASE_URL: "https://uskfnszcdqpcfrhjxitl.supabase.co",
+    SUPABASE_SECRET_KEY: "process-only-secret",
+  };
+  let captured;
+  const result = await verifyBackendContract({
+    environment,
+    fetchImpl: async (url, init) => {
+      captured = { url: String(url), init };
+      return Response.json(validContract());
+    },
+  });
+  assert.equal(result.status, "passed");
+  assert.equal(captured.url, "https://uskfnszcdqpcfrhjxitl.supabase.co/rest/v1/rpc/dawanear_backend_contract");
+  assert.equal(captured.init.headers.apikey, environment.SUPABASE_SECRET_KEY);
+  assert.equal(captured.init.headers.Authorization, `Bearer ${environment.SUPABASE_SECRET_KEY}`);
+  assert.throws(
+    () => resolveBackendContractEndpoint({ SUPABASE_URL: "https://uskfnszcdqpcfrhjxitl.supabase.co/path" }),
+    /HTTPS \*\.supabase\.co origin/,
+  );
 });
 
 test("detects privilege, function-mode and Realtime drift", () => {
@@ -202,6 +281,49 @@ test("detects privilege, function-mode and Realtime drift", () => {
     "Offers are missing from Realtime publication.",
     "PUBLIC can execute a MED+250 function.",
     "An unexpected MED+250 table is directly selectable by authenticated clients.",
+  ]);
+});
+
+test("detects trust-metric privacy, approval, and anonymous-surface drift", () => {
+  const contract = validContract();
+  contract.trust_metrics.public_can_execute = true;
+  contract.trust_metrics.anon_can_read_approvals = true;
+  contract.trust_metrics.approval_rows_with_incomplete_evidence = 1;
+  contract.api_surface.anonymous_security_definer_count = 2;
+
+  assert.deepEqual(assessBackendContract(contract), [
+    "PUBLIC can execute the trust-metrics RPC.",
+    "Anonymous users can read trust-metric approvals.",
+    "An approved trust metric lacks complete governance evidence.",
+    "Anonymous privileged-function surface drifted beyond the aggregate trust-metrics RPC.",
+  ]);
+});
+
+test("detects incomplete or publicly leaked product descriptions", () => {
+  const contract = validContract();
+  contract.product_descriptions.evidence_constraint_validated = false;
+  contract.product_descriptions.approved_without_complete_evidence_count = 1;
+  contract.product_descriptions.public_projection_leak_count = 1;
+
+  assert.deepEqual(assessBackendContract(contract), [
+    "The approved product-description evidence constraint is missing or unvalidated.",
+    "An approved product description lacks complete source, rights, clinical, or review evidence.",
+    "An unapproved or altered product description reached the public catalogue.",
+  ]);
+});
+
+test("detects product-description workflow privilege, audit, and reconciliation drift", () => {
+  const contract = validContract();
+  contract.product_description_workflow.review_table_service_only = false;
+  contract.product_description_workflow.authenticated_can_review = true;
+  contract.product_description_workflow.audit_constraint_trigger_enabled = false;
+  contract.product_description_workflow.approved_without_current_audit_count = 1;
+
+  assert.deepEqual(assessBackendContract(contract), [
+    "Product-description review evidence is not service-only.",
+    "Signed-in users can review product descriptions.",
+    "Product-description publication can bypass the immutable review ledger.",
+    "An approved product description lacks a matching current approval event.",
   ]);
 });
 
@@ -395,6 +517,9 @@ test("makes backend drift and operational health mandatory in the live release g
   assert.match(liveGate, /^npm run release:preflight:live/);
   assert.match(liveGate, /&& npm run data:duplicates:verify -- --strict/);
   assert.match(liveGate, /&& npm run backend:verify/);
+  assert.match(liveGate, /&& npm run backend:verify:description-reviewer/);
+  assert.match(liveGate, /MED250_DESCRIPTION_REVIEWER_PROBE_PRODUCT_ID/);
+  assert.match(liveGate, /MED250_DESCRIPTION_REVIEWER_PROBE_EXPECTED_UPDATED_AT/);
   assert.match(liveGate, /&& npm run ops:health:strict/);
   assert.ok(
     liveGate.indexOf("release:preflight:live") < liveGate.indexOf("data:duplicates:verify"),
@@ -407,6 +532,10 @@ test("makes backend drift and operational health mandatory in the live release g
   assert.ok(
     liveGate.indexOf("backend:verify") < liveGate.indexOf("wrangler deploy"),
     "backend drift must be checked before Cloudflare packaging",
+  );
+  assert.ok(
+    liveGate.indexOf("backend:verify:description-reviewer") < liveGate.indexOf("ops:health:strict"),
+    "the protected reviewer must be probed before operational readiness is accepted",
   );
   assert.ok(
     liveGate.indexOf("ops:health:strict") < liveGate.indexOf("wrangler deploy"),

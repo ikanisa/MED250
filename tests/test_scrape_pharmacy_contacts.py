@@ -19,11 +19,21 @@ class PharmacyScraperTests(unittest.TestCase):
         self.assertEqual(MODULE.normalize_rwanda_phone("0788 123 456"), "+250788123456")
         self.assertEqual(MODULE.normalize_rwanda_phone("+250 788 123 456"), "+250788123456")
 
+    def test_rwanda_landline_is_not_rewritten_as_mobile(self):
+        self.assertEqual(MODULE.normalize_rwanda_phone("+250 252 572 135"), "")
+        self.assertEqual(MODULE.extract_rwanda_phones("Phone: +250 252 572 135"), [])
+
     def test_extracts_multiple_unique_rwanda_phones_from_listing_text(self):
         phones = MODULE.extract_rwanda_phones(
             "Phone: +250 788 123 456 | Call 0788 123 456 | Tel 0722 987 654"
         )
         self.assertEqual(phones, ["+250788123456", "+250722987654"])
+
+    def test_extracts_bare_national_number_from_maps_result_card(self):
+        phones = MODULE.extract_rwanda_phones(
+            "Pharmacy · Kigali · Open now · 788 123 456"
+        )
+        self.assertEqual(phones, ["+250788123456"])
 
     def test_preserves_printed_non_leap_day_without_losing_row(self):
         self.assertEqual(MODULE.parse_source_date("29/02/2030"), "2030-02-29")
@@ -136,6 +146,24 @@ class PharmacyScraperTests(unittest.TestCase):
         self.assertEqual(merged["phone_number"], "+250788513496")
         self.assertEqual(merged["google_maps_url"], "https://www.google.com/maps/place/DUPHAR")
         self.assertEqual(merged["match_status"], "matched")
+
+    def test_partition_merge_preserves_checked_coverage_over_pending_row(self):
+        row = {key: "" for key in MODULE.SOURCE_COLUMNS}
+        row.update({"source_serial": "1", "name": "TEST PHARMACY"})
+        checked = MODULE.blank_result(row, "unmatched")
+        checked.update(
+            {
+                "coverage_status": "no_place_candidate",
+                "query_used": "https://www.google.com/maps/search/Test",
+                "query_attempts": "7",
+            }
+        )
+        pending = MODULE.blank_result(row)
+        merged = MODULE.merge_observations(checked, pending)
+        self.assertEqual(merged["coverage_status"], "no_place_candidate")
+        self.assertEqual(merged["match_status"], "unmatched")
+        self.assertEqual(merged["query_used"], checked["query_used"])
+        self.assertEqual(merged["query_attempts"], "7")
 
     def test_refresh_drops_legacy_google_phone_without_canonical_match(self):
         row = {key: "" for key in MODULE.SOURCE_COLUMNS}
@@ -260,6 +288,22 @@ class PharmacyScraperTests(unittest.TestCase):
             )
         )
 
+    def test_strong_maps_discovery_accepts_close_name_and_district_alias(self):
+        row = {
+            "name": "PHARMACIE DE BUTARE LTD",
+            "district": "HUYE",
+            "sector": "NGOMA",
+            "cell": "BUTARE",
+        }
+        name = "Pharmacie de Butare (Huye)"
+        address = "Butare, Rwanda"
+        score, evidence = MODULE.candidate_score(
+            row["name"], row["district"], row["sector"], row["cell"], name, address
+        )
+        self.assertTrue(
+            MODULE.strong_maps_discovery(row, name, address, score, evidence)
+        )
+
     def test_refresh_drops_prior_matched_place_without_pharmacy_identity(self):
         row = {key: "" for key in MODULE.SOURCE_COLUMNS}
         row.update(
@@ -303,6 +347,7 @@ class PharmacyScraperTests(unittest.TestCase):
                 self.assertIsNotNone(loaded)
                 self.assertFalse(MODULE.browser_result_complete(loaded))
                 loaded["query_used"] = "https://www.google.com/maps/search/test"
+                loaded["coverage_status"] = "no_place_candidate"
                 self.assertTrue(MODULE.browser_result_complete(loaded))
                 self.assertFalse(MODULE.browser_result_complete(loaded, require_deep=True))
                 loaded["search_mode"] = "deep"

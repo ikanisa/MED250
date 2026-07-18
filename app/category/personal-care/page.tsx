@@ -3,8 +3,9 @@ import { redirect } from "next/navigation";
 import Marketplace from "../../marketplace";
 import { getInitialMarketplaceProducts } from "../../../lib/product-seo";
 import { getPublicCatalogueTaxonomy } from "../../../lib/public-marketplace-product";
+import { marketplaceAlternates } from "../../../lib/marketplace-locale";
 
-export const metadata: Metadata = { title: "Beauty and personal care products", description: "Browse source-backed beauty and personal care products currently present in the MED+250 catalogue.", alternates: { canonical: "/category/personal-care" } };
+export const metadata: Metadata = { title: "Beauty and personal care products", description: "Browse source-backed beauty and personal care products currently present in the MED+250 catalogue.", alternates: marketplaceAlternates("/category/personal-care") };
 
 export default async function PersonalCarePage() {
   const initialTaxonomy = await getPublicCatalogueTaxonomy();

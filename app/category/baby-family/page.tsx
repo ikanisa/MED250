@@ -3,8 +3,9 @@ import { redirect } from "next/navigation";
 import Marketplace from "../../marketplace";
 import { getInitialMarketplaceProducts } from "../../../lib/product-seo";
 import { getPublicCatalogueTaxonomy } from "../../../lib/public-marketplace-product";
+import { marketplaceAlternates } from "../../../lib/marketplace-locale";
 
-export const metadata: Metadata = { title: "Baby products", description: "Browse source-backed baby products currently present in the MED+250 catalogue.", alternates: { canonical: "/category/baby-family" } };
+export const metadata: Metadata = { title: "Baby products", description: "Browse source-backed baby products currently present in the MED+250 catalogue.", alternates: marketplaceAlternates("/category/baby-family") };
 
 export default async function BabyFamilyPage() {
   const initialTaxonomy = await getPublicCatalogueTaxonomy();

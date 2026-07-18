@@ -1,14 +1,26 @@
 import type { Metadata } from "next";
 import InfoShell from "../info-shell";
+import { marketplaceAlternates } from "../../lib/marketplace-locale";
+import { marketplaceMessage } from "../../lib/marketplace-messages";
 
-export const metadata: Metadata = { title: "Privacy", description: "How MED+250 handles location, contact, order, and prescription information.", alternates: { canonical: "/privacy" } };
+export const metadata: Metadata = {
+  title: marketplaceMessage("navigation.privacy"),
+  description: marketplaceMessage("inventory.9c1e99af0efd"),
+  alternates: marketplaceAlternates("/privacy"),
+};
 
 export default function PrivacyPage() {
-  return <InfoShell eyebrow="PRIVACY" title="Privacy at MED+250" intro="This notice explains how the current MED+250 marketplace uses location, contact, request, and prescription information.">
-    <section><h2>Information used for an availability request</h2><p>MED+250 uses your selected products, quantities, fulfilment preference, location, WhatsApp number, and any prescription you choose to attach. Anonymous sign-in identifies a browser session; it does not make request or health data anonymous.</p></section>
-    <section><h2>Location and pharmacy matching</h2><p>Your browser asks before sharing location. MED+250 prioritises verified nearby pharmacies when approved premises coordinates are available and otherwise uses a verified national responder pool. Pharmacies initially receive only an approximate distance—or a national-service label—and the order information needed to decide whether they can fulfil it.</p></section>
-    <section><h2>Contact and prescription access</h2><p>Your exact contact details and private prescription are withheld until you choose a responding pharmacy. Prescription access uses a short-lived link and is limited to the selected pharmacy&apos;s order workflow.</p></section>
-    <section><h2>WhatsApp, prices and MoMo</h2><p>Central catalogue prices are indicative only. MED+250 does not publish pharmacy-specific prices or stock. Opening WhatsApp or the phone&apos;s MoMo menu leaves MED+250 and is governed by the relevant service and your mobile operator. MED+250 does not process or hold the payment.</p></section>
-    <section><h2>Questions and corrections</h2><p>Pharmacy staff can request a correction to their registered WhatsApp contact from the pharmacy portal. For other privacy requests and complaints, contact the MED+250 administrator through the contact channel provided in the marketplace.</p></section>
-  </InfoShell>;
+  return (
+    <InfoShell
+      eyebrow={marketplaceMessage("inventory.39d98d5b9cd5")}
+      title={marketplaceMessage("inventory.eb86f860c44f")}
+      intro={marketplaceMessage("inventory.d9302d510d99")}
+    >
+      <section><h2>{marketplaceMessage("inventory.f1bcd650fb8d")}</h2><p>{marketplaceMessage("inventory.0f91ad22b6e6")}</p></section>
+      <section><h2>{marketplaceMessage("inventory.ef4903cec8c5")}</h2><p>{marketplaceMessage("inventory.b610143dd4e0")}</p></section>
+      <section><h2>{marketplaceMessage("inventory.ac8d2d623440")}</h2><p>{marketplaceMessage("inventory.3ae751db9645")}</p></section>
+      <section><h2>{marketplaceMessage("inventory.ad2ded1604fd")}</h2><p>{marketplaceMessage("inventory.bba907c266ce")}</p></section>
+      <section><h2>{marketplaceMessage("inventory.764e1f17bc8b")}</h2><p>{marketplaceMessage("inventory.b2547a8aa861")}</p></section>
+    </InfoShell>
+  );
 }

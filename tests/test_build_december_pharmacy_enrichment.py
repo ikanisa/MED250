@@ -71,6 +71,17 @@ class DecemberEnrichmentTests(unittest.TestCase):
         self.assertEqual(metadata["source_name"], "MMI public pharmacy partner directory")
         self.assertTrue(metadata["verified"])
 
+    def test_rwanda_landline_is_rejected_from_mobile_contact_import(self):
+        row = {
+            "december_source_serial": "426",
+            "phone_number": "+250252572135",
+            "phone_source": "public_evidence_csv",
+            "phone_evidence_url": "https://www.mmi.gov.rw/partners/pharmacies",
+            "phone_evidence_reference": "MMI pharmacy partner directory",
+        }
+        with self.assertRaises(MODULE.ImportBuildError):
+            MODULE.phone_metadata(row)
+
     def test_multiple_phone_sources_create_distinct_contact_metadata(self):
         row = {
             "phone_number": "+250788111111; +250722222222",

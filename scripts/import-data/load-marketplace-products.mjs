@@ -4,6 +4,8 @@ import process from "node:process";
 
 import { createClient } from "@supabase/supabase-js";
 
+import { officialCatalogueTitle } from "../../lib/product-display.ts";
+
 const defaultDataset = path.resolve(
   "outputs/019f66ce-d480-7a90-9bb7-ee6e417b5ce7/corrected/research/corrected-catalog-dataset-2026-07-15.json",
 );
@@ -36,7 +38,8 @@ if (!dryRun && (!supabaseUrl || !secretKey)) {
 
 const dataset = JSON.parse(await readFile(datasetPath, "utf8"));
 const qualityOverrides = JSON.parse(await readFile(qualityOverridesPath, "utf8"));
-const products = dataset.consumer_products;
+const excludedAsins = new Set(Object.keys(qualityOverrides.excluded_asins ?? {}));
+const products = dataset.consumer_products.filter((product) => !excludedAsins.has(String(product.asin ?? "")));
 if (!Array.isArray(products) || products.length < 2_000) {
   throw new Error(`Expected at least 2,000 consumer products; found ${products?.length ?? 0}`);
 }
@@ -74,7 +77,6 @@ const reviewEvidence = {
   approved_at: reviewedAt,
 };
 const packOnlyName = /^\d+(?:\.\d+)?\s*(?:pcs?|pieces?|ml|l|mg|g|kg|oz|fl\s*oz)?$/i;
-const excludedAsins = new Set(Object.keys(qualityOverrides.excluded_asins ?? {}));
 const normalizeProductName = (value) => String(value ?? "")
   .toLocaleLowerCase()
   .normalize("NFKD")
@@ -91,7 +93,9 @@ const rows = products.map((product, index) => {
   if (product.id !== `AMZ-${product.asin}` || product.source_product_id !== product.asin) {
     throw new Error(`Product ${index + 1} has inconsistent Amazon identifiers`);
   }
-  const productName = String(product.product_name ?? "").trim();
+  const productName = officialCatalogueTitle(String(product.product_name ?? ""));
+  const brandName = officialCatalogueTitle(String(product.brand_name ?? "")) || "Unbranded";
+  const genericName = officialCatalogueTitle(String(product.generic_name ?? ""));
   const normalizedProductName = normalizeProductName(productName);
   if (
     !productName
@@ -102,9 +106,6 @@ const rows = products.map((product, index) => {
     || productName.toLocaleLowerCase() === String(product.subcategory).trim().toLocaleLowerCase()
   ) {
     throw new Error(`Product ${product.id} does not have a customer-facing product name`);
-  }
-  if (excludedAsins.has(product.asin)) {
-    throw new Error(`Product ${product.id} is blocked by the catalogue quality audit`);
   }
   if (product.amazon_price_usd_observed != null) {
     throw new Error(`Product ${product.id} retains an Amazon price; Amazon price references are not importable`);
@@ -124,6 +125,9 @@ const rows = products.map((product, index) => {
   taxonomy.add(`${product.category} / ${product.subcategory}`);
   return {
     ...Object.fromEntries(expectedFields.map((field) => [field, product[field] ?? null])),
+    product_name: productName,
+    brand_name: brandName,
+    generic_name: genericName || null,
     ...reviewEvidence,
   };
 });

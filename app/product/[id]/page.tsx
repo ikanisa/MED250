@@ -1,30 +1,39 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Marketplace from "../../marketplace";
-import { getProductSeo, productSeoDescription, toMarketplaceProduct } from "../../../lib/product-seo";
-import { getPublicCatalogueTaxonomy, getPublicMarketplaceProduct, getPublicProductImages } from "../../../lib/public-marketplace-product";
+import { getProductSeo, getRelatedMarketplaceProducts, productSeoDescription, toMarketplaceProduct } from "../../../lib/product-seo";
+import { getPublicMarketplaceProduct, getPublicProductImages } from "../../../lib/public-marketplace-product";
+import { catalogueDepartmentForProduct } from "../../../lib/non-prescription-taxonomy";
 import { absoluteUrl } from "../../../lib/site";
 import { safeJsonLd } from "../../../lib/safe-json-ld";
+import { customerProductTitle } from "../../../lib/product-display";
+import { marketplaceAlternates } from "../../../lib/marketplace-locale";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const localProduct = getProductSeo(id);
-  const baseProduct = localProduct ? toMarketplaceProduct(localProduct) : await getPublicMarketplaceProduct(id);
-  const imageUrls = localProduct ? await getPublicProductImages(id) : baseProduct?.imageUrls ?? [];
+  const remoteProduct = await getPublicMarketplaceProduct(id);
+  const baseProduct = remoteProduct ?? (localProduct ? toMarketplaceProduct(localProduct) : null);
+  const imageUrls = remoteProduct?.imageUrls?.length
+    ? remoteProduct.imageUrls
+    : localProduct
+      ? await getPublicProductImages(id)
+      : baseProduct?.imageUrls ?? [];
   const product = baseProduct ? {
     ...baseProduct,
     imageUrl: imageUrls[0] ?? baseProduct.imageUrl,
     imageUrls: imageUrls.length ? imageUrls : baseProduct.imageUrls,
   } : null;
   if (!product) return { title: "Product not found", robots: { index: false, follow: false } };
-  const description = localProduct
+  const displayName = customerProductTitle(product.brand);
+  const description = product.description || (localProduct
     ? productSeoDescription(localProduct)
-    : `${product.brand}${product.subcategory ? ` — ${product.subcategory}` : ""}. View central product information, request availability, and continue with a pharmacy on WhatsApp.`;
-  const title = [product.brand, product.strength].filter(Boolean).join(" ");
+    : `${displayName}${product.subcategory ? ` — ${product.subcategory}` : ""}. View central product information, request availability, and continue with a pharmacy on WhatsApp.`);
+  const title = [displayName, product.strength].filter(Boolean).join(" ");
   return {
     title,
     description,
-    alternates: { canonical: `/product/${encodeURIComponent(product.id)}` },
+    alternates: marketplaceAlternates(`/product/${encodeURIComponent(product.id)}`),
     openGraph: { type: "website", title, description, url: `/product/${encodeURIComponent(product.id)}`, images: [{ url: product.imageUrl ?? "/og-marketplace-v2.png", width: product.imageUrl ? 1400 : 1200, height: product.imageUrl ? 1400 : 630, alt: product.imageUrl ? title : "MED+250 Rwanda pharmacy marketplace" }] },
     twitter: { card: "summary_large_image", title, description, images: [product.imageUrl ?? "/og-marketplace-v2.png"] },
   };
@@ -33,25 +42,30 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const localProduct = getProductSeo(id);
-  const [remoteProduct, initialTaxonomy] = await Promise.all([
-    localProduct ? Promise.resolve(null) : getPublicMarketplaceProduct(id),
-    getPublicCatalogueTaxonomy(),
-  ]);
-  const baseProduct = localProduct ? toMarketplaceProduct(localProduct) : remoteProduct;
-  const imageUrls = localProduct ? await getPublicProductImages(id) : baseProduct?.imageUrls ?? [];
+  const remoteProduct = await getPublicMarketplaceProduct(id);
+  const baseProduct = remoteProduct ?? (localProduct ? toMarketplaceProduct(localProduct) : null);
+  const imageUrls = remoteProduct?.imageUrls?.length
+    ? remoteProduct.imageUrls
+    : localProduct
+      ? await getPublicProductImages(id)
+      : baseProduct?.imageUrls ?? [];
   const product = baseProduct ? {
     ...baseProduct,
     imageUrl: imageUrls[0] ?? baseProduct.imageUrl,
     imageUrls: imageUrls.length ? imageUrls : baseProduct.imageUrls,
   } : null;
   if (!product) notFound();
-  const description = localProduct
+  const displayName = customerProductTitle(product.brand);
+  const department = catalogueDepartmentForProduct(product);
+  const relatedProducts = getRelatedMarketplaceProducts(product);
+  const description = product.description || (localProduct
     ? productSeoDescription(localProduct)
-    : `${product.brand}${product.subcategory ? ` — ${product.subcategory}` : ""}. View central product information, request availability, and continue with a pharmacy on WhatsApp.`;
+    : `${displayName}${product.subcategory ? ` — ${product.subcategory}` : ""}. View central product information, request availability, and continue with a pharmacy on WhatsApp.`);
   const productSchema = {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: [product.brand, product.strength].filter(Boolean).join(" "),
+    name: [displayName, product.strength].filter(Boolean).join(" "),
+    alternateName: displayName !== product.brand ? product.brand : undefined,
     description,
     sku: product.registrationNumber || product.id,
     category: product.category,
@@ -70,9 +84,9 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl("/") },
-      { "@type": "ListItem", position: 2, name: "Products", item: absoluteUrl("/categories") },
-      { "@type": "ListItem", position: 3, name: product.brand, item: absoluteUrl(`/product/${encodeURIComponent(product.id)}`) },
+      { "@type": "ListItem", position: 2, name: department.label, item: absoluteUrl(department.href) },
+      { "@type": "ListItem", position: 3, name: displayName, item: absoluteUrl(`/product/${encodeURIComponent(product.id)}`) },
     ],
   };
-  return <><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(productSchema) }} /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbs) }} /><Marketplace initialProductId={id} initialProduct={product} initialTaxonomy={initialTaxonomy} /></>;
+  return <><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(productSchema) }} /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbs) }} /><Marketplace initialProductId={id} initialProduct={product} initialProducts={relatedProducts} /></>;
 }

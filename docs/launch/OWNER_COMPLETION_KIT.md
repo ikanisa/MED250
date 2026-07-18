@@ -196,12 +196,17 @@ Gates:
 - `MED250_GATE_SECURITY_HARDENING_DEPLOYED`
 - `MED250_GATE_EDGE_FUNCTIONS_DEPLOYED`
 
-The required deployment and test artifacts already exist. The backend owner must inspect them, verify the current live contract remains `2026-07-16.10`, verify database SSL enforcement, the independent product-image approval trigger, DDL governance guard, six function versions, protected probes, and the scoped database-advisor record, and add their name, role, and timezone-qualified approval to the registry. If privileged credentials have since changed, rerun:
+The historical deployment and test artifacts cover the six functions reviewed on 2026-07-16 and must remain historical. The backend owner must create a fresh seven-function inventory, verify the current live contract is `2026-07-18.3`, verify database SSL enforcement, the independent product-image approval trigger, DDL governance guard, aggregate public trust-metric boundary, fail-closed product-description governance and immutable review workflow, verify the new description reviewer with both anonymous denial and an authenticated read-only inspection, review the scoped database-advisor record, and add their name, role, and timezone-qualified approval to the registry. Run:
 
 ```sh
 npm run backend:verify
+npm run backend:verify:description-reviewer -- --product-id PRODUCT_ID --expected-updated-at EXACT_INSPECT_UPDATED_AT --evidence-output docs/launch/evidence/product-description-reviewer-verification-YYYY-MM-DD.json
 npm run ops:health:strict
 ```
+
+Use the exact `updated_at` returned by a fresh inspection. The receipt contains no response body, raw product identifier, credentials, description, or review note. Hash it and bind that digest into the fresh seven-function test record before owner approval; the automated receipt is supporting evidence, not an approval artifact by itself.
+
+Configure the protected production environment with `MED250_ADMIN_TOKEN` as a secret and the exact probe inputs as `MED250_DESCRIPTION_REVIEWER_PROBE_PRODUCT_ID` and `MED250_DESCRIPTION_REVIEWER_PROBE_EXPECTED_UPDATED_AT` variables. The live release gate intentionally rejects missing or stale probe inputs.
 
 ### Privacy owner
 
@@ -240,7 +245,7 @@ Commands:
 ```sh
 npm run domain:dns:verify
 npm run cloudflare:check:production
-npm run deployment:verify -- --url https://med250.gikundiro.com --mode live
+npm run deployment:verify -- --url https://med250.gikundiro.com --mode live --expected-revision <exact-lowercase-40-character-git-sha>
 ```
 
 ### QA owner
@@ -275,7 +280,7 @@ npm run backend:verify
 npm run ops:health:strict
 npm run security:audit
 npm run release:check:live
-npm run deployment:verify -- --url https://med250.gikundiro.com --mode live
+npm run deployment:verify -- --url https://med250.gikundiro.com --mode live --expected-revision <exact-lowercase-40-character-git-sha>
 ```
 
 The protected production workflow additionally requires the exact live confirmation phrase and approval of the `med250-production` GitHub environment.

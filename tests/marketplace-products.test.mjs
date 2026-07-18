@@ -50,6 +50,10 @@ const marketplaceImporter = await readFile(
   new URL("../scripts/import-data/load-marketplace-products.mjs", import.meta.url),
   "utf8",
 );
+const nonProductRetirementMigration = await readFile(
+  new URL("../supabase/migrations/20260718080000_retire_non_product_catalogue_records.sql", import.meta.url),
+  "utf8",
+);
 const taxonomyMigration = await readFile(
   new URL("../supabase/migrations/20260716085840_remove_inferred_medicine_subcategories.sql", import.meta.url),
   "utf8",
@@ -67,9 +71,12 @@ const categoryPages = await Promise.all([
   "../app/category/wellness/page.tsx",
 ].map((page) => readFile(new URL(page, import.meta.url), "utf8")));
 
-test("Amazon-first import contains 2,200 unique, centrally activated products across all 25 taxonomy pairs", () => {
+test("Amazon source retains 2,200 traceable rows while the governed import publishes 2,198 products", () => {
   const rows = dataset.consumer_products;
+  const excludedAsins = new Set(Object.keys(catalogueQualityOverrides.excluded_asins));
+  const publishableRows = rows.filter((row) => !excludedAsins.has(row.asin));
   assert.equal(rows.length, 2_200);
+  assert.equal(publishableRows.length, 2_198);
   assert.equal(new Set(rows.map((row) => row.id)).size, 2_200);
   assert.equal(new Set(rows.map((row) => row.asin)).size, 2_200);
   assert.equal(new Set(rows.map((row) => `${row.category} / ${row.subcategory}`)).size, 25);
@@ -90,6 +97,7 @@ test("Amazon-first import contains 2,200 unique, centrally activated products ac
     counts[key] = (counts[key] ?? 0) + 1;
     return counts;
   }, {})).every((count) => count >= 50));
+  assert.ok(!publishableRows.some((row) => new Set(["032380909X", "B01K1S6AHM"]).has(row.asin)));
 });
 
 test("uses complete consumer product names instead of quantity or pack tokens", () => {
@@ -101,12 +109,23 @@ test("uses complete consumer product names instead of quantity or pack tokens", 
   assert.match(marketplaceImporter, /does not have a customer-facing product name/);
   assert.match(marketplaceImporter, /Duplicate customer-facing product name/);
   assert.match(marketplaceImporter, /Could not retire superseded products/);
+  assert.match(marketplaceImporter, /filter\(\(product\) => !excludedAsins\.has/);
   assert.match(marketplaceImporter, /publication_status: "rejected"/);
   assert.match(catalogueQualityMigration, /canonical product metadata/i);
   assert.match(catalogueQualityMigration, /marketplace\.generic_name, marketplace\.strength, marketplace\.dosage_form/);
   assert.match(catalogueQualityMigration, /publication_status = 'rejected'/);
   assert.ok(Object.keys(catalogueQualityOverrides.title_corrections).length >= 200);
   assert.ok(Object.keys(catalogueQualityOverrides.excluded_asins).length >= 90);
+  assert.equal(catalogueQualityOverrides.excluded_asins["032380909X"], "Book/ISBN study guide, not a pharmacy catalogue product.");
+  assert.equal(catalogueQualityOverrides.excluded_asins.B01K1S6AHM, "Clinical-skills textbook, not a pharmacy catalogue product.");
+  assert.match(nonProductRetirementMigration, /AMZ-032380909X/);
+  assert.match(nonProductRetirementMigration, /AMZ-B01K1S6AHM/);
+  assert.match(nonProductRetirementMigration, /insert into public\.dawanear_marketplace_product_reviews/);
+  assert.match(nonProductRetirementMigration, /expected_product_updated_at/);
+  assert.match(nonProductRetirementMigration, /previous_state/);
+  assert.match(nonProductRetirementMigration, /resulting_state/);
+  assert.match(nonProductRetirementMigration, /publication_status = 'rejected'/);
+  assert.match(nonProductRetirementMigration, /raise exception 'Non-product catalogue records remain publicly visible'/);
   assert.equal(dataset.qa.duplicate_product_titles, 0);
   assert.ok(dataset.consumer_products.some((row) => row.brand_name === "10pcs" && row.product_name.includes("Makeup Brushes")));
 });

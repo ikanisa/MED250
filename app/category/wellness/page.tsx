@@ -3,8 +3,9 @@ import { redirect } from "next/navigation";
 import Marketplace from "../../marketplace";
 import { getInitialMarketplaceProducts } from "../../../lib/product-seo";
 import { getPublicCatalogueTaxonomy } from "../../../lib/public-marketplace-product";
+import { marketplaceAlternates } from "../../../lib/marketplace-locale";
 
-export const metadata: Metadata = { title: "Health and household products", description: "Browse source-backed health and household products currently present in the MED+250 catalogue.", alternates: { canonical: "/category/wellness" } };
+export const metadata: Metadata = { title: "Health and household products", description: "Browse source-backed health and household products currently present in the MED+250 catalogue.", alternates: marketplaceAlternates("/category/wellness") };
 
 export default async function WellnessPage() {
   const initialTaxonomy = await getPublicCatalogueTaxonomy();

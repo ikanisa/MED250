@@ -1,0 +1,358 @@
+{
+  "schema_version": 1,
+  "audit": {
+    "title": "MED250 Digital Marketplace Audit",
+    "date": "2026-07-18",
+    "baseline_score": 38,
+    "source_url": "https://docs.google.com/document/d/17eYzBjZZVoUhcKOkCeS1Zo3tEaJHf1iuSThPsHF5TNI/edit?tab=t.0",
+    "source_revision": "ALtnJHwQWBgt5JycfaOGftvKWVHBOLMKzbI9tuf-JrxPmecFrmDaMt1VqSxxxAxyOZIqpkTkcapZA8VcxqQNLq9OMDzTgjApfiO0tloLkak"
+  },
+  "status_definitions": {
+    "complete": "Every acceptance condition is covered by source-revision-bound, hash-verified or independently verified evidence and a named accountable approval.",
+    "partial": "Implementation or evidence exists, but at least one acceptance condition remains open.",
+    "external_gate": "Completion depends on named approval, production access, third-party verification, or controlled physical testing.",
+    "owner_declined": "The accountable product owner explicitly rejected the audit recommendation; the rejected surface must remain absent."
+  },
+  "findings": [
+    {
+      "id": "P0-1",
+      "priority": "P0",
+      "title": "Advertised departments were empty",
+      "goals": [1],
+      "status": "partial",
+      "owner": "Backend/data lead and frontend lead",
+      "dependencies": ["Approved source-backed catalogue population", "Governed live deployment"],
+      "acceptance": ["Every advertised department has a non-zero requestable live population or is hidden.", "Desktop and mobile evidence covers every advertised route without a terminal loading placeholder."],
+      "evidence": ["docs/audit/live-baseline-2026-07-18.md", "docs/audit/live-catalogue-readiness-2026-07-18.md", "docs/audit/live-baseline-2026-07-18/10-deployment-verification.json", "docs/audit/live-baseline-2026-07-18/11-live-catalogue-verification.json", "tests/marketplace-products.test.mjs", "tests/rendered-html.test.mjs", "data/audit-browser-evidence.json", "scripts/validate-audit-browser-evidence.mjs", "tests/audit-browser-evidence.test.mjs", "docs/audit/browser-evidence-closure-2026-07-18.md"],
+      "remaining": ["Complete and approve both advertised-department scenarios in the shared browser ledger against an immutable deployed revision."]
+    },
+    {
+      "id": "P0-2",
+      "priority": "P0",
+      "title": "Catalogue stopped at the first 24 products",
+      "goals": [0, 1],
+      "status": "partial",
+      "owner": "Backend/data lead and QA owner",
+      "dependencies": ["Live search RPC", "Immutable deployment revision"],
+      "acceptance": ["Products 25 and 120 and the final page are reachable with stable totals.", "Pagination has no gaps or duplicates and preserves active query, filter, sort, and view state."],
+      "evidence": ["docs/audit/live-baseline-2026-07-18.md", "docs/audit/live-catalogue-readiness-2026-07-18.md", "docs/audit/live-baseline-2026-07-18/10-deployment-verification.json", "docs/audit/live-baseline-2026-07-18/11-live-catalogue-verification.json", "scripts/verify-live-catalogue.mjs", "tests/live-catalogue-verification.test.mjs", "tests/server-catalogue-search.test.mjs", "tests/rendered-html.test.mjs", "data/audit-browser-evidence.json", "scripts/validate-audit-browser-evidence.mjs", "tests/audit-browser-evidence.test.mjs", "docs/audit/browser-evidence-closure-2026-07-18.md"],
+      "remaining": ["Deploy the two catalogue corrections, bind an exact 4,657-ID passing receipt to the immutable release, and complete the catalogue-boundary plus failure-recovery scenarios in the shared browser ledger."]
+    },
+    {
+      "id": "P0-3",
+      "priority": "P0",
+      "title": "Organic search visibility was zero",
+      "goals": [2],
+      "status": "external_gate",
+      "owner": "SEO/growth owner and infrastructure owner",
+      "dependencies": ["Google Search Console ownership", "Approved indexable production deployment", "Canonical-domain ownership and catalog-only alternate-origin policy"],
+      "acceptance": ["Search Console accepts the canonical sitemap and reports no systemic crawl or canonical failure.", "Priority homepage, department, and product URLs pass URL Inspection and begin accumulating impressions.", "The canonical custom domain is the only live ordering origin; the public Sites origin is retired or passes catalog-only verification with ordering disabled."],
+      "evidence": ["docs/audit/seo-readiness-2026-07-18.md", "docs/audit/live-baseline-2026-07-18/10-deployment-verification.json", "scripts/verify-deployed-site.mjs", "tests/deployment-verification.test.mjs", "docs/launch/production-evidence-runbook.md"],
+      "remaining": ["Verify the canonical domain and sitemap, retire or publish a current catalog-only Sites release, submit the canonical sitemap, inspect priority URLs, and retain dated Search Console evidence."]
+    },
+    {
+      "id": "P0-4",
+      "priority": "P0",
+      "title": "No indicative price appeared in the sampled catalogue",
+      "goals": [3],
+      "status": "external_gate",
+      "owner": "Data lead, product owner, and legal owner",
+      "dependencies": ["Approved Rwanda price sources", "Named reviewer", "Freshness and withdrawal policy"],
+      "acceptance": ["At least 100 priority products across medicines and consumer health have current reviewed RWF prices.", "Public cards, details, filters, sorting, and structured data fail closed when price evidence is absent or stale."],
+      "evidence": ["docs/audit/price-coverage-2026-07-18.md", "scripts/report-price-coverage.mjs", "tests/marketplace-products.test.mjs"],
+      "remaining": ["Add an owner-approved medicine-representative priority set and approve source rights, freshness, and withdrawal rules."]
+    },
+    {
+      "id": "P0-5",
+      "priority": "P0",
+      "title": "Transactional cart language conflicted with the request model",
+      "goals": [4],
+      "status": "partial",
+      "owner": "Product owner and frontend lead",
+      "dependencies": ["Approved customer vocabulary", "Controlled request-journey evidence"],
+      "acceptance": ["All customer actions use the approved availability-request vocabulary.", "Desktop and mobile journeys contain no checkout, payment, purchase, or completed-order claim before pharmacy selection."],
+      "evidence": ["tests/rendered-html.test.mjs", "app/marketplace.tsx", "app/terms/page.tsx", "data/audit-browser-evidence.json", "scripts/validate-audit-browser-evidence.mjs", "tests/audit-browser-evidence.test.mjs", "docs/audit/browser-evidence-closure-2026-07-18.md"],
+      "remaining": ["Complete and approve both live availability-request journey scenarios in the shared browser ledger."]
+    },
+    {
+      "id": "P1-1",
+      "priority": "P1",
+      "title": "Trust and response signals were absent",
+      "goals": [5],
+      "status": "external_gate",
+      "owner": "Product owner, backend lead, and pharmacy operations lead",
+      "dependencies": ["Production traffic threshold", "Expiring operations approval", "Privacy-safe aggregate contract"],
+      "acceptance": ["Every displayed metric exposes source, sample, window, freshness, and suppression rules.", "No unsupported rating, stock, badge, pharmacy ranking, or availability claim is published."],
+      "evidence": ["docs/audit/trust-metrics-readiness-2026-07-18.md", "tests/public-trust-metrics.test.mjs", "supabase/migrations/20260718083000_public_trust_metrics.sql"],
+      "remaining": ["Deploy the aggregate metric migration, accumulate genuine observations, obtain operations approval, and capture approved and suppressed live states."]
+    },
+    {
+      "id": "P1-2",
+      "priority": "P1",
+      "title": "Related-product discovery was absent",
+      "goals": [8],
+      "status": "partial",
+      "owner": "Product, data, and frontend leads",
+      "dependencies": ["Governed recommendation population", "Non-advice safety policy", "Live catalogue reconciliation"],
+      "acceptance": ["Related products remain inside approved category or medicine-compatibility boundaries.", "No non-requestable, clinically unsupported, or known non-product record enters a recommendation rail."],
+      "evidence": ["docs/audit/related-product-readiness-2026-07-18.md", "docs/audit/live-catalogue-readiness-2026-07-18.md", "docs/audit/live-baseline-2026-07-18/11-live-catalogue-verification.json", "lib/product-related.ts", "tests/product-related.test.mjs", "data/audit-browser-evidence.json", "scripts/validate-audit-browser-evidence.mjs", "tests/audit-browser-evidence.test.mjs", "docs/audit/browser-evidence-closure-2026-07-18.md"],
+      "remaining": ["Deploy the proven two-record non-product retirement, reconcile a passing 4,657-ID live index, and complete both related-product safety scenarios in the shared browser ledger."]
+    },
+    {
+      "id": "P1-3",
+      "priority": "P1",
+      "title": "Legal pages lacked complete controller identity and contact details",
+      "goals": [6],
+      "status": "external_gate",
+      "owner": "Legal/privacy owner",
+      "dependencies": ["Registered entity details", "Approved privacy contact", "DPIA and regulatory decisions"],
+      "acceptance": ["Terms and Privacy publish the approved legal entity, registered address, and privacy contact.", "Published legal copy matches the implemented data flow, retention, processors, transfers, rights, and complaints route."],
+      "evidence": ["docs/launch/RWANDA_REGULATORY_REVIEW_BRIEF.md", "docs/launch/PRESCRIPTION_RETENTION_POLICY.md", "data/launch-evidence.json"],
+      "remaining": ["Obtain the accountable legal and privacy decisions and replace all unresolved identity/contact placeholders with approved facts."]
+    },
+    {
+      "id": "P1-4",
+      "priority": "P1",
+      "title": "The customer interface was English-only",
+      "goals": [7],
+      "status": "external_gate",
+      "owner": "Product owner, localization owner, legal reviewer, and frontend lead",
+      "dependencies": ["Qualified Kinyarwanda translation", "Clinical and legal glossary approval", "Locale architecture", "Device QA"],
+      "acceptance": ["The complete browse, product, request, status, and WhatsApp journey passes in Kinyarwanda on desktop and mobile.", "Critical clinical, privacy, regulatory, and fulfilment strings have reviewer identity and glossary-version evidence."],
+      "evidence": ["data/localization/locale-releases.json", "data/localization/messages.en-RW.json", "data/localization/runtime-messages.en-RW.json", "data/localization/source-copy-inventory.json", "lib/marketplace-locale.ts", "lib/marketplace-messages.ts", "scripts/extract-localization-inventory.mjs", "scripts/promote-localization-inventory.mjs", "scripts/validate-localization.mjs", "tests/localization.test.mjs", "tests/catalogue-search.test.mjs", "docs/MED250_AUDIT_IMPLEMENTATION_GOALS.md"],
+      "remaining": ["Commission qualified Kinyarwanda copy from the complete governed source catalog; record glossary plus clinical/legal approvals; enable the localized renderer and language switcher only after those approvals; then run complete desktop and mobile journey QA. The regenerated inventory covers 592 governed source messages, the client-safe runtime catalog contains 590 messages, 574 source messages are referenced at runtime, and zero-regression budgets protect every detected source occurrence from hardcoded-copy regressions."]
+    },
+    {
+      "id": "P1-5",
+      "priority": "P1",
+      "title": "Full-catalogue search reach was unverified",
+      "goals": [0, 1, 2],
+      "status": "partial",
+      "owner": "Backend/data lead and QA owner",
+      "dependencies": ["Live search RPC", "Controlled browser evidence"],
+      "acceptance": ["Late-alphabet, typo, French, and Kinyarwanda queries return relevant live results.", "Search reports stable totals and never silently falls back to an incomplete client snapshot in live mode."],
+      "evidence": ["docs/audit/live-catalogue-readiness-2026-07-18.md", "docs/audit/live-baseline-2026-07-18/11-live-catalogue-verification.json", "scripts/verify-live-catalogue.mjs", "supabase/migrations/20260718121000_restore_multilingual_marketplace_search.sql", "tests/live-catalogue-verification.test.mjs", "tests/catalogue-search.test.mjs", "tests/server-catalogue-search.test.mjs", "tests/rendered-html.test.mjs", "data/audit-browser-evidence.json", "scripts/validate-audit-browser-evidence.mjs", "tests/audit-browser-evidence.test.mjs", "docs/audit/browser-evidence-closure-2026-07-18.md"],
+      "remaining": ["Deploy the multilingual marketplace-search migration, bind a passing live RPC receipt for all six required cases to the immutable release, and complete both six-query search scenarios in the shared browser ledger."]
+    },
+    {
+      "id": "P2-1",
+      "priority": "P2",
+      "title": "Raw regulatory product titles reduced scanability",
+      "goals": [8],
+      "status": "partial",
+      "owner": "Product and data leads",
+      "dependencies": ["Title-quality policy", "Governed exceptions review"],
+      "acceptance": ["Customer titles are concise, sentence-cased, and brand-first where source evidence permits.", "The full official regulatory value remains visible and unchanged on medicine details."],
+      "evidence": ["docs/audit/product-content-quality-2026-07-18.md", "data/imports/product-content-review-pending-2026-07-18.json", "scripts/import-data/product-content-review.mjs", "lib/product-display.ts", "tests/product-display.test.mjs", "tests/product-content-review.test.mjs", "data/audit-browser-evidence.json", "scripts/validate-audit-browser-evidence.mjs", "tests/audit-browser-evidence.test.mjs", "docs/audit/browser-evidence-closure-2026-07-18.md"],
+      "remaining": ["Complete the 72 source-bound duplicate-title, missing-generic, and short-title decisions with accountable evidence; import authoritative corrections; pass strict verification; reconcile the approved display-title population to live data; then complete both representative product-content scenarios in the shared browser ledger."]
+    },
+    {
+      "id": "P2-2",
+      "priority": "P2",
+      "title": "Additional journey-education module",
+      "goals": [4],
+      "status": "owner_declined",
+      "owner": "Product owner",
+      "dependencies": [],
+      "acceptance": ["The rejected route, section, copy, styles, and assets remain absent.", "Request-model clarity is provided at the point of action through approved vocabulary and no-payment microcopy."],
+      "evidence": ["tests/audit-implementation-goals.test.mjs", "tests/rendered-html.test.mjs"],
+      "remaining": [],
+      "decision": {
+        "decided_by": "Product owner",
+        "decided_at": "2026-07-18",
+        "rationale": "The product owner explicitly required this audit recommendation to be removed completely and not reintroduced."
+      }
+    },
+    {
+      "id": "P2-3",
+      "priority": "P2",
+      "title": "Breadcrumbs lacked category context and result state was lost",
+      "goals": [8],
+      "status": "partial",
+      "owner": "Frontend lead",
+      "dependencies": ["Stable URL-state contract", "Live browser evidence"],
+      "acceptance": ["Visual and JSON-LD breadcrumbs include the correct department/category context.", "Browser Back restores query, filters, sort, view, loaded depth, and focused product."],
+      "evidence": ["docs/audit/catalogue-navigation-readiness-2026-07-18.md", "lib/catalogue-navigation-state.ts", "tests/catalogue-navigation-state.test.mjs", "tests/rendered-html.test.mjs", "app/product/[id]/page.tsx", "app/marketplace.tsx", "data/audit-browser-evidence.json", "scripts/validate-audit-browser-evidence.mjs", "tests/audit-browser-evidence.test.mjs", "docs/audit/browser-evidence-closure-2026-07-18.md"],
+      "remaining": ["Complete and approve both result-restoration scenarios in the shared browser ledger against the immutable live release."]
+    },
+    {
+      "id": "P2-4",
+      "priority": "P2",
+      "title": "No pre-request response expectation was shown",
+      "goals": [5],
+      "status": "external_gate",
+      "owner": "Product owner and pharmacy operations lead",
+      "dependencies": ["P1-1 trust-metric approval", "Real production observations"],
+      "acceptance": ["Any response expectation uses the governed percentile, sample, window, and freshness contract.", "The interface never presents eligible-pharmacy matching as stock or guaranteed availability."],
+      "evidence": ["docs/audit/trust-metrics-readiness-2026-07-18.md", "tests/public-trust-metrics.test.mjs"],
+      "remaining": ["Complete the same production-data and operations-approval closure required by P1-1."]
+    },
+    {
+      "id": "P2-5",
+      "priority": "P2",
+      "title": "Some product descriptions and images were insufficiently informative",
+      "goals": [8, 9],
+      "status": "partial",
+      "owner": "Data lead and design/creative lead",
+      "dependencies": ["Source-backed description policy", "Image provenance and QA"],
+      "acceptance": ["Blank description, malformed-title, unusable-image, and missing-generic rules pass for the approved catalogue.", "Every public image has governed provenance and an approved use without inventing product identity or claims."],
+      "evidence": ["docs/audit/product-content-quality-2026-07-18.md", "data/imports/product-content-review-pending-2026-07-18.json", "scripts/import-data/product-content-review.mjs", "supabase/migrations/20260718133000_govern_public_product_descriptions.sql", "supabase/migrations/20260718143000_govern_product_description_reviews.sql", "supabase/functions/review-product-descriptions/index.ts", "scripts/product-description-admin.mjs", "scripts/verify-product-description-reviewer-deployment.mjs", "tests/product-descriptions-sql.test.mjs", "tests/product-description-review-workflow.test.mjs", "tests/product-description-admin.test.mjs", "tests/product-description-reviewer-deployment.test.mjs", "docs/product-image-pipeline.md", "tests/product-content-review.test.mjs", "tests/product-images-sql.test.mjs", "data/audit-browser-evidence.json", "scripts/validate-audit-browser-evidence.mjs", "tests/audit-browser-evidence.test.mjs", "docs/audit/browser-evidence-closure-2026-07-18.md"],
+      "remaining": ["Deploy the description migrations and protected reviewer; capture a passing body-free reviewer receipt bound to backend contract 2026-07-18.3; complete the missing-generic and short-title decisions; approve exact source bytes through the governed single-product workflow; finish image provenance review; then complete both representative product-content scenarios in the shared browser ledger."]
+    },
+    {
+      "id": "P3-1",
+      "priority": "P3",
+      "title": "Brand imagery lacked authentic Rwandan context",
+      "goals": [9],
+      "status": "external_gate",
+      "owner": "Design/creative lead and legal/data-rights owner",
+      "dependencies": ["Approved creative brief", "Model/property releases", "Reuse rights", "Core P0/P1 closure"],
+      "acceptance": ["Accepted imagery reflects real Rwandan pharmacy/customer contexts without unsupported product or service claims.", "Every final asset has recorded provenance, release status, approved crops, alt text, and responsive QA."],
+      "evidence": ["design/design-qa.md", "docs/MED250_AUDIT_IMPLEMENTATION_GOALS.md"],
+      "remaining": ["Produce or commission owner-approved authentic creative only after rights and release requirements are defined."]
+    },
+    {
+      "id": "P3-2",
+      "priority": "P3",
+      "title": "Repeat mobile visitors had no install affordance",
+      "goals": [9],
+      "status": "partial",
+      "owner": "Frontend lead and QA owner",
+      "dependencies": ["Supported device matrix", "Physical-device UAT"],
+      "acceptance": ["Install eligibility, repeat-visit prompt, dismissal, update, standalone mode, and iOS guidance work on supported devices.", "Offline behavior never reports availability, request submission, or confirmation success without a live response."],
+      "evidence": ["app/pwa-manager.tsx", "public/sw.js", "public/offline.html", "tests/rendered-html.test.mjs"],
+      "remaining": ["Complete supported Android and iOS physical-device evidence."]
+    }
+  ],
+  "source_coverage": {
+    "scorecard_categories": [
+      { "id": "SC-1", "title": "Catalogue completeness and data integrity", "goals": [1], "items": ["P0-1", "P0-2"] },
+      { "id": "SC-2", "title": "Price transparency", "goals": [3], "items": ["P0-4"] },
+      { "id": "SC-3", "title": "Search, discovery, and SEO", "goals": [1, 2], "items": ["P0-3", "P1-5"] },
+      { "id": "SC-4", "title": "Conversion clarity", "goals": [4], "items": ["P0-5"] },
+      { "id": "SC-5", "title": "Trust and social proof", "goals": [5], "items": ["P1-1", "P2-4"] },
+      { "id": "SC-6", "title": "Legal and regulatory disclosure", "goals": [6], "items": ["P1-3"] },
+      { "id": "SC-7", "title": "Localisation", "goals": [7], "items": ["P1-4"] },
+      { "id": "SC-8", "title": "Accessibility and technical foundation", "goals": [0, 2, 10], "items": ["P0-3", "P3-2"] },
+      { "id": "SC-9", "title": "Visual design and branding", "goals": [9], "items": ["P2-5", "P3-1"] }
+    ],
+    "preservation_invariants": [
+      {
+        "id": "W-1",
+        "title": "Preserve server-rendered crawlable pages",
+        "goals": [2, 10],
+        "owner": "Frontend lead and SEO/growth owner",
+        "acceptance": ["Home, catalogue, product, privacy, and terms routes retain complete server-rendered content.", "Any future frontend migration must pass rendered HTML, canonical, and indexability regression checks."],
+        "evidence": ["tests/rendered-html.test.mjs", "app/layout.tsx", "docs/audit/seo-readiness-2026-07-18.md"]
+      },
+      {
+        "id": "W-2",
+        "title": "Preserve product-level regulatory transparency",
+        "goals": [6, 8],
+        "owner": "Data lead and legal/privacy owner",
+        "acceptance": ["Every governed medicine detail retains its authoritative registration, manufacturer, and country fields when source evidence exists.", "Customer-facing normalization never mutates or hides the official regulatory value."],
+        "evidence": ["app/product/[id]/page.tsx", "tests/rendered-html.test.mjs", "tests/product-display.test.mjs"]
+      },
+      {
+        "id": "W-3",
+        "title": "Preserve staged privacy-conscious disclosure",
+        "goals": [4, 6],
+        "owner": "Product owner and legal/privacy owner",
+        "acceptance": ["A pharmacy receives only the minimum staged request information permitted for its current workflow state.", "Exact contact and prescription access remain selected-pharmacy-only, short-lived, and policy-bound."],
+        "evidence": ["app/privacy/page.tsx", "docs/launch/PRESCRIPTION_RETENTION_POLICY.md", "docs/launch/PHARMACY_OPERATIONS_SOP.md"]
+      },
+      {
+        "id": "W-4",
+        "title": "Preserve the non-diagnostic service boundary",
+        "goals": [4, 6, 8],
+        "owner": "Product owner and legal/privacy owner",
+        "acceptance": ["Every public template retains the approved non-diagnostic and non-prescribing boundary.", "New product, localization, and request surfaces cannot imply diagnosis, treatment recommendation, or replacement of a qualified professional."],
+        "evidence": ["docs/launch/RWANDA_REGULATORY_REVIEW_BRIEF.md", "tests/rendered-html.test.mjs", "data/localization/source-copy-inventory.json"]
+      },
+      {
+        "id": "W-5",
+        "title": "Preserve canonical crawl hygiene",
+        "goals": [2, 10],
+        "owner": "SEO/growth owner and frontend lead",
+        "acceptance": ["Canonical public pages remain crawlable while modal, private, preview, and duplicate states remain excluded.", "Sitemap, robots policy, canonical metadata, and deployment mode agree for every public origin."],
+        "evidence": ["app/robots.ts", "app/sitemap.ts", "tests/rendered-html.test.mjs", "tests/deployment-verification.test.mjs"]
+      }
+    ],
+    "benchmark_capabilities": [
+      { "id": "B-1", "title": "Upfront filterable pricing", "disposition": "remediate", "goals": [3], "items": ["P0-4"] },
+      { "id": "B-2", "title": "Ratings and reviews", "disposition": "govern_then_expand", "goals": [5, 11], "items": ["P1-1", "S4-2"] },
+      { "id": "B-3", "title": "Related-request discovery", "disposition": "govern_then_expand", "goals": [8, 11], "items": ["P1-2", "S4-3"] },
+      { "id": "B-4", "title": "Availability expectation", "disposition": "model_appropriate_signal", "goals": [5], "items": ["P2-4"] },
+      { "id": "B-5", "title": "Request tracking and status", "disposition": "verify_and_preserve", "goals": [4, 10], "items": ["P0-5"] },
+      { "id": "B-6", "title": "Multi-language storefront", "disposition": "remediate", "goals": [7], "items": ["P1-4"] },
+      { "id": "B-7", "title": "Native mobile application presence", "disposition": "verify_separately", "goals": [9, 10], "items": ["P3-2"] },
+      { "id": "B-8", "title": "Live support continuity", "disposition": "model_appropriate_signal", "goals": [4, 5], "items": ["P0-5", "P2-4"] },
+      { "id": "B-9", "title": "Full-catalogue search relevance", "disposition": "remediate", "goals": [1, 2], "items": ["P0-2", "P1-5"] },
+      { "id": "B-10", "title": "Trust badges and certifications", "disposition": "govern_then_expand", "goals": [5, 6], "items": ["P1-1"] },
+      { "id": "B-11", "title": "Clear scoped legal disclosures", "disposition": "remediate", "goals": [6], "items": ["P1-3"] }
+    ],
+    "roadmap_actions": [
+      { "id": "R1-1", "phase": 1, "title": "Hide or relabel empty departments until populated", "goals": [1], "items": ["P0-1"] },
+      { "id": "R1-2", "phase": 1, "title": "Remove the catalogue ceiling and reconcile live totals", "goals": [0, 1], "items": ["P0-2"] },
+      { "id": "R1-3", "phase": 1, "title": "Use request-model action vocabulary", "goals": [4], "items": ["P0-5"] },
+      { "id": "R1-4", "phase": 1, "title": "State that pharmacy confirmation precedes payment", "goals": [4], "items": ["P0-5"] },
+      { "id": "R2-1", "phase": 2, "title": "Submit and monitor the canonical sitemap", "goals": [2], "items": ["P0-3"] },
+      { "id": "R2-2", "phase": 2, "title": "Publish governed indicative pricing for the priority set", "goals": [3], "items": ["P0-4"] },
+      { "id": "R2-3", "phase": 2, "title": "Publish approved controller identity and privacy contact", "goals": [6], "items": ["P1-3"] },
+      { "id": "R2-4", "phase": 2, "title": "Release qualified Kinyarwanda localization", "goals": [7], "items": ["P1-4"] },
+      { "id": "R3-1", "phase": 3, "title": "Normalize customer product titles without mutating official values", "goals": [8], "items": ["P2-1"] },
+      { "id": "R3-2", "phase": 3, "title": "Honor the owner-declined journey-education recommendation", "goals": [4], "items": ["P2-2"] },
+      { "id": "R3-3", "phase": 3, "title": "Publish only evidence-backed trust and response signals", "goals": [5], "items": ["P1-1", "P2-4"] },
+      { "id": "R3-4", "phase": 3, "title": "Preserve category context and result state", "goals": [8], "items": ["P2-3"] },
+      { "id": "R4-1", "phase": 4, "title": "Evaluate integrated MoMo checkout only after entry criteria pass", "goals": [11], "items": ["S4-1"] },
+      { "id": "R4-2", "phase": 4, "title": "Evaluate pharmacy reliability scoring only after entry criteria pass", "goals": [11], "items": ["S4-2"] },
+      { "id": "R4-3", "phase": 4, "title": "Evaluate behavioral cross-sell only after entry criteria pass", "goals": [11], "items": ["S4-3"] }
+    ],
+    "verification_limits": [
+      { "id": "V-1", "title": "Rendered live search behavior requires controlled browser verification", "goals": [1, 10], "items": ["P1-5"] },
+      { "id": "V-2", "title": "Mobile rendering requires supported-device evidence", "goals": [9, 10], "items": ["P3-2"] },
+      { "id": "V-3", "title": "Core Web Vitals and page-speed timing require production measurement", "goals": [10], "items": [] },
+      { "id": "V-4", "title": "Screen-reader behavior requires controlled accessibility evidence", "goals": [10], "items": [] }
+    ],
+    "audited_surfaces": [
+      { "id": "A-1", "title": "Homepage", "goals": [0, 10], "items": ["P0-1", "P0-5"] },
+      { "id": "A-2", "title": "All-products catalogue", "goals": [0, 1, 10], "items": ["P0-2", "P1-5"] },
+      { "id": "A-3", "title": "Medicines department", "goals": [0, 1, 10], "items": ["P0-1", "P0-2"] },
+      { "id": "A-4", "title": "Personal-care department", "goals": [0, 1, 10], "items": ["P0-1"] },
+      { "id": "A-5", "title": "Baby-and-family department", "goals": [0, 1, 10], "items": ["P0-1"] },
+      { "id": "A-6", "title": "Wellness department", "goals": [0, 1, 10], "items": ["P0-1"] },
+      { "id": "A-7", "title": "Representative regulated product detail", "goals": [0, 8, 10], "items": ["P2-1", "P2-5"] },
+      { "id": "A-8", "title": "Representative branded product detail", "goals": [0, 8, 10], "items": ["P2-1", "P2-5"] },
+      { "id": "A-9", "title": "Privacy notice", "goals": [0, 6, 10], "items": ["P1-3"] },
+      { "id": "A-10", "title": "Marketplace terms", "goals": [0, 6, 10], "items": ["P0-5", "P1-3"] },
+      { "id": "A-11", "title": "Pharmacy portal entry state", "goals": [0, 2, 10], "items": [] },
+      { "id": "A-12", "title": "Google indexing check", "goals": [0, 2, 10], "items": ["P0-3"] }
+    ]
+  },
+  "strategic_items": [
+    {
+      "id": "S4-1",
+      "title": "MoMo API checkout",
+      "goal": 11,
+      "status": "external_gate",
+      "owner": "Product, legal, finance, operations, and engineering owners",
+      "entry_criteria": ["Fulfilment SLAs are proven", "Seller-of-record and payment roles are approved", "Refund, dispute, reconciliation, fraud, and support operations are defined"]
+    },
+    {
+      "id": "S4-2",
+      "title": "Pharmacy reliability scoring",
+      "goal": 11,
+      "status": "external_gate",
+      "owner": "Product, operations, legal, and data owners",
+      "entry_criteria": ["Minimum observation volume is met", "Methodology and suppression are approved", "Appeals and dispute handling are operational"]
+    },
+    {
+      "id": "S4-3",
+      "title": "Behavioral cross-sell",
+      "goal": 11,
+      "status": "external_gate",
+      "owner": "Product, clinical, privacy, and data owners",
+      "entry_criteria": ["Current conservative related-product rail is live-verified", "Consent and privacy boundaries are approved", "Clinical non-advice constraints are validated"]
+    }
+  ]
+}

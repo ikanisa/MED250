@@ -1,0 +1,486 @@
+{
+  "schema_version": "1",
+  "environment": "production",
+  "origin": "https://med250.gikundiro.com",
+  "audit_source_revision": "ALtnJHwQWBgt5JycfaOGftvKWVHBOLMKzbI9tuf-JrxPmecFrmDaMt1VqSxxxAxyOZIqpkTkcapZA8VcxqQNLq9OMDzTgjApfiO0tloLkak",
+  "status": "pending",
+  "release_revision": null,
+  "deployment_receipt": {
+    "path": null,
+    "sha256": null
+  },
+  "catalogue_receipt": {
+    "path": null,
+    "sha256": null
+  },
+  "capture_tool": null,
+  "executed_by": null,
+  "started_at": null,
+  "completed_at": null,
+  "redaction_confirmed": false,
+  "personal_data_recorded": false,
+  "credentials_recorded": false,
+  "approved_by": null,
+  "approved_role": null,
+  "approved_at": null,
+  "scenarios": {
+    "DESKTOP_DEPARTMENTS": {
+      "title": "Every advertised department settles with source-backed products — desktop",
+      "finding_ids": [
+        "P0-1"
+      ],
+      "device": "desktop",
+      "status": "pending",
+      "note": null,
+      "captures": {
+        "medicines": {
+          "title": "Medicines department settled",
+          "status": "pending",
+          "note": null
+        },
+        "personal_care": {
+          "title": "Beauty and personal care department settled",
+          "status": "pending",
+          "note": null
+        },
+        "baby_family": {
+          "title": "Baby and family department settled",
+          "status": "pending",
+          "note": null
+        },
+        "wellness": {
+          "title": "Health and household department settled",
+          "status": "pending",
+          "note": null
+        }
+      }
+    },
+    "MOBILE_DEPARTMENTS": {
+      "title": "Every advertised department settles with source-backed products — mobile",
+      "finding_ids": [
+        "P0-1"
+      ],
+      "device": "mobile",
+      "status": "pending",
+      "note": null,
+      "captures": {
+        "medicines": {
+          "title": "Medicines department settled",
+          "status": "pending",
+          "note": null
+        },
+        "personal_care": {
+          "title": "Beauty and personal care department settled",
+          "status": "pending",
+          "note": null
+        },
+        "baby_family": {
+          "title": "Baby and family department settled",
+          "status": "pending",
+          "note": null
+        },
+        "wellness": {
+          "title": "Health and household department settled",
+          "status": "pending",
+          "note": null
+        }
+      }
+    },
+    "DESKTOP_CATALOGUE_BOUNDARIES": {
+      "title": "Catalogue products 25, 120, and the final result are reachable — desktop",
+      "finding_ids": [
+        "P0-2"
+      ],
+      "device": "desktop",
+      "status": "pending",
+      "note": null,
+      "captures": {
+        "product_25": {
+          "title": "Product 25 is reachable",
+          "status": "pending",
+          "note": null
+        },
+        "product_120": {
+          "title": "Product 120 is reachable",
+          "status": "pending",
+          "note": null
+        },
+        "final_product": {
+          "title": "Final catalogue product is reachable",
+          "status": "pending",
+          "note": null
+        }
+      }
+    },
+    "MOBILE_CATALOGUE_BOUNDARIES": {
+      "title": "Catalogue products 25, 120, and the final result are reachable — mobile",
+      "finding_ids": [
+        "P0-2"
+      ],
+      "device": "mobile",
+      "status": "pending",
+      "note": null,
+      "captures": {
+        "product_25": {
+          "title": "Product 25 is reachable",
+          "status": "pending",
+          "note": null
+        },
+        "product_120": {
+          "title": "Product 120 is reachable",
+          "status": "pending",
+          "note": null
+        },
+        "final_product": {
+          "title": "Final catalogue product is reachable",
+          "status": "pending",
+          "note": null
+        }
+      }
+    },
+    "DESKTOP_FAILURE_RECOVERY": {
+      "title": "Catalogue failure and retry recover without a terminal placeholder — desktop",
+      "finding_ids": [
+        "P0-2"
+      ],
+      "device": "desktop",
+      "status": "pending",
+      "note": null,
+      "captures": {
+        "failed_state": {
+          "title": "Bounded catalogue failure is visible",
+          "status": "pending",
+          "note": null
+        },
+        "retry_state": {
+          "title": "Retry action is available and active",
+          "status": "pending",
+          "note": null
+        },
+        "recovered_state": {
+          "title": "Catalogue returns to a settled result state",
+          "status": "pending",
+          "note": null
+        }
+      }
+    },
+    "MOBILE_FAILURE_RECOVERY": {
+      "title": "Catalogue failure and retry recover without a terminal placeholder — mobile",
+      "finding_ids": [
+        "P0-2"
+      ],
+      "device": "mobile",
+      "status": "pending",
+      "note": null,
+      "captures": {
+        "failed_state": {
+          "title": "Bounded catalogue failure is visible",
+          "status": "pending",
+          "note": null
+        },
+        "retry_state": {
+          "title": "Retry action is available and active",
+          "status": "pending",
+          "note": null
+        },
+        "recovered_state": {
+          "title": "Catalogue returns to a settled result state",
+          "status": "pending",
+          "note": null
+        }
+      }
+    },
+    "DESKTOP_REQUEST_JOURNEY": {
+      "title": "Availability-request journey preserves the non-transactional boundary — desktop",
+      "finding_ids": [
+        "P0-5"
+      ],
+      "device": "desktop",
+      "status": "pending",
+      "note": null,
+      "captures": {
+        "product_action": {
+          "title": "Product action uses the approved request vocabulary",
+          "status": "pending",
+          "note": null
+        },
+        "request_basket": {
+          "title": "Request basket shows the selected product without a purchase claim",
+          "status": "pending",
+          "note": null
+        },
+        "no_payment_boundary": {
+          "title": "No-payment-before-confirmation disclosure is visible",
+          "status": "pending",
+          "note": null
+        },
+        "preselection_status": {
+          "title": "Pre-selection state does not claim an order or payment succeeded",
+          "status": "pending",
+          "note": null
+        }
+      }
+    },
+    "MOBILE_REQUEST_JOURNEY": {
+      "title": "Availability-request journey preserves the non-transactional boundary — mobile",
+      "finding_ids": [
+        "P0-5"
+      ],
+      "device": "mobile",
+      "status": "pending",
+      "note": null,
+      "captures": {
+        "product_action": {
+          "title": "Product action uses the approved request vocabulary",
+          "status": "pending",
+          "note": null
+        },
+        "request_basket": {
+          "title": "Request basket shows the selected product without a purchase claim",
+          "status": "pending",
+          "note": null
+        },
+        "no_payment_boundary": {
+          "title": "No-payment-before-confirmation disclosure is visible",
+          "status": "pending",
+          "note": null
+        },
+        "preselection_status": {
+          "title": "Pre-selection state does not claim an order or payment succeeded",
+          "status": "pending",
+          "note": null
+        }
+      }
+    },
+    "DESKTOP_RELATED_PRODUCTS": {
+      "title": "Related-product rails stay inside the governed safety boundary — desktop",
+      "finding_ids": [
+        "P1-2"
+      ],
+      "device": "desktop",
+      "status": "pending",
+      "note": null,
+      "captures": {
+        "medicine_rail": {
+          "title": "Representative medicine rail uses compatible source evidence",
+          "status": "pending",
+          "note": null
+        },
+        "consumer_rail": {
+          "title": "Representative consumer rail stays in approved taxonomy",
+          "status": "pending",
+          "note": null
+        },
+        "fail_closed_empty": {
+          "title": "Insufficient evidence produces no recommendation rail",
+          "status": "pending",
+          "note": null
+        }
+      }
+    },
+    "MOBILE_RELATED_PRODUCTS": {
+      "title": "Related-product rails stay inside the governed safety boundary — mobile",
+      "finding_ids": [
+        "P1-2"
+      ],
+      "device": "mobile",
+      "status": "pending",
+      "note": null,
+      "captures": {
+        "medicine_rail": {
+          "title": "Representative medicine rail uses compatible source evidence",
+          "status": "pending",
+          "note": null
+        },
+        "consumer_rail": {
+          "title": "Representative consumer rail stays in approved taxonomy",
+          "status": "pending",
+          "note": null
+        },
+        "fail_closed_empty": {
+          "title": "Insufficient evidence produces no recommendation rail",
+          "status": "pending",
+          "note": null
+        }
+      }
+    },
+    "DESKTOP_SEARCH_MATRIX": {
+      "title": "All six governed live-search cases return relevant results — desktop",
+      "finding_ids": [
+        "P1-5"
+      ],
+      "device": "desktop",
+      "status": "pending",
+      "note": null,
+      "captures": {
+        "paracetamol": {
+          "title": "Paracetamol search result",
+          "status": "pending",
+          "note": null
+        },
+        "zinc": {
+          "title": "Late-alphabet zinc search result",
+          "status": "pending",
+          "note": null
+        },
+        "omeprazole": {
+          "title": "Omeprazole search result",
+          "status": "pending",
+          "note": null
+        },
+        "typo": {
+          "title": "Clinically meaningful typo recovery",
+          "status": "pending",
+          "note": null
+        },
+        "french": {
+          "title": "French common-use query result",
+          "status": "pending",
+          "note": null
+        },
+        "kinyarwanda": {
+          "title": "Kinyarwanda common-use query result",
+          "status": "pending",
+          "note": null
+        }
+      }
+    },
+    "MOBILE_SEARCH_MATRIX": {
+      "title": "All six governed live-search cases return relevant results — mobile",
+      "finding_ids": [
+        "P1-5"
+      ],
+      "device": "mobile",
+      "status": "pending",
+      "note": null,
+      "captures": {
+        "paracetamol": {
+          "title": "Paracetamol search result",
+          "status": "pending",
+          "note": null
+        },
+        "zinc": {
+          "title": "Late-alphabet zinc search result",
+          "status": "pending",
+          "note": null
+        },
+        "omeprazole": {
+          "title": "Omeprazole search result",
+          "status": "pending",
+          "note": null
+        },
+        "typo": {
+          "title": "Clinically meaningful typo recovery",
+          "status": "pending",
+          "note": null
+        },
+        "french": {
+          "title": "French common-use query result",
+          "status": "pending",
+          "note": null
+        },
+        "kinyarwanda": {
+          "title": "Kinyarwanda common-use query result",
+          "status": "pending",
+          "note": null
+        }
+      }
+    },
+    "DESKTOP_NAVIGATION_RESTORE": {
+      "title": "Browser Back restores catalogue controls, depth, position, and focus — desktop",
+      "finding_ids": [
+        "P2-3"
+      ],
+      "device": "desktop",
+      "status": "pending",
+      "note": null,
+      "captures": {
+        "configured_results": {
+          "title": "Configured query, filters, sort, and view",
+          "status": "pending",
+          "note": null
+        },
+        "later_product": {
+          "title": "Product opened from a later result batch",
+          "status": "pending",
+          "note": null
+        },
+        "restored_results": {
+          "title": "Back navigation restores URL, controls, depth, position, and focus",
+          "status": "pending",
+          "note": null
+        }
+      }
+    },
+    "MOBILE_NAVIGATION_RESTORE": {
+      "title": "Browser Back restores catalogue controls, depth, position, and focus — mobile",
+      "finding_ids": [
+        "P2-3"
+      ],
+      "device": "mobile",
+      "status": "pending",
+      "note": null,
+      "captures": {
+        "configured_results": {
+          "title": "Configured query, filters, sort, and view",
+          "status": "pending",
+          "note": null
+        },
+        "later_product": {
+          "title": "Product opened from a later result batch",
+          "status": "pending",
+          "note": null
+        },
+        "restored_results": {
+          "title": "Back navigation restores URL, controls, depth, position, and focus",
+          "status": "pending",
+          "note": null
+        }
+      }
+    },
+    "DESKTOP_PRODUCT_CONTENT": {
+      "title": "Representative product details preserve governed title and content boundaries — desktop",
+      "finding_ids": [
+        "P2-1",
+        "P2-5"
+      ],
+      "device": "desktop",
+      "status": "pending",
+      "note": null,
+      "captures": {
+        "medicine_detail": {
+          "title": "Medicine detail preserves concise and exact official titles",
+          "status": "pending",
+          "note": null
+        },
+        "consumer_detail": {
+          "title": "Consumer detail exposes only approved description and imagery",
+          "status": "pending",
+          "note": null
+        }
+      }
+    },
+    "MOBILE_PRODUCT_CONTENT": {
+      "title": "Representative product details preserve governed title and content boundaries — mobile",
+      "finding_ids": [
+        "P2-1",
+        "P2-5"
+      ],
+      "device": "mobile",
+      "status": "pending",
+      "note": null,
+      "captures": {
+        "medicine_detail": {
+          "title": "Medicine detail preserves concise and exact official titles",
+          "status": "pending",
+          "note": null
+        },
+        "consumer_detail": {
+          "title": "Consumer detail exposes only approved description and imagery",
+          "status": "pending",
+          "note": null
+        }
+      }
+    }
+  }
+}

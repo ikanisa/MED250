@@ -131,8 +131,23 @@ Deno.serve(async (request: Request) => {
       if (membershipError) throw membershipError;
     }
 
+    // Password sign-in is intentionally protected by Turnstile in production.
+    // The WhatsApp OTP above already established possession, so mint a
+    // single-use server-side email token without sending email and exchange it
+    // through the normal Auth verifier. This preserves CAPTCHA on public
+    // password endpoints while avoiding a second, unavailable browser proof.
+    const { data: linkData, error: linkError } = await client.auth.admin.generateLink({
+      type: "magiclink",
+      email,
+    });
+    const tokenHash = linkData?.properties?.hashed_token;
+    if (linkError || !tokenHash) throw linkError ?? new Error("Permanent pharmacy session link was not created");
+
     const sessionClient = anonClient();
-    const { data: signInData, error: signInError } = await sessionClient.auth.signInWithPassword({ email, password });
+    const { data: signInData, error: signInError } = await sessionClient.auth.verifyOtp({
+      token_hash: tokenHash,
+      type: "email",
+    });
     if (signInError || !signInData.session) throw signInError ?? new Error("Permanent pharmacy session was not created");
 
     return json(request, {

@@ -1,0 +1,145 @@
+{
+  "schema_version": 1,
+  "default_locale": "en-RW",
+  "time_zone": "Africa/Kigali",
+  "localized_renderer_enabled": false,
+  "source_catalog": "data/localization/messages.en-RW.json",
+  "runtime_catalog": "data/localization/runtime-messages.en-RW.json",
+  "source_copy_inventory": "data/localization/source-copy-inventory.json",
+  "runtime_extraction": {
+    "baseline_hardcoded_messages": 450,
+    "baseline_high_risk_hardcoded_messages": 203,
+    "max_hardcoded_messages": 0,
+    "max_high_risk_hardcoded_messages": 0,
+    "max_high_risk_hardcoded_by_surface": {
+      "request": 0,
+      "status": 0,
+      "pharmacy_portal": 0,
+      "browse": 0,
+      "product": 0,
+      "shared": 0,
+      "legal": 0,
+      "location": 0,
+      "system": 0
+    }
+  },
+  "extraction_scope": [
+    "app/marketplace.tsx",
+    "app/privacy/page.tsx",
+    "app/terms/page.tsx",
+    "app/info-shell.tsx",
+    "app/error.tsx",
+    "app/global-error.tsx",
+    "app/not-found.tsx",
+    "app/loading.tsx",
+    "app/navigation-feedback.tsx",
+    "app/pwa-manager.tsx",
+    "app/google-map-location-picker.tsx",
+    "app/turnstile.tsx"
+  ],
+  "required_journeys": {
+    "browse": [
+      "navigation.home",
+      "navigation.products",
+      "navigation.pharmacies",
+      "catalogue.search_label",
+      "catalogue.all_categories",
+      "catalogue.load_more",
+      "catalogue.all_loaded"
+    ],
+    "product": [
+      "product.price_label",
+      "product.indicative_price_prefix",
+      "product.prescription_required",
+      "product.no_prescription_required",
+      "product.ask_pharmacist",
+      "product.description_heading",
+      "product.description_source",
+      "product.similarity_disclaimer"
+    ],
+    "request": [
+      "request.basket_label",
+      "request.review_step",
+      "request.details_step",
+      "request.verify_step",
+      "request.confirm_step",
+      "request.no_payment_notice",
+      "request.availability_not_purchase"
+    ],
+    "status": [
+      "status.my_requests",
+      "status.waiting_for_confirmation",
+      "status.no_stock_claim",
+      "status.close_request"
+    ],
+    "whatsapp": [
+      "whatsapp.send_code",
+      "whatsapp.verify_number",
+      "whatsapp.continue_with_pharmacy",
+      "whatsapp.reconfirm_notice"
+    ],
+    "clinical": [
+      "clinical.marketplace_disclaimer",
+      "clinical.catalogue_not_advice",
+      "clinical.prescription_gate"
+    ],
+    "legal": [
+      "navigation.privacy",
+      "navigation.terms",
+      "legal.controller_identity",
+      "legal.privacy_contact",
+      "legal.payment_boundary"
+    ]
+  },
+  "high_risk_journeys": ["product", "request", "status", "whatsapp", "clinical", "legal"],
+  "releases": [
+    {
+      "locale": "en-RW",
+      "segment": "en",
+      "label": "English",
+      "native_label": "English",
+      "public": true,
+      "runtime_ready": true,
+      "status": "approved_source",
+      "catalog": "data/localization/messages.en-RW.json",
+      "route_mode": "default_unprefixed",
+      "translation_provider": null,
+      "glossary_version": "source-en-RW-2026-07-18.9",
+      "clinical_reviewer": "source copy; translation review not applicable",
+      "legal_reviewer": "source copy; translation review not applicable",
+      "reviewed_at": "2026-07-18"
+    },
+    {
+      "locale": "rw-RW",
+      "segment": "rw",
+      "label": "Kinyarwanda",
+      "native_label": "Ikinyarwanda",
+      "public": false,
+      "runtime_ready": false,
+      "status": "awaiting_qualified_translation",
+      "catalog": null,
+      "route_mode": "blocked_until_approved",
+      "translation_provider": null,
+      "glossary_version": null,
+      "clinical_reviewer": null,
+      "legal_reviewer": null,
+      "reviewed_at": null
+    },
+    {
+      "locale": "fr-RW",
+      "segment": "fr",
+      "label": "French",
+      "native_label": "Français",
+      "public": false,
+      "runtime_ready": false,
+      "status": "deferred",
+      "catalog": null,
+      "route_mode": "blocked_until_approved",
+      "translation_provider": null,
+      "glossary_version": null,
+      "clinical_reviewer": null,
+      "legal_reviewer": null,
+      "reviewed_at": null
+    }
+  ]
+}

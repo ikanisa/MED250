@@ -3,8 +3,9 @@ import { redirect } from "next/navigation";
 import Marketplace from "../../marketplace";
 import { getInitialMarketplaceProducts } from "../../../lib/product-seo";
 import { getPublicCatalogueTaxonomy } from "../../../lib/public-marketplace-product";
+import { marketplaceAlternates } from "../../../lib/marketplace-locale";
 
-export const metadata: Metadata = { title: "Medicines in Rwanda", description: "Search current medicine catalogue records by brand, generic name, symptom, strength, dosage form, or pack size.", alternates: { canonical: "/category/medicines" } };
+export const metadata: Metadata = { title: "Medicines in Rwanda", description: "Search current medicine catalogue records by brand, generic name, symptom, strength, dosage form, or pack size.", alternates: marketplaceAlternates("/category/medicines") };
 
 export default async function MedicinesPage() {
   const initialTaxonomy = await getPublicCatalogueTaxonomy();

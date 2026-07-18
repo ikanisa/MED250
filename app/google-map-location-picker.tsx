@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { ArrowRight, LoaderCircle, MapPin, Search, X } from "lucide-react";
+import { marketplaceMessage } from "../lib/marketplace-messages";
 
 export type MapCoordinates = {
   latitude: number;
@@ -144,7 +145,7 @@ export default function GoogleMapLocationPicker({
         position: initialPosition,
         draggable: true,
         visible: Boolean(initialCoordinates),
-        title: "Selected delivery location",
+        title: marketplaceMessage("inventory.3fc2c8746879"),
       });
       const geocoder = new maps.Geocoder();
       mapRef.current = map;
@@ -220,24 +221,24 @@ export default function GoogleMapLocationPicker({
     onChoose({ latitude: selected.lat, longitude: selected.lng, accuracy: 50 }, address || coordinateLabel(selected));
   }
 
-  return <section className="map-location-picker" aria-label="Choose delivery location on Google Maps">
+  return <section className="map-location-picker" aria-label={marketplaceMessage("inventory.32831948b425")}>
     <div className="map-location-head">
-      <div><b>Choose on Google Maps</b><small>Search an address or place the pin at the delivery point.</small></div>
-      <button type="button" onClick={onCancel} aria-label="Close map location picker"><X size={17} /></button>
+      <div><b>{marketplaceMessage("inventory.66f3ff01304b")}</b><small>{marketplaceMessage("inventory.e504cae5caa7")}</small></div>
+      <button type="button" onClick={onCancel} aria-label={marketplaceMessage("inventory.f3e7c90d7604")}><X size={17} /></button>
     </div>
     <form className="map-location-search" onSubmit={searchAddress}>
-      <label><span className="sr-only">Search address in Rwanda</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search address or landmark" autoComplete="street-address" /></label>
-      <button type="submit" disabled={loading || searching || !query.trim()}>{searching ? <LoaderCircle className="button-spinner" size={16} /> : <Search size={16} />}<span>Search</span></button>
+      <label><span className="sr-only">{marketplaceMessage("inventory.0ffb50d74cd4")}</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={marketplaceMessage("inventory.65c0a6f040fa")} autoComplete="street-address" /></label>
+      <button type="submit" disabled={loading || searching || !query.trim()}>{searching ? <LoaderCircle className="button-spinner" size={16} /> : <Search size={16} />}<span>{marketplaceMessage("inventory.49c266baaaa7")}</span></button>
     </form>
-    <div className="map-location-canvas" ref={mapElementRef} aria-label="Google Map for choosing delivery location">
-      {loading ? <div className="map-location-loading" role="status"><LoaderCircle className="button-spinner" size={20} /> Loading Google Maps…</div> : null}
-      {!loading && error && !mapReady ? <div className="map-location-unavailable" role="alert"><MapPin size={22} /><b>Map unavailable</b><span>{error}</span></div> : null}
+    <div className="map-location-canvas" ref={mapElementRef} aria-label={marketplaceMessage("inventory.ddba599d9b70")}>
+      {loading ? <div className="map-location-loading" role="status"><LoaderCircle className="button-spinner" size={20} /> {marketplaceMessage("inventory.42b3b8d97b43")}</div> : null}
+      {!loading && error && !mapReady ? <div className="map-location-unavailable" role="alert"><MapPin size={22} /><b>{marketplaceMessage("inventory.c8ceec5c1183")}</b><span>{error}</span></div> : null}
     </div>
     {error && mapReady ? <p className="form-error" role="alert">{error}</p> : null}
     <div className={`map-location-selection${selected ? " ready" : ""}`} aria-live="polite">
       <MapPin size={18} />
-      <div><b>{selected ? address : "No location selected"}</b><small>{selected ? "Move the pin to adjust the delivery point." : "Tap the map or search for an address."}</small></div>
+      <div><b>{selected ? address : marketplaceMessage("inventory.e8fde7a2057b")}</b><small>{selected ? marketplaceMessage("inventory.d3f7f00538de") : marketplaceMessage("inventory.4e2858d5c45c")}</small></div>
     </div>
-    <button type="button" className="primary-wide" onClick={confirmLocation} disabled={!selected || loading}>Use this location <ArrowRight size={17} /></button>
+    <button type="button" className="primary-wide" onClick={confirmLocation} disabled={!selected || loading}>{marketplaceMessage("inventory.69d62e1893a1")} <ArrowRight size={17} /></button>
   </section>;
 }

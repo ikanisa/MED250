@@ -101,7 +101,7 @@
       "owner": "MED+250 backend owner",
       "required_evidence_types": ["deployment_receipt", "test_record"],
       "status": "pending",
-      "acceptance": "The forward security migrations and contract refresh are deployed using rotated credentials, and the privileged backend verifier returns contract 2026-07-16.10 with the runtime and DDL product-image governance guards and all invariants passing.",
+      "acceptance": "The forward security migrations and contract refresh are deployed using rotated credentials, and the privileged backend verifier returns contract 2026-07-18.1 with the runtime and DDL product-image governance guards, aggregate public trust-metric boundary, and all invariants passing.",
       "evidence": [
         {
           "type": "deployment_receipt",

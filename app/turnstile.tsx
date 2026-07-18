@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { marketplaceMessage } from "../lib/marketplace-messages";
 
 type TurnstileApi = {
   render(container: HTMLElement, options: Record<string, unknown>): string;
@@ -94,8 +95,8 @@ export default function Turnstile({
     };
   }, [siteKey]);
 
-  return <div className="turnstile-check" aria-label="Security check">
+  return <div className="turnstile-check" aria-label={marketplaceMessage("inventory.147bf977ab0a")}>
     <div ref={containerRef} />
-    {loading ? <small role="status">Loading security check…</small> : null}
+    {loading ? <small role="status">{marketplaceMessage("inventory.b5133c200e17")}</small> : null}
   </div>;
 }

@@ -49,7 +49,9 @@ export type Product = {
   indicativePriceUpdatedAt: string | null;
   imageUrl: string | null;
   imageUrls?: string[];
-  amazonProductUrl?: string | null;
+  description?: string | null;
+  descriptionSourceName?: string | null;
+  descriptionSourceUrl?: string | null;
   isOrderable: boolean;
   accent?: string;
 };
@@ -87,9 +89,20 @@ export type CatalogueTaxonomyRow = {
 export type CustomerProfile = {
   userId: string;
   whatsapp: string | null;
+  whatsappVerifiedAt: string | null;
   preferredLanguage: string;
   createdAt: string | null;
   updatedAt: string | null;
+};
+
+export type CustomerWhatsappOtpChallenge = {
+  challengeId: string;
+  expiresAt: string;
+};
+
+export type VerifiedCustomerWhatsapp = {
+  phone: string;
+  verifiedAt: string;
 };
 
 export type OfferItem = {
@@ -241,6 +254,16 @@ export type SubmitOfferResult = {
   offerId: string;
   totalRwf: number;
   complete: boolean;
+};
+
+export type CentralPriceContributionResult = {
+  contributionId: string;
+  productId: string;
+  submittedPriceRwf: number;
+  previousPriceRwf: number | null;
+  centralPriceRwf: number;
+  becameLowest: boolean;
+  status: "initialized" | "lowered" | "not_lower";
 };
 
 export type PharmacyClaimInput = {
@@ -555,7 +578,7 @@ export async function loadCustomerProfile(): Promise<CustomerProfile | null> {
   const client = requireCustomerBackend();
   const { data, error } = await client
     .from("dawanear_customer_profiles")
-    .select("user_id,whatsapp,preferred_language,created_at,updated_at")
+    .select("user_id,whatsapp,whatsapp_verified_at,preferred_language,created_at,updated_at")
     .eq("user_id", user.id)
     .maybeSingle();
   if (error) rethrow("Could not load your MED250 profile", error);
@@ -563,10 +586,52 @@ export async function loadCustomerProfile(): Promise<CustomerProfile | null> {
   return {
     userId: requiredString(data, "profile", "user_id"),
     whatsapp: nullableString(data, "whatsapp"),
+    whatsappVerifiedAt: nullableString(data, "whatsapp_verified_at"),
     preferredLanguage: stringValue(data, "preferred_language") || "en",
     createdAt: nullableString(data, "created_at"),
     updatedAt: nullableString(data, "updated_at"),
   };
+}
+
+export async function requestCustomerWhatsappOtp(phone: string): Promise<CustomerWhatsappOtpChallenge> {
+  const normalizedPhone = normalizeCustomerWhatsapp(phone);
+  if (!normalizedPhone) throw new Error("Enter the WhatsApp number you want to verify.");
+  await ensureAnonymousCustomer();
+  const client = requireCustomerBackend();
+  const { data, error } = await client.functions.invoke<CustomerWhatsappOtpChallenge & { error?: string }>(
+    "dawanear-customer-send-otp",
+    { body: { phone: normalizedPhone } },
+  );
+  if (error) rethrow("Could not send your WhatsApp verification code", error);
+  if (data?.error) throw new Error(data.error);
+  if (!data?.challengeId || !data.expiresAt) {
+    throw new Error("Could not start WhatsApp verification. Please try again.");
+  }
+  return { challengeId: data.challengeId, expiresAt: data.expiresAt };
+}
+
+export async function verifyCustomerWhatsappOtp(
+  phone: string,
+  challengeId: string,
+  token: string,
+): Promise<VerifiedCustomerWhatsapp> {
+  const normalizedPhone = normalizeCustomerWhatsapp(phone);
+  if (!normalizedPhone) throw new Error("Enter the WhatsApp number you want to verify.");
+  const cleanedToken = token.replace(/\s/g, "");
+  if (!/^\d{6}$/.test(cleanedToken)) throw new Error("Enter the complete 6-digit WhatsApp code.");
+  if (!/^[0-9a-f-]{36}$/i.test(challengeId)) throw new Error("Send a new WhatsApp code.");
+  await ensureAnonymousCustomer();
+  const client = requireCustomerBackend();
+  const { data, error } = await client.functions.invoke<VerifiedCustomerWhatsapp & { error?: string }>(
+    "dawanear-customer-verify-otp",
+    { body: { phone: normalizedPhone, challengeId, code: cleanedToken } },
+  );
+  if (error) rethrow("Could not verify your WhatsApp code", error);
+  if (data?.error) throw new Error(data.error);
+  if (!data?.phone || !data.verifiedAt) {
+    throw new Error("WhatsApp verification completed without a profile receipt. Please retry.");
+  }
+  return { phone: data.phone, verifiedAt: data.verifiedAt };
 }
 
 function pageSize(value: number): number {
@@ -637,7 +702,9 @@ function mapProduct(row: JsonRecord): Product {
     indicativePriceUpdatedAt: nullableString(row, "indicative_price_updated_at", "indicativePriceUpdatedAt"),
     imageUrl: nullableString(row, "image_url", "imageUrl"),
     imageUrls: stringArray(row, "image_urls", "imageUrls"),
-    amazonProductUrl: nullableString(row, "amazon_product_url", "amazonProductUrl"),
+    description: nullableString(row, "description"),
+    descriptionSourceName: nullableString(row, "description_source_name", "descriptionSourceName"),
+    descriptionSourceUrl: nullableString(row, "description_source_url", "descriptionSourceUrl"),
     isOrderable: booleanValue(row, defaultOrderable, "is_orderable", "isOrderable"),
   };
 }
@@ -1376,6 +1443,45 @@ export async function submitOffer(draft: OfferDraft): Promise<SubmitOfferResult>
     offerId: requiredString(row, "submitted offer", "offer_id", "id"),
     totalRwf: Math.round(totalRwf),
     complete: booleanValue(row, false, "complete"),
+  };
+}
+
+/**
+ * Records one pharmacy's private price evidence and returns the resulting
+ * shared catalogue price. The backend retains every submission for audit but
+ * exposes only the single lowest central "From" price to customers.
+ */
+export async function contributeCentralPrice(input: {
+  pharmacyId: string;
+  productId: string;
+  priceRwf: number;
+}): Promise<CentralPriceContributionResult> {
+  await requirePermanentPharmacyUser("Could not record the central price contribution");
+  const priceRwf = requireInteger(input.priceRwf, "Price", 1, 100_000_000);
+  const client = requirePharmacyBackend();
+  const { data, error } = await client.rpc("dawanear_contribute_central_price", {
+    p_pharmacy_id: requireNonEmpty(input.pharmacyId, "Pharmacy ID"),
+    p_product_id: requireNonEmpty(input.productId, "Product ID"),
+    p_price_rwf: priceRwf,
+  });
+  if (error) rethrow("Could not record the central price contribution", error);
+  const row = asRows(data)[0];
+  if (!row) throw new Error("Could not record the central price contribution: no receipt was returned.");
+  const submittedPriceRwf = numericValue(row, "submitted_price_rwf");
+  const previousPriceRwf = numericValue(row, "previous_price_rwf");
+  const centralPriceRwf = numericValue(row, "central_price_rwf");
+  const status = stringValue(row, "contribution_status");
+  if (submittedPriceRwf == null || centralPriceRwf == null || !["initialized", "lowered", "not_lower"].includes(status)) {
+    throw new Error("Could not record the central price contribution: the backend returned an invalid receipt.");
+  }
+  return {
+    contributionId: requiredString(row, "central price contribution", "contribution_id"),
+    productId: requiredString(row, "central price contribution", "product_id"),
+    submittedPriceRwf: Math.round(submittedPriceRwf),
+    previousPriceRwf: previousPriceRwf == null ? null : Math.round(previousPriceRwf),
+    centralPriceRwf: Math.round(centralPriceRwf),
+    becameLowest: booleanValue(row, false, "became_lowest"),
+    status: status as CentralPriceContributionResult["status"],
   };
 }
 

@@ -105,6 +105,20 @@ class PharmacyAuditMergeTests(unittest.TestCase):
         with self.assertRaises(MODULE.MergeError):
             MODULE.merge_audits([first, second])
 
+    def test_table_projection_has_only_source_and_two_enrichment_columns(self):
+        audit = row(
+            1,
+            phone_number="+250788123456",
+            matched_name="Internal audit detail",
+        )
+        projected = MODULE.table_rows([audit])
+        self.assertEqual(list(projected[0]), MODULE.POLICY.OUTPUT_COLUMNS)
+        self.assertEqual(projected[0]["phone_number"], "+250788123456")
+        self.assertEqual(
+            projected[0]["google_maps_url"], audit["google_maps_url"]
+        )
+        self.assertNotIn("matched_name", projected[0])
+
 
 if __name__ == "__main__":
     unittest.main()

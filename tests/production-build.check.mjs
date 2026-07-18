@@ -52,6 +52,7 @@ test("publishes live robots directives and the complete source-backed sitemap", 
   const sitemapResponse = await render("/sitemap.xml");
   assert.equal(sitemapResponse.status, 200);
   const sitemap = await sitemapResponse.text();
-  assert.ok((sitemap.match(/<url>/g) ?? []).length >= 2_400);
+  assert.ok((sitemap.match(/<url>/g) ?? []).length >= 4_600);
   assert.match(sitemap, /https:\/\/med250\.gikundiro\.com\/product\/rwanda-fda-hm-/);
+  assert.match(sitemap, /https:\/\/med250\.gikundiro\.com\/product\/AMZ-/);
 });

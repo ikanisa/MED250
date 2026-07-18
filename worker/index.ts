@@ -5,6 +5,7 @@ import handler from "vinext/server/app-router-entry";
 interface Env {
   ASSETS: Fetcher;
   MED250_RELEASE_MODE?: "preview" | "catalog" | "live";
+  MED250_RELEASE_REVISION?: string;
   IMAGES: {
     input(stream: ReadableStream): {
       transform(options: Record<string, unknown>): {
@@ -26,7 +27,7 @@ const contentSecurityPolicy = [
   "font-src 'self' data:",
   "form-action 'self'",
   "frame-ancestors 'none'",
-  "img-src 'self' data: blob: https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.gstatic.com",
+  "img-src 'self' data: blob: https://uskfnszcdqpcfrhjxitl.supabase.co https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.gstatic.com",
   "manifest-src 'self'",
   "media-src 'self'",
   "object-src 'none'",
@@ -38,7 +39,19 @@ const contentSecurityPolicy = [
   "worker-src 'self' blob:",
 ].join("; ");
 
-function withSecurityHeaders(request: Request, response: Response, requestId: string, durationMs: number, releaseMode: Env["MED250_RELEASE_MODE"]) {
+function normalizedReleaseRevision(value: string | undefined) {
+  const revision = value?.trim() ?? "";
+  return /^[A-Za-z0-9._-]{7,64}$/.test(revision) ? revision : "";
+}
+
+function withSecurityHeaders(
+  request: Request,
+  response: Response,
+  requestId: string,
+  durationMs: number,
+  releaseMode: Env["MED250_RELEASE_MODE"],
+  releaseRevision: string | undefined,
+) {
   const headers = new Headers(response.headers);
   const hostname = new URL(request.url).hostname;
   headers.set("Content-Security-Policy", contentSecurityPolicy);
@@ -52,6 +65,8 @@ function withSecurityHeaders(request: Request, response: Response, requestId: st
   headers.set("X-Permitted-Cross-Domain-Policies", "none");
   headers.set("X-Request-Id", requestId);
   headers.set("Server-Timing", `app;dur=${durationMs.toFixed(1)}`);
+  const revision = normalizedReleaseRevision(releaseRevision);
+  if (revision) headers.set("X-MED250-Release-Revision", revision);
   if (releaseMode === "preview" || !releaseMode || hostname.endsWith(".workers.dev")) headers.set("X-Robots-Tag", "noindex, nofollow");
   if (new URL(request.url).protocol === "https:") headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
@@ -106,7 +121,14 @@ const worker = {
       status: response.status,
       durationMs: Math.round(durationMs),
     }));
-    return withSecurityHeaders(request, response, requestId, durationMs, env?.MED250_RELEASE_MODE);
+    return withSecurityHeaders(
+      request,
+      response,
+      requestId,
+      durationMs,
+      env?.MED250_RELEASE_MODE,
+      env?.MED250_RELEASE_REVISION,
+    );
   },
 };
 

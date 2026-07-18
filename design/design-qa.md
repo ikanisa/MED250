@@ -47,15 +47,15 @@ Date: 2026-07-13
 
 - When price, stock, availability, or another optional catalogue value is absent, the value area remains visually blank.
 - Do not render placeholder labels, explanatory copy, “confirm on WhatsApp” text, “not published” text, or invented values for missing data.
-- Preserve the surrounding card anatomy and the cart action; blank data must not be communicated as a value or a status.
+- Preserve the surrounding card anatomy and the request action; blank data must not be communicated as a value or a status.
 - This rule applies across catalogue cards, product detail views, request summaries, pharmacy surfaces, loading states, and future designs.
 
-## Product cart action rule
+## Product request action rule
 
-- Every catalogue-card commerce action uses a standard shopping-cart icon with no visible “Check availability” label.
-- The accessible name is “Add [product] to cart”; the product-detail action may show the visible text “Add to cart”.
-- The cart icon remains right-aligned when price data is blank, and adding an item immediately opens the cart with clear added-item feedback.
-- Availability-request language begins only after the customer reviews the cart and proceeds into fulfilment details.
+- Every catalogue-card commerce action uses the established basket icon without a redundant visible label.
+- The accessible name is “Add [product] to request”; the product-detail action shows “Add to request”.
+- The action remains right-aligned when price data is blank, and adding an item immediately opens the request basket with clear added-item feedback.
+- Customer-facing copy consistently describes an availability request and never implies checkout, payment, or a completed purchase.
 
 ## Product-name integrity rule
 
@@ -66,5 +66,15 @@ Date: 2026-07-13
 - Exact duplicate normalized titles collapse to one catalogue product; variant ASINs may coexist only when their canonical titles identify a meaningful size, scent, bundle, colour, or configuration difference.
 - Consumer taxonomy stays in category, subcategory, and product-type fields. It is never copied into medicine-only generic-name or dosage-form slots, and repeated taxonomy labels are suppressed on cards.
 - Books, occupational gifts, unrelated search noise, adult-only products incorrectly returned for child care, and unresolved one- or two-word source labels are not publishable.
+
+## Adaptive layout rule
+
+- Every design element, asset, layout, and interactive component must adapt to its content, container, viewport, zoom level, and available input mode.
+- Content determines component height. Do not reserve empty grid or flex tracks, fixed viewport-filling sections, or placeholder space after optional content disappears.
+- Prefer `clamp()`, `minmax()`, `fr`, percentages, logical properties, intrinsic sizing, flexible wrapping, aspect ratios, and container or viewport queries over hardcoded dimensions and breakpoint-only logic.
+- Fixed dimensions are permitted only for true invariants such as minimum accessible pointer targets, icon geometry, borders, and source-backed media aspect ratios. They must not force page overflow or unused visual space.
+- Typography must respond to both viewport size and content length. Images must preserve their intrinsic proportions and fit without distortion, clipping, or layout shift.
+- New and changed interfaces must be checked at minimum at 320 px, 390 px, 768 px, 1024 px, and 1440 px widths, with browser zoom and long-content states included when relevant.
+- A change that works at one captured viewport but creates overflow, clipping, excessive whitespace, or unreadable density at another viewport does not pass design QA.
 
 final result: passed

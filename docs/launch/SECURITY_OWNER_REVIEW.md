@@ -20,7 +20,7 @@ It does not authorise a credential rotation in the shared Supabase project, appr
 
 The existing redacted security evidence records:
 
-- backend contract `2026-07-16.10`;
+- backend contract `2026-07-18.3`;
 - Supabase server-side Turnstile enforcement enabled for anonymous customer identities;
 - missing and invalid Turnstile tokens rejected without changing the aggregate Auth user count;
 - anonymous customer identities enabled;
