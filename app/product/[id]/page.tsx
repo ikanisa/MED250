@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Marketplace from "../../marketplace";
 import { getProductSeo, getRelatedMarketplaceProducts, productSeoDescription, toMarketplaceProduct } from "../../../lib/product-seo";
-import { getPublicMarketplaceProduct, getPublicProductImages } from "../../../lib/public-marketplace-product";
+import { getPublicMarketplaceProduct, getPublicMarketplaceProducts, getPublicProductImages } from "../../../lib/public-marketplace-product";
 import { catalogueDepartmentForProduct } from "../../../lib/non-prescription-taxonomy";
 import { absoluteUrl } from "../../../lib/site";
 import { safeJsonLd } from "../../../lib/safe-json-ld";
@@ -57,7 +57,16 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   if (!product) notFound();
   const displayName = customerProductTitle(product.brand);
   const department = catalogueDepartmentForProduct(product);
-  const relatedProducts = getRelatedMarketplaceProducts(product);
+  const relatedProductSeeds = getRelatedMarketplaceProducts(product, 12);
+  const publicRelatedProducts = await getPublicMarketplaceProducts(relatedProductSeeds.map((candidate) => candidate.id));
+  const publicRelatedProductsById = new Map(publicRelatedProducts.map((candidate) => [candidate.id, candidate]));
+  const relatedProducts = relatedProductSeeds
+    .map((candidate) => {
+      const published = publicRelatedProductsById.get(candidate.id);
+      return published ? { ...published, accent: candidate.accent } : candidate;
+    })
+    .filter((candidate) => Boolean(candidate.imageUrl ?? candidate.imageUrls?.[0]))
+    .slice(0, 8);
   const description = product.description || (localProduct
     ? productSeoDescription(localProduct)
     : `${displayName}${product.subcategory ? ` — ${product.subcategory}` : ""}. View central product information, request availability, and continue with a pharmacy on WhatsApp.`);

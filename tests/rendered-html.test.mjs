@@ -73,6 +73,9 @@ test("adds category-aware product breadcrumbs and source-backed related products
 
   assert.match(taxonomy, /catalogueDepartmentForProduct/);
   assert.match(productPage, /getRelatedMarketplaceProducts/);
+  assert.match(productPage, /getPublicMarketplaceProducts/);
+  assert.match(productPage, /getRelatedMarketplaceProducts\(product, 12\)/);
+  assert.match(productPage, /filter\(\(candidate\) => Boolean\(candidate\.imageUrl \?\? candidate\.imageUrls\?\.\[0\]\)\)/);
   assert.match(productPage, /name: department\.label, item: absoluteUrl\(department\.href\)/);
   assertCataloguedMessage(marketplace, "inventory.ddd8bdb51f77", "Similar catalogue products");
   assertCataloguedMessage(marketplace, "inventory.ec2e25a05e2d", "For browsing only — catalogue similarity is not medical advice or a treatment recommendation.");
@@ -171,6 +174,16 @@ test("server-renders canonical product metadata with its approved public product
   assert.match(html, /DAWA limited/);
   assert.ok(!html.includes(`"image":"${metadataOrigin}/og-marketplace-v2.png"`));
   assert.doesNotMatch(html, /About this product/);
+});
+
+test("server-renders similar catalogue cards only when their real product images are available", async () => {
+  const response = await render("/product/AMZ-B0GNQMMSZ3");
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  const relatedSection = html.match(/<section class="marketplace-section related-products"[\s\S]*?<p class="related-products-note"/)?.[0] ?? "";
+  assert.match(relatedSection, /class="product-image-wrap"/);
+  assert.match(relatedSection, /storage\/v1\/object\/public\/product-images\/v1\/AMZ-/);
+  assert.doesNotMatch(relatedSection, /product-card[^"']*without-image/);
 });
 
 test("shows only governed public product descriptions with source attribution", async () => {

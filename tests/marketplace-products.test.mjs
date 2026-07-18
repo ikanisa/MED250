@@ -193,6 +193,9 @@ test("storefront loads and searches the unified catalogue with exact taxonomy fi
   assert.match(taxonomy, /return value;/);
   assert.match(productPage, /getPublicMarketplaceProduct/);
   assert.match(publicProduct, /dawanear_all_product_catalog/);
+  assert.match(publicProduct, /export async function getPublicMarketplaceProducts/);
+  assert.match(publicProduct, /MAX_RELATED_PRODUCT_IDS = 12/);
+  assert.match(publicProduct, /id", `in\.\(\$\{ids\.join\(","\)\}\)`/);
   assert.match(publicProduct, /cache: "no-store"/);
   assert.match(client, /indicativePriceRwf/);
   assert.match(publicProduct, /indicative_price_rwf/);
