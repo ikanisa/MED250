@@ -35,8 +35,8 @@ test("server-renders the MED+250 marketplace", async () => {
   const html = await response.text();
   assert.match(html, /<title>MED\+250/);
   assert.match(html, /Health and everyday care/);
-  assert.match(html, /Find them all at your nearest pharmacy/);
-  assert.match(html, /Shop medicines, beauty, baby and wellness essentials/);
+  assert.match(html, /Found at the nearest Pharmacy/);
+  assert.match(html, /Explore medicines and everyday essentials with confidence/);
   assert.match(html, /Shop products/);
   assert.match(html, /All products/);
   assert.doesNotMatch(html, /Pharmacies confirm availability.+final price on WhatsApp/i);
@@ -612,7 +612,7 @@ test("gives immediate route feedback and keeps product navigation work responsiv
   assert.match(navigationFeedback, /destination\.pathname === current\.pathname/);
   assert.match(productLoading, /Opening product details…/);
   assert.match(productLoading, /aria-busy="true"/);
-  assertCataloguedMessage(routeLoading, "inventory.7b580d07d3ed", "Health and everyday care. Find them all at your nearest pharmacy.");
+  assertCataloguedMessage(routeLoading, "inventory.7b580d07d3ed", "Health and everyday care. Found at the nearest Pharmacy.");
   assertCataloguedMessage(routeLoading, "inventory.697e2082d670", "Loading current products and your request tools…");
   assert.doesNotMatch(productPage, /getPublicCatalogueTaxonomy/);
   assert.match(publicProduct, /import \{ cache \} from "react"/);

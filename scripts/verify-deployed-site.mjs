@@ -87,7 +87,7 @@ export function assessDeploymentEvidence({ origin, mode, records, expectedRevisi
     if (requiresWorkerRevision && !/^[A-Za-z0-9._-]{7,64}$/.test(releaseRevision ?? "")) {
       errors.push("/: X-MED250-Release-Revision is missing or invalid");
     }
-    if (!home.body.includes("MED+250") || !home.body.includes("Health and everyday care") || !home.body.includes("Find them all at your nearest pharmacy")) {
+    if (!home.body.includes("MED+250") || !home.body.includes("Health and everyday care") || !home.body.includes("Found at the nearest Pharmacy")) {
       errors.push("/: marketplace identity or primary proposition is missing");
     }
     if (mode === "preview" && home.headers["x-robots-tag"] !== "noindex, nofollow") {

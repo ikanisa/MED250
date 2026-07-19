@@ -6709,7 +6709,7 @@
     },
     {
       "id": "inventory.7b580d07d3ed",
-      "source": "Health and everyday care. Find them all at your nearest pharmacy.",
+      "source": "Health and everyday care. Found at the nearest Pharmacy.",
       "risk": "high",
       "catalog_ids": [
         "inventory.7b580d07d3ed"
@@ -8965,7 +8965,7 @@
     },
     {
       "id": "inventory.a68745f09fc1",
-      "source": "Find them all at your nearest pharmacy.",
+      "source": "Found at the nearest Pharmacy.",
       "risk": "standard",
       "catalog_ids": [
         "inventory.a68745f09fc1"
@@ -13106,7 +13106,7 @@
     },
     {
       "id": "inventory.f0908d3d760e",
-      "source": "Shop medicines, beauty, baby and wellness essentials in one simple marketplace built for Rwanda.",
+      "source": "Explore medicines and everyday essentials with confidence, and connect with a nearby pharmacy through one seamless marketplace built for Rwanda.",
       "risk": "standard",
       "catalog_ids": [
         "inventory.f0908d3d760e"

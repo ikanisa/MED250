@@ -49,7 +49,7 @@ function records(origin, mode) {
       "x-med250-release-revision": securityHeaders["x-med250-release-revision"],
     } : {},
     body: route === "/"
-      ? "<title>MED+250</title><h1>Health and everyday care. <em>Find them all at your nearest pharmacy.</em></h1>"
+      ? "<title>MED+250</title><h1>Health and everyday care. <em>Found at the nearest Pharmacy.</em></h1>"
       : route === "/robots.txt"
         ? mode === "preview" ? "User-Agent: *\nDisallow: /" : `User-Agent: *\nAllow: /\nSitemap: ${origin}/sitemap.xml`
         : route === "/sitemap.xml"
