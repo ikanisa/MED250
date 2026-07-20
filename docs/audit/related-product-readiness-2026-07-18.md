@@ -2,7 +2,7 @@
 
 Report date: 2026-07-18  
 Source snapshot: 2026-07-15  
-Status: **local recommendation policy implemented; live and governed-content acceptance pending**
+Status: **exact-release recommendation population reconciled; accountable acceptance pending**
 
 ## Population and source control
 
@@ -17,7 +17,9 @@ Status: **local recommendation policy implemented; live and governed-content acc
 
 The previous recommendation implementation consumed only the 2,480-row medicine SEO snapshot. Consumer-product pages therefore had no complete source-backed recommendation population. The new compact index is regenerated from the corrected catalogue snapshot and contains every currently requestable medicine and consumer record.
 
-Two approved source rows were discovered to be books rather than pharmacy products: `AMZ-032380909X` and `AMZ-B01K1S6AHM`. Both are now recorded in the catalogue-quality override registry, fail closed in recommendation seeding/candidate selection, are absent from the generated sitemap, and are retired by migration `20260718080000_retire_non_product_catalogue_records.sql`. Applying and verifying that migration in production remains a release action.
+Two approved source rows were discovered to be books rather than pharmacy products: `AMZ-032380909X` and `AMZ-B01K1S6AHM`. Both are recorded in the catalogue-quality override registry, fail closed in recommendation seeding/candidate selection, are absent from the generated sitemap, and are retired by migration `20260718080000_retire_non_product_catalogue_records.sql`. The passing production catalogue receipt now confirms both IDs are absent from the public 4,657-product population.
+
+The source-bound [live recommendation receipt](live-baseline-2026-07-18/18-live-related-products-5ef50a.json) independently fetches all 39 production catalogue pages and binds them to release `5ef50a296941056bd17e614dff7b35290742f50a`. It proves that all 4,657 live IDs equal the recommendable index population. The production selector evaluated every seed and 17,690 edges: 106 medicine edges and 17,584 consumer edges, with zero unsafe edges, duplicate candidates, missing live products, or unexpected live products.
 
 ## Conservative matching policy
 
@@ -33,11 +35,10 @@ Two approved source rows were discovered to be books rather than pharmacy produc
 `npm test`  
 `npm run build:production && node --test tests/production-build.check.mjs tests/product-sitemap-index.test.mjs tests/product-related.test.mjs tests/marketplace-products.test.mjs`
 
-The serial full-suite run passed 209/209 tests. The targeted production-mode run passed 17/17 tests across recommendation policy, governed catalogue exclusions, server metadata, sitemap/robots, and marketplace data contracts. Both preview and production bundles built successfully. The default suite is intentionally serialized because concurrent test files share the generated `dist` Worker; parallel execution could delete or replace that artifact while rendered-route tests were still importing it.
+The refreshed serial full-suite run passed 304/304 tests, including the exact-release live recommendation verifier and its source-drift test. The default suite is intentionally serialized because concurrent test files share the generated `dist` Worker; parallel execution could delete or replace that artifact while rendered-route tests were still importing it.
 
 ## Remaining closure
 
-1. Apply and verify the governed live-catalogue correction for the two book records; do not infer production removal from the local migration and sitemap.
-2. Capture controlled browser evidence for representative medicine and consumer pages, empty fail-closed rails, Back navigation, and required breakpoints.
-3. Obtain product/data-owner approval of the medicine equivalence boundary and consumer taxonomy policy.
-4. Reconcile the deployed recommendation population with the approved live catalogue and attach the deployed revision identifier.
+1. Obtain product/data-owner approval of the medicine equivalence boundary and consumer taxonomy policy.
+2. Obtain independent QA approval for the completed desktop and mobile browser scenarios covering representative medicine and consumer rails plus the empty fail-closed state.
+3. Preserve the verified 4,657-product, 17,690-edge reconciliation and deployment binding to revision `5ef50a296941056bd17e614dff7b35290742f50a` through approval.

@@ -505,9 +505,12 @@ test("provides accessible feedback, mobile filters, wizard progress, and resilie
   assert.match(marketplace, /role="status" aria-live="polite" aria-atomic="true"/);
   assert.match(marketplace, /data-modal-root="catalogue-filters"/);
   assert.match(marketplace, /aria-describedby="catalogue-filter-description"/);
-  assert.match(marketplace, /className="wizard-progress"/);
-  assert.match(marketplace, /aria-current=\{portalStage === "otp" \? "step"/);
+  assert.doesNotMatch(marketplace, /className="wizard-progress"/);
+  assert.match(marketplace, /className="portal-auth-status"/);
+  assert.match(marketplace, /aria-describedby="pharmacy-signin-context"/);
   assert.match(marketplace, /className="order-wizard-progress"/);
+  assert.match(marketplace, /CHECKOUT_STEPS\.filter\(\(item\) => item\.id !== 3\)/);
+  assert.match(marketplace, /--order-step-count/);
   assert.match(marketplace, /previousCheckoutStepRef/);
   assert.ok(marketplace.indexOf("const [checkoutStep") < marketplace.indexOf("const previousCheckoutStepRef"));
   assert.match(marketplace, /querySelector<HTMLElement>\("\[data-checkout-step-focus\]"\)/);
@@ -515,7 +518,8 @@ test("provides accessible feedback, mobile filters, wizard progress, and resilie
   assertCataloguedMessage(marketplace, "inventory.4ed9052cf4be", "Review and send your availability request");
   assertCataloguedMessage(marketplace, "inventory.acbb998d8243", "Continue to details");
   assertCataloguedMessage(marketplace, "inventory.dcea8abbdff0", "Review request");
-  assert.match(marketplace, /continueToOrderConfirmation/);
+  assert.match(marketplace, /setCheckoutStep\(customerWhatsappVerified \? 4 : 3\)/);
+  assert.match(marketplace, /setCheckoutStep\(4\)/);
   assert.match(marketplace, /className="catalogue-skeleton"/);
   assert.match(marketplace, /aria-busy=\{ordering\}/);
   assert.match(navigationFeedback, /navigator\.onLine/);
@@ -535,7 +539,8 @@ test("provides accessible feedback, mobile filters, wizard progress, and resilie
   assert.match(css, /--clay-shadow:/);
   assert.match(css, /MED\+250 soft-gradient claymorphism system/);
   assert.match(css, /\.order-review-item[\s\S]*background:var\(--clay-surface\)/);
-  assert.match(css, /\.order-added-feedback>span \{[^}]*min-width:0/);
+  assert.match(marketplace, /className="sr-only" role="status">\{recentlyAddedBrand\}/);
+  assert.match(css, /\.saved-whatsapp-row/);
   assert.match(css, /\.order-review-item>\.cart-item-copy>b \{[^}]*-webkit-line-clamp:2/);
   assert.match(css, /footer\.order-wizard-actions[\s\S]*background:linear-gradient/);
   assert.match(css, /env\(safe-area-inset-bottom\)/);
@@ -638,7 +643,9 @@ test("requires international customer WhatsApp and restores on-device order pref
   assert.match(marketplace, /getCountryCallingCode/);
   assertCataloguedMessage(marketplace, "inventory.36ca78914773", "WhatsApp country code");
   assert.match(marketplace, /aria-label=\{marketplaceMessage\("inventory\.36ca78914773"\)\}/);
-  assertCataloguedMessage(marketplace, "inventory.dd0285bfd9b4", "required for registration and response alerts");
+  assertCataloguedMessage(marketplace, "inventory.dd0285bfd9b4", "Verified once and remembered");
+  assert.match(marketplace, /customerWhatsappVerified && !editingCustomerWhatsapp/);
+  assert.match(marketplace, /setCheckoutStep\(customerWhatsappVerified \? 4 : 3\)/);
   assert.match(marketplace, /CUSTOMER_PREFERENCES_STORAGE_KEY/);
   assert.match(marketplace, /coordinates: coordinates/);
   assert.match(marketplace, /applyMapLocation/);
@@ -769,7 +776,7 @@ test("opens the basket after add and provides a rotating product gallery", async
   assert.match(marketplace, /loadCatalogueProductsByIds\(productIds\)/);
   assert.match(marketplace, /\.\.\.refreshed,[\s\S]*quantity: item\.quantity,[\s\S]*substitutesAllowed: Boolean\(item\.substitutesAllowed\)/);
   assert.match(marketplace, /order-review-item[\s\S]*<ProductVisual product=\{item\} small \/>/);
-  assert.match(marketplace, /className="order-added-feedback"[\s\S]*<span><b>\{recentlyAddedBrand\}<\/b><small>/);
+  assert.match(marketplace, /className="sr-only" role="status">\{recentlyAddedBrand\}/);
   assert.match(marketplace, /className="cart-item-copy"/);
   assert.match(marketplace, /function ProductGallery/);
   assert.match(marketplace, /function productTitleClass\(title: string\)/);
@@ -1056,9 +1063,9 @@ test("uses WhatsApp Cloud OTP only for pharmacy portal access", async () => {
   ]);
 
   assertCataloguedMessage(marketplace, "whatsapp.send_code", "Send code on WhatsApp");
-  assertCataloguedMessage(marketplace, "inventory.3be818907a1b", "Sign in with registered WhatsApp number");
+  assertCataloguedMessage(marketplace, "inventory.3be818907a1b", "Open your pharmacy workspace");
   assert.doesNotMatch(marketplace, /SECURE PHARMACY ACCESS/);
-  assertCataloguedMessage(marketplace, "inventory.76305e161c53", "Enter your WhatsApp code");
+  assertCataloguedMessage(marketplace, "inventory.76305e161c53", "Enter the 6-digit code");
   assert.match(marketplace, /autoComplete="one-time-code"/);
   assertCataloguedMessage(marketplace, "inventory.46ea2bdb2842", "WhatsApp number not registered");
   assert.match(marketplace, /250795588248/);

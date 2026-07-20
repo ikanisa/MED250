@@ -101,21 +101,21 @@
       "owner": "MED+250 backend owner",
       "required_evidence_types": ["deployment_receipt", "test_record"],
       "status": "pending",
-      "acceptance": "The forward security migrations and contract refresh are deployed using rotated credentials, and the privileged backend verifier returns contract 2026-07-18.1 with the runtime and DDL product-image governance guards, aggregate public trust-metric boundary, and all invariants passing.",
+      "acceptance": "The forward security migrations and contract refresh are deployed using rotated credentials, and the privileged backend verifier returns contract 2026-07-18.3 with the runtime and DDL product-image governance guards, aggregate public trust-metric boundary, fail-closed product-description workflow, and all invariants passing.",
       "evidence": [
         {
           "type": "deployment_receipt",
-          "reference": "docs/launch/evidence/security-hardening-deployment-2026-07-16.json",
-          "sha256": "7404d58e6884dbdeef1877e2c0bd9403882a010ff8786b7ba528da4425208013",
-          "recorded_at": "2026-07-16T13:10:34Z",
-          "summary": "Redacted receipt for forward migration 20260716190000, live verified-rights governance restoration, unsafe-worker containment and public Storage cleanup."
+          "reference": "docs/launch/evidence/security-hardening-deployment-2026-07-18.json",
+          "sha256": "dcfdeac982b75a11240db1bfd4a2150ff9c15833055eb1f9485cf0938896b3a3",
+          "recorded_at": "2026-07-18T17:24:14Z",
+          "summary": "Current production receipt for backend contract 2026-07-18.3 reconciliation, description governance, trust controls, catalogue corrections, and notification-outbox index deployment."
         },
         {
           "type": "test_record",
-          "reference": "docs/launch/evidence/security-hardening-test-2026-07-16.json",
-          "sha256": "7f89436fffa0f69b61902a76a804b0cd9471b7e8f9cfdbdcc704e7d40b65be2d",
-          "recorded_at": "2026-07-16T13:43:37Z",
-          "summary": "Fresh post-repair production contract, strict operational health, advisor scope, empty public image Storage, protected DDL and expanded regression audits passed."
+          "reference": "docs/launch/evidence/security-hardening-test-2026-07-18.json",
+          "sha256": "9d01de4bc5949cb5024ae159192c0c1abb429132c902a688d4dbba8b597d784b",
+          "recorded_at": "2026-07-18T17:28:30Z",
+          "summary": "Current production governance queries, post-deploy advisors, lint, targeted database tests, and the complete 302-test application suite passed."
         }
       ],
       "approved_by": null,
@@ -127,21 +127,21 @@
       "owner": "MED+250 backend owner",
       "required_evidence_types": ["deployment_receipt", "test_record"],
       "status": "pending",
-      "acceptance": "The reviewed OTP, cleanup, geocoding and contact-review Edge Function versions are deployed and their protected-origin and least-privilege probes pass.",
+      "acceptance": "The reviewed OTP, cleanup, geocoding, marketplace-review, contact-review and product-description-review Edge Function versions are deployed and their protected-access boundaries pass.",
       "evidence": [
         {
           "type": "deployment_receipt",
-          "reference": "docs/launch/evidence/edge-functions-deployment-2026-07-16.json",
-          "sha256": "421dd3e3cf1cba5995e29fdb0a95aba20e3c277da0d2bca322b97db16ff50709",
-          "recorded_at": "2026-07-16T12:57:41Z",
-          "summary": "Redacted receipt confirming the six reviewed functions remain active and the shared-project env-dump deployment is a JWT-protected constant HTTP 410 retirement tombstone pending any owner-authorised deletion."
+          "reference": "docs/launch/evidence/edge-functions-deployment-2026-07-18.json",
+          "sha256": "2fec968b290b47c6d1f1390f327f9a57ce6b3f49db4eb93712b6d67dd8a8c74c",
+          "recorded_at": "2026-07-18T17:19:45Z",
+          "summary": "Current production receipt for the newly deployed product-description reviewer, exact deployed source retrieval, custom authentication boundary, and contract headers."
         },
         {
           "type": "test_record",
-          "reference": "docs/launch/evidence/edge-functions-test-2026-07-16.json",
-          "sha256": "7cb2e77597fe2b37df9636c2f8b6cd28a182631a310aeef868714d07988588e1",
-          "recorded_at": "2026-07-16T13:43:37Z",
-          "summary": "Protected-access probes passed for all six reviewed functions; env-dump remains safely contained and a fresh management inventory confirms every reviewed deployment remains active at the governed version."
+          "reference": "docs/launch/evidence/edge-functions-test-2026-07-18.json",
+          "sha256": "ebfd598a100390952c29fb09c99a11c1e7035b4b7b5591aad1731548da1dc7c8",
+          "recorded_at": "2026-07-18T17:19:45Z",
+          "summary": "Current product-description reviewer denial probe, response hardening, one-product workflow review, and complete reviewer regression tests passed."
         }
       ],
       "approved_by": null,
@@ -209,17 +209,17 @@
       "evidence": [
         {
           "type": "domain_verification",
-          "reference": "docs/launch/evidence/domain-verification-2026-07-16.json",
-          "sha256": "1710f30758a4c66c53c1dc7066fb3a9bceee333c234e52c76a5cf42cd0af6ff4",
-          "recorded_at": "2026-07-16T12:43:07Z",
-          "summary": "Post-deployment custom-domain DNS, HTTPS, Worker route, repeated availability sampling, and browser verification passed for the fail-soft catalogue release."
+          "reference": "docs/launch/evidence/domain-verification-2026-07-18.json",
+          "sha256": "7b25c2a4051b6a7f310a69de4f26228c12be344bbbca685941f1bdc072f3eabd",
+          "recorded_at": "2026-07-18T16:33:24.163Z",
+          "summary": "Current canonical-domain DNS, HTTPS, ten-route, redirect, security-header, robots, sitemap, and exact-revision checks passed."
         },
         {
           "type": "test_record",
-          "reference": "docs/launch/evidence/domain-deployment-test-2026-07-16.json",
-          "sha256": "97c8f62071a8196e419fda3b92e96d3bf305289748136564818658fff39756c7",
-          "recorded_at": "2026-07-16T12:43:07Z",
-          "summary": "The deployed production version passed the seven-route verifier, ninety repeated HTTP checks, and desktop and mobile catalogue browser checks."
+          "reference": "docs/launch/evidence/domain-deployment-test-2026-07-18.json",
+          "sha256": "6d4b535b8adeeb53319cd49a1b13db167e39e58cd7dbef58a731145cca1d9f7b",
+          "recorded_at": "2026-07-18T16:33:31.102Z",
+          "summary": "Current exact-revision route verification, 4,657-product catalogue reconciliation, multilingual search reach, and browser evidence binding passed."
         }
       ],
       "approved_by": null,

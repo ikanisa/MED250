@@ -17,6 +17,7 @@ import { validatePhysicalUat } from "./validate-physical-uat.mjs";
 const browser = (id, label) => ({ type: "browser", id, label });
 const launch = (id, label) => ({ type: "launch", id, label });
 const manual = (id, label) => ({ type: "manual", id, label });
+const technical = (id, label) => ({ type: "technical", id, label });
 const contentReview = (label) => ({ type: "content_review", id: "product-content-review", label });
 const localization = (label) => ({ type: "localization", id: "rw-RW", label });
 const physicalUat = (label) => ({ type: "physical_uat", id: "med250-production", label });
@@ -35,7 +36,7 @@ export const auditClosureBindings = Object.freeze({
   "P0-3": [
     launch("MED250_GATE_DOMAIN_DNS_VERIFIED", "Confirmed DNS, TLS, routing, headers, robots, and sitemap evidence for the canonical production domain"),
     manual("search-console", "Search Console ownership, sitemap submission, URL inspection, and dated indexing evidence"),
-    manual("sites-catalog-boundary", "The public Sites origin is either retired or verified as a current catalog-only release with ordering disabled"),
+    technical("sites-catalog-boundary", "The public Sites origin is verified as a current catalog-only release with ordering disabled"),
   ],
   "P0-4": [
     launch("MED250_GATE_DATA_REUSE_APPROVED", "Approved reuse rights for active catalogue and price sources"),
@@ -53,6 +54,7 @@ export const auditClosureBindings = Object.freeze({
   "P1-2": [
     browser("DESKTOP_RELATED_PRODUCTS", "Desktop related-product safety evidence"),
     browser("MOBILE_RELATED_PRODUCTS", "Mobile related-product safety evidence"),
+    technical("live-related-products", "Exact-release reconciliation of every live recommendable product and generated recommendation edge"),
   ],
   "P1-3": [
     launch("MED250_GATE_REGULATORY_APPROVED", "Legal and regulatory approval for the production operating model"),
@@ -115,6 +117,58 @@ function terminalStatus(status) {
   return status === "complete" || status === "owner_declined";
 }
 
+export function assessTechnicalClosureEvidence({ sitesCatalogReceipt, liveRelatedReceipt }) {
+  const sitesErrors = [];
+  const sitesOrigin = "https://med250-rwanda.ikanisa.chatgpt.site";
+  const requiredSitesRoutes = new Set([
+    "/", "/categories", "/category/medicines",
+    "/product/rwanda-fda-hm-0734", "/product/AMZ-B004L5JCZ4",
+    "/robots.txt", "/sitemap.xml", "/manifest.webmanifest", "/sw.js", "/offline.html",
+  ]);
+  if (sitesCatalogReceipt?.status !== "passed") sitesErrors.push("Sites catalogue receipt is not passed.");
+  if (sitesCatalogReceipt?.origin !== sitesOrigin || sitesCatalogReceipt?.mode !== "catalog") sitesErrors.push("Sites receipt is not bound to the governed catalog-only origin.");
+  const sitesRoutes = sitesCatalogReceipt?.routes ?? [];
+  if (sitesCatalogReceipt?.routeCount !== 10 || sitesRoutes.length !== 10) sitesErrors.push("Sites receipt does not contain all ten governed routes.");
+  if (sitesRoutes.some((route) => route?.status !== 200 || route?.finalOrigin !== sitesOrigin)) sitesErrors.push("A Sites route failed or escaped the catalog origin.");
+  if ([...requiredSitesRoutes].some((route) => !sitesRoutes.some((entry) => entry?.route === route))) sitesErrors.push("A required Sites route is missing.");
+  if ((sitesCatalogReceipt?.errors ?? []).length) sitesErrors.push("Sites receipt contains verification errors.");
+
+  const relatedErrors = [];
+  if (liveRelatedReceipt?.status !== "passed") relatedErrors.push("Live related-product receipt is not passed.");
+  if (liveRelatedReceipt?.releaseRevision !== "5ef50a296941056bd17e614dff7b35290742f50a") relatedErrors.push("Related-product receipt is not bound to the production revision.");
+  for (const [field, expected] of Object.entries({
+    liveProductCount: 4_657,
+    relatedIndexCount: 4_659,
+    recommendableCount: 4_657,
+    suppressedCount: 2,
+    seedsEvaluated: 4_657,
+    unsafeEdgeCount: 0,
+    duplicateCandidateCount: 0,
+    missingLiveCount: 0,
+    unexpectedLiveCount: 0,
+    maximumCandidatesPerSeed: 8,
+  })) if (liveRelatedReceipt?.[field] !== expected) relatedErrors.push(`Related-product ${field} must equal ${expected}.`);
+  if (!Number.isInteger(liveRelatedReceipt?.totalEdges) || liveRelatedReceipt.totalEdges < 1) relatedErrors.push("Related-product receipt has no evaluated edges.");
+  if (!/^[a-f0-9]{64}$/.test(liveRelatedReceipt?.liveIdSha256 ?? "")) relatedErrors.push("Related-product live identifier digest is invalid.");
+  if (!/^[a-f0-9]{64}$/.test(liveRelatedReceipt?.edgeBindingSha256 ?? "")) relatedErrors.push("Related-product edge digest is invalid.");
+  if ((liveRelatedReceipt?.errors ?? []).length) relatedErrors.push("Related-product receipt contains verification errors.");
+
+  return {
+    valid: sitesErrors.length === 0 && relatedErrors.length === 0,
+    errors: [...sitesErrors, ...relatedErrors],
+    signals: {
+      "sites-catalog-boundary": {
+        status: sitesErrors.length ? "failed" : "passed",
+        satisfied: sitesErrors.length === 0,
+      },
+      "live-related-products": {
+        status: relatedErrors.length ? "failed" : "passed",
+        satisfied: relatedErrors.length === 0,
+      },
+    },
+  };
+}
+
 function buildSignal(requirement, item, sources) {
   if (requirement.type === "browser") {
     const scenario = sources.browserLedger?.scenarios?.[requirement.id];
@@ -166,6 +220,14 @@ function buildSignal(requirement, item, sources) {
       satisfied: passed,
     };
   }
+  if (requirement.type === "technical") {
+    const signal = sources.technicalEvidence?.[requirement.id];
+    return {
+      ...requirement,
+      status: signal?.status ?? "missing",
+      satisfied: signal?.satisfied === true,
+    };
+  }
   const covered = item.status === "complete";
   return {
     ...requirement,
@@ -181,6 +243,7 @@ export function buildAuditClosureReport({
   physicalUat: physicalUatLedger,
   localizationRegistry,
   contentReviewAssessment,
+  technicalEvidence = {},
 }) {
   const sources = {
     browserLedger,
@@ -188,6 +251,7 @@ export function buildAuditClosureReport({
     physicalUat: physicalUatLedger,
     localizationRegistry,
     contentReviewAssessment,
+    technicalEvidence,
   };
   const registerItems = [...(register.findings ?? []), ...(register.strategic_items ?? [])];
   const items = registerItems.map((item) => {
@@ -234,12 +298,14 @@ export function buildAuditClosureReport({
   const releaseGateQueue = Object.entries(launchManifest?.gates ?? {}).flatMap(([name, gate]) => {
     if (gate?.status === "confirmed") return [];
     const suppliedTypes = new Set((gate?.evidence ?? []).map(({ type }) => type));
+    const missingEvidenceTypes = (gate?.required_evidence_types ?? []).filter((type) => !suppliedTypes.has(type));
     return [{
       name,
       title: gate?.title ?? "",
       owner: gate?.owner ?? "",
       status: gate?.status ?? "missing",
-      missingEvidenceTypes: (gate?.required_evidence_types ?? []).filter((type) => !suppliedTypes.has(type)),
+      missingEvidenceTypes,
+      approvalRequired: gate?.status === "pending" && missingEvidenceTypes.length === 0,
     }];
   });
   const allBrowserEvidencePassed = browserLedger?.status === "passed"
@@ -253,6 +319,18 @@ export function buildAuditClosureReport({
   const contentReviewReady = contentReviewAssessment?.valid === true
     && contentReviewAssessment?.pendingCount === 0
     && contentReviewAssessment?.blockingCorrectionCount === 0;
+  const sourceCoverage = register.source_coverage ?? {};
+  const sourceCoverageCounts = {
+    findingCount: (register.findings ?? []).length,
+    scorecardCategoryCount: (sourceCoverage.scorecard_categories ?? []).length,
+    preservationInvariantCount: (sourceCoverage.preservation_invariants ?? []).length,
+    benchmarkCapabilityCount: (sourceCoverage.benchmark_capabilities ?? []).length,
+    roadmapActionCount: (sourceCoverage.roadmap_actions ?? []).length,
+    verificationLimitCount: (sourceCoverage.verification_limits ?? []).length,
+    auditedSurfaceCount: (sourceCoverage.audited_surfaces ?? []).length,
+  };
+  const sourceUnitCount = Object.values(sourceCoverageCounts).reduce((total, count) => total + count, 0);
+  const sourceCoverageReady = JSON.stringify(Object.values(sourceCoverageCounts)) === JSON.stringify([17, 9, 5, 11, 15, 4, 12]);
 
   return {
     schemaVersion: "1",
@@ -266,8 +344,14 @@ export function buildAuditClosureReport({
       && allBrowserEvidencePassed
       && allLaunchEvidenceConfirmed
       && allPhysicalUatPassed
-      && contentReviewReady,
+      && contentReviewReady
+      && sourceCoverageReady,
     systems: {
+      sourceCoverage: {
+        status: sourceCoverageReady ? "mapped" : "incomplete",
+        sourceUnitCount,
+        ...sourceCoverageCounts,
+      },
       browserEvidence: {
         status: browserLedger?.status ?? "missing",
         scenarioCount: browserScenarios.length,
@@ -309,6 +393,7 @@ function printText(report) {
   console.log("Open items: " + report.openItemCount);
   console.log("Audit source revision: " + report.auditSourceRevision);
   console.log("");
+  console.log("Audit source coverage: " + report.systems.sourceCoverage.sourceUnitCount + " units mapped");
   console.log("Browser evidence: " + report.systems.browserEvidence.passedScenarioCount + "/" + report.systems.browserEvidence.scenarioCount + " scenarios passed; " + report.systems.browserEvidence.captureCount + " planned captures");
   console.log("Launch evidence: " + report.systems.launchEvidence.confirmedGateCount + "/" + report.systems.launchEvidence.gateCount + " gates confirmed");
   console.log("Physical UAT: " + report.systems.physicalUat.passedScenarioCount + "/" + report.systems.physicalUat.scenarioCount + " scenarios passed");
@@ -317,7 +402,7 @@ function printText(report) {
   if (report.releaseGateQueue.length) {
     console.log("\nProduction release gates needing evidence:");
     for (const gate of report.releaseGateQueue) {
-      const missing = gate.missingEvidenceTypes.length ? gate.missingEvidenceTypes.join(", ") : "approval or reconciliation";
+      const missing = gate.missingEvidenceTypes.length ? gate.missingEvidenceTypes.join(", ") : "named owner approval";
       console.log("  " + gate.name + " — " + gate.owner + " — " + missing);
     }
   }
@@ -331,13 +416,35 @@ async function loadJson(path) {
   return JSON.parse(await readFile(path, "utf8"));
 }
 
+async function validateReceiptSourceBindings(receipt) {
+  const errors = [];
+  const bindings = receipt?.sources
+    ? Object.values(receipt.sources)
+    : receipt?.verifier ? [receipt.verifier] : [];
+  for (const binding of bindings) {
+    const path = String(binding?.path ?? "");
+    const digest = String(binding?.sha256 ?? "");
+    if (!path || path.startsWith("/") || path.split(/[\\/]/).includes("..") || !/^[a-f0-9]{64}$/.test(digest)) {
+      errors.push("Technical receipt contains an unsafe or incomplete source binding.");
+      continue;
+    }
+    try {
+      const bytes = await readFile(path);
+      if (createHash("sha256").update(bytes).digest("hex") !== digest) errors.push(`Technical receipt source digest drifted for ${path}.`);
+    } catch {
+      errors.push(`Technical receipt source is unavailable at ${path}.`);
+    }
+  }
+  return errors;
+}
+
 async function main() {
   const json = process.argv.includes("--json");
   const strict = process.argv.includes("--strict");
   const unknown = process.argv.slice(2).filter((argument) => argument !== "--json" && argument !== "--strict");
   if (unknown.length) throw new Error("Unknown argument(s): " + unknown.join(", "));
 
-  const [register, browserLedger, launchManifest, physicalUatLedger, localizationRegistry, actualReview, datasetSource] = await Promise.all([
+  const [register, browserLedger, launchManifest, physicalUatLedger, localizationRegistry, actualReview, datasetSource, sitesCatalogReceipt, liveRelatedReceipt] = await Promise.all([
     loadJson("data/audit-implementation-register.json"),
     loadJson("data/audit-browser-evidence.json"),
     loadJson("data/launch-evidence.json"),
@@ -345,6 +452,8 @@ async function main() {
     loadJson("data/localization/locale-releases.json"),
     loadJson(DEFAULT_REVIEW_PATH),
     readFile(DEFAULT_DATASET_PATH, "utf8"),
+    loadJson("docs/audit/live-baseline-2026-07-18/16-sites-catalog-verification-5ef50a.json"),
+    loadJson("docs/audit/live-baseline-2026-07-18/18-live-related-products-5ef50a.json"),
   ]);
   const dataset = JSON.parse(datasetSource);
   const expectedReview = buildProductContentReviewPacket(dataset, {
@@ -353,6 +462,11 @@ async function main() {
   });
   const contentReviewPreview = assessProductContentReview(expectedReview, actualReview);
   const contentReviewAssessment = assessProductContentReview(expectedReview, actualReview, { strict: true });
+  const technicalAssessment = assessTechnicalClosureEvidence({ sitesCatalogReceipt, liveRelatedReceipt });
+  const technicalBindingErrors = (await Promise.all([
+    validateReceiptSourceBindings(sitesCatalogReceipt),
+    validateReceiptSourceBindings(liveRelatedReceipt),
+  ])).flat();
   const validations = await Promise.all([
     validateAuditImplementationRegister(register),
     Promise.resolve(validateAuditBrowserEvidence(browserLedger)),
@@ -361,7 +475,11 @@ async function main() {
     validateLocalizationFiles(),
     Promise.resolve(contentReviewPreview),
   ]);
-  const validationErrors = validations.flatMap((result) => result.errors ?? []);
+  const validationErrors = [
+    ...validations.flatMap((result) => result.errors ?? []),
+    ...technicalAssessment.errors,
+    ...technicalBindingErrors,
+  ];
   if (validationErrors.length) throw new Error("Authoritative closure input is invalid: " + validationErrors.join("; "));
 
   const report = buildAuditClosureReport({
@@ -371,6 +489,7 @@ async function main() {
     physicalUat: physicalUatLedger,
     localizationRegistry,
     contentReviewAssessment,
+    technicalEvidence: technicalAssessment.signals,
   });
   if (json) console.log(JSON.stringify(report, null, 2));
   else printText(report);

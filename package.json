@@ -77,6 +77,7 @@
     "seo:generate-products": "node scripts/generate-product-seo-index.mjs && node scripts/generate-product-sitemap-index.mjs && node scripts/generate-product-related-index.mjs",
     "seo:generate-sitemap": "node scripts/generate-product-sitemap-index.mjs",
     "data:related-products": "node scripts/generate-product-related-index.mjs",
+    "related:verify:live": "node --env-file-if-exists=.env.local scripts/verify-live-related-products.mjs",
     "launch:evidence:verify": "node scripts/validate-launch-evidence.mjs",
     "launch:evidence:verify:live": "node scripts/validate-launch-evidence.mjs --strict",
     "launch:evidence:status": "node scripts/report-launch-evidence.mjs",

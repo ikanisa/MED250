@@ -1,0 +1,42 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_DOMAIN_DNS_VERIFIED",
+  "evidence_type": "domain_verification",
+  "status": "complete",
+  "title": "Canonical MED+250 production domain verification",
+  "summary": "The canonical production domain resolves over HTTPS and the exact-revision deployment verifier passes every required route, redirect, security-header, robots, and sitemap check.",
+  "recorded_at": "2026-07-18T16:33:24.163Z",
+  "recorded_by": "Codex automated verifier",
+  "recorded_role": "Release verification agent",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Domain resolution",
+      "status": "passed",
+      "detail": "The canonical hostname resolved and served the intended Cloudflare Worker release without a mixed-revision route."
+    },
+    {
+      "name": "TLS verification",
+      "status": "passed",
+      "detail": "Every verified canonical route completed over HTTPS with the required strict transport security policy."
+    },
+    {
+      "name": "Route verification",
+      "status": "passed",
+      "detail": "All ten required production routes passed status, canonical behavior, security-header, robots, and sitemap checks."
+    },
+    {
+      "name": "Revision binding",
+      "status": "passed",
+      "detail": "The expected and observed release revision both equal 5ef50a296941056bd17e614dff7b35290742f50a across the complete route set."
+    }
+  ],
+  "verified_by": "Codex automated verifier",
+  "verifier_role": "Release verification agent",
+  "verified_at": "2026-07-18T16:33:24.163Z",
+  "hostnames": ["med250.gikundiro.com"],
+  "dns_passed": true,
+  "tls_passed": true,
+  "routes_passed": true
+}

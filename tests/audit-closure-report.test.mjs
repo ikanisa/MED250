@@ -4,6 +4,7 @@ import test from "node:test";
 
 import {
   auditClosureBindings,
+  assessTechnicalClosureEvidence,
   buildAuditClosureReport,
 } from "../scripts/report-audit-closure.mjs";
 
@@ -11,13 +12,16 @@ async function readJson(relativePath) {
   return JSON.parse(await readFile(new URL("../" + relativePath, import.meta.url), "utf8"));
 }
 
-const [register, browserLedger, launchManifest, physicalUat, localizationRegistry] = await Promise.all([
+const [register, browserLedger, launchManifest, physicalUat, localizationRegistry, sitesCatalogReceipt, liveRelatedReceipt] = await Promise.all([
   readJson("data/audit-implementation-register.json"),
   readJson("data/audit-browser-evidence.json"),
   readJson("data/launch-evidence.json"),
   readJson("data/physical-device-uat.json"),
   readJson("data/localization/locale-releases.json"),
+  readJson("docs/audit/live-baseline-2026-07-18/16-sites-catalog-verification-5ef50a.json"),
+  readJson("docs/audit/live-baseline-2026-07-18/18-live-related-products-5ef50a.json"),
 ]);
+const technicalAssessment = assessTechnicalClosureEvidence({ sitesCatalogReceipt, liveRelatedReceipt });
 
 const contentReviewAssessment = {
   valid: false,
@@ -35,6 +39,7 @@ function build(overrides = {}) {
     physicalUat: overrides.physicalUat ?? physicalUat,
     localizationRegistry: overrides.localizationRegistry ?? localizationRegistry,
     contentReviewAssessment: overrides.contentReviewAssessment ?? contentReviewAssessment,
+    technicalEvidence: overrides.technicalEvidence ?? technicalAssessment.signals,
   });
 }
 
@@ -48,13 +53,29 @@ test("binds every audit finding and strategic decision to an owner-ready closure
   assert.equal(report.readyItemCount, 1);
   assert.equal(report.openItemCount, 19);
   assert.equal(report.strictReady, false);
+  assert.deepEqual(report.systems.sourceCoverage, {
+    status: "mapped",
+    sourceUnitCount: 73,
+    findingCount: 17,
+    scorecardCategoryCount: 9,
+    preservationInvariantCount: 5,
+    benchmarkCapabilityCount: 11,
+    roadmapActionCount: 15,
+    verificationLimitCount: 4,
+    auditedSurfaceCount: 12,
+  });
   assert.equal(report.releaseGateQueue.length, 15);
+  assert.equal(report.releaseGateQueue.find(({ name }) => name === "MED250_GATE_DOMAIN_DNS_VERIFIED").approvalRequired, true);
+  assert.equal(report.releaseGateQueue.find(({ name }) => name === "MED250_GATE_SECURITY_HARDENING_DEPLOYED").approvalRequired, true);
+  assert.equal(report.releaseGateQueue.find(({ name }) => name === "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED").approvalRequired, true);
   assert.equal(report.ownerQueues.reduce((total, queue) => total + queue.itemCount, 0), 19);
 
   const declined = report.items.find(({ id }) => id === "P2-2");
   assert.equal(declined.terminal, true);
   assert.equal(declined.ready, true);
   assert.equal(declined.blockerCount, 0);
+  assert.equal(report.items.find(({ id }) => id === "P0-3").signals.find(({ id }) => id === "sites-catalog-boundary").satisfied, true);
+  assert.equal(report.items.find(({ id }) => id === "P1-2").signals.find(({ id }) => id === "live-related-products").satisfied, true);
 });
 
 test("reports the exact current cross-system state without promoting partial work", () => {
@@ -62,7 +83,7 @@ test("reports the exact current cross-system state without promoting partial wor
   assert.deepEqual(report.systems.browserEvidence, {
     status: "pending",
     scenarioCount: 16,
-    passedScenarioCount: 0,
+    passedScenarioCount: 16,
     captureCount: 56,
   });
   assert.deepEqual(report.systems.launchEvidence, {
@@ -80,7 +101,7 @@ test("reports the exact current cross-system state without promoting partial wor
 
   const departments = report.items.find(({ id }) => id === "P0-1");
   assert.deepEqual(departments.signals.map(({ id }) => id), ["DESKTOP_DEPARTMENTS", "MOBILE_DEPARTMENTS"]);
-  assert.equal(departments.blockerCount, 2);
+  assert.equal(departments.blockerCount, 0);
 
   const localizationItem = report.items.find(({ id }) => id === "P1-4");
   assert.equal(localizationItem.signals[0].status, "awaiting_qualified_translation");
@@ -91,7 +112,7 @@ test("reports the exact current cross-system state without promoting partial wor
     "search-console",
     "sites-catalog-boundary",
   ]);
-  assert.equal(searchVisibilityItem.blockerCount, 3);
+  assert.equal(searchVisibilityItem.blockerCount, 2);
 
   const deviceItem = report.items.find(({ id }) => id === "P3-2");
   assert.deepEqual(deviceItem.signals.map(({ type }) => type), ["physical_uat", "launch"]);
@@ -102,6 +123,7 @@ test("every automated binding resolves to an authoritative committed source", ()
     for (const requirement of requirements) {
       if (requirement.type === "browser") assert.ok(browserLedger.scenarios[requirement.id], requirement.id);
       if (requirement.type === "launch") assert.ok(launchManifest.gates[requirement.id], requirement.id);
+      if (requirement.type === "technical") assert.ok(technicalAssessment.signals[requirement.id], requirement.id);
       if (requirement.type === "localization") {
         assert.ok(localizationRegistry.releases.some(({ locale }) => locale === requirement.id), requirement.id);
       }
@@ -113,18 +135,20 @@ test("every automated binding resolves to an authoritative committed source", ()
 
 test("a complete item remains unready until all linked machine evidence passes", () => {
   const nextRegister = structuredClone(register);
-  nextRegister.findings.find(({ id }) => id === "P0-1").status = "complete";
-
-  const incomplete = build({ register: nextRegister });
-  assert.equal(incomplete.items.find(({ id }) => id === "P0-1").ready, false);
-  assert.equal(incomplete.openItemCount, 19);
-  assert.ok(incomplete.ownerQueues.some(({ owner }) => owner === "Backend/data lead and frontend lead"));
-
+  nextRegister.findings.find(({ id }) => id === "P0-5").status = "complete";
   const nextBrowser = structuredClone(browserLedger);
-  nextBrowser.scenarios.DESKTOP_DEPARTMENTS.status = "passed";
-  nextBrowser.scenarios.MOBILE_DEPARTMENTS.status = "passed";
+  nextBrowser.scenarios.DESKTOP_REQUEST_JOURNEY.status = "pending";
+  nextBrowser.scenarios.MOBILE_REQUEST_JOURNEY.status = "pending";
+
+  const incomplete = build({ register: nextRegister, browserLedger: nextBrowser });
+  assert.equal(incomplete.items.find(({ id }) => id === "P0-5").ready, false);
+  assert.equal(incomplete.openItemCount, 19);
+  assert.ok(incomplete.ownerQueues.some(({ owner }) => owner === "Product owner and frontend lead"));
+
+  nextBrowser.scenarios.DESKTOP_REQUEST_JOURNEY.status = "passed";
+  nextBrowser.scenarios.MOBILE_REQUEST_JOURNEY.status = "passed";
   const complete = build({ register: nextRegister, browserLedger: nextBrowser });
-  assert.equal(complete.items.find(({ id }) => id === "P0-1").ready, true);
+  assert.equal(complete.items.find(({ id }) => id === "P0-5").ready, true);
   assert.equal(complete.terminalItemCount, 2);
   assert.equal(complete.openItemCount, 18);
   assert.equal(complete.strictReady, false);

@@ -1,6 +1,6 @@
 # MED250 Design QA
 
-Date: 2026-07-13
+Date: 2026-07-19
 
 ## Comparison basis
 
@@ -76,5 +76,14 @@ Date: 2026-07-13
 - Typography must respond to both viewport size and content length. Images must preserve their intrinsic proportions and fit without distortion, clipping, or layout shift.
 - New and changed interfaces must be checked at minimum at 320 px, 390 px, 768 px, 1024 px, and 1440 px widths, with browser zoom and long-content states included when relevant.
 - A change that works at one captured viewport but creates overflow, clipping, excessive whitespace, or unreadable density at another viewport does not pass design QA.
+
+## Remembered identity and journey rule
+
+- WhatsApp verification is a one-time identity action, not a permanent step in every request. A verified customer number is restored from the persisted customer profile and shown as a compact saved contact.
+- Returning customers move directly from contact and fulfilment to request review. The verification step appears only for a new or changed number and advances automatically after a valid code.
+- Changing the verified number explicitly re-enters verification. Reusing the already verified number does not create a new challenge.
+- Pharmacy workspace sessions persist until sign-out or expiry. Sign-in copy must communicate that persistence without presenting a repeated onboarding wizard.
+- Each journey screen has one primary decision. Status messages use transient or compact feedback and must not duplicate content already visible in the current step.
+- Journey QA must cover first-time verification, returning verified identity, number change, expired session, loading, error, keyboard, and narrow-screen states.
 
 final result: passed

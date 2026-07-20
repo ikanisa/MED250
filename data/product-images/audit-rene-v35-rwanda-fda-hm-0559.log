@@ -1,0 +1,9 @@
+[INFO] 2026-07-17 08:19:27,986 [RapidOCR] base.py:23: Using engine_name: onnxruntime
+[INFO] 2026-07-17 08:19:28,021 [RapidOCR] download_file.py:60: File exists and is valid: /Volumes/PRO-G40/MED250/.venv-product-images/lib/python3.12/site-packages/rapidocr/models/PP-OCRv6_det_small.onnx
+[INFO] 2026-07-17 08:19:28,021 [RapidOCR] main.py:63: Using /Volumes/PRO-G40/MED250/.venv-product-images/lib/python3.12/site-packages/rapidocr/models/PP-OCRv6_det_small.onnx
+[INFO] 2026-07-17 08:19:28,056 [RapidOCR] base.py:23: Using engine_name: onnxruntime
+[INFO] 2026-07-17 08:19:28,057 [RapidOCR] download_file.py:60: File exists and is valid: /Volumes/PRO-G40/MED250/.venv-product-images/lib/python3.12/site-packages/rapidocr/models/ch_ppocr_mobile_v2.0_cls_mobile.onnx
+[INFO] 2026-07-17 08:19:28,057 [RapidOCR] main.py:63: Using /Volumes/PRO-G40/MED250/.venv-product-images/lib/python3.12/site-packages/rapidocr/models/ch_ppocr_mobile_v2.0_cls_mobile.onnx
+[INFO] 2026-07-17 08:19:28,089 [RapidOCR] base.py:23: Using engine_name: onnxruntime
+[INFO] 2026-07-17 08:19:28,108 [RapidOCR] download_file.py:60: File exists and is valid: /Volumes/PRO-G40/MED250/.venv-product-images/lib/python3.12/site-packages/rapidocr/models/PP-OCRv6_rec_small.onnx
+[INFO] 2026-07-17 08:19:28,109 [RapidOCR] main.py:63: Using /Volumes/PRO-G40/MED250/.venv-product-images/lib/python3.12/site-packages/rapidocr/models/PP-OCRv6_rec_small.onnx

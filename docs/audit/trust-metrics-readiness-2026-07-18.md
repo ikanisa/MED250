@@ -68,9 +68,8 @@ Validation completed locally:
 
 ## Remaining closure
 
-1. Apply the migration to the intended Supabase project and verify the deployed RPC through the anonymous key.
-2. Observe real request traffic until the response threshold and freshness conditions pass; do not seed or backfill synthetic production observations.
-3. Have pharmacy operations review the exact eligible-pharmacy population and response distribution, attach dated evidence, approve with an expiry, and approve the public wording.
-4. Capture desktop/mobile browser evidence for the approved state and for withdrawal/expiry suppression.
-5. Implement feedback collection only after consent, abuse controls, moderation, dispute handling, privacy review, and an owner-approved operating procedure exist.
-6. Keep pharmacy reliability ratings/rankings deferred until their separate methodology, minimum volume, appeals process, and legal/operations approvals are complete.
+1. Observe real request traffic until the response threshold and freshness conditions pass; do not seed or backfill synthetic production observations.
+2. Have pharmacy operations review the exact eligible-pharmacy population and response distribution, attach dated evidence, approve with an expiry, and approve the public wording.
+3. Capture desktop/mobile browser evidence for the approved state and for withdrawal/expiry suppression. The production `approval_required` state is already verified in the backend reconciliation receipt.
+4. Implement feedback collection only after consent, abuse controls, moderation, dispute handling, privacy review, and an owner-approved operating procedure exist.
+5. Keep pharmacy reliability ratings/rankings deferred until their separate methodology, minimum volume, appeals process, and legal/operations approvals are complete.

@@ -15,7 +15,7 @@ const manifest = JSON.parse(await readFile(
 test("keeps all fifteen production gates in a structurally valid evidence registry", () => {
   const result = validateLaunchEvidence(manifest, {
     rootDir: new URL("..", import.meta.url).pathname,
-    now: new Date("2026-07-17T12:00:00Z"),
+    now: new Date("2026-07-19T12:00:00Z"),
   });
   assert.equal(result.valid, true);
   assert.equal(result.gateCount, 15);
@@ -27,7 +27,7 @@ test("blocks production while any launch evidence remains pending", () => {
   const result = validateLaunchEvidence(manifest, {
     strict: true,
     rootDir: new URL("..", import.meta.url).pathname,
-    now: new Date("2026-07-17T12:00:00Z"),
+    now: new Date("2026-07-19T12:00:00Z"),
   });
   assert.equal(result.valid, false);
   assert.equal(result.errors.filter((error) => /production requires confirmed evidence/.test(error)).length, 15);

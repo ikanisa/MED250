@@ -1,0 +1,22 @@
+[INFO] 2026-07-17 08:22:43,718 [RapidOCR] base.py:23: Using engine_name: onnxruntime
+[INFO] 2026-07-17 08:22:43,780 [RapidOCR] download_file.py:60: File exists and is valid: /Volumes/PRO-G40/MED250/.venv-product-images/lib/python3.12/site-packages/rapidocr/models/PP-OCRv6_det_small.onnx
+[INFO] 2026-07-17 08:22:43,780 [RapidOCR] main.py:63: Using /Volumes/PRO-G40/MED250/.venv-product-images/lib/python3.12/site-packages/rapidocr/models/PP-OCRv6_det_small.onnx
+[INFO] 2026-07-17 08:22:43,810 [RapidOCR] base.py:23: Using engine_name: onnxruntime
+[INFO] 2026-07-17 08:22:43,811 [RapidOCR] download_file.py:60: File exists and is valid: /Volumes/PRO-G40/MED250/.venv-product-images/lib/python3.12/site-packages/rapidocr/models/ch_ppocr_mobile_v2.0_cls_mobile.onnx
+[INFO] 2026-07-17 08:22:43,812 [RapidOCR] main.py:63: Using /Volumes/PRO-G40/MED250/.venv-product-images/lib/python3.12/site-packages/rapidocr/models/ch_ppocr_mobile_v2.0_cls_mobile.onnx
+[INFO] 2026-07-17 08:22:43,848 [RapidOCR] base.py:23: Using engine_name: onnxruntime
+[INFO] 2026-07-17 08:22:43,860 [RapidOCR] download_file.py:60: File exists and is valid: /Volumes/PRO-G40/MED250/.venv-product-images/lib/python3.12/site-packages/rapidocr/models/PP-OCRv6_rec_small.onnx
+[INFO] 2026-07-17 08:22:43,860 [RapidOCR] main.py:63: Using /Volumes/PRO-G40/MED250/.venv-product-images/lib/python3.12/site-packages/rapidocr/models/PP-OCRv6_rec_small.onnx
+[1/1] ready rwanda-fda-hm-0544
+{
+  "started_at": "2026-07-17T06:22:38+00:00",
+  "dataset": "/Volumes/PRO-G40/MED250/outputs/019f66ce-d480-7a90-9bb7-ee6e417b5ce7/corrected/research/corrected-catalog-dataset-2026-07-15.json",
+  "selected_products": 1,
+  "published": 0,
+  "ready": 1,
+  "incomplete": 0,
+  "deferred": 0,
+  "skipped": 0,
+  "failures": [],
+  "finished_at": "2026-07-17T06:23:01+00:00"
+}

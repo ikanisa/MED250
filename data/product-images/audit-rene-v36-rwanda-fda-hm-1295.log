@@ -1,0 +1,50 @@
+[INFO] 2026-07-17 08:25:53,966 [RapidOCR] base.py:23: Using engine_name: onnxruntime
+[INFO] 2026-07-17 08:25:54,017 [RapidOCR] download_file.py:60: File exists and is valid: /Volumes/PRO-G40/MED250/.venv-product-images/lib/python3.12/site-packages/rapidocr/models/PP-OCRv6_det_small.onnx
+[INFO] 2026-07-17 08:25:54,017 [RapidOCR] main.py:63: Using /Volumes/PRO-G40/MED250/.venv-product-images/lib/python3.12/site-packages/rapidocr/models/PP-OCRv6_det_small.onnx
+[INFO] 2026-07-17 08:25:54,060 [RapidOCR] base.py:23: Using engine_name: onnxruntime
+[INFO] 2026-07-17 08:25:54,062 [RapidOCR] download_file.py:60: File exists and is valid: /Volumes/PRO-G40/MED250/.venv-product-images/lib/python3.12/site-packages/rapidocr/models/ch_ppocr_mobile_v2.0_cls_mobile.onnx
+[INFO] 2026-07-17 08:25:54,062 [RapidOCR] main.py:63: Using /Volumes/PRO-G40/MED250/.venv-product-images/lib/python3.12/site-packages/rapidocr/models/ch_ppocr_mobile_v2.0_cls_mobile.onnx
+[INFO] 2026-07-17 08:25:54,108 [RapidOCR] base.py:23: Using engine_name: onnxruntime
+[INFO] 2026-07-17 08:25:54,120 [RapidOCR] download_file.py:60: File exists and is valid: /Volumes/PRO-G40/MED250/.venv-product-images/lib/python3.12/site-packages/rapidocr/models/PP-OCRv6_rec_small.onnx
+[INFO] 2026-07-17 08:25:54,121 [RapidOCR] main.py:63: Using /Volumes/PRO-G40/MED250/.venv-product-images/lib/python3.12/site-packages/rapidocr/models/PP-OCRv6_rec_small.onnx
+[1/1] incomplete rwanda-fda-hm-1295: 0/5 images
+{
+  "started_at": "2026-07-17T06:25:50+00:00",
+  "dataset": "/Volumes/PRO-G40/MED250/outputs/019f66ce-d480-7a90-9bb7-ee6e417b5ce7/corrected/research/corrected-catalog-dataset-2026-07-15.json",
+  "selected_products": 1,
+  "published": 0,
+  "ready": 0,
+  "incomplete": 1,
+  "deferred": 0,
+  "skipped": 0,
+  "failures": [
+    {
+      "product_id": "rwanda-fda-hm-1295",
+      "name": "CIPROREN TABLETS",
+      "publication_target_count": 5,
+      "final_target_count": 5,
+      "candidate_count": 6,
+      "validated_image_count": 0,
+      "retry_count": 1,
+      "failure_policy_key": "2026-07-17.36:retry-tier-0",
+      "failed_candidate_urls": [
+        "https://www.rene.co.ug/wp-content/uploads/2025/06/ciproren.png-processed.jpg",
+        "https://www.rene.co.ug/wp-content/uploads/2025/06/ciproren.png-processed-600x600.jpg",
+        "https://www.rene.co.ug/wp-content/uploads/2025/06/ciproren.png-processed-300x300.jpg",
+        "https://www.rene.co.ug/wp-content/uploads/2025/06/ciproren.png-processed-150x150.jpg",
+        "https://www.rene.co.ug/wp-content/uploads/2025/06/ciproren.png-processed-768x768.jpg",
+        "https://www.rene.co.ug/wp-content/uploads/2025/06/ciproren.png-processed-100x100.jpg"
+      ],
+      "images": [],
+      "errors": [
+        "https://www.rene.co.ug/wp-content/uploads/2025/06/ciproren.png-processed.jpg: OCR detected a product strength or pack size that does not match 500mg 10 Tablets",
+        "https://www.rene.co.ug/wp-content/uploads/2025/06/ciproren.png-processed-600x600.jpg: OCR detected a product strength or pack size that does not match 500mg 10 Tablets",
+        "https://www.rene.co.ug/wp-content/uploads/2025/06/ciproren.png-processed-300x300.jpg: Image resolution is too low: 300x300",
+        "https://www.rene.co.ug/wp-content/uploads/2025/06/ciproren.png-processed-150x150.jpg: Image resolution is too low: 150x150",
+        "https://www.rene.co.ug/wp-content/uploads/2025/06/ciproren.png-processed-768x768.jpg: OCR detected a product strength or pack size that does not match 500mg 10 Tablets",
+        "https://www.rene.co.ug/wp-content/uploads/2025/06/ciproren.png-processed-100x100.jpg: Image resolution is too low: 100x100"
+      ]
+    }
+  ],
+  "finished_at": "2026-07-17T06:26:04+00:00"
+}

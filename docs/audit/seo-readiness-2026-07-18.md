@@ -1,7 +1,7 @@
 # MED+250 technical SEO readiness report
 
 Report date: 2026-07-18  
-Status: **local technical population corrected; live Search Console acceptance pending**
+Status: **technical population and catalog-only secondary release verified; live Search Console acceptance pending**
 
 ## Sitemap population
 
@@ -34,11 +34,9 @@ node --test tests/product-sitemap-index.test.mjs
 
 ## Remaining live owner evidence
 
-1. Verify the canonical production origin exposes 4,665 sitemap URLs and matching canonical hosts.
-2. Retire the public Sites origin or replace its stale release with a current catalog-only build. `npm run sites:verify:catalog` must pass, and customer ordering must remain disabled there.
-3. Confirm Google Search Console ownership and submit the canonical production `/sitemap.xml` only.
-4. Run URL Inspection for the homepage, every department, one medicine, one priced consumer product, and one unpriced consumer product.
-5. Record sitemap acceptance, crawl/indexing exclusions, canonical decisions, impressions, clicks, and zero-result searches on a dated cadence.
-6. Keep Goal 2 open until Search Console evidence shows no systemic crawl or canonical failure; a `site:` query alone is insufficient.
+1. Confirm Google Search Console ownership and submit the canonical production `/sitemap.xml` only.
+2. Run URL Inspection for the homepage, every department, one medicine, one priced consumer product, and one unpriced consumer product.
+3. Record sitemap acceptance, crawl/indexing exclusions, canonical decisions, impressions, clicks, and zero-result searches on a dated cadence.
+4. Keep Goal 2 open until Search Console evidence shows no systemic crawl or canonical failure; a `site:` query alone is insufficient.
 
-The canonical custom domain is the sole live ordering origin. The Sites hostname is a secondary catalogue surface and cannot satisfy live deployment evidence. The currently published Sites version predates the active remediation work and fails the catalog verifier, so it must not be treated as current or release-ready.
+The canonical custom domain is the sole live ordering origin. The Sites hostname is a secondary catalogue surface and cannot satisfy live deployment evidence. Sites version 13 was published from source revision `5ef50a296941056bd17e614dff7b35290742f50a` on 2026-07-18 and the body-free [10-route catalogue verification receipt](live-baseline-2026-07-18/16-sites-catalog-verification-5ef50a.json) passes with ordering disabled and all 4,665 sitemap URLs present.

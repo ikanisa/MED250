@@ -1,30 +1,30 @@
 # MED+250 live baseline
 
 Browser capture: 2026-07-18 09:54–10:00 CAT (Africa/Kigali)  
-Machine-verification refresh: 2026-07-18 11:48 CAT (Africa/Kigali)  
+Machine-verification refresh: 2026-07-18 16:53 CAT (Africa/Kigali)
 Target: `https://med250.gikundiro.com`  
 Audit source revision: `ALtnJHwQWBgt5JycfaOGftvKWVHBOLMKzbI9tuf-JrxPmecFrmDaMt1VqSxxxAxyOZIqpkTkcapZA8VcxqQNLq9OMDzTgjApfiO0tloLkak`  
-Local repository commit at capture: `f2bd1341ee40733c106ba347654e92c5d35207c5` (dirty worktree; not asserted as the deployed revision)
+Verified production release revision: `5ef50a296941056bd17e614dff7b35290742f50a`
 
 ## Outcome
 
 The live storefront no longer exhibits the audit's apparent 24-product ceiling. The browser loaded 168 stable product cards on the homepage, retained an accessible manual load control, and exposed late-alphabet products beyond the first server page. The sampled Beauty & Personal Care, Baby, and Health & Household department routes were populated.
 
-This is a partial Goal 0 baseline, not launch approval. The live Worker now exposes the stable release value `manual-20260718-d0e0a582b819`, and an exact-value verification pass is retained as a dated receipt. That value does not resolve to a commit in this repository, so it is deployment identity evidence but not yet immutable source-to-production traceability. Every protected production evidence gate remains pending.
+This remains a partial Goal 0 baseline, not launch approval. The live Worker exposes the exact lowercase Git revision above, and the dated deployment receipt proves the expected and observed values match across all 10 required routes. The source-bound catalogue receipt independently passes at exactly 4,657 products. All 16 governed browser scenarios now pass with 56 immutable captures; the ledger remains pending overall because independent approval has not been recorded.
 
 ## Machine checks
 
 | Check | Result |
 | --- | --- |
-| `npm run deployment:verify -- --url https://med250.gikundiro.com --mode live --expected-revision manual-20260718-d0e0a582b819` | Passed against all 10 required routes with an exact release-value match |
+| `npm run deployment:verify -- --url https://med250.gikundiro.com --mode live --expected-revision 5ef50a296941056bd17e614dff7b35290742f50a` | Passed against all 10 required routes with an exact Git-revision match |
 | `/sitemap.xml` | 4,665 `<url>` entries |
 | `robots.txt` | Public routes allowed; `/pharmacies` and pharmacy-portal query URLs disallowed; sitemap and host use the production origin |
 | Security headers | CSP, request ID, server timing, and other verifier-controlled headers present |
-| Deployment release value | `manual-20260718-d0e0a582b819`; stable across the discovery and exact-match probes, but not found in local Git history |
-| Durable receipt | [10-deployment-verification.json](live-baseline-2026-07-18/10-deployment-verification.json): allowlisted headers, response byte counts and SHA-256 digests, verifier digest, no response bodies |
-| Full live catalogue | [Source-bound catalogue report](live-catalogue-readiness-2026-07-18.md): all 39 pages and every advertised department are reachable without duplicate IDs; production still has two retired records and two multilingual search failures |
+| Deployment release value | `5ef50a296941056bd17e614dff7b35290742f50a`; expected and observed values match exactly |
+| Durable receipt | [14-deployment-verification-5ef50a.json](live-baseline-2026-07-18/14-deployment-verification-5ef50a.json): allowlisted headers, response byte counts and SHA-256 digests, verifier digest, no response bodies |
+| Full live catalogue | [Source-bound catalogue report](live-catalogue-readiness-2026-07-18.md): all 39 pages reconcile to 4,657 governed IDs; every advertised department and all six required search cases pass |
 
-The protected Cloudflare workflow injects the exact Git commit SHA as `MED250_RELEASE_REVISION`; the Worker returns it as `X-MED250-Release-Revision`. The verifier now fails when that header is absent, malformed, or differs from an optional `--expected-revision`, and can atomically write a body-free receipt through `--evidence-output`. A governed deployment receipt or an immutable commit value is still required to reconcile the current manual release value to source.
+The protected Cloudflare workflow injects the exact Git commit SHA as `MED250_RELEASE_REVISION`; the Worker returns it as `X-MED250-Release-Revision`. The verifier fails when that header is absent, malformed, or differs from `--expected-revision`, and atomically retained the body-free passing receipt linked above.
 
 ## Browser evidence
 
@@ -46,10 +46,9 @@ Accepted screenshots:
 
 The earlier `03`, `05`, and `07` captures contain loading skeletons and are retained only as transient-state diagnostics. They are not accepted as completion evidence.
 
+The newer source-bound [browser evidence ledger](../../data/audit-browser-evidence.json) supersedes those samples for P0 verification. It validates immutable PNG digests for all 16 production scenarios and 56 required captures across desktop and mobile. The controlled run is complete and bound to the passing deployment and catalogue receipts; independent approval remains pending, so the ledger's overall status remains `pending` with `execution_status: completed_awaiting_approval`.
+
 ## Remaining Goal 0 closure
 
-1. Reconcile `manual-20260718-d0e0a582b819` to a governed deployment receipt or replace it through the protected workflow with the exact deployed Git SHA, then retain an exact-match verification receipt.
-2. Capture mobile evidence and the complete request basket/status journey with approved controlled identities.
-3. Deploy the multilingual search normalization, prove its two currently failing common-use queries, and capture controlled catalogue failure/retry behavior.
-4. Retire the two identified non-product rows so the live 4,659-row catalogue reconciles exactly to the governed 4,657-row source, then reconcile price, backend-contract, and operational counts.
-5. Close the 15 named legal, operational, security, infrastructure, and physical-device gates; no local implementation or public reachability substitutes for those approvals.
+1. Obtain independent QA review and record the real approver name, role, and timestamp before promoting the browser ledger to `passed`.
+2. Reconcile price, backend-contract, operational, legal, security, infrastructure, and physical-device gates; machine checks and public reachability do not substitute for those approvals.

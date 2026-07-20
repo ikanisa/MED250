@@ -23,8 +23,8 @@
       "owner": "Backend/data lead and frontend lead",
       "dependencies": ["Approved source-backed catalogue population", "Governed live deployment"],
       "acceptance": ["Every advertised department has a non-zero requestable live population or is hidden.", "Desktop and mobile evidence covers every advertised route without a terminal loading placeholder."],
-      "evidence": ["docs/audit/live-baseline-2026-07-18.md", "docs/audit/live-catalogue-readiness-2026-07-18.md", "docs/audit/live-baseline-2026-07-18/10-deployment-verification.json", "docs/audit/live-baseline-2026-07-18/11-live-catalogue-verification.json", "tests/marketplace-products.test.mjs", "tests/rendered-html.test.mjs", "data/audit-browser-evidence.json", "scripts/validate-audit-browser-evidence.mjs", "tests/audit-browser-evidence.test.mjs", "docs/audit/browser-evidence-closure-2026-07-18.md"],
-      "remaining": ["Complete and approve both advertised-department scenarios in the shared browser ledger against an immutable deployed revision."]
+      "evidence": ["docs/audit/live-baseline-2026-07-18.md", "docs/audit/live-catalogue-readiness-2026-07-18.md", "docs/audit/live-baseline-2026-07-18/14-deployment-verification-5ef50a.json", "docs/audit/live-baseline-2026-07-18/15-live-catalogue-verification-5ef50a.json", "tests/marketplace-products.test.mjs", "tests/rendered-html.test.mjs", "data/audit-browser-evidence.json", "scripts/validate-audit-browser-evidence.mjs", "tests/audit-browser-evidence.test.mjs", "docs/audit/browser-evidence-closure-2026-07-18.md"],
+      "remaining": ["Obtain independent QA approval for the passing desktop and mobile advertised-department scenarios and bind them into the completed browser session."]
     },
     {
       "id": "P0-2",
@@ -35,8 +35,8 @@
       "owner": "Backend/data lead and QA owner",
       "dependencies": ["Live search RPC", "Immutable deployment revision"],
       "acceptance": ["Products 25 and 120 and the final page are reachable with stable totals.", "Pagination has no gaps or duplicates and preserves active query, filter, sort, and view state."],
-      "evidence": ["docs/audit/live-baseline-2026-07-18.md", "docs/audit/live-catalogue-readiness-2026-07-18.md", "docs/audit/live-baseline-2026-07-18/10-deployment-verification.json", "docs/audit/live-baseline-2026-07-18/11-live-catalogue-verification.json", "scripts/verify-live-catalogue.mjs", "tests/live-catalogue-verification.test.mjs", "tests/server-catalogue-search.test.mjs", "tests/rendered-html.test.mjs", "data/audit-browser-evidence.json", "scripts/validate-audit-browser-evidence.mjs", "tests/audit-browser-evidence.test.mjs", "docs/audit/browser-evidence-closure-2026-07-18.md"],
-      "remaining": ["Deploy the two catalogue corrections, bind an exact 4,657-ID passing receipt to the immutable release, and complete the catalogue-boundary plus failure-recovery scenarios in the shared browser ledger."]
+      "evidence": ["docs/audit/live-baseline-2026-07-18.md", "docs/audit/live-catalogue-readiness-2026-07-18.md", "docs/audit/live-baseline-2026-07-18/14-deployment-verification-5ef50a.json", "docs/audit/live-baseline-2026-07-18/15-live-catalogue-verification-5ef50a.json", "scripts/verify-live-catalogue.mjs", "tests/live-catalogue-verification.test.mjs", "tests/server-catalogue-search.test.mjs", "tests/rendered-html.test.mjs", "data/audit-browser-evidence.json", "scripts/validate-audit-browser-evidence.mjs", "tests/audit-browser-evidence.test.mjs", "docs/audit/browser-evidence-closure-2026-07-18.md"],
+      "remaining": ["Obtain independent QA approval for the passing catalogue-boundary, failure-recovery, and navigation-restoration scenarios bound to the immutable production release."]
     },
     {
       "id": "P0-3",
@@ -47,8 +47,8 @@
       "owner": "SEO/growth owner and infrastructure owner",
       "dependencies": ["Google Search Console ownership", "Approved indexable production deployment", "Canonical-domain ownership and catalog-only alternate-origin policy"],
       "acceptance": ["Search Console accepts the canonical sitemap and reports no systemic crawl or canonical failure.", "Priority homepage, department, and product URLs pass URL Inspection and begin accumulating impressions.", "The canonical custom domain is the only live ordering origin; the public Sites origin is retired or passes catalog-only verification with ordering disabled."],
-      "evidence": ["docs/audit/seo-readiness-2026-07-18.md", "docs/audit/live-baseline-2026-07-18/10-deployment-verification.json", "scripts/verify-deployed-site.mjs", "tests/deployment-verification.test.mjs", "docs/launch/production-evidence-runbook.md"],
-      "remaining": ["Verify the canonical domain and sitemap, retire or publish a current catalog-only Sites release, submit the canonical sitemap, inspect priority URLs, and retain dated Search Console evidence."]
+      "evidence": ["docs/audit/seo-readiness-2026-07-18.md", "docs/audit/live-baseline-2026-07-18/14-deployment-verification-5ef50a.json", "docs/audit/live-baseline-2026-07-18/16-sites-catalog-verification-5ef50a.json", "scripts/verify-deployed-site.mjs", "tests/deployment-verification.test.mjs", "docs/launch/production-evidence-runbook.md"],
+      "remaining": ["Submit the canonical sitemap in the verified Search Console property, inspect priority URLs, and retain dated Search Console acceptance and monitoring evidence."]
     },
     {
       "id": "P0-4",
@@ -72,7 +72,7 @@
       "dependencies": ["Approved customer vocabulary", "Controlled request-journey evidence"],
       "acceptance": ["All customer actions use the approved availability-request vocabulary.", "Desktop and mobile journeys contain no checkout, payment, purchase, or completed-order claim before pharmacy selection."],
       "evidence": ["tests/rendered-html.test.mjs", "app/marketplace.tsx", "app/terms/page.tsx", "data/audit-browser-evidence.json", "scripts/validate-audit-browser-evidence.mjs", "tests/audit-browser-evidence.test.mjs", "docs/audit/browser-evidence-closure-2026-07-18.md"],
-      "remaining": ["Complete and approve both live availability-request journey scenarios in the shared browser ledger."]
+      "remaining": ["Obtain independent QA approval for both passing live availability-request journey scenarios in the shared browser ledger."]
     },
     {
       "id": "P1-1",
@@ -83,8 +83,8 @@
       "owner": "Product owner, backend lead, and pharmacy operations lead",
       "dependencies": ["Production traffic threshold", "Expiring operations approval", "Privacy-safe aggregate contract"],
       "acceptance": ["Every displayed metric exposes source, sample, window, freshness, and suppression rules.", "No unsupported rating, stock, badge, pharmacy ranking, or availability claim is published."],
-      "evidence": ["docs/audit/trust-metrics-readiness-2026-07-18.md", "tests/public-trust-metrics.test.mjs", "supabase/migrations/20260718083000_public_trust_metrics.sql"],
-      "remaining": ["Deploy the aggregate metric migration, accumulate genuine observations, obtain operations approval, and capture approved and suppressed live states."]
+      "evidence": ["docs/audit/trust-metrics-readiness-2026-07-18.md", "tests/public-trust-metrics.test.mjs", "supabase/migrations/20260718083000_public_trust_metrics.sql", "docs/audit/live-baseline-2026-07-18/17-supabase-backend-reconciliation-5ef50a.json"],
+      "remaining": ["Accumulate genuine observations, obtain expiring operations approval, and capture the approved live state. The production RPC is deployed and its approval-required suppressed state is verified."]
     },
     {
       "id": "P1-2",
@@ -95,8 +95,8 @@
       "owner": "Product, data, and frontend leads",
       "dependencies": ["Governed recommendation population", "Non-advice safety policy", "Live catalogue reconciliation"],
       "acceptance": ["Related products remain inside approved category or medicine-compatibility boundaries.", "No non-requestable, clinically unsupported, or known non-product record enters a recommendation rail."],
-      "evidence": ["docs/audit/related-product-readiness-2026-07-18.md", "docs/audit/live-catalogue-readiness-2026-07-18.md", "docs/audit/live-baseline-2026-07-18/11-live-catalogue-verification.json", "lib/product-related.ts", "tests/product-related.test.mjs", "data/audit-browser-evidence.json", "scripts/validate-audit-browser-evidence.mjs", "tests/audit-browser-evidence.test.mjs", "docs/audit/browser-evidence-closure-2026-07-18.md"],
-      "remaining": ["Deploy the proven two-record non-product retirement, reconcile a passing 4,657-ID live index, and complete both related-product safety scenarios in the shared browser ledger."]
+      "evidence": ["docs/audit/related-product-readiness-2026-07-18.md", "docs/audit/live-catalogue-readiness-2026-07-18.md", "docs/audit/live-baseline-2026-07-18/15-live-catalogue-verification-5ef50a.json", "docs/audit/live-baseline-2026-07-18/18-live-related-products-5ef50a.json", "scripts/verify-live-related-products.mjs", "tests/live-related-products-verification.test.mjs", "lib/product-related.ts", "tests/product-related.test.mjs", "data/audit-browser-evidence.json", "scripts/validate-audit-browser-evidence.mjs", "tests/audit-browser-evidence.test.mjs", "docs/audit/browser-evidence-closure-2026-07-18.md"],
+      "remaining": ["Obtain product/data-owner approval for the fully reconciled recommendation policy and both passing related-product safety scenarios."]
     },
     {
       "id": "P1-3",
@@ -131,8 +131,8 @@
       "owner": "Backend/data lead and QA owner",
       "dependencies": ["Live search RPC", "Controlled browser evidence"],
       "acceptance": ["Late-alphabet, typo, French, and Kinyarwanda queries return relevant live results.", "Search reports stable totals and never silently falls back to an incomplete client snapshot in live mode."],
-      "evidence": ["docs/audit/live-catalogue-readiness-2026-07-18.md", "docs/audit/live-baseline-2026-07-18/11-live-catalogue-verification.json", "scripts/verify-live-catalogue.mjs", "supabase/migrations/20260718121000_restore_multilingual_marketplace_search.sql", "tests/live-catalogue-verification.test.mjs", "tests/catalogue-search.test.mjs", "tests/server-catalogue-search.test.mjs", "tests/rendered-html.test.mjs", "data/audit-browser-evidence.json", "scripts/validate-audit-browser-evidence.mjs", "tests/audit-browser-evidence.test.mjs", "docs/audit/browser-evidence-closure-2026-07-18.md"],
-      "remaining": ["Deploy the multilingual marketplace-search migration, bind a passing live RPC receipt for all six required cases to the immutable release, and complete both six-query search scenarios in the shared browser ledger."]
+      "evidence": ["docs/audit/live-catalogue-readiness-2026-07-18.md", "docs/audit/live-baseline-2026-07-18/15-live-catalogue-verification-5ef50a.json", "scripts/verify-live-catalogue.mjs", "supabase/migrations/20260718121000_restore_multilingual_marketplace_search.sql", "tests/live-catalogue-verification.test.mjs", "tests/catalogue-search.test.mjs", "tests/server-catalogue-search.test.mjs", "tests/rendered-html.test.mjs", "data/audit-browser-evidence.json", "scripts/validate-audit-browser-evidence.mjs", "tests/audit-browser-evidence.test.mjs", "docs/audit/browser-evidence-closure-2026-07-18.md"],
+      "remaining": ["Obtain independent QA approval for both passing six-query search scenarios and their live RPC receipt bound to the completed browser session."]
     },
     {
       "id": "P2-1",
@@ -144,7 +144,7 @@
       "dependencies": ["Title-quality policy", "Governed exceptions review"],
       "acceptance": ["Customer titles are concise, sentence-cased, and brand-first where source evidence permits.", "The full official regulatory value remains visible and unchanged on medicine details."],
       "evidence": ["docs/audit/product-content-quality-2026-07-18.md", "data/imports/product-content-review-pending-2026-07-18.json", "scripts/import-data/product-content-review.mjs", "lib/product-display.ts", "tests/product-display.test.mjs", "tests/product-content-review.test.mjs", "data/audit-browser-evidence.json", "scripts/validate-audit-browser-evidence.mjs", "tests/audit-browser-evidence.test.mjs", "docs/audit/browser-evidence-closure-2026-07-18.md"],
-      "remaining": ["Complete the 72 source-bound duplicate-title, missing-generic, and short-title decisions with accountable evidence; import authoritative corrections; pass strict verification; reconcile the approved display-title population to live data; then complete both representative product-content scenarios in the shared browser ledger."]
+      "remaining": ["Complete the 72 source-bound duplicate-title, missing-generic, and short-title decisions with accountable evidence; import authoritative corrections; pass strict verification; reconcile the approved display-title population to live data; then obtain approval for the passing representative product-content scenarios."]
     },
     {
       "id": "P2-2",
@@ -173,7 +173,7 @@
       "dependencies": ["Stable URL-state contract", "Live browser evidence"],
       "acceptance": ["Visual and JSON-LD breadcrumbs include the correct department/category context.", "Browser Back restores query, filters, sort, view, loaded depth, and focused product."],
       "evidence": ["docs/audit/catalogue-navigation-readiness-2026-07-18.md", "lib/catalogue-navigation-state.ts", "tests/catalogue-navigation-state.test.mjs", "tests/rendered-html.test.mjs", "app/product/[id]/page.tsx", "app/marketplace.tsx", "data/audit-browser-evidence.json", "scripts/validate-audit-browser-evidence.mjs", "tests/audit-browser-evidence.test.mjs", "docs/audit/browser-evidence-closure-2026-07-18.md"],
-      "remaining": ["Complete and approve both result-restoration scenarios in the shared browser ledger against the immutable live release."]
+      "remaining": ["Obtain independent QA approval for both passing result-restoration scenarios in the shared browser ledger against the immutable live release."]
     },
     {
       "id": "P2-4",
@@ -196,8 +196,8 @@
       "owner": "Data lead and design/creative lead",
       "dependencies": ["Source-backed description policy", "Image provenance and QA"],
       "acceptance": ["Blank description, malformed-title, unusable-image, and missing-generic rules pass for the approved catalogue.", "Every public image has governed provenance and an approved use without inventing product identity or claims."],
-      "evidence": ["docs/audit/product-content-quality-2026-07-18.md", "data/imports/product-content-review-pending-2026-07-18.json", "scripts/import-data/product-content-review.mjs", "supabase/migrations/20260718133000_govern_public_product_descriptions.sql", "supabase/migrations/20260718143000_govern_product_description_reviews.sql", "supabase/functions/review-product-descriptions/index.ts", "scripts/product-description-admin.mjs", "scripts/verify-product-description-reviewer-deployment.mjs", "tests/product-descriptions-sql.test.mjs", "tests/product-description-review-workflow.test.mjs", "tests/product-description-admin.test.mjs", "tests/product-description-reviewer-deployment.test.mjs", "docs/product-image-pipeline.md", "tests/product-content-review.test.mjs", "tests/product-images-sql.test.mjs", "data/audit-browser-evidence.json", "scripts/validate-audit-browser-evidence.mjs", "tests/audit-browser-evidence.test.mjs", "docs/audit/browser-evidence-closure-2026-07-18.md"],
-      "remaining": ["Deploy the description migrations and protected reviewer; capture a passing body-free reviewer receipt bound to backend contract 2026-07-18.3; complete the missing-generic and short-title decisions; approve exact source bytes through the governed single-product workflow; finish image provenance review; then complete both representative product-content scenarios in the shared browser ledger."]
+      "evidence": ["docs/audit/product-content-quality-2026-07-18.md", "data/imports/product-content-review-pending-2026-07-18.json", "scripts/import-data/product-content-review.mjs", "supabase/migrations/20260718133000_govern_public_product_descriptions.sql", "supabase/migrations/20260718143000_govern_product_description_reviews.sql", "supabase/functions/review-product-descriptions/index.ts", "scripts/product-description-admin.mjs", "scripts/verify-product-description-reviewer-deployment.mjs", "tests/product-descriptions-sql.test.mjs", "tests/product-description-review-workflow.test.mjs", "tests/product-description-admin.test.mjs", "tests/product-description-reviewer-deployment.test.mjs", "docs/audit/live-baseline-2026-07-18/17-supabase-backend-reconciliation-5ef50a.json", "supabase/migrations/20260718172000_index_whatsapp_outbox_foreign_keys.sql", "docs/product-image-pipeline.md", "tests/product-content-review.test.mjs", "tests/product-images-sql.test.mjs", "data/audit-browser-evidence.json", "scripts/validate-audit-browser-evidence.mjs", "tests/audit-browser-evidence.test.mjs", "docs/audit/browser-evidence-closure-2026-07-18.md"],
+      "remaining": ["Use the protected administrator credential and a controlled product identity to capture the body-free positive-path reviewer receipt; complete the missing-generic and short-title decisions; approve exact source bytes through the governed single-product workflow; finish image provenance review; then approve both passing representative product-content scenarios."]
     },
     {
       "id": "P3-1",
@@ -285,7 +285,7 @@
       { "id": "B-4", "title": "Availability expectation", "disposition": "model_appropriate_signal", "goals": [5], "items": ["P2-4"] },
       { "id": "B-5", "title": "Request tracking and status", "disposition": "verify_and_preserve", "goals": [4, 10], "items": ["P0-5"] },
       { "id": "B-6", "title": "Multi-language storefront", "disposition": "remediate", "goals": [7], "items": ["P1-4"] },
-      { "id": "B-7", "title": "Native mobile application presence", "disposition": "verify_separately", "goals": [9, 10], "items": ["P3-2"] },
+      { "id": "B-7", "title": "Native mobile application presence", "disposition": "verify_separately", "goals": [9, 10], "items": [] },
       { "id": "B-8", "title": "Live support continuity", "disposition": "model_appropriate_signal", "goals": [4, 5], "items": ["P0-5", "P2-4"] },
       { "id": "B-9", "title": "Full-catalogue search relevance", "disposition": "remediate", "goals": [1, 2], "items": ["P0-2", "P1-5"] },
       { "id": "B-10", "title": "Trust badges and certifications", "disposition": "govern_then_expand", "goals": [5, 6], "items": ["P1-1"] },

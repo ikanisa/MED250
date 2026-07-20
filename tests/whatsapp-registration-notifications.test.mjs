@@ -4,6 +4,7 @@ import test from "node:test";
 import { PGlite } from "@electric-sql/pglite";
 
 const migrationPath = new URL("../supabase/migrations/20260718064237_whatsapp_customer_verification_and_notifications.sql", import.meta.url);
+const outboxIndexMigrationPath = new URL("../supabase/migrations/20260718172000_index_whatsapp_outbox_foreign_keys.sql", import.meta.url);
 const marketplacePath = new URL("../app/marketplace.tsx", import.meta.url);
 const configPath = new URL("../supabase/config.toml", import.meta.url);
 const dispatchPath = new URL("../supabase/functions/dispatch-whatsapp-notifications/index.ts", import.meta.url);
@@ -45,6 +46,13 @@ test("pharmacy and customer WhatsApp deliveries use a durable private outbox", a
   assert.match(sql, /portal_path', 'pharmacy-portal=open&request='/);
   assert.match(sql, /portal_path', 'request='/);
   assert.match(sql, /revoke all on table public\.dawanear_whatsapp_outbox from public, anon, authenticated/);
+});
+
+test("the notification outbox indexes both foreign-key references", async () => {
+  const sql = await readFile(outboxIndexMigrationPath, "utf8");
+  assert.match(sql, /med250\.allow_product_image_governance_ddl/);
+  assert.match(sql, /create index if not exists dawanear_whatsapp_outbox_offer_id_idx[\s\S]*\(offer_id\)/);
+  assert.match(sql, /create index if not exists dawanear_whatsapp_outbox_pharmacy_id_idx[\s\S]*\(pharmacy_id\)/);
 });
 
 test("checkout includes a blocking WhatsApp verification step", async () => {

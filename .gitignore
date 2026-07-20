@@ -42,6 +42,7 @@ next-env.d.ts
 /.wrangler/
 /outputs/
 /work/
+/tmp/
 /archive/
 /supabase/.temp/
 /.venv-product-images/

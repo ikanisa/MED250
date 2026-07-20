@@ -1,31 +1,23 @@
 {
   "schemaVersion": "1.0",
-  "capturedAt": "2026-07-18T09:58:59.771Z",
+  "capturedAt": "2026-07-18T12:06:36.717Z",
   "origin": "https://uskfnszcdqpcfrhjxitl.supabase.co",
   "rpc": "dawanear_search_marketplace_catalogue",
-  "status": "failed",
+  "status": "passed",
   "expectedTotal": 4657,
-  "observedTotal": 4659,
+  "observedTotal": 4657,
   "expectedPageCount": 39,
   "capturedPageCount": 39,
-  "observedIdSha256": "b5c6abe7cc47e2e0fb7806f5a6cffc67cb94c8b40a37d07ac250d12c17c006b8",
+  "observedIdSha256": "31763863731aa2bb9fc314dabf84713839aa84ae9f7dd88dce2738d0f6e28974",
   "duplicateIds": [],
   "missingSourceIds": [],
-  "unexpectedLiveIds": [
-    "AMZ-032380909X",
-    "AMZ-B01K1S6AHM"
-  ],
+  "unexpectedLiveIds": [],
   "boundaryProducts": {
     "product25": "AMZ-B0CNG8CRRD",
     "product120": "rwanda-fda-hm-0247",
     "finalProduct": "rwanda-fda-hm-1580"
   },
-  "errors": [
-    "Live catalogue total 4659 does not match the governed source total 4657.",
-    "Live catalogue contains 2 products outside the governed source index.",
-    "french: live search returned no results for douleur.",
-    "kinyarwanda: live search returned no results for ububabare."
-  ],
+  "errors": [],
   "source": {
     "path": "data/product-sitemap-index.json",
     "sha256": "29a2c2015d42f61f03222eb250a418ae2293051bf60f4da8d46b39f11b2fe4be",
@@ -35,236 +27,236 @@
     {
       "offset": 0,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "9b55d3bf9ae269e3f85ec5e353f5591c8013c9333a97aa8cecbf95ee67ec252b"
+      "total": 4657,
+      "bodySha256": "d8e15e07135d9be3e00f2cfb7d6e1bb44fdd0491460fbeebca67f8540b0b754c"
     },
     {
       "offset": 120,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "28001a478889b4a193e9cd61e014c20574d76c7a3bd6bac581c4935db75a96e6"
+      "total": 4657,
+      "bodySha256": "27c734b66db761040331cf8ac8d665187ce91cdba803ac7d865b5723eadecdb6"
     },
     {
       "offset": 240,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "3914757f47755194e0b38992fe06542af41e53592802614dc6e036fcc5e802b0"
+      "total": 4657,
+      "bodySha256": "f551bd9617f3357b7c69b852c117f42ef80b86ff788eb96d089abaf5f8fca333"
     },
     {
       "offset": 360,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "e7f5148934bececced55d403d9333dd146537a88ac66aa3c447ce0313ff4f52d"
+      "total": 4657,
+      "bodySha256": "f847e3c694a7ba0d287224ecdcb95b0c54d0cf3782d68a9dbfaf6fae9d74a5a0"
     },
     {
       "offset": 480,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "0669eb68b4ef8637f24993a4106f3fa84915404597588343799fc844ff6eed88"
+      "total": 4657,
+      "bodySha256": "f4e0172866ff78a0487e76144e3325678601a69942fc21f17d763ffee49ab6f2"
     },
     {
       "offset": 600,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "4672dcec739ad95581bd75e57506be292e6dad530848f5fe802af10f07ef7daf"
+      "total": 4657,
+      "bodySha256": "164d3f7e808a9c373de2b2d3cc74a249c8fbec8491d11adf7b171aff84c630b0"
     },
     {
       "offset": 720,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "f498259df296668a623478175c3db727824ed11ae796f1260b86224fb5f3fa04"
+      "total": 4657,
+      "bodySha256": "c511952735dc51ddc86232ef54a9cc0786a2ad4b5c6134138d165bdfd17549c8"
     },
     {
       "offset": 840,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "3c25e70ad9fe6583c30c333032b533d6c88f62889d07f79f359a241cde5ae130"
+      "total": 4657,
+      "bodySha256": "ab71a006f4207428122c31cc2cf249bd82e7afcd271e511d48389b6eaab7d2fa"
     },
     {
       "offset": 960,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "1951ffeca2b5d8493a184854447c71ac14b16066f49ae1e513cf82392407d447"
+      "total": 4657,
+      "bodySha256": "59aa935d90a7d924b8d497c2477e6db0e6c7a4b2ca9223211cc6d6a7ade5ed2b"
     },
     {
       "offset": 1080,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "9ac6c820fc98b823767845335b9aa9d93e2596b3d2b2031e8d3456fec5104749"
+      "total": 4657,
+      "bodySha256": "d12bf1bc9cbfde5ec8121697a960570c311f5ca944c77e19c1788578baec59cc"
     },
     {
       "offset": 1200,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "054eb733d0033f6627b7bb0747fd7a8daaaa26e255866e7035c4903d077537d1"
+      "total": 4657,
+      "bodySha256": "826625a97e3dfaa0d4466ffbede57d04391b0b159f7560582f7409442151a428"
     },
     {
       "offset": 1320,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "6edee7cc36ec21669c9cc4998ed06fce569f08a57c648bfe723973060f52fefa"
+      "total": 4657,
+      "bodySha256": "ad271ec99a0e0edfb80d4671a104acaaa7bd28cd236d47da236bfce2f3e3b137"
     },
     {
       "offset": 1440,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "cfd215c4f9d1a7ab69998eb8775489586f708b3d027aa17580285d8e008cb411"
+      "total": 4657,
+      "bodySha256": "e035b5bc8e4644fd7c46033112279cf2c4ccd86515d721f02c4eb66d2744ad9b"
     },
     {
       "offset": 1560,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "39137aefd71fd410e46ddbccbbb5564b9af1aad46011bdf1431c6d982d778bed"
+      "total": 4657,
+      "bodySha256": "1fd4411d0efea6fc498f8c1696343d00ffe24b6619e7ed9e66fab61bb9f28828"
     },
     {
       "offset": 1680,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "ca58ec98a1b94bbc32d64f9ab5734e7fac965320efb2363a054bb9c9fa48427c"
+      "total": 4657,
+      "bodySha256": "0648f5ac7f1bb4d81bc44488cca8bf49e594a47314575f4b6e261105ff56da65"
     },
     {
       "offset": 1800,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "d4a01568300f8f515fa143fa4bbbea5ddd23261fb42aa4d705b8e57a3ee81e01"
+      "total": 4657,
+      "bodySha256": "9b21d9349b4897402628e370e9c1715e6d26e2311386e9a9c1d63e089e0e720b"
     },
     {
       "offset": 1920,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "bef764ee9e3839a250b493dfa5550617271784f783bd10e2fbb417a5de99a130"
+      "total": 4657,
+      "bodySha256": "14a6ae081d7583055b8b7ccd675c8952a2a4595001270aee15c7d4d7aab4227f"
     },
     {
       "offset": 2040,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "104a15654b6d9f190366835cf349eca5988556df0dbab096508469727cb56949"
+      "total": 4657,
+      "bodySha256": "f9a233e8afaa1d7c179bbd21bd3ad5f41863e8447a88832ba0345b46ccfec760"
     },
     {
       "offset": 2160,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "b94697ff5aaa5c4ab5deb35ea848608321d24d33edaee72016617156f6cef3f1"
+      "total": 4657,
+      "bodySha256": "f5f06ed1a43fafe6a03e09cf8fb5c902c8ff1589c211acc63fc24dac129fea60"
     },
     {
       "offset": 2280,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "09c5637ef29f1acb40cc02a0103a1907df479c3f07e0a9bb95f8a25b99079513"
+      "total": 4657,
+      "bodySha256": "e7cbd056f5639c0096252219dcc08a8317e579f8f096c5d46fc0255ed9233eb0"
     },
     {
       "offset": 2400,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "cf903c7579e29051cd0834e8f028c19e16a861c846c9e655b17a7865a2e089d5"
+      "total": 4657,
+      "bodySha256": "00fd3fa1dd074dfdc6d1029dea2599e31f3d4b5e928d7dbc44335af8e9184ebf"
     },
     {
       "offset": 2520,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "183d5d42897b16d2818dc696a1c5133ffeea7a8dfcbfdd20b32d7b1bf6f9e566"
+      "total": 4657,
+      "bodySha256": "3889602f6310d28febb4815534598c6f539c2b1420d8b2f80d9ddd6b1ff4c93a"
     },
     {
       "offset": 2640,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "1e9d04ed929b9867b03df85b0fc337802363ed6c0ffd5a2164a8efe8e22b8e5c"
+      "total": 4657,
+      "bodySha256": "f5ff51da2d50374e46217b98f298f80adf0aebb18f2b19701b70ac390ba9d808"
     },
     {
       "offset": 2760,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "bda0394ea7fea523678539411a9a5d55a07aa8d904672fca7aa3da8bdc0220d6"
+      "total": 4657,
+      "bodySha256": "c693c2adb337cc955a5a5f3fca4b480e1bc0b9d06842c1f8c6b4ebd1e18dc4e3"
     },
     {
       "offset": 2880,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "311778654f0b1efce67227f38746e0c2556fa160faa25c5234baa752c6a69d76"
+      "total": 4657,
+      "bodySha256": "6ff242be3573499c4dbcbfa9551270f9076bba7b1d091d1465c4b15a242100b9"
     },
     {
       "offset": 3000,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "f2ad52d59ea04931dd14a5a4724553b3cf117a6946fdbf94b586b333a9542953"
+      "total": 4657,
+      "bodySha256": "5cafa52b34ad68660e7ecb99a3132f96c82f7f064ddfdf67ba7d419f52ad8f13"
     },
     {
       "offset": 3120,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "7ab4b9c8d4b68600f39817cc0eb645dfef88d99502eeff2fa8f0cf66ebfe282b"
+      "total": 4657,
+      "bodySha256": "8461c5ecee2a3ac0829793a6bbc14dc451143024471c530ba86d249be87d1a2c"
     },
     {
       "offset": 3240,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "efead876d27816edaebc49a36803bc2bb8714e0d386ab4609bf442edcfb357fe"
+      "total": 4657,
+      "bodySha256": "50fa26da8633f59bafe6d691cb6ee5546d6613725a6e32cd2eb47d2ba5c60ce8"
     },
     {
       "offset": 3360,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "249de23dbdf470b7fa2711396db7293db5da310e024ae687739d571159787499"
+      "total": 4657,
+      "bodySha256": "d7e45afc5a02879eecbcf19c9bc811d7de203c21da5da66ed8085366b3648d15"
     },
     {
       "offset": 3480,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "78f749ed303b7a844b0c27714831ddbccef0575f23b262afd59287b0cc751469"
+      "total": 4657,
+      "bodySha256": "ee9d747a1cb860f86da5386c79b5f9fb1f09c812a6fbf647b121d085b7406335"
     },
     {
       "offset": 3600,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "53749a60c7ea9c1edad5e8bf048d3331f9d06848adcbaac9536489a59123f2f3"
+      "total": 4657,
+      "bodySha256": "cd2dd41b1f0d40a9354716e1f195e4c5cae9d7bd46a8d3165c09c728683ce64b"
     },
     {
       "offset": 3720,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "8ef73e70af769cfdc00a6e7eeec2f67f5d67b1a0bc24b734ad9fbad075b76d39"
+      "total": 4657,
+      "bodySha256": "ba7918ef41ec10a05432f637dea98702e969c8b71692d1d7664385bb8d5baea4"
     },
     {
       "offset": 3840,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "87ade65523308fcd2d2df8e2f0a01d740ab5ea73e41ca450147e3a95b0b76aa8"
+      "total": 4657,
+      "bodySha256": "e584996d9c50c4ad4199a27f96a69b68dbc23ce4abd1249854b16251f56d23e7"
     },
     {
       "offset": 3960,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "8aa0d150db3608e3628812300deb674446b6c047f701b40b1b128f3a47919c26"
+      "total": 4657,
+      "bodySha256": "4e708f21255b921ce3d9dfa44bb05f3e218478b7edc4a46873e99caa5ec45df2"
     },
     {
       "offset": 4080,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "8758f654c654b079b1f1ceba490c5bf7125e15a50dac12d17a1d7fbdaa637c77"
+      "total": 4657,
+      "bodySha256": "b325730ad08f623ad453d5d27dc76dd18123e85df22c74baa2015acb9d3b6e56"
     },
     {
       "offset": 4200,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "b258f30c1c98b42aff4a5023791fff027afbeaceea01b986d66f10978da92a8b"
+      "total": 4657,
+      "bodySha256": "aa4b2162e878b3284bc7311aec21345b1f530b2dd76e4360a1984a48301455a5"
     },
     {
       "offset": 4320,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "f2d00aaf40cf6f0902e5bfa59f7038f30a9a52ae121070d695dac0ae697ecbab"
+      "total": 4657,
+      "bodySha256": "5f7b7e59cbd8cc527560e1c7e05ec883de98b324ad72f3f719660a405e3a3c90"
     },
     {
       "offset": 4440,
       "rowCount": 120,
-      "total": 4659,
-      "bodySha256": "92a2e423844be83b0ce9175bfa4d7de3462f14aa8dfde1005199ce7d1614973e"
+      "total": 4657,
+      "bodySha256": "a1914b6ab92c505fe9b7361c8ce3f895ae3c3567996f04475cea99d3cab8defd"
     },
     {
       "offset": 4560,
-      "rowCount": 99,
-      "total": 4659,
-      "bodySha256": "f51f1b8c034607e88912951d7dcddb5949c585199819dc31000cfc5f0559163b"
+      "rowCount": 97,
+      "total": 4657,
+      "bodySha256": "554e4958d1a8f84e9c75ed3457eda2f0409bbe003d09af4f0d54458fda6d8837"
     }
   ],
   "departments": [
@@ -278,19 +270,19 @@
       "department": "Beauty & Personal Care",
       "total": 990,
       "sampleId": "AMZ-B0GNQMMSZ3",
-      "bodySha256": "67a8a1c1819858625a9bd9d760935e3c59379e1d0ddbb90d4e0b06a8605691af"
+      "bodySha256": "635422e3b42a91837e72a241b18322f7038d0c6cbffd6bd0d7bcc9690d2ef2a4"
     },
     {
       "department": "Baby",
-      "total": 423,
+      "total": 421,
       "sampleId": "AMZ-B0DX1GFWJW",
-      "bodySha256": "e6dc064a7ec164c4d87bc79faa24dedd68dfb211a274a23636432062113bb73a"
+      "bodySha256": "ce09c59f9499f62feded6f6f0b1ae4857d9dafa6f7effbe813f8976c6e4f2f5f"
     },
     {
       "department": "Health & Household",
       "total": 787,
       "sampleId": "AMZ-B09HHHZDW7",
-      "bodySha256": "5ea9d2281532184e7c5d308f7414117af029efe787d304df4886ef8c1885d474"
+      "bodySha256": "c22fa328f1b71b98855a484331b69c1505c5438a7c8ef8e4c98c2cf7202b4c79"
     }
   ],
   "searches": [
@@ -454,9 +446,40 @@
         "ibuprofen",
         "diclofenac"
       ],
-      "total": 0,
-      "bodySha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-      "sample": []
+      "total": 135,
+      "bodySha256": "ac979f9092439dfc51613b6f7991fde72a69b9cb790bc41de06bed0f9db06a80",
+      "sample": [
+        {
+          "id": "rwanda-fda-hm-1594",
+          "brand": "PARACETAMOL",
+          "generic": "Paracetamol 125 mg",
+          "explanation": "Exact product name"
+        },
+        {
+          "id": "rwanda-fda-hm-0468",
+          "brand": "ABDOL-500",
+          "generic": "Paracetamol",
+          "explanation": "Exact active ingredient"
+        },
+        {
+          "id": "rwanda-fda-hm-0503",
+          "brand": "ANDOL-1000",
+          "generic": "Paracetamol",
+          "explanation": "Exact active ingredient"
+        },
+        {
+          "id": "rwanda-fda-hm-0504",
+          "brand": "ANDOL-500",
+          "generic": "Paracetamol",
+          "explanation": "Exact active ingredient"
+        },
+        {
+          "id": "rwanda-fda-hm-0990",
+          "brand": "CALPOL SUSPENSION",
+          "generic": "PARACETAMOL",
+          "explanation": "Exact active ingredient"
+        }
+      ]
     },
     {
       "id": "kinyarwanda",
@@ -466,9 +489,40 @@
         "ibuprofen",
         "diclofenac"
       ],
-      "total": 0,
-      "bodySha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-      "sample": []
+      "total": 135,
+      "bodySha256": "ac979f9092439dfc51613b6f7991fde72a69b9cb790bc41de06bed0f9db06a80",
+      "sample": [
+        {
+          "id": "rwanda-fda-hm-1594",
+          "brand": "PARACETAMOL",
+          "generic": "Paracetamol 125 mg",
+          "explanation": "Exact product name"
+        },
+        {
+          "id": "rwanda-fda-hm-0468",
+          "brand": "ABDOL-500",
+          "generic": "Paracetamol",
+          "explanation": "Exact active ingredient"
+        },
+        {
+          "id": "rwanda-fda-hm-0503",
+          "brand": "ANDOL-1000",
+          "generic": "Paracetamol",
+          "explanation": "Exact active ingredient"
+        },
+        {
+          "id": "rwanda-fda-hm-0504",
+          "brand": "ANDOL-500",
+          "generic": "Paracetamol",
+          "explanation": "Exact active ingredient"
+        },
+        {
+          "id": "rwanda-fda-hm-0990",
+          "brand": "CALPOL SUSPENSION",
+          "generic": "PARACETAMOL",
+          "explanation": "Exact active ingredient"
+        }
+      ]
     }
   ],
   "verifier": {

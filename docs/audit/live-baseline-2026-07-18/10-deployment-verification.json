@@ -1,11 +1,11 @@
 {
   "schemaVersion": "1.0",
-  "capturedAt": "2026-07-18T09:48:25.980Z",
+  "capturedAt": "2026-07-18T12:07:33.079Z",
   "status": "passed",
   "origin": "https://med250.gikundiro.com",
   "mode": "live",
-  "observedReleaseRevision": "manual-20260718-d0e0a582b819",
-  "expectedReleaseRevision": "manual-20260718-d0e0a582b819",
+  "observedReleaseRevision": "d4ccfeec65eccb59245e35e652160fb442eedc9a",
+  "expectedReleaseRevision": "d4ccfeec65eccb59245e35e652160fb442eedc9a",
   "releaseRevisionExpectation": "matched",
   "routeCount": 10,
   "routes": [
@@ -19,15 +19,15 @@
         "cross-origin-resource-policy": "same-site",
         "permissions-policy": "camera=(), geolocation=(self), microphone=()",
         "referrer-policy": "strict-origin-when-cross-origin",
-        "server-timing": "app;dur=0.0, cfEdge;dur=5,cfOrigin;dur=0,cfWorker;dur=7",
+        "server-timing": "app;dur=0.0, cfEdge;dur=3,cfOrigin;dur=0,cfWorker;dur=10",
         "strict-transport-security": "max-age=31536000; includeSubDomains",
         "x-content-type-options": "nosniff",
         "x-frame-options": "DENY",
-        "x-med250-release-revision": "manual-20260718-d0e0a582b819",
-        "x-request-id": "7613a118-c0fc-4083-94c8-ee87e9f1b7ef"
+        "x-med250-release-revision": "d4ccfeec65eccb59245e35e652160fb442eedc9a",
+        "x-request-id": "27db3315-0450-4965-bea8-40b5f9ff1319"
       },
-      "bodyBytes": 90778,
-      "bodySha256": "8a497d9095001cfa405e5788d0d18cdd3e3a9753b9299bdc44fe22466142eb6b"
+      "bodyBytes": 107485,
+      "bodySha256": "f5a14e92fb5f4a430508f039400e18c844add63fdb8747a600e39569f47e5e2b"
     },
     {
       "route": "/categories",
@@ -39,15 +39,15 @@
         "cross-origin-resource-policy": "same-site",
         "permissions-policy": "camera=(), geolocation=(self), microphone=()",
         "referrer-policy": "strict-origin-when-cross-origin",
-        "server-timing": "app;dur=885.0, cfEdge;dur=114,cfOrigin;dur=0,cfWorker;dur=1045",
+        "server-timing": "app;dur=1054.0, cfEdge;dur=5,cfOrigin;dur=0,cfWorker;dur=1179",
         "strict-transport-security": "max-age=31536000; includeSubDomains",
         "x-content-type-options": "nosniff",
         "x-frame-options": "DENY",
-        "x-med250-release-revision": "manual-20260718-d0e0a582b819",
-        "x-request-id": "afe101a7-22bb-4b67-9726-f1aa6601afb3"
+        "x-med250-release-revision": "d4ccfeec65eccb59245e35e652160fb442eedc9a",
+        "x-request-id": "9c628078-021e-44a3-8129-e7e7b2d9a0d1"
       },
-      "bodyBytes": 85144,
-      "bodySha256": "9988849bbaca6f55b77abc89b03c875d72467625019c89afbd957b9ca8503018"
+      "bodyBytes": 101742,
+      "bodySha256": "02874623f9251654757e3cee98bee4fa4687bd7fe782392b714b33ae2e89c060"
     },
     {
       "route": "/category/medicines",
@@ -59,15 +59,15 @@
         "cross-origin-resource-policy": "same-site",
         "permissions-policy": "camera=(), geolocation=(self), microphone=()",
         "referrer-policy": "strict-origin-when-cross-origin",
-        "server-timing": "app;dur=1117.0, cfEdge;dur=5,cfOrigin;dur=0,cfWorker;dur=1275",
+        "server-timing": "app;dur=1081.0, cfEdge;dur=7,cfOrigin;dur=0,cfWorker;dur=1202",
         "strict-transport-security": "max-age=31536000; includeSubDomains",
         "x-content-type-options": "nosniff",
         "x-frame-options": "DENY",
-        "x-med250-release-revision": "manual-20260718-d0e0a582b819",
-        "x-request-id": "ba6a1b1c-4a6a-4918-a006-d350e0bfe3b2"
+        "x-med250-release-revision": "d4ccfeec65eccb59245e35e652160fb442eedc9a",
+        "x-request-id": "1b578868-cf01-43b2-9a4c-5b7cadbf9bea"
       },
-      "bodyBytes": 83914,
-      "bodySha256": "8629e984e8e9c6331445f1cc5e0c507993732e73633d69b6af7098b5e4ed0d07"
+      "bodyBytes": 94757,
+      "bodySha256": "d1bac65ebe5fb7f40920d035c4c52d518c2502b91044096c5b8fb58a18c2b0d4"
     },
     {
       "route": "/product/rwanda-fda-hm-0734",
@@ -79,15 +79,15 @@
         "cross-origin-resource-policy": "same-site",
         "permissions-policy": "camera=(), geolocation=(self), microphone=()",
         "referrer-policy": "strict-origin-when-cross-origin",
-        "server-timing": "app;dur=767.0, cfEdge;dur=5,cfOrigin;dur=0,cfWorker;dur=775",
+        "server-timing": "app;dur=282.0, cfEdge;dur=6,cfOrigin;dur=0,cfWorker;dur=291",
         "strict-transport-security": "max-age=31536000; includeSubDomains",
         "x-content-type-options": "nosniff",
         "x-frame-options": "DENY",
-        "x-med250-release-revision": "manual-20260718-d0e0a582b819",
-        "x-request-id": "a4a1d1ee-897f-4053-876a-4d6e9e4fc699"
+        "x-med250-release-revision": "d4ccfeec65eccb59245e35e652160fb442eedc9a",
+        "x-request-id": "58904d8a-5a3d-4365-a322-7bfa67b4aa05"
       },
-      "bodyBytes": 43015,
-      "bodySha256": "7c67a71c84e5cf8aab2c152d749cd67ecaa2d3ca12e47e74b8039b2f4678387e"
+      "bodyBytes": 43154,
+      "bodySha256": "44aa45a3b545d1c92da72c29f3b011f29f6d455a83752db992eb9ea73a77b6c9"
     },
     {
       "route": "/product/AMZ-B004L5JCZ4",
@@ -99,15 +99,15 @@
         "cross-origin-resource-policy": "same-site",
         "permissions-policy": "camera=(), geolocation=(self), microphone=()",
         "referrer-policy": "strict-origin-when-cross-origin",
-        "server-timing": "app;dur=646.0, cfEdge;dur=127,cfOrigin;dur=0,cfWorker;dur=689",
+        "server-timing": "app;dur=816.0, cfEdge;dur=3,cfOrigin;dur=0,cfWorker;dur=824",
         "strict-transport-security": "max-age=31536000; includeSubDomains",
         "x-content-type-options": "nosniff",
         "x-frame-options": "DENY",
-        "x-med250-release-revision": "manual-20260718-d0e0a582b819",
-        "x-request-id": "9257a0b1-88e2-4f92-ae96-f420c059092a"
+        "x-med250-release-revision": "d4ccfeec65eccb59245e35e652160fb442eedc9a",
+        "x-request-id": "0d6f3b55-f6fb-4be9-b4af-8a001b0db63a"
       },
-      "bodyBytes": 60408,
-      "bodySha256": "09f26129471ee0e1511f2e519975ae12f9a8ab78c5dc6c7ae8320f84867d6e9e"
+      "bodyBytes": 60460,
+      "bodySha256": "63568c30e99d3b647cd6bd742832defa4675edfbc44d5037b3ff723ef6920749"
     },
     {
       "route": "/robots.txt",
@@ -123,8 +123,8 @@
         "strict-transport-security": "max-age=31536000; includeSubDomains",
         "x-content-type-options": "nosniff",
         "x-frame-options": "DENY",
-        "x-med250-release-revision": "manual-20260718-d0e0a582b819",
-        "x-request-id": "d11a5f7e-3527-471d-baf8-6bd44dc4b110"
+        "x-med250-release-revision": "d4ccfeec65eccb59245e35e652160fb442eedc9a",
+        "x-request-id": "fbdeba68-128a-4608-9ff0-7038b3e9c71a"
       },
       "bodyBytes": 161,
       "bodySha256": "69ae1f331239681439f8b41677d656532a2612a017b2855006920e4a1fb0dcc6"
@@ -143,8 +143,8 @@
         "strict-transport-security": "max-age=31536000; includeSubDomains",
         "x-content-type-options": "nosniff",
         "x-frame-options": "DENY",
-        "x-med250-release-revision": "manual-20260718-d0e0a582b819",
-        "x-request-id": "09956e62-8a7f-4426-8be8-fb27b873c517"
+        "x-med250-release-revision": "d4ccfeec65eccb59245e35e652160fb442eedc9a",
+        "x-request-id": "caad5d30-de2a-46af-bb1c-056ef9ab9f97"
       },
       "bodyBytes": 840233,
       "bodySha256": "b2795f2cb214c6ff3346f519676c1e78980d1b86c77bd80c3751db7d5d7e02b8"
@@ -154,7 +154,7 @@
       "status": 200,
       "finalOrigin": "https://med250.gikundiro.com",
       "headers": {
-        "server-timing": "cfCacheStatus;desc=\"HIT\", cfEdge;dur=10,cfOrigin;dur=0"
+        "server-timing": "cfCacheStatus;desc=\"HIT\", cfEdge;dur=5,cfOrigin;dur=0"
       },
       "bodyBytes": 635,
       "bodySha256": "a97b8fd29d1a6447b0b9dffab689bcc37b9497983d4bf393a55c1c553a0cacfd"
@@ -172,7 +172,7 @@
       "status": 200,
       "finalOrigin": "https://med250.gikundiro.com",
       "headers": {
-        "server-timing": "cfCacheStatus;desc=\"HIT\", cfEdge;dur=6,cfOrigin;dur=0"
+        "server-timing": "cfCacheStatus;desc=\"HIT\", cfEdge;dur=8,cfOrigin;dur=0"
       },
       "bodyBytes": 1835,
       "bodySha256": "da9fb3fd9417b2ab7315052319e5d7f026b2d0e4f997e990e608644e6432b9c0"
@@ -181,6 +181,6 @@
   "errors": [],
   "verifier": {
     "path": "scripts/verify-deployed-site.mjs",
-    "sha256": "15b3448f8b90e255efec77d2a175396e5497493062241d8afe2c478812ed3eef"
+    "sha256": "d338c476dc667b47eade5e8b3a929616a169b62f6cf4d761f301e84fedd1b51a"
   }
 }

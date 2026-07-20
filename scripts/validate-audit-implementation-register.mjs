@@ -320,7 +320,6 @@ export async function validateAuditImplementationRegister(register, {
     "benchmark_capabilities",
     validItemIds,
     errors,
-    { requireItems: true },
   );
   const roadmap = validateSourceCoverageRecords(
     sourceCoverage.roadmap_actions,
@@ -348,6 +347,9 @@ export async function validateAuditImplementationRegister(register, {
   for (const benchmark of benchmarks) {
     if (!allowedBenchmarkDispositions.has(benchmark.disposition)) {
       errors.push(`${benchmark.id}: unsupported benchmark disposition ${benchmark.disposition}`);
+    }
+    if (benchmark.disposition !== "verify_separately" && benchmark.items.length === 0) {
+      errors.push(`${benchmark.id}: at least one governed audit-item mapping is required`);
     }
   }
   const expectedPhaseByRoadmapId = new Map(expectedSourceCoverageIds.roadmap_actions.map((id) => [id, Number(id[1])]));

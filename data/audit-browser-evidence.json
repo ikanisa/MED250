@@ -4,20 +4,20 @@
   "origin": "https://med250.gikundiro.com",
   "audit_source_revision": "ALtnJHwQWBgt5JycfaOGftvKWVHBOLMKzbI9tuf-JrxPmecFrmDaMt1VqSxxxAxyOZIqpkTkcapZA8VcxqQNLq9OMDzTgjApfiO0tloLkak",
   "status": "pending",
-  "release_revision": null,
+  "release_revision": "5ef50a296941056bd17e614dff7b35290742f50a",
   "deployment_receipt": {
-    "path": null,
-    "sha256": null
+    "path": "docs/audit/live-baseline-2026-07-18/14-deployment-verification-5ef50a.json",
+    "sha256": "614c9055e64c5d80186d7e4e4a277d6e658d4d0a48068737e0633918c8678cde"
   },
   "catalogue_receipt": {
-    "path": null,
-    "sha256": null
+    "path": "docs/audit/live-baseline-2026-07-18/15-live-catalogue-verification-5ef50a.json",
+    "sha256": "a1a79f604242e3c7633ee6b141adbc5f5e554386ff4d1b18932027c680a8d899"
   },
-  "capture_tool": null,
-  "executed_by": null,
-  "started_at": null,
-  "completed_at": null,
-  "redaction_confirmed": false,
+  "capture_tool": "in-app-browser",
+  "executed_by": "Codex controlled production executor",
+  "started_at": "2026-07-18T16:35:51.825Z",
+  "completed_at": "2026-07-18T16:53:45.316Z",
+  "redaction_confirmed": true,
   "personal_data_recorded": false,
   "credentials_recorded": false,
   "approved_by": null,
@@ -30,28 +30,52 @@
         "P0-1"
       ],
       "device": "desktop",
-      "status": "pending",
-      "note": null,
+      "status": "passed",
+      "note": "All four production department routes settled with non-empty source-backed product collections at the governed desktop viewport.",
       "captures": {
         "medicines": {
           "title": "Medicines department settled",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "The Medicines route settled with populated product groups.",
+          "route": "/category/medicines",
+          "viewport_width": 1440,
+          "viewport_height": 900,
+          "captured_at": "2026-07-18T16:36:00.593Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-desktop_departments-medicines.png",
+          "screenshot_sha256": "bc55395bb98d06515074b0d495ceb428c1aea0d9eeba9848de8576c3d9ba7936"
         },
         "personal_care": {
           "title": "Beauty and personal care department settled",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "The Beauty and Personal Care route settled with populated product groups.",
+          "route": "/category/personal-care",
+          "viewport_width": 1440,
+          "viewport_height": 900,
+          "captured_at": "2026-07-18T16:36:01.586Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-desktop_departments-personal_care.png",
+          "screenshot_sha256": "3873a2d9dac92f633282653d220787ef03b836bc2ca3330c5ddfaf932cb07d7d"
         },
         "baby_family": {
           "title": "Baby and family department settled",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "The Baby route settled with populated product groups.",
+          "route": "/category/baby-family",
+          "viewport_width": 1440,
+          "viewport_height": 900,
+          "captured_at": "2026-07-18T16:36:02.426Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-desktop_departments-baby_family.png",
+          "screenshot_sha256": "66c959fdd69a9cc1ece21e430689b3f7403d52810ec7d4f9fd2edafda48262c1"
         },
         "wellness": {
           "title": "Health and household department settled",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "The Health and Household route settled with populated product groups.",
+          "route": "/category/wellness",
+          "viewport_width": 1440,
+          "viewport_height": 900,
+          "captured_at": "2026-07-18T16:36:03.356Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-desktop_departments-wellness.png",
+          "screenshot_sha256": "d013f11e80bbabf9a94267845a821063c07e10a47dc7fc925b895e211b6554fd"
         }
       }
     },
@@ -61,28 +85,52 @@
         "P0-1"
       ],
       "device": "mobile",
-      "status": "pending",
-      "note": null,
+      "status": "passed",
+      "note": "All four production department routes settled with non-empty source-backed product collections at the governed mobile viewport.",
       "captures": {
         "medicines": {
           "title": "Medicines department settled",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "The Medicines route settled with populated product groups.",
+          "route": "/category/medicines",
+          "viewport_width": 390,
+          "viewport_height": 844,
+          "captured_at": "2026-07-18T16:36:06.751Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-mobile_departments-medicines.png",
+          "screenshot_sha256": "43ddb9458a6abfd4034eb928f6ca7b83d1632b56359442198901704e3659cd39"
         },
         "personal_care": {
           "title": "Beauty and personal care department settled",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "The Beauty and Personal Care route settled with populated product groups.",
+          "route": "/category/personal-care",
+          "viewport_width": 390,
+          "viewport_height": 844,
+          "captured_at": "2026-07-18T16:36:07.462Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-mobile_departments-personal_care.png",
+          "screenshot_sha256": "41db53146ef10f6bfc7bf2fb9fc3535dd4e2f356a2ce6a0707fb69ff63966535"
         },
         "baby_family": {
           "title": "Baby and family department settled",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "The Baby route settled with populated product groups.",
+          "route": "/category/baby-family",
+          "viewport_width": 390,
+          "viewport_height": 844,
+          "captured_at": "2026-07-18T16:36:21.260Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-mobile_departments-baby_family.png",
+          "screenshot_sha256": "3eaad5d9a7dcb6d35d7b1495183ab299fcc540c9668d5e740c73aa3370ad65a4"
         },
         "wellness": {
           "title": "Health and household department settled",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "The Health and Household route settled with populated product groups.",
+          "route": "/category/wellness",
+          "viewport_width": 390,
+          "viewport_height": 844,
+          "captured_at": "2026-07-18T16:36:22.572Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-mobile_departments-wellness.png",
+          "screenshot_sha256": "43800b9f3cd80164d58e17e487011e77bb3619eb7ba0868ba1388f29b485ec16"
         }
       }
     },
@@ -92,23 +140,41 @@
         "P0-2"
       ],
       "device": "desktop",
-      "status": "pending",
-      "note": null,
+      "status": "passed",
+      "note": "The source-bound products at positions 25, 120, and the final catalogue boundary each resolved to their production detail route.",
       "captures": {
         "product_25": {
           "title": "Product 25 is reachable",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "The verifier-bound product at position 25 resolved with its governed title and product imagery.",
+          "route": "/product/AMZ-B0CNG8CRRD",
+          "viewport_width": 1440,
+          "viewport_height": 900,
+          "captured_at": "2026-07-18T16:46:37.199Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-desktop_catalogue_boundaries-product_25.png",
+          "screenshot_sha256": "39bced3f36f6096db2e26abf4815be948e034ee7a23f8a8f68772285062b9739"
         },
         "product_120": {
           "title": "Product 120 is reachable",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "The verifier-bound product at position 120 resolved with its governed title and official catalogue fields.",
+          "route": "/product/rwanda-fda-hm-0247",
+          "viewport_width": 1440,
+          "viewport_height": 900,
+          "captured_at": "2026-07-18T16:46:39.173Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-desktop_catalogue_boundaries-product_120.png",
+          "screenshot_sha256": "8a3d820aa0fc501258e3a6669a2264159e0cb18ba727a4c87f8d5207a304a711"
         },
         "final_product": {
           "title": "Final catalogue product is reachable",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "The verifier-bound final catalogue product resolved with its governed title and official catalogue fields.",
+          "route": "/product/rwanda-fda-hm-1580",
+          "viewport_width": 1440,
+          "viewport_height": 900,
+          "captured_at": "2026-07-18T16:46:41.107Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-desktop_catalogue_boundaries-final_product.png",
+          "screenshot_sha256": "e09b8ba65aed906078631a71464a62e7ddfc7a8f1ffacbc74f4f549a704d267b"
         }
       }
     },
@@ -118,23 +184,41 @@
         "P0-2"
       ],
       "device": "mobile",
-      "status": "pending",
-      "note": null,
+      "status": "passed",
+      "note": "The source-bound products at positions 25, 120, and the final catalogue boundary each resolved to their production detail route.",
       "captures": {
         "product_25": {
           "title": "Product 25 is reachable",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "The verifier-bound product at position 25 resolved with its governed title and product imagery.",
+          "route": "/product/AMZ-B0CNG8CRRD",
+          "viewport_width": 390,
+          "viewport_height": 844,
+          "captured_at": "2026-07-18T16:46:47.526Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-mobile_catalogue_boundaries-product_25.png",
+          "screenshot_sha256": "ed16bccd2bd01706257c0877753908b8bed16dae8c5a10a3d92ea0ce426f7be8"
         },
         "product_120": {
           "title": "Product 120 is reachable",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "The verifier-bound product at position 120 resolved with its governed title and official catalogue fields.",
+          "route": "/product/rwanda-fda-hm-0247",
+          "viewport_width": 390,
+          "viewport_height": 844,
+          "captured_at": "2026-07-18T16:46:49.426Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-mobile_catalogue_boundaries-product_120.png",
+          "screenshot_sha256": "dcc788e02e066c0e3f5fb1a9e8fa9857ca10220e2851cee94f8082cf61d39e19"
         },
         "final_product": {
           "title": "Final catalogue product is reachable",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "The verifier-bound final catalogue product resolved with its governed title and official catalogue fields.",
+          "route": "/product/rwanda-fda-hm-1580",
+          "viewport_width": 390,
+          "viewport_height": 844,
+          "captured_at": "2026-07-18T16:46:51.314Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-mobile_catalogue_boundaries-final_product.png",
+          "screenshot_sha256": "065355f67d99727d5b7a3371969e99dcfea105e8b3c585105493ff4bfe9473af"
         }
       }
     },
@@ -144,23 +228,41 @@
         "P0-2"
       ],
       "device": "desktop",
-      "status": "pending",
-      "note": null,
+      "status": "passed",
+      "note": "A controlled offline catalogue refresh exposed a bounded error, an active retry state, and a settled live recovery without retaining private data.",
       "captures": {
         "failed_state": {
           "title": "Bounded catalogue failure is visible",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "The offline refresh displayed a bounded catalogue failure while preserving the previously settled products.",
+          "route": "/?search=zinc",
+          "viewport_width": 1440,
+          "viewport_height": 900,
+          "captured_at": "2026-07-18T16:44:01.351Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-desktop_failure_recovery-failed_state.png",
+          "screenshot_sha256": "062dc23826a2690f4183029013f4d5a33b8b9167f62228eccfb580d17f3dd76c"
         },
         "retry_state": {
           "title": "Retry action is available and active",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "The retry action entered a visible updating state after connectivity was restored.",
+          "route": "/?search=zinc",
+          "viewport_width": 1440,
+          "viewport_height": 900,
+          "captured_at": "2026-07-18T16:44:01.853Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-desktop_failure_recovery-retry_state.png",
+          "screenshot_sha256": "acf27a91a4927bc758fcdde369e41bfefe6df0aca256a1c05da0449e3c6cc893"
         },
         "recovered_state": {
           "title": "Catalogue returns to a settled result state",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "The catalogue recovered to populated zinc results with the failure alert cleared.",
+          "route": "/?search=zinc",
+          "viewport_width": 1440,
+          "viewport_height": 900,
+          "captured_at": "2026-07-18T16:44:03.558Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-desktop_failure_recovery-recovered_state.png",
+          "screenshot_sha256": "49443e1a5e21b77ea05dafe194204f6a9a20c815cf75d262925b03d0905c5e6f"
         }
       }
     },
@@ -170,23 +272,41 @@
         "P0-2"
       ],
       "device": "mobile",
-      "status": "pending",
-      "note": null,
+      "status": "passed",
+      "note": "A controlled offline catalogue refresh exposed a bounded error, an active retry state, and a settled live recovery without retaining private data.",
       "captures": {
         "failed_state": {
           "title": "Bounded catalogue failure is visible",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "The offline refresh displayed a bounded catalogue failure while preserving the previously settled products.",
+          "route": "/?search=zinc",
+          "viewport_width": 390,
+          "viewport_height": 844,
+          "captured_at": "2026-07-18T16:45:16.611Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-mobile_failure_recovery-failed_state.png",
+          "screenshot_sha256": "86169fc4437360d02d979771e33cdf1f9f91118e1799c281b49dd2a31db9447c"
         },
         "retry_state": {
           "title": "Retry action is available and active",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "The retry action entered a visible updating state after connectivity was restored.",
+          "route": "/?search=zinc",
+          "viewport_width": 390,
+          "viewport_height": 844,
+          "captured_at": "2026-07-18T16:45:16.998Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-mobile_failure_recovery-retry_state.png",
+          "screenshot_sha256": "0f912ef9408b3078b0be7c38e55c579622118f8f42c9791942336ccfb5d16a2e"
         },
         "recovered_state": {
           "title": "Catalogue returns to a settled result state",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "The catalogue recovered to populated zinc results with the failure alert cleared.",
+          "route": "/?search=zinc",
+          "viewport_width": 390,
+          "viewport_height": 844,
+          "captured_at": "2026-07-18T16:45:19.179Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-mobile_failure_recovery-recovered_state.png",
+          "screenshot_sha256": "e8f962e753df394e3214be1f8d1b8b5ccffcbb9c2769293776cffcec4832f53f"
         }
       }
     },
@@ -196,28 +316,52 @@
         "P0-5"
       ],
       "device": "desktop",
-      "status": "pending",
-      "note": null,
+      "status": "passed",
+      "note": "Controlled production checks passed without retaining private data.",
       "captures": {
         "product_action": {
           "title": "Product action uses the approved request vocabulary",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Product detail uses the approved Add to request vocabulary with an empty starting basket.",
+          "route": "/product/AMZ-B06Y15D1LH",
+          "viewport_width": 1440,
+          "viewport_height": 900,
+          "captured_at": "2026-07-18T16:40:10.578Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-desktop_request_journey-product_action.png",
+          "screenshot_sha256": "1cc9f9395389ad577b9d18d3528ec51cf624c983e354e383f50ae79df9cce946"
         },
         "request_basket": {
           "title": "Request basket shows the selected product without a purchase claim",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Request basket contains only the selected evidence product and makes no purchase claim.",
+          "route": "/",
+          "viewport_width": 1440,
+          "viewport_height": 900,
+          "captured_at": "2026-07-18T16:40:30.867Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-desktop_request_journey-request_basket.png",
+          "screenshot_sha256": "f5b24a9647cb3dc5e296c6267e27c776995ab8c31d7ba8c30a25f056f2ddf251"
         },
         "no_payment_boundary": {
           "title": "No-payment-before-confirmation disclosure is visible",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Product action explicitly states that pharmacy confirmation happens before any payment.",
+          "route": "/product/AMZ-B06Y15D1LH",
+          "viewport_width": 1440,
+          "viewport_height": 900,
+          "captured_at": "2026-07-18T16:40:10.797Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-desktop_request_journey-no_payment_boundary.png",
+          "screenshot_sha256": "1cc9f9395389ad577b9d18d3528ec51cf624c983e354e383f50ae79df9cce946"
         },
         "preselection_status": {
           "title": "Pre-selection state does not claim an order or payment succeeded",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Details remain incomplete and make no order, payment, or success claim; no personal contact data is retained.",
+          "route": "/",
+          "viewport_width": 1440,
+          "viewport_height": 900,
+          "captured_at": "2026-07-18T16:52:34.998Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-desktop_request_journey-preselection_status.png",
+          "screenshot_sha256": "eacda2576b7f4b93a63ae445bddf72e183b4fab1a5f52d5cfe991f05bee6f074"
         }
       }
     },
@@ -227,28 +371,52 @@
         "P0-5"
       ],
       "device": "mobile",
-      "status": "pending",
-      "note": null,
+      "status": "passed",
+      "note": "Controlled production checks passed without retaining private data.",
       "captures": {
         "product_action": {
           "title": "Product action uses the approved request vocabulary",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Product detail uses the approved Add to request vocabulary with an empty starting basket.",
+          "route": "/product/AMZ-B06Y15D1LH",
+          "viewport_width": 390,
+          "viewport_height": 844,
+          "captured_at": "2026-07-18T16:41:20.190Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-mobile_request_journey-product_action.png",
+          "screenshot_sha256": "feb0588ed47211781f48df16b5ee23e38635f6642cddcb74fabaa69113816893"
         },
         "request_basket": {
           "title": "Request basket shows the selected product without a purchase claim",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Request basket contains only the selected evidence product and makes no purchase claim.",
+          "route": "/",
+          "viewport_width": 390,
+          "viewport_height": 844,
+          "captured_at": "2026-07-18T16:41:21.669Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-mobile_request_journey-request_basket.png",
+          "screenshot_sha256": "b284b531159c3a3229dd65d03cf9553ed11a45c98a1d61f5804bf0b76508f69d"
         },
         "no_payment_boundary": {
           "title": "No-payment-before-confirmation disclosure is visible",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Product action explicitly states that pharmacy confirmation happens before any payment.",
+          "route": "/product/AMZ-B06Y15D1LH",
+          "viewport_width": 390,
+          "viewport_height": 844,
+          "captured_at": "2026-07-18T16:41:20.307Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-mobile_request_journey-no_payment_boundary.png",
+          "screenshot_sha256": "feb0588ed47211781f48df16b5ee23e38635f6642cddcb74fabaa69113816893"
         },
         "preselection_status": {
           "title": "Pre-selection state does not claim an order or payment succeeded",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Details remain incomplete and make no order, payment, or success claim; no personal contact data is retained.",
+          "route": "/",
+          "viewport_width": 390,
+          "viewport_height": 844,
+          "captured_at": "2026-07-18T16:53:13.832Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-mobile_request_journey-preselection_status.png",
+          "screenshot_sha256": "ceff827644f8dc84e651bd44a48ceb6a7139e2578820886d671086624ae70f92"
         }
       }
     },
@@ -258,23 +426,41 @@
         "P1-2"
       ],
       "device": "desktop",
-      "status": "pending",
-      "note": null,
+      "status": "passed",
+      "note": "Controlled production checks passed without retaining private data.",
       "captures": {
         "medicine_rail": {
           "title": "Representative medicine rail uses compatible source evidence",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Medicine related-products rail contains governed same-category catalogue products.",
+          "route": "/product/rwanda-fda-hm-0468",
+          "viewport_width": 1440,
+          "viewport_height": 900,
+          "captured_at": "2026-07-18T16:37:18.801Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-desktop_related_products-medicine_rail.png",
+          "screenshot_sha256": "98da4089f953122839e7e1e2e55cce2828ec0001811a42ab3efa9175538c069c"
         },
         "consumer_rail": {
           "title": "Representative consumer rail stays in approved taxonomy",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Consumer related-products rail contains source-backed same-category products.",
+          "route": "/product/AMZ-B000052XCI",
+          "viewport_width": 1440,
+          "viewport_height": 900,
+          "captured_at": "2026-07-18T16:37:21.255Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-desktop_related_products-consumer_rail.png",
+          "screenshot_sha256": "af7933786acb027b28083ee85d2c0a58e379ddfb7578a54743d2b94d214ee372"
         },
         "fail_closed_empty": {
           "title": "Insufficient evidence produces no recommendation rail",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "A current medicine without sufficient dosage-match evidence renders normally and omits the related-products rail.",
+          "route": "/product/rwanda-fda-hm-0001",
+          "viewport_width": 1440,
+          "viewport_height": 900,
+          "captured_at": "2026-07-18T16:47:46.021Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-desktop_related_products-fail_closed_empty.png",
+          "screenshot_sha256": "9fe3fcb11d2e061eef938a990c03211106c27f5f525dbce98d03bdcc40ff04b7"
         }
       }
     },
@@ -284,23 +470,41 @@
         "P1-2"
       ],
       "device": "mobile",
-      "status": "pending",
-      "note": null,
+      "status": "passed",
+      "note": "Controlled production checks passed without retaining private data.",
       "captures": {
         "medicine_rail": {
           "title": "Representative medicine rail uses compatible source evidence",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Mobile medicine related-products rail contains governed same-category catalogue products.",
+          "route": "/product/rwanda-fda-hm-0468",
+          "viewport_width": 390,
+          "viewport_height": 844,
+          "captured_at": "2026-07-18T16:39:27.777Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-mobile_related_products-medicine_rail.png",
+          "screenshot_sha256": "27e356e119afa23023927ebfb3242c3e39639ac3475f441670a2f9efacab1eb3"
         },
         "consumer_rail": {
           "title": "Representative consumer rail stays in approved taxonomy",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Mobile consumer related-products rail contains source-backed same-category products.",
+          "route": "/product/AMZ-B000052XCI",
+          "viewport_width": 390,
+          "viewport_height": 844,
+          "captured_at": "2026-07-18T16:39:29.725Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-mobile_related_products-consumer_rail.png",
+          "screenshot_sha256": "a9eee22f201f28dc9c8efb70c2718d53bb36501166f0d8c2db67b47120ae024b"
         },
         "fail_closed_empty": {
           "title": "Insufficient evidence produces no recommendation rail",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "The mobile medicine detail without sufficient dosage-match evidence renders normally and omits the related-products rail.",
+          "route": "/product/rwanda-fda-hm-0001",
+          "viewport_width": 390,
+          "viewport_height": 844,
+          "captured_at": "2026-07-18T16:47:48.927Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-mobile_related_products-fail_closed_empty.png",
+          "screenshot_sha256": "d11848baa76e86a76b85c433669d8342339ff112ca09f19c6582abaeda209e1d"
         }
       }
     },
@@ -310,38 +514,74 @@
         "P1-5"
       ],
       "device": "desktop",
-      "status": "pending",
-      "note": null,
+      "status": "passed",
+      "note": "Controlled production checks passed without retaining private data.",
       "captures": {
         "paracetamol": {
           "title": "Paracetamol search result",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Paracetamol search returns governed medicine matches.",
+          "route": "/?search=paracetamol",
+          "viewport_width": 1440,
+          "viewport_height": 900,
+          "captured_at": "2026-07-18T16:49:37.408Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-desktop_search_matrix-paracetamol.png",
+          "screenshot_sha256": "2b1d928991d02a9bd42f121f7cf255e16c5bbf1b4eb40d7be822327ee1ccfcb9"
         },
         "zinc": {
           "title": "Late-alphabet zinc search result",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Zinc search returns matching products.",
+          "route": "/?search=zinc",
+          "viewport_width": 1440,
+          "viewport_height": 900,
+          "captured_at": "2026-07-18T16:49:40.156Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-desktop_search_matrix-zinc.png",
+          "screenshot_sha256": "3c943d7310a3987b2277c037cdb04ab14d4b4006e3c897c50c98c0e744f0ab65"
         },
         "omeprazole": {
           "title": "Omeprazole search result",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Omeprazole search returns matching medicine products.",
+          "route": "/?search=omeprazole",
+          "viewport_width": 1440,
+          "viewport_height": 900,
+          "captured_at": "2026-07-18T16:49:42.863Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-desktop_search_matrix-omeprazole.png",
+          "screenshot_sha256": "f4605a9641289efc80b4ab5ef41c0200ab82f1e0e04dd15be5e7c90485a327d0"
         },
         "typo": {
           "title": "Clinically meaningful typo recovery",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Typo-tolerant search resolves brinzolamde to Brinzolamide.",
+          "route": "/?search=brinzolamde",
+          "viewport_width": 1440,
+          "viewport_height": 900,
+          "captured_at": "2026-07-18T16:49:45.526Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-desktop_search_matrix-typo.png",
+          "screenshot_sha256": "e0337f4ae24fa4a0c493d90d3b5cbab28ae101cd3e2a57c550518041b8a7df6e"
         },
         "french": {
           "title": "French common-use query result",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "French symptom search resolves douleur to pain-relief products.",
+          "route": "/?search=douleur",
+          "viewport_width": 1440,
+          "viewport_height": 900,
+          "captured_at": "2026-07-18T16:49:48.489Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-desktop_search_matrix-french.png",
+          "screenshot_sha256": "5f9d39657df5eba6b485ee4caffca0cae775dac317f1af692cbb9fbc5780fb7b"
         },
         "kinyarwanda": {
           "title": "Kinyarwanda common-use query result",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Kinyarwanda symptom search resolves ububabare to pain-relief products.",
+          "route": "/?search=ububabare",
+          "viewport_width": 1440,
+          "viewport_height": 900,
+          "captured_at": "2026-07-18T16:49:51.228Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-desktop_search_matrix-kinyarwanda.png",
+          "screenshot_sha256": "8966fc94104ee935aff2c4d356da6994aa322a84c0eb410fa36c3b42048e1a99"
         }
       }
     },
@@ -351,38 +591,74 @@
         "P1-5"
       ],
       "device": "mobile",
-      "status": "pending",
-      "note": null,
+      "status": "passed",
+      "note": "Controlled production checks passed without retaining private data.",
       "captures": {
         "paracetamol": {
           "title": "Paracetamol search result",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Paracetamol search returns governed medicine matches.",
+          "route": "/?search=paracetamol",
+          "viewport_width": 390,
+          "viewport_height": 844,
+          "captured_at": "2026-07-18T16:49:53.874Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-mobile_search_matrix-paracetamol.png",
+          "screenshot_sha256": "9ed0d38256263d5c729310c9e2b71c63caa247615acb5fc73c512415b335996d"
         },
         "zinc": {
           "title": "Late-alphabet zinc search result",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Zinc search returns matching products.",
+          "route": "/?search=zinc",
+          "viewport_width": 390,
+          "viewport_height": 844,
+          "captured_at": "2026-07-18T16:49:56.554Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-mobile_search_matrix-zinc.png",
+          "screenshot_sha256": "52b3264e3037587d696bbe81d275521bd9411c11c5be81a3437dc175820b101d"
         },
         "omeprazole": {
           "title": "Omeprazole search result",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Omeprazole search returns matching medicine products.",
+          "route": "/?search=omeprazole",
+          "viewport_width": 390,
+          "viewport_height": 844,
+          "captured_at": "2026-07-18T16:49:59.235Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-mobile_search_matrix-omeprazole.png",
+          "screenshot_sha256": "beaf6ba8cafa347ff0829edce5f5b73794ccc27e5e35693994c20761f3d5aebd"
         },
         "typo": {
           "title": "Clinically meaningful typo recovery",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Typo-tolerant search resolves brinzolamde to Brinzolamide.",
+          "route": "/?search=brinzolamde",
+          "viewport_width": 390,
+          "viewport_height": 844,
+          "captured_at": "2026-07-18T16:50:01.824Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-mobile_search_matrix-typo.png",
+          "screenshot_sha256": "440a630af2a04dfb10ad25266a86cd16aafce06dc64117815a0d5ee93764f4c7"
         },
         "french": {
           "title": "French common-use query result",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "French symptom search resolves douleur to pain-relief products.",
+          "route": "/?search=douleur",
+          "viewport_width": 390,
+          "viewport_height": 844,
+          "captured_at": "2026-07-18T16:50:04.505Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-mobile_search_matrix-french.png",
+          "screenshot_sha256": "c845bd14006f384701a9d74f9688b94d0b1c75c63d66dbae3af0d2223363284c"
         },
         "kinyarwanda": {
           "title": "Kinyarwanda common-use query result",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Kinyarwanda symptom search resolves ububabare to pain-relief products.",
+          "route": "/?search=ububabare",
+          "viewport_width": 390,
+          "viewport_height": 844,
+          "captured_at": "2026-07-18T16:50:07.113Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-mobile_search_matrix-kinyarwanda.png",
+          "screenshot_sha256": "080cf0dcb4f38a393d507af73b46df6120644360dc228c166501cb3f9fc27b3c"
         }
       }
     },
@@ -392,23 +668,41 @@
         "P2-3"
       ],
       "device": "desktop",
-      "status": "pending",
-      "note": null,
+      "status": "passed",
+      "note": "Controlled production checks passed without retaining private data.",
       "captures": {
         "configured_results": {
           "title": "Configured query, filters, sort, and view",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Search, sort, list view, depth, and focused product are encoded in the production URL.",
+          "route": "/?search=omeprazole&sort=az&view=list&shown=120&position=rwanda-fda-hm-0970",
+          "viewport_width": 1440,
+          "viewport_height": 900,
+          "captured_at": "2026-07-18T16:42:21.804Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-desktop_navigation_restore-configured_results.png",
+          "screenshot_sha256": "d8724187cf549c9c9cf85796b656c98b70f97757b4eabf8f2fadf060f98138d3"
         },
         "later_product": {
           "title": "Product opened from a later result batch",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Focused result opens its production product-detail route.",
+          "route": "/product/rwanda-fda-hm-0970",
+          "viewport_width": 1440,
+          "viewport_height": 900,
+          "captured_at": "2026-07-18T16:42:26.478Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-desktop_navigation_restore-later_product.png",
+          "screenshot_sha256": "1dedfc0974abb0bc0660750f2e2a87340d8fc462f673c1573430af3c05808551"
         },
         "restored_results": {
           "title": "Back navigation restores URL, controls, depth, position, and focus",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Browser Back restores query controls, catalogue depth, and focused product.",
+          "route": "/?search=omeprazole&sort=az&view=list&shown=120&position=rwanda-fda-hm-0970",
+          "viewport_width": 1440,
+          "viewport_height": 900,
+          "captured_at": "2026-07-18T16:42:38.447Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-desktop_navigation_restore-restored_results.png",
+          "screenshot_sha256": "a042a49523adee4889ed999eaf5e490a8cecd63afb8bf65f329f967ca1efc043"
         }
       }
     },
@@ -418,23 +712,41 @@
         "P2-3"
       ],
       "device": "mobile",
-      "status": "pending",
-      "note": null,
+      "status": "passed",
+      "note": "Controlled production checks passed without retaining private data.",
       "captures": {
         "configured_results": {
           "title": "Configured query, filters, sort, and view",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Search, sort, list view, depth, and focused product are encoded in the production URL.",
+          "route": "/?search=omeprazole&sort=az&view=list&shown=120&position=rwanda-fda-hm-0970",
+          "viewport_width": 390,
+          "viewport_height": 844,
+          "captured_at": "2026-07-18T16:42:52.978Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-mobile_navigation_restore-configured_results.png",
+          "screenshot_sha256": "011b0eeea1f3c98055dbcbb9fd02c6c4c4f3c64bcedc5abc95d09d16ede015a5"
         },
         "later_product": {
           "title": "Product opened from a later result batch",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Focused result opens its production product-detail route.",
+          "route": "/product/rwanda-fda-hm-0970",
+          "viewport_width": 390,
+          "viewport_height": 844,
+          "captured_at": "2026-07-18T16:42:56.178Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-mobile_navigation_restore-later_product.png",
+          "screenshot_sha256": "de32cf13da2588d71cdd0fd660b83783ef007485d08c473acd9e7a56d288fef9"
         },
         "restored_results": {
           "title": "Back navigation restores URL, controls, depth, position, and focus",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Browser Back restores query controls, catalogue depth, and focused product.",
+          "route": "/?search=omeprazole&sort=az&view=list&shown=120&position=rwanda-fda-hm-0970",
+          "viewport_width": 390,
+          "viewport_height": 844,
+          "captured_at": "2026-07-18T16:43:07.867Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-mobile_navigation_restore-restored_results.png",
+          "screenshot_sha256": "6b6949bd2050d91ce77b90b99af021b6ba491fbd935ef1fb39d06d32892836be"
         }
       }
     },
@@ -445,18 +757,30 @@
         "P2-5"
       ],
       "device": "desktop",
-      "status": "pending",
-      "note": null,
+      "status": "passed",
+      "note": "Controlled production checks passed without retaining private data.",
       "captures": {
         "medicine_detail": {
           "title": "Medicine detail preserves concise and exact official titles",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Medicine detail exposes governed registration, form, pack, and manufacturer content.",
+          "route": "/product/rwanda-fda-hm-0734",
+          "viewport_width": 1440,
+          "viewport_height": 900,
+          "captured_at": "2026-07-18T16:46:43.139Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-desktop_product_content-medicine_detail.png",
+          "screenshot_sha256": "54ca2735de85aa2dcd297eeac24018b15180fe63929253c2ef5fb825ffba36d2"
         },
         "consumer_detail": {
           "title": "Consumer detail exposes only approved description and imagery",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Consumer detail exposes source-backed title, gallery, pack, and request action.",
+          "route": "/product/AMZ-B06Y15D1LH",
+          "viewport_width": 1440,
+          "viewport_height": 900,
+          "captured_at": "2026-07-18T16:46:45.371Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-desktop_product_content-consumer_detail.png",
+          "screenshot_sha256": "3776c17248aeac8e501f632a2556eeb40108c50e5013cca866df1229d743678a"
         }
       }
     },
@@ -467,20 +791,33 @@
         "P2-5"
       ],
       "device": "mobile",
-      "status": "pending",
-      "note": null,
+      "status": "passed",
+      "note": "Controlled production checks passed without retaining private data.",
       "captures": {
         "medicine_detail": {
           "title": "Medicine detail preserves concise and exact official titles",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Mobile medicine detail exposes governed registration, form, pack, and manufacturer content.",
+          "route": "/product/rwanda-fda-hm-0734",
+          "viewport_width": 390,
+          "viewport_height": 844,
+          "captured_at": "2026-07-18T16:46:53.144Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-mobile_product_content-medicine_detail.png",
+          "screenshot_sha256": "559a20217679a22ed222acb1fde2601012eef21a30767666226604e6ebfe04c9"
         },
         "consumer_detail": {
           "title": "Consumer detail exposes only approved description and imagery",
-          "status": "pending",
-          "note": null
+          "status": "passed",
+          "note": "Mobile consumer detail exposes source-backed title, gallery, pack, and request action.",
+          "route": "/product/AMZ-B06Y15D1LH",
+          "viewport_width": 390,
+          "viewport_height": 844,
+          "captured_at": "2026-07-18T16:46:55.269Z",
+          "screenshot_path": "docs/audit/browser-evidence/release-5ef50a-mobile_product_content-consumer_detail.png",
+          "screenshot_sha256": "7b595df8b8802486e3ea214c85346576e927eb1bed9cbe3210cea1ff4687475b"
         }
       }
     }
-  }
+  },
+  "execution_status": "completed_awaiting_approval"
 }

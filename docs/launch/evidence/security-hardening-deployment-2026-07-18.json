@@ -1,0 +1,45 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_SECURITY_HARDENING_DEPLOYED",
+  "evidence_type": "deployment_receipt",
+  "status": "complete",
+  "title": "Production backend reconciliation and outbox index deployment",
+  "summary": "The live MED+250 schema reconciles contract 2026-07-18.3 and every reviewed governance effect. Two missing notification-outbox foreign-key indexes were installed through the protected transaction-local DDL override and validated in production.",
+  "recorded_at": "2026-07-18T17:24:14Z",
+  "recorded_by": "Codex automated verifier",
+  "recorded_role": "Release verification agent",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Backend contract reconciliation",
+      "status": "passed",
+      "detail": "The live contract function declares version 2026-07-18.3 with the expected 31-function and 24-table MED+250 boundaries."
+    },
+    {
+      "name": "Description governance deployment",
+      "status": "passed",
+      "detail": "All thirteen governance columns, both mandatory product-description triggers, the immutable review ledger, and the single-product review RPC exist with the intended privileges."
+    },
+    {
+      "name": "Trust and catalogue deployment",
+      "status": "passed",
+      "detail": "The aggregate trust function, approval table, multilingual normalization, extended member-pharmacy profile, and both audited catalogue retirements are present in production."
+    },
+    {
+      "name": "Outbox index deployment",
+      "status": "passed",
+      "detail": "Valid offer-reference and pharmacy-reference indexes now cover both notification-outbox foreign keys, and the production advisor reports zero remaining MED+250 unindexed foreign keys."
+    },
+    {
+      "name": "Source evidence binding",
+      "status": "passed",
+      "detail": "The redacted reconciliation receipt is bound to Git revision 5ef50a296941056bd17e614dff7b35290742f50a and retains no database rows, credentials, or response bodies."
+    }
+  ],
+  "deployed_by": "Codex release operator",
+  "deployer_role": "Automated backend release operator",
+  "deployed_at": "2026-07-18T17:21:30Z",
+  "environment": "MED+250 production database",
+  "release_identifier": "med250-backend-2026-07-18.3-reconciliation-5ef50a"
+}

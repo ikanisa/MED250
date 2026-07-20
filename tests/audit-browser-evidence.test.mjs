@@ -112,16 +112,18 @@ function createPassingFixture() {
   return { ledger, root };
 }
 
-test("committed audit browser plan is complete but cannot pass strict closure", () => {
+test("completed audit browser execution is valid but cannot pass strict closure without approval", () => {
   const planned = validateAuditBrowserEvidence(pendingLedger, { rootDir: repositoryRoot });
   assert.equal(planned.valid, true, planned.errors.join("\n"));
   assert.equal(planned.scenarioCount, 16);
   assert.equal(planned.captureCount, 56);
-  assert.deepEqual(planned.statusCounts, { pending: 16, passed: 0, failed: 0, blocked: 0, invalid: 0 });
+  assert.deepEqual(planned.statusCounts, { pending: 0, passed: 16, failed: 0, blocked: 0, invalid: 0 });
+  assert.equal(pendingLedger.execution_status, "completed_awaiting_approval");
+  assert.deepEqual(planned.warnings, []);
 
   const strict = validateAuditBrowserEvidence(pendingLedger, { strict: true, rootDir: repositoryRoot });
   assert.equal(strict.valid, false);
-  assert.match(strict.errors.join("\n"), /strict audit closure requires passed evidence/);
+  assert.match(strict.errors.join("\n"), /requires a named approver/);
   assert.match(strict.errors.join("\n"), /overall status must be passed/);
 });
 

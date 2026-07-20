@@ -1,0 +1,49 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_SECURITY_HARDENING_DEPLOYED",
+  "evidence_type": "test_record",
+  "status": "complete",
+  "title": "Production backend governance and advisor verification",
+  "summary": "Read-only production reconciliation, post-deploy advisors, targeted governance tests, lint, and the complete application suite verify the current MED+250 backend boundary without retaining protected data.",
+  "recorded_at": "2026-07-18T17:28:30Z",
+  "recorded_by": "Codex automated verifier",
+  "recorded_role": "Release verification agent",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Description publication boundary",
+      "status": "passed",
+      "detail": "Production has zero incomplete approved descriptions, zero public description leaks, and zero approved descriptions lacking a matching current immutable audit event."
+    },
+    {
+      "name": "Review privilege boundary",
+      "status": "passed",
+      "detail": "Anonymous and ordinary signed-in roles cannot inspect the review ledger or execute description decisions; the protected backend role retains the required access."
+    },
+    {
+      "name": "Trust suppression boundary",
+      "status": "passed",
+      "detail": "The live aggregate response contains no identity or health data and suppresses both public values with approval_required until real operations approval exists."
+    },
+    {
+      "name": "Database advisor verification",
+      "status": "passed",
+      "detail": "No new actionable MED+250 security defect was found, and both previously reported notification-outbox foreign-key performance notices are cleared."
+    },
+    {
+      "name": "Complete regression suite",
+      "status": "passed",
+      "detail": "The serialized production build and complete Node regression suite passed 302 of 302 tests, including the new outbox-index contract test."
+    },
+    {
+      "name": "Static verification",
+      "status": "passed",
+      "detail": "Lint, implementation-register validation, JSON validation, targeted database tests, and the scoped whitespace check all completed successfully."
+    }
+  ],
+  "executed_by": "Codex automated verifier",
+  "executor_role": "Release verification agent",
+  "started_at": "2026-07-18T17:17:00Z",
+  "completed_at": "2026-07-18T17:28:30Z"
+}

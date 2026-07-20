@@ -79,7 +79,7 @@ No real order or WhatsApp message was sent.
 | Cloudflare strict dry run | Pass; 3,174.10 KiB upload, 625.47 KiB gzip |
 | `git diff --check` | Pass |
 
-The application exposes the expected routes for home, categories, four category subpages, dynamic product detail, How it works, Privacy, Terms, Accessibility, telemetry, robots, sitemap, and the private pharmacy entry redirect.
+The application exposes the expected routes for home, categories, four category subpages, dynamic product detail, Privacy, Terms, Accessibility, telemetry, robots, sitemap, and the private pharmacy entry redirect.
 
 ## Remaining launch locks
 

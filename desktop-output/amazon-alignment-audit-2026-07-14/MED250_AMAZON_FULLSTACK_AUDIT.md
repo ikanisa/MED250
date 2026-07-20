@@ -83,7 +83,6 @@ MED+250 should not copy every Amazon feature. Amazon's public reviews, seller pa
 - Baby and family.
 - Wellness.
 - Dynamic server-rendered product detail for all 2,480 governed products.
-- How it works.
 - Privacy.
 - Terms.
 - Accessibility.

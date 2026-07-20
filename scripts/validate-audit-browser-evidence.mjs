@@ -12,6 +12,7 @@ export const expectedAuditSourceRevision = "ALtnJHwQWBgt5JycfaOGftvKWVHBOLMKzbI9
 
 const productRoute = /^\/product\/(?:rwanda-fda-hm-[0-9]{4}|AMZ-[A-Z0-9]{10})(?:\?[^#]{1,400})?$/;
 const catalogueRoute = /^(?:\/|\/categories|\/category\/(?:medicines|personal-care|baby-family|wellness))(?:\?[^#]{1,400})?$/;
+const catalogueBoundaryRoute = /^(?:(?:\/|\/categories|\/category\/(?:medicines|personal-care|baby-family|wellness))(?:\?[^#]{1,400})?|\/product\/(?:rwanda-fda-hm-[0-9]{4}|AMZ-[A-Z0-9]{10})(?:\?[^#]{1,400})?)$/;
 
 function pairedScenario(id, title, findingIds, captures) {
   return Object.fromEntries(["DESKTOP", "MOBILE"].map((device) => {
@@ -33,9 +34,9 @@ export const expectedAuditBrowserScenarios = Object.freeze({
     wellness: { title: "Health and household department settled", routePattern: /^\/category\/wellness$/ },
   }),
   ...pairedScenario("CATALOGUE_BOUNDARIES", "Catalogue products 25, 120, and the final result are reachable", ["P0-2"], {
-    product_25: { title: "Product 25 is reachable", routePattern: catalogueRoute },
-    product_120: { title: "Product 120 is reachable", routePattern: catalogueRoute },
-    final_product: { title: "Final catalogue product is reachable", routePattern: catalogueRoute },
+    product_25: { title: "Product 25 is reachable", routePattern: catalogueBoundaryRoute },
+    product_120: { title: "Product 120 is reachable", routePattern: catalogueBoundaryRoute },
+    final_product: { title: "Final catalogue product is reachable", routePattern: catalogueBoundaryRoute },
   }),
   ...pairedScenario("FAILURE_RECOVERY", "Catalogue failure and retry recover without a terminal placeholder", ["P0-2"], {
     failed_state: { title: "Bounded catalogue failure is visible", routePattern: catalogueRoute },
@@ -45,7 +46,7 @@ export const expectedAuditBrowserScenarios = Object.freeze({
   ...pairedScenario("REQUEST_JOURNEY", "Availability-request journey preserves the non-transactional boundary", ["P0-5"], {
     product_action: { title: "Product action uses the approved request vocabulary", routePattern: productRoute },
     request_basket: { title: "Request basket shows the selected product without a purchase claim", routePattern: catalogueRoute },
-    no_payment_boundary: { title: "No-payment-before-confirmation disclosure is visible", routePattern: catalogueRoute },
+    no_payment_boundary: { title: "No-payment-before-confirmation disclosure is visible", routePattern: productRoute },
     preselection_status: { title: "Pre-selection state does not claim an order or payment succeeded", routePattern: catalogueRoute },
   }),
   ...pairedScenario("RELATED_PRODUCTS", "Related-product rails stay inside the governed safety boundary", ["P1-2"], {
@@ -271,6 +272,20 @@ export function validateAuditBrowserEvidence(ledger, {
       errors.push("audit browser evidence requires explicit redaction and no personal-data or credential retention");
     }
     if (ledger?.status !== "passed") errors.push("audit browser evidence overall status must be passed");
+    validateReceipt(ledger?.deployment_receipt, "deployment", ledger, options, errors);
+    validateReceipt(ledger?.catalogue_receipt, "catalogue", ledger, options, errors);
+  } else if (ledger?.execution_status === "completed_awaiting_approval") {
+    if (!/^[a-f0-9]{40}$/.test(String(ledger?.release_revision ?? ""))) errors.push("completed audit browser execution requires the exact lowercase Git release revision");
+    if (!allowedCaptureTools.has(ledger?.capture_tool)) errors.push("completed audit browser execution requires an approved capture_tool");
+    if (typeof ledger?.executed_by !== "string" || ledger.executed_by.trim().length < 3) errors.push("completed audit browser execution requires a named executor");
+    if (!validTimestamp(ledger?.started_at)) errors.push("completed audit browser execution requires a timezone-qualified started_at");
+    if (!validTimestamp(ledger?.completed_at)) errors.push("completed audit browser execution requires a timezone-qualified completed_at");
+    if (validTimestamp(ledger?.started_at) && validTimestamp(ledger?.completed_at) && Date.parse(ledger.completed_at) < Date.parse(ledger.started_at)) errors.push("audit browser execution completed_at precedes started_at");
+    if (ledger?.approved_by !== null || ledger?.approved_role !== null || ledger?.approved_at !== null) errors.push("awaiting-approval audit browser evidence must not contain approval metadata");
+    if (ledger?.redaction_confirmed !== true || ledger?.personal_data_recorded !== false || ledger?.credentials_recorded !== false) {
+      errors.push("completed audit browser execution requires explicit redaction and no personal-data or credential retention");
+    }
+    if (statusCounts.passed !== expectedScenarioIds.length) errors.push("completed audit browser execution requires every governed scenario to pass");
     validateReceipt(ledger?.deployment_receipt, "deployment", ledger, options, errors);
     validateReceipt(ledger?.catalogue_receipt, "catalogue", ledger, options, errors);
   } else if ([ledger?.release_revision, ledger?.executed_by, ledger?.started_at, ledger?.completed_at, ledger?.approved_by, ledger?.approved_role, ledger?.approved_at].some(Boolean)) {

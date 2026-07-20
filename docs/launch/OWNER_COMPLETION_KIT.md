@@ -9,6 +9,8 @@ Run:
 ```sh
 npm run launch:evidence:status
 npm run --silent launch:evidence:handoff > /tmp/med250-owner-evidence-handoff.json
+npm run audit:browser-evidence:verify
+npm run audit:closure:status
 ```
 
 The second command produces one deterministic handoff for all 17 currently missing evidence types without changing the repository. Every one now has a prepared pending artifact with gate-specific checks, unresolved actions and completion instructions. Complete the listed file in place, validate it, hash it, and then add it to `data/launch-evidence.json`. Do not replace a prepared packet with a generic template.
@@ -26,6 +28,28 @@ npm run launch:evidence:verify
 ```
 
 Do not store a credential, token, phone number, OTP, customer identity, email address, prescription content, exact customer location, or unredacted account identifier.
+
+## Independent browser QA approval
+
+The controlled browser execution is complete against production release
+`5ef50a296941056bd17e614dff7b35290742f50a`: all 16 governed desktop/mobile
+scenarios and all 56 privacy-reviewed PNG captures pass. The ledger is
+`data/audit-browser-evidence.json`; its screenshot set is
+`docs/audit/browser-evidence/`. Its overall status remains deliberately
+`pending` with `execution_status: completed_awaiting_approval`.
+
+An independent QA owner must:
+
+1. Review the deployment and catalogue receipt bindings, scenario notes, routes,
+   viewports, timestamps, PNG digests and the full screenshot set.
+2. Confirm the evidence contains no customer identity, phone, OTP, prescription,
+   request identifier, exact location, credential or secret.
+3. Record their real name, role and timezone-qualified approval timestamp in
+   `approved_by`, `approved_role` and `approved_at`.
+4. Set the overall ledger `status` to `passed` only after that review. Do not
+   change individual capture facts or the bound release revision.
+5. Run `npm run audit:browser-evidence:verify:live`. The strict verifier must
+   pass before the browser ledger can close any audit finding.
 
 ## Owner work packets
 
@@ -196,7 +220,7 @@ Gates:
 - `MED250_GATE_SECURITY_HARDENING_DEPLOYED`
 - `MED250_GATE_EDGE_FUNCTIONS_DEPLOYED`
 
-The historical deployment and test artifacts cover the six functions reviewed on 2026-07-16 and must remain historical. The backend owner must create a fresh seven-function inventory, verify the current live contract is `2026-07-18.3`, verify database SSL enforcement, the independent product-image approval trigger, DDL governance guard, aggregate public trust-metric boundary, fail-closed product-description governance and immutable review workflow, verify the new description reviewer with both anonymous denial and an authenticated read-only inspection, review the scoped database-advisor record, and add their name, role, and timezone-qualified approval to the registry. Run:
+The historical deployment and test artifacts cover the six functions reviewed on 2026-07-16 and remain historical. Fresh 2026-07-18 deployment and test artifacts now bind the active description reviewer, backend contract `2026-07-18.3`, description governance, aggregate trust boundary, scoped database advisors, and the 302-test suite captured when those artifacts were generated. The current serial suite passes 304/304 after adding the exact-release recommendation checks. The anonymous reviewer-denial probe passes. The backend owner must use the protected administrator credential and a controlled product identity for the remaining authenticated read-only inspection, review the fresh artifacts, and add their real name, role, and timezone-qualified approval to the registry. Run:
 
 ```sh
 npm run backend:verify
@@ -204,7 +228,7 @@ npm run backend:verify:description-reviewer -- --product-id PRODUCT_ID --expecte
 npm run ops:health:strict
 ```
 
-Use the exact `updated_at` returned by a fresh inspection. The receipt contains no response body, raw product identifier, credentials, description, or review note. Hash it and bind that digest into the fresh seven-function test record before owner approval; the automated receipt is supporting evidence, not an approval artifact by itself.
+Use the exact `updated_at` returned by a fresh inspection. The receipt contains no response body, raw product identifier, credentials, description, or review note. Hash it and bind that digest into the current Edge Function test record before owner approval; the automated records are supporting evidence, not approval artifacts by themselves.
 
 Configure the protected production environment with `MED250_ADMIN_TOKEN` as a secret and the exact probe inputs as `MED250_DESCRIPTION_REVIEWER_PROBE_PRODUCT_ID` and `MED250_DESCRIPTION_REVIEWER_PROBE_EXPECTED_UPDATED_AT` variables. The live release gate intentionally rejects missing or stale probe inputs.
 
@@ -236,7 +260,7 @@ The paired infrastructure signature is
 
 1. Create and install the least-privilege Cloudflare deployment token described above.
 2. Confirm the intended account, production Worker, custom-domain route, protected GitHub environment, and secret/variable ownership.
-3. Verify DNS, TLS, redirects, headers, robots, sitemap, and all seven representative routes.
+3. Verify DNS, TLS, redirects, headers, robots, sitemap, and all ten required routes.
 4. Add the redacted account-verification artifact and signed approval.
 5. Inspect the existing domain artifacts and add named infrastructure approval.
 
@@ -267,6 +291,30 @@ Final check:
 ```sh
 npm run uat:verify:live
 ```
+
+The browser approval above is independent of physical-device UAT. Responsive
+browser emulation does not replace real-device GPS, OTP, WhatsApp, MoMo,
+prescription, notification, lifecycle or cleanup evidence.
+
+## Audit closure work outside the 15 launch gates
+
+The launch registry does not absorb the separately governed audit ledgers.
+After the owner packets above, the accountable owners must also complete:
+
+- qualified Kinyarwanda translation, glossary review and clinical/legal sign-off
+  in the locale-release ledger;
+- all 72 source-bound product-content decisions in
+  `data/imports/product-content-review-pending-2026-07-18.json` without inferring
+  medicine ingredients or merging distinct registrations;
+- canonical sitemap submission and priority-URL inspection in Google Search
+  Console, with dated owner evidence;
+- authentic creative rights/release approval before replacing any governed
+  catalogue creative;
+- the three strategic owner decisions on payments, marketplace expansion and
+  personalization.
+
+`docs/audit/unified-audit-closure-status-2026-07-18.md` and
+`npm run audit:closure:status` are the authoritative consolidated queue.
 
 ## Final protected release
 

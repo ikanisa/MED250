@@ -1,0 +1,19 @@
+{
+  "checked_at": "2026-07-18T06:25:16.173529+00:00",
+  "live_products": 4659,
+  "target_images": 23977,
+  "approved_images": 23977,
+  "linked_products": 4659,
+  "remaining_images": 0,
+  "allocation_image_gap": 0,
+  "products_with_at_least_three": 4659,
+  "products_with_final_allocation": 4659,
+  "products_missing_minimum_gallery": 0,
+  "products_staged_below_final_allocation": 0,
+  "validation_policy_version": "2026-07-17.57",
+  "policy_validated_products": 57,
+  "policy_revalidation_remaining": 4602,
+  "url_verification_checked_at": "2026-07-18T05:03:46+00:00",
+  "broken_public_urls": 0,
+  "broken_product_ids": []
+}
