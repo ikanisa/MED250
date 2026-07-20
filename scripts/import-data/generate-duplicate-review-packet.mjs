@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
-import { readFile, writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { deriveDuplicateGroups, parseCsv } from "./verify-duplicate-register-review.mjs";
@@ -80,7 +80,7 @@ export function buildDuplicateReviewPacket({ productRows, retailRows, onlineRows
       pharmacy_professional_registration_groups: groups.filter((group) => group.record_type === "pharmacy_professional_registration").length,
     },
     review_rules: [
-      "Use the authoritative source and named regulatory reviewer; this packet does not decide whether a repeated identifier is valid.",
+      "Use the authoritative source and named register data reviewer; this packet does not decide whether a repeated identifier is valid.",
       "Record decisions only in data/imports/duplicate-register-review.csv with reviewer, timezone-qualified timestamp and rationale.",
       "Never merge or remove source rows merely to make the strict verifier pass.",
     ],
@@ -116,7 +116,9 @@ async function main() {
   });
   const serialized = `${JSON.stringify(packet, null, 2)}\n`;
   if (outputPath) {
-    await writeFile(resolve(outputPath), serialized, "utf8");
+    const resolvedOutput = resolve(outputPath);
+    await mkdir(dirname(resolvedOutput), { recursive: true });
+    await writeFile(resolvedOutput, serialized, "utf8");
     console.log(JSON.stringify({ status: "written", output: outputPath, ...packet.summary }, null, 2));
   } else {
     process.stdout.write(serialized);

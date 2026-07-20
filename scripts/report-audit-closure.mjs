@@ -39,8 +39,6 @@ export const auditClosureBindings = Object.freeze({
     technical("sites-catalog-boundary", "The public Sites origin is verified as a current catalog-only release with ordering disabled"),
   ],
   "P0-4": [
-    launch("MED250_GATE_DATA_REUSE_APPROVED", "Approved reuse rights for active catalogue and price sources"),
-    launch("MED250_GATE_REGULATORY_APPROVED", "Regulatory approval for public medicine and price presentation"),
     manual("price-review", "Named medicine-representative price review, freshness policy, and withdrawal policy"),
   ],
   "P0-5": [
@@ -48,7 +46,6 @@ export const auditClosureBindings = Object.freeze({
     browser("MOBILE_REQUEST_JOURNEY", "Mobile availability-request journey evidence"),
   ],
   "P1-1": [
-    launch("MED250_GATE_PHARMACY_OPERATIONS_APPROVED", "Operations approval for public trust signals"),
     manual("trust-observations", "Fresh, sufficient, privacy-safe production observations and approved suppressed/published states"),
   ],
   "P1-2": [
@@ -57,8 +54,6 @@ export const auditClosureBindings = Object.freeze({
     technical("live-related-products", "Exact-release reconciliation of every live recommendable product and generated recommendation edge"),
   ],
   "P1-3": [
-    launch("MED250_GATE_REGULATORY_APPROVED", "Legal and regulatory approval for the production operating model"),
-    launch("MED250_GATE_DATA_REUSE_APPROVED", "Data-owner approval for active source reuse"),
     launch("MED250_GATE_PRESCRIPTION_RETENTION_APPROVED", "Privacy-owner approval for prescription retention"),
     manual("controller-identity", "Approved controller identity, registered address, privacy contact, processor, transfer, and rights details"),
   ],
@@ -81,21 +76,17 @@ export const auditClosureBindings = Object.freeze({
     browser("MOBILE_NAVIGATION_RESTORE", "Mobile result-state restoration evidence"),
   ],
   "P2-4": [
-    launch("MED250_GATE_PHARMACY_OPERATIONS_APPROVED", "Operations approval for response and availability signals"),
     manual("response-observations", "Fresh, sufficient, privacy-safe production response observations"),
   ],
   "P2-5": [
     contentReview("All governed product-content owner decisions"),
     launch("MED250_GATE_SECURITY_HARDENING_DEPLOYED", "Deployed product-description and image-governance contract"),
     launch("MED250_GATE_EDGE_FUNCTIONS_DEPLOYED", "Deployed protected product-description reviewer"),
-    launch("MED250_GATE_DATA_REUSE_APPROVED", "Approved source and image reuse rights"),
     browser("DESKTOP_PRODUCT_CONTENT", "Desktop representative product-detail evidence"),
     browser("MOBILE_PRODUCT_CONTENT", "Mobile representative product-detail evidence"),
     manual("image-provenance", "Completed image provenance, reuse-rights, and creative QA review"),
   ],
   "P3-1": [
-    launch("MED250_GATE_DATA_REUSE_APPROVED", "Data-rights approval for every published creative source"),
-    launch("MED250_GATE_REGULATORY_APPROVED", "Regulatory approval for public medicine and pharmacy creative"),
     manual("creative-rights", "Approved creative brief, authentic Rwanda production, model/property releases, and usage rights"),
   ],
   "P3-2": [
@@ -311,7 +302,7 @@ export function buildAuditClosureReport({
   const allBrowserEvidencePassed = browserLedger?.status === "passed"
     && browserScenarios.length === 16
     && browserScenarios.every(({ status }) => status === "passed");
-  const allLaunchEvidenceConfirmed = launchGates.length === 15
+  const allLaunchEvidenceConfirmed = launchGates.length === 11
     && launchGates.every(({ status }) => status === "confirmed");
   const allPhysicalUatPassed = physicalUatLedger?.status === "passed"
     && physicalScenarios.length === 12

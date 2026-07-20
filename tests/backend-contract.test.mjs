@@ -515,6 +515,7 @@ test("makes backend drift and operational health mandatory in the live release g
   ));
   const liveGate = packageJson.scripts["release:check:live"];
   assert.match(liveGate, /^npm run release:preflight:live/);
+  assert.match(liveGate, /&& npm run launch:go-live:status/);
   assert.match(liveGate, /&& npm run data:duplicates:verify -- --strict/);
   assert.match(liveGate, /&& npm run backend:verify/);
   assert.match(liveGate, /&& npm run backend:verify:description-reviewer/);
@@ -524,6 +525,11 @@ test("makes backend drift and operational health mandatory in the live release g
   assert.ok(
     liveGate.indexOf("release:preflight:live") < liveGate.indexOf("data:duplicates:verify"),
     "fail-closed attestation checks must run before a service credential is used",
+  );
+  assert.ok(
+    liveGate.indexOf("release:preflight:live") < liveGate.indexOf("launch:go-live:status")
+      && liveGate.indexOf("launch:go-live:status") < liveGate.indexOf("data:duplicates:verify"),
+    "consolidated go-live readiness must run before source-governance and service-credential checks",
   );
   assert.ok(
     liveGate.indexOf("data:duplicates:verify") < liveGate.indexOf("backend:verify"),

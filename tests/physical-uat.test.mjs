@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
+import { buildPhysicalUatPacket } from "../scripts/create-physical-uat-packet.mjs";
 import { validatePhysicalUat } from "../scripts/validate-physical-uat.mjs";
 
 const ledger = JSON.parse(await readFile(new URL("../data/physical-device-uat.json", import.meta.url), "utf8"));
@@ -14,6 +15,31 @@ test("keeps the complete pending physical-device UAT ledger valid but not produc
   const strict = validatePhysicalUat(ledger, { strict: true, rootDir: new URL("..", import.meta.url).pathname });
   assert.equal(strict.valid, false);
   assert.equal(strict.errors.filter((error) => /production UAT requires passed evidence/.test(error)).length, 12);
+});
+
+test("builds a deterministic privacy-safe UAT execution packet", () => {
+  const packet = buildPhysicalUatPacket(ledger, {
+    ledgerPath: "data/physical-device-uat.json",
+    ledgerSha256: "a".repeat(64),
+  });
+
+  assert.equal(packet.source_ledger.scenario_count, 12);
+  assert.equal(packet.source_ledger.status_counts.pending, 12);
+  assert.equal(packet.scenarios.length, 12);
+  assert.deepEqual(packet.required_run_metadata, [
+    "customer_identity_label",
+    "pharmacy_identity_label",
+    "unrelated_pharmacy_identity_label",
+    "executed_by",
+    "started_at",
+    "completed_at",
+    "approved_by",
+    "approved_role",
+    "approved_at",
+  ]);
+  const serialized = JSON.stringify(packet);
+  assert.match(serialized, /No unintended pharmacy/);
+  assert.doesNotMatch(serialized, /(?:\\+?250)?7\\d{8}|OTP:\\s*\\d{6}|order id:/i);
 });
 
 test("accepts a complete redacted UAT record with evidence and named approval", () => {

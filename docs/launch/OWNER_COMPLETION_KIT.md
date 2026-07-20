@@ -8,12 +8,14 @@ Run:
 
 ```sh
 npm run launch:evidence:status
+npm run launch:go-live:status
+npm run launch:approval:packet
 npm run --silent launch:evidence:handoff > /tmp/med250-owner-evidence-handoff.json
 npm run audit:browser-evidence:verify
 npm run audit:closure:status
 ```
 
-The second command produces one deterministic handoff for all 17 currently missing evidence types without changing the repository. Every one now has a prepared pending artifact with gate-specific checks, unresolved actions and completion instructions. Complete the listed file in place, validate it, hash it, and then add it to `data/launch-evidence.json`. Do not replace a prepared packet with a generic template.
+The second command produces one deterministic handoff for the currently missing evidence types without changing the repository. Every one now has a prepared pending artifact with gate-specific checks, unresolved actions and completion instructions. Complete the listed file in place, validate it, hash it, and then add it to `data/launch-evidence.json`. Do not replace a prepared packet with a generic template.
 
 For every artifact:
 
@@ -26,6 +28,38 @@ npm run launch:evidence:artifact:verify -- \
 shasum -a 256 docs/launch/evidence/ARTIFACT.json
 npm run launch:evidence:verify
 ```
+
+After an artifact validates, record it with the guarded registry helper:
+
+```sh
+npm run launch:evidence:record -- \
+  --artifact docs/launch/evidence/ARTIFACT.json
+```
+
+When the last required evidence type for a gate is present and the accountable
+owner has approved the gate, confirm it in the same guarded path:
+
+```sh
+npm run launch:evidence:record -- \
+  --artifact docs/launch/evidence/FINAL-ARTIFACT.json \
+  --confirm \
+  --approved-by "Named owner" \
+  --approved-role "Accountable role" \
+  --approved-at "2026-07-20T18:00:00+02:00"
+```
+
+The helper validates the artifact strictly, computes the SHA-256 digest, refuses
+secret-like references, refuses duplicate evidence unless `--replace` is
+explicit, and will not record approval metadata without `--confirm`.
+
+For gates where all required evidence is already present but owner approval is
+missing, use the generated review packet:
+
+- `desktop-output/goal-progress-2026-07-20/launch-approval-packet-2026-07-20.json`
+
+Refresh it with `npm run launch:approval:packet`. It lists the exact evidence,
+acceptance criterion and safe confirmation command for each evidence-complete
+gate.
 
 Do not store a credential, token, phone number, OTP, customer identity, email address, prescription content, exact customer location, or unredacted account identifier.
 
@@ -59,7 +93,6 @@ Gates:
 
 - `MED250_GATE_GPS_READY`
 - `MED250_GATE_WHATSAPP_READY`
-- `MED250_GATE_PHARMACY_OPERATIONS_APPROVED`
 
 Required work:
 
@@ -67,12 +100,24 @@ Required work:
 2. Accept coordinates only where the source proves the operating premises and the review record identifies the reviewer and source version.
 3. Accept a WhatsApp contact only where the pharmacy or an authoritative source proves that the number is authorized for the pharmacy.
 4. Do not infer WhatsApp capability from an ordinary public phone number.
-5. Approve written dispatch, response, escalation, expiry, cancellation, prescription, incident, and WhatsApp handoff procedures.
-6. Produce the two review ledgers and the operations signed approval.
+5. Produce the two review ledgers.
 
-Current aggregate evidence already records 93 GPS-ready pharmacies, 300 pharmacies with WhatsApp coverage, 338 login-enabled WhatsApp contacts, and 300 dispatch-ready pharmacies. These counts do not replace record-level approval.
+Generate the shared public-registry review index with:
 
-The complete procedure is `docs/launch/PHARMACY_OPERATIONS_SOP.md`. Review it against the intended production pharmacy set, assign the named operating and escalation roles in the controlled staff register, and complete `docs/launch/evidence/pharmacy-operations-approval-pending-2026-07-16.json`. If the operating model changes, update the procedure, repeat the relevant tests and replace the recorded procedure digest before signing.
+```sh
+npm run ops:readiness:packet
+```
+
+The generated packet is:
+
+- `desktop-output/goal-progress-2026-07-20/operations-readiness-packet-2026-07-20.json`
+
+It contains the 769-row registry index for both GPS and WhatsApp review, but no
+phone numbers, precise coordinates or owner approval. Keep the actual
+coordinate/contact evidence and row-level decisions in the controlled private
+operations ledger.
+
+Current aggregate evidence already records 93 GPS-ready pharmacies, 300 pharmacies with WhatsApp coverage, 338 login-enabled WhatsApp contacts, and 300 dispatch-ready pharmacies. These counts do not replace record-level GPS and WhatsApp review.
 
 Use these redacted aggregate ledger shells for the record-level readiness decisions:
 
@@ -81,54 +126,7 @@ Use these redacted aggregate ledger shells for the record-level readiness decisi
 
 Keep precise coordinates and contact values in the controlled private ledgers. The release artifacts contain only aggregate counts, source digests, allowed decisions and completion instructions.
 
-### Legal and regulatory
-
-Gate:
-
-- `MED250_GATE_REGULATORY_APPROVED`
-
-The named legal/compliance owner must review the exact information-first marketplace model, central indicative-price wording, pharmacy-only fulfilment, WhatsApp handoff, medicine presentation, prescription handling, product advertising, Rwanda FDA conditions, RICA conditions, and any health-sector obligations. Record conditions or restrictions in the signed artifact; do not use a generic project approval.
-
-Start with:
-
-- `docs/launch/RWANDA_REGULATORY_REVIEW_BRIEF.md`
-- `docs/launch/evidence/regulatory-approval-pending-2026-07-16.json`
-
-The brief records two material current-law actions that cannot be closed by engineering: Law No. 011/2026 requires an enterprise engaging in e-commerce or online-intermediary services to apply for the corresponding RICA licence, with an existing-operator conformity period of no more than six months from 4 March 2026; and Rwanda FDA's promotion rules expressly include catalogues and internet/electronic displays within regulated advertising where they promote supply, sale or use. The owner must obtain authoritative written determinations or approvals for the exact MED+250 presentation and operation, complete the privacy and health-sector decisions in the brief, and sign only after every pending check passes.
-
-### Data owner
-
-Gate:
-
-- `MED250_GATE_DATA_REUSE_APPROVED`
-
-Review provenance, licence, permission, publication scope, refresh cadence, and withdrawal procedure for:
-
-- Rwanda FDA medicine and pharmacy registers;
-- Amazon category/taxonomy and product-reference research;
-- Rwanda government GIS;
-- MMI and other pharmacy-directory evidence;
-- pharmacy contact evidence;
-- Rwanda observed central indicative-price sources.
-
-The review ledger must cover every active source and include exact SHA-256 source digests. If a source is not approved for publication or operational reuse, remove or replace the affected derived data before approval.
-
-Start from the prepared redacted ledger:
-
-- `docs/launch/evidence/data-reuse-review-ledger-pending-2026-07-16.json`
-- `docs/launch/evidence/data-reuse-approval-pending-2026-07-16.json`
-
-It already inventories the nine active source classes, binds the current derived data and captured external snapshots to SHA-256 digests, records Amazon as taxonomy/product-reference research only, and confirms that Amazon prices are absent. A controlled private bundle now retains 25 exact artifacts: the raw Amazon snapshot, corrected 2,200-row import dataset, final 4,680-record workbook, Rwanda FDA product and licensed-premises sources, all 11 active Rwanda FDA duty-roster PDFs, governed derived releases and supporting manifests. The redacted technical receipt is `docs/launch/evidence/source-retention-bundle-2026-07-16.json`.
-
-Before signing, approve the current private durable-storage location or move the unchanged bundle to an approved evidence store and run:
-
-```sh
-npm run data:source-retention:verify
-```
-
-Retain the verified manifest SHA-256, then record one approval, rejection or conditional approval per source class and follow the two pending artifacts' completion instructions. Technical retention does not itself grant publication or operational-reuse rights.
-
-### Regulatory data reviewer
+### Register data reviewer
 
 Gate:
 
@@ -140,7 +138,7 @@ Run:
 npm run data:duplicates:packet
 ```
 
-Review all 51 groups in `desktop-output/goal-progress-2026-07-16/04-duplicate-review-packet.json`. Record only one of:
+Review all 51 groups in `desktop-output/goal-progress-2026-07-20/duplicate-register-review-packet-2026-07-20.json`. Record only one of:
 
 - `accepted_source_duplicate` when the authoritative source genuinely contains distinct valid records sharing the identifier;
 - `blocked_source_correction` when an authoritative correction is still required.
@@ -161,26 +159,14 @@ npm run data:duplicates:verify -- --strict
 
 Gates:
 
-- `MED250_GATE_CREDENTIALS_ROTATED`
 - `MED250_GATE_TURNSTILE_SERVER_VERIFIED`
 - `MED250_GATE_AUTH_RATE_LIMITS_APPROVED`
 
 Use `docs/launch/SECURITY_OWNER_REVIEW.md` as the shared decision and execution packet. Its pending artifacts are:
 
-- `docs/launch/evidence/credentials-rotation-deployment-receipt-pending-2026-07-16.json`
-- `docs/launch/evidence/credentials-rotation-approval-pending-2026-07-16.json`
 - `docs/launch/evidence/turnstile-positive-path-test-pending-2026-07-16.json`
 - `docs/launch/evidence/auth-rate-limit-test-pending-2026-07-16.json`
 - `docs/launch/evidence/auth-rate-limit-approval-pending-2026-07-16.json`
-
-Credential work:
-
-1. Revoke every previously exposed Supabase service, database, personal, and deployment credential.
-2. Replace each downstream CI, local, and server reference.
-3. Replace the current broad Cloudflare OAuth session with a token limited to the MED+250 Worker, required route/assets, and read-only zone inspection.
-4. Verify old credentials fail.
-5. Verify the new credentials perform only the intended operations.
-6. Store only a redacted deployment receipt and signed approval.
 
 Turnstile positive-path test:
 
@@ -260,7 +246,7 @@ The paired infrastructure signature is
 
 1. Create and install the least-privilege Cloudflare deployment token described above.
 2. Confirm the intended account, production Worker, custom-domain route, protected GitHub environment, and secret/variable ownership.
-3. Verify DNS, TLS, redirects, headers, robots, sitemap, and all ten required routes.
+3. Review the fresh July 20 domain artifacts, then rerun DNS, TLS, redirects, headers, robots, sitemap, and all ten required routes immediately before signing.
 4. Add the redacted account-verification artifact and signed approval.
 5. Inspect the existing domain artifacts and add named infrastructure approval.
 
@@ -272,6 +258,13 @@ npm run cloudflare:check:production
 npm run deployment:verify -- --url https://med250.gikundiro.com --mode live --expected-revision <exact-lowercase-40-character-git-sha>
 ```
 
+The current machine evidence for the domain gate is:
+
+- `docs/launch/evidence/domain-verification-2026-07-20.json`
+- `docs/launch/evidence/domain-deployment-test-2026-07-20.json`
+
+It passed against live revision `37d8c1c0e0c8ac2d15eea436d2f9037c20e2814c`; the infrastructure owner still needs to sign the gate after confirming the intended Cloudflare account and route ownership.
+
 ### QA owner
 
 Gate:
@@ -281,10 +274,11 @@ Gate:
 Start from:
 
 - `data/physical-device-uat.json`
+- `desktop-output/goal-progress-2026-07-20/physical-device-uat-packet-2026-07-20.json`
 - `docs/launch/evidence/physical-device-uat-test-pending-2026-07-16.json`
 - `docs/launch/evidence/physical-device-uat-approval-pending-2026-07-16.json`
 
-Use only approved, opaque customer, pharmacy, and unrelated-pharmacy test identities. Execute all 12 scenarios in `data/physical-device-uat.json`. Do not record real phone numbers, OTPs, order IDs, prescription contents, or exact coordinates. Do not contact an unintended pharmacy.
+Generate or refresh the execution packet with `npm run uat:packet`. Use only approved, opaque customer, pharmacy, and unrelated-pharmacy test identities. Execute all 12 scenarios in `data/physical-device-uat.json`. Do not record real phone numbers, OTPs, order IDs, prescription contents, or exact coordinates. Do not contact an unintended pharmacy.
 
 Final check:
 
@@ -296,7 +290,7 @@ The browser approval above is independent of physical-device UAT. Responsive
 browser emulation does not replace real-device GPS, OTP, WhatsApp, MoMo,
 prescription, notification, lifecycle or cleanup evidence.
 
-## Audit closure work outside the 15 launch gates
+## Audit closure work outside the 11 launch gates
 
 The launch registry does not absorb the separately governed audit ledgers.
 After the owner packets above, the accountable owners must also complete:
@@ -322,6 +316,7 @@ Only after every owner packet is complete:
 
 ```sh
 npm run launch:evidence:verify:live
+npm run launch:go-live:status
 npm run data:duplicates:verify -- --strict
 npm run uat:verify:live
 npm run backend:verify

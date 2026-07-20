@@ -24,7 +24,7 @@
     {
       "name": "No inferred regulatory decision",
       "status": "passed",
-      "detail": "The packet and verifier deliberately provide no merge, removal, acceptance or correction recommendation; only a named regulatory data reviewer may decide each group."
+      "detail": "The packet and verifier deliberately provide no merge, removal, acceptance or correction recommendation; only a named register data reviewer may decide each group."
     },
     {
       "name": "Strict duplicate review",
@@ -34,7 +34,7 @@
     {
       "name": "Named reviewer completion",
       "status": "pending",
-      "detail": "The accountable regulatory data reviewer must complete all row decisions, rerun the strict verifier and sign this redacted ledger."
+      "detail": "The accountable register data reviewer must complete all row decisions, rerun the strict verifier and sign this redacted ledger."
     }
   ],
   "reviewed_by": null,
@@ -49,16 +49,16 @@
     "blocked_source_correction": 0
   },
   "review_csv_reference": "data/imports/duplicate-register-review.csv",
-  "review_packet_reference": "desktop-output/goal-progress-2026-07-16/04-duplicate-review-packet.json",
+  "review_packet_reference": "desktop-output/goal-progress-2026-07-20/duplicate-register-review-packet-2026-07-20.json",
   "source_digests": {
     "review_csv": "1d70082cec26bc0c152edccc3362a3310d474f37433605a660e91b5f2c6bdbee",
-    "review_packet": "198ebd2cde16d710d391f079f138b896dad38f97a6d3e9597e9cb54d74e3fe94",
+    "review_packet": "2cacfffa514d472c548aca8fc14502f63564b53848efa5be46d5c747ca6efa05",
     "rwanda_fda_products": "8b6b22d154da87c26bb7fc153d621c41f713f9ba0b60ff16d0c6c4f8122aab22",
     "rwanda_fda_retail_pharmacies": "977b4d35036d178b45191f98de55e574e848755f1153df252a7a621665b583a9",
     "rwanda_fda_online_pharmacies": "03032e7e892cb2d1ffc3a335d28d81288f082c8989fd9113299632c56e2c79c9"
   },
   "completion_instructions": [
-    "Review every group in desktop-output/goal-progress-2026-07-16/04-duplicate-review-packet.json against the authoritative Rwanda FDA source.",
+    "Review every group in desktop-output/goal-progress-2026-07-20/duplicate-register-review-packet-2026-07-20.json against the authoritative Rwanda FDA source.",
     "Record exactly one governed decision, named reviewer, timezone-qualified reviewed_at value and substantive note for every row in data/imports/duplicate-register-review.csv.",
     "Use blocked_source_correction when an authoritative correction is still required; do not change or remove source rows merely to satisfy the verifier.",
     "Run npm run data:duplicates:verify -- --strict and retain its redacted passing result.",

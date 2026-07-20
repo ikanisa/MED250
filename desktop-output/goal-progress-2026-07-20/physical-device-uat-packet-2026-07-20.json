@@ -1,0 +1,267 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "classification": "controlled physical-device UAT execution packet; contains no phone numbers, OTPs, order identifiers, prescription contents or exact coordinates",
+  "source_ledger": {
+    "path": "data/physical-device-uat.json",
+    "sha256": "489330c2db1ec7400a459bacf216ac7b0bb719893ad8deaee588ed9d69d7ae11",
+    "scenario_count": 12,
+    "status_counts": {
+      "pending": 12,
+      "passed": 0,
+      "failed": 0,
+      "blocked": 0,
+      "invalid": 0
+    },
+    "pending_valid": true
+  },
+  "execution_rules": [
+    "Use only approved opaque customer, pharmacy and unrelated-pharmacy test identity labels.",
+    "Do not record phone numbers, OTPs, order IDs, prescription contents, exact customer coordinates, credentials or bearer tokens.",
+    "Every passed scenario must have a repository-relative or access-controlled HTTPS evidence reference and a useful redacted note.",
+    "No unintended pharmacy may receive a request, OTP, message, prescription or notification during the controlled run.",
+    "Set the authoritative ledger in data/physical-device-uat.json only after the real device evidence exists.",
+    "Run npm run uat:verify:live before completing the launch evidence test record or QA approval."
+  ],
+  "required_run_metadata": [
+    "customer_identity_label",
+    "pharmacy_identity_label",
+    "unrelated_pharmacy_identity_label",
+    "executed_by",
+    "started_at",
+    "completed_at",
+    "approved_by",
+    "approved_role",
+    "approved_at"
+  ],
+  "scenarios": [
+    {
+      "sequence": 1,
+      "id": "PREVIEW_FAIL_CLOSED",
+      "title": "Preview ordering and indexing remain disabled before controlled enablement",
+      "current_status": "pending",
+      "required_completion_fields": [
+        "status=passed",
+        "evidence_reference",
+        "redacted_note"
+      ],
+      "prohibited_evidence": [
+        "phone number",
+        "OTP",
+        "order identifier",
+        "prescription contents",
+        "exact customer coordinates",
+        "credential or token"
+      ]
+    },
+    {
+      "sequence": 2,
+      "id": "GPS_DENIAL_RECOVERY",
+      "title": "GPS denial shows recovery guidance without dispatch",
+      "current_status": "pending",
+      "required_completion_fields": [
+        "status=passed",
+        "evidence_reference",
+        "redacted_note"
+      ],
+      "prohibited_evidence": [
+        "phone number",
+        "OTP",
+        "order identifier",
+        "prescription contents",
+        "exact customer coordinates",
+        "credential or token"
+      ]
+    },
+    {
+      "sequence": 3,
+      "id": "GPS_CONSENT_BOUNDED_DISPATCH",
+      "title": "GPS consent produces only bounded eligible-pharmacy dispatch",
+      "current_status": "pending",
+      "required_completion_fields": [
+        "status=passed",
+        "evidence_reference",
+        "redacted_note"
+      ],
+      "prohibited_evidence": [
+        "phone number",
+        "OTP",
+        "order identifier",
+        "prescription contents",
+        "exact customer coordinates",
+        "credential or token"
+      ]
+    },
+    {
+      "sequence": 4,
+      "id": "PRESCRIPTION_ENFORCEMENT",
+      "title": "Prescription-required products enforce private upload and missing-file rejection",
+      "current_status": "pending",
+      "required_completion_fields": [
+        "status=passed",
+        "evidence_reference",
+        "redacted_note"
+      ],
+      "prohibited_evidence": [
+        "phone number",
+        "OTP",
+        "order identifier",
+        "prescription contents",
+        "exact customer coordinates",
+        "credential or token"
+      ]
+    },
+    {
+      "sequence": 5,
+      "id": "RECIPIENT_ISOLATION",
+      "title": "Only eligible recipient pharmacies receive and read the request",
+      "current_status": "pending",
+      "required_completion_fields": [
+        "status=passed",
+        "evidence_reference",
+        "redacted_note"
+      ],
+      "prohibited_evidence": [
+        "phone number",
+        "OTP",
+        "order identifier",
+        "prescription contents",
+        "exact customer coordinates",
+        "credential or token"
+      ]
+    },
+    {
+      "sequence": 6,
+      "id": "WHATSAPP_OTP_LIFECYCLE",
+      "title": "Real WhatsApp OTP succeeds once and rejects wrong, expired and reused codes",
+      "current_status": "pending",
+      "required_completion_fields": [
+        "status=passed",
+        "evidence_reference",
+        "redacted_note"
+      ],
+      "prohibited_evidence": [
+        "phone number",
+        "OTP",
+        "order identifier",
+        "prescription contents",
+        "exact customer coordinates",
+        "credential or token"
+      ]
+    },
+    {
+      "sequence": 7,
+      "id": "COMPLETE_OFFER_AND_SUBSTITUTE",
+      "title": "Complete offer, fulfilment and compatible-substitute rules work on device",
+      "current_status": "pending",
+      "required_completion_fields": [
+        "status=passed",
+        "evidence_reference",
+        "redacted_note"
+      ],
+      "prohibited_evidence": [
+        "phone number",
+        "OTP",
+        "order identifier",
+        "prescription contents",
+        "exact customer coordinates",
+        "credential or token"
+      ]
+    },
+    {
+      "sequence": 8,
+      "id": "CONTACT_PRIVACY_AND_SELECTION",
+      "title": "Pharmacy contact remains private before selection and is limited after selection",
+      "current_status": "pending",
+      "required_completion_fields": [
+        "status=passed",
+        "evidence_reference",
+        "redacted_note"
+      ],
+      "prohibited_evidence": [
+        "phone number",
+        "OTP",
+        "order identifier",
+        "prescription contents",
+        "exact customer coordinates",
+        "credential or token"
+      ]
+    },
+    {
+      "sequence": 9,
+      "id": "EXPLICIT_HANDOFFS",
+      "title": "WhatsApp and MoMo handoffs require explicit customer action and claim no payment custody",
+      "current_status": "pending",
+      "required_completion_fields": [
+        "status=passed",
+        "evidence_reference",
+        "redacted_note"
+      ],
+      "prohibited_evidence": [
+        "phone number",
+        "OTP",
+        "order identifier",
+        "prescription contents",
+        "exact customer coordinates",
+        "credential or token"
+      ]
+    },
+    {
+      "sequence": 10,
+      "id": "CANCELLATION_COMPLETION_EXPIRY",
+      "title": "Cancellation, completion, expiry and closure notifications behave correctly",
+      "current_status": "pending",
+      "required_completion_fields": [
+        "status=passed",
+        "evidence_reference",
+        "redacted_note"
+      ],
+      "prohibited_evidence": [
+        "phone number",
+        "OTP",
+        "order identifier",
+        "prescription contents",
+        "exact customer coordinates",
+        "credential or token"
+      ]
+    },
+    {
+      "sequence": 11,
+      "id": "PRESCRIPTION_ACCESS_RETENTION",
+      "title": "Prescription access boundaries and approved retention behavior hold through lifecycle",
+      "current_status": "pending",
+      "required_completion_fields": [
+        "status=passed",
+        "evidence_reference",
+        "redacted_note"
+      ],
+      "prohibited_evidence": [
+        "phone number",
+        "OTP",
+        "order identifier",
+        "prescription contents",
+        "exact customer coordinates",
+        "credential or token"
+      ]
+    },
+    {
+      "sequence": 12,
+      "id": "PRIVACY_SAFE_OPERATIONS",
+      "title": "Operational health and Worker logs contain no prohibited identifiers",
+      "current_status": "pending",
+      "required_completion_fields": [
+        "status=passed",
+        "evidence_reference",
+        "redacted_note"
+      ],
+      "prohibited_evidence": [
+        "phone number",
+        "OTP",
+        "order identifier",
+        "prescription contents",
+        "exact customer coordinates",
+        "credential or token"
+      ]
+    }
+  ]
+}

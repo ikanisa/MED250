@@ -235,6 +235,7 @@ test("keeps preview and production Workers isolated behind manual protected depl
   assert.match(packageJson.scripts["test:sites:catalog"], /NEXT_PUBLIC_MARKETPLACE_MODE=catalog/);
   assert.match(packageJson.scripts["release:check:live"], /npm run test:preview/);
   assert.match(packageJson.scripts["release:check:live"], /npm run test:production/);
+  assert.match(packageJson.scripts["release:check:live"], /npm run launch:go-live:status/);
   assert.match(packageJson.scripts["release:check:live"], /wrangler deploy --env production --dry-run --strict/);
   assert.match(packageJson.scripts["deploy:live"], /wrangler deploy --env production --keep-vars --strict/);
   assert.match(packageJson.scripts["cloudflare:check:production"], /wrangler deploy --env production --dry-run --strict/);

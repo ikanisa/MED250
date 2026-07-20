@@ -10,10 +10,17 @@ import {
   createLaunchEvidenceTemplate,
   discoverPreparedLaunchEvidence,
 } from "../scripts/create-launch-evidence-template.mjs";
+import { recordLaunchEvidence } from "../scripts/record-launch-evidence.mjs";
 import { validateLaunchEvidence } from "../scripts/validate-launch-evidence.mjs";
 import { validateLaunchEvidenceArtifact } from "../scripts/validate-launch-evidence-artifact.mjs";
 
 const manifest = JSON.parse(await readFile(new URL("../data/launch-evidence.json", import.meta.url), "utf8"));
+
+function cleanManifest() {
+  const localManifest = structuredClone(manifest);
+  for (const gate of Object.values(localManifest.gates)) gate.evidence = [];
+  return localManifest;
+}
 
 function completeArtifact(gate, type) {
   const artifact = createLaunchEvidenceTemplate(gate, type);
@@ -39,7 +46,7 @@ function completeArtifact(gate, type) {
 
 test("validates complete type-specific artifacts for every supported evidence category", () => {
   const examples = [
-    ["MED250_GATE_REGULATORY_APPROVED", "signed_approval"],
+    ["MED250_GATE_AUTH_RATE_LIMITS_APPROVED", "signed_approval"],
     ["MED250_GATE_PHYSICAL_UAT_PASSED", "test_record"],
     ["MED250_GATE_DUPLICATE_REGISTER_REVIEWED", "review_ledger"],
     ["MED250_GATE_SECURITY_HARDENING_DEPLOYED", "deployment_receipt"],
@@ -81,23 +88,19 @@ test("builds one owner-ready handoff using every prepared pending artifact", asy
   const prepared = await discoverPreparedLaunchEvidence(new URL("../docs/launch/evidence", import.meta.url));
   const handoff = createLaunchEvidenceHandoff(manifest, prepared);
   assert.equal(handoff.release, "med250-production");
-  assert.equal(handoff.gate_count, 15);
-  assert.equal(handoff.missing_evidence_artifact_count, 17);
-  assert.equal(handoff.prepared_pending_artifact_count, 17);
+  assert.equal(handoff.gate_count, 11);
+  assert.equal(handoff.missing_evidence_artifact_count, 11);
+  assert.equal(handoff.prepared_pending_artifact_count, 11);
   assert.equal(handoff.unprepared_evidence_artifact_count, 0);
   const security = handoff.gates.find((gate) => gate.gate === "MED250_GATE_SECURITY_HARDENING_DEPLOYED");
   assert.deepEqual(security.missing_evidence_types, []);
   assert.equal(security.approval_required.approved_by, null);
-  const credentials = handoff.gates.find((gate) => gate.gate === "MED250_GATE_CREDENTIALS_ROTATED");
-  assert.deepEqual(credentials.missing_evidence_types, ["deployment_receipt", "signed_approval"]);
-  assert.deepEqual(credentials.unprepared_evidence_types, []);
-  assert.deepEqual(credentials.evidence_templates, {});
-  assert.match(credentials.suggested_filenames.signed_approval, /credentials-rotation-approval-pending-2026-07-16\.json$/);
-  assert.equal(credentials.prepared_pending_evidence.signed_approval.template_valid, true);
-  assert.ok(credentials.prepared_pending_evidence.signed_approval.unresolved_checks.length > 0);
   const duplicates = handoff.gates.find((gate) => gate.gate === "MED250_GATE_DUPLICATE_REGISTER_REVIEWED");
   assert.match(duplicates.suggested_filenames.review_ledger, /duplicate-register-review-ledger-pending-2026-07-16\.json$/);
   assert.equal(duplicates.prepared_pending_evidence.review_ledger.check_status_counts.blocked, 1);
+  const authRate = handoff.gates.find((gate) => gate.gate === "MED250_GATE_AUTH_RATE_LIMITS_APPROVED");
+  assert.deepEqual(authRate.missing_evidence_types, ["signed_approval", "test_record"]);
+  assert.equal(authRate.prepared_pending_evidence.signed_approval.template_valid, true);
 });
 
 test("registry validates hashed local JSON artifacts and rejects artifact metadata drift", async () => {
@@ -137,5 +140,118 @@ test("registry validates hashed local JSON artifacts and rejects artifact metada
   const rejected = validateLaunchEvidence(localManifest, { rootDir: root, now: new Date("2026-07-17T12:00:00Z") });
   assert.equal(rejected.valid, false);
   assert.ok(rejected.errors.some((error) => /artifact gate must be MED250_GATE_GPS_READY/.test(error)));
+  await rm(root, { recursive: true, force: true });
+});
+
+test("records completed launch evidence without inventing gate approval", async () => {
+  const root = await mkdtemp(join(tmpdir(), "med250-record-evidence-"));
+  const evidenceDir = join(root, "docs", "launch", "evidence");
+  await mkdir(evidenceDir, { recursive: true });
+  const localManifest = cleanManifest();
+  const gateName = "MED250_GATE_TURNSTILE_SERVER_VERIFIED";
+  const artifact = completeArtifact(gateName, "test_record");
+  const reference = "docs/launch/evidence/turnstile-test.json";
+  await writeFile(join(root, reference), `${JSON.stringify(artifact, null, 2)}\n`);
+
+  const result = await recordLaunchEvidence({
+    manifest: localManifest,
+    artifactPath: reference,
+    rootDir: root,
+    now: new Date("2026-07-17T12:00:00Z"),
+  });
+
+  const gate = result.manifest.gates[gateName];
+  assert.equal(result.recorded.confirmed, false);
+  assert.equal(gate.status, "pending");
+  assert.equal(gate.approved_by, null);
+  assert.equal(gate.evidence.length, 1);
+  assert.equal(gate.evidence[0].type, "test_record");
+  assert.match(gate.evidence[0].sha256, /^[a-f0-9]{64}$/);
+  assert.deepEqual(result.recorded.missingEvidenceTypes, []);
+  await rm(root, { recursive: true, force: true });
+});
+
+test("confirms a gate only after all required evidence and owner approval are present", async () => {
+  const root = await mkdtemp(join(tmpdir(), "med250-confirm-evidence-"));
+  const evidenceDir = join(root, "docs", "launch", "evidence");
+  await mkdir(evidenceDir, { recursive: true });
+  const localManifest = cleanManifest();
+  const gateName = "MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED";
+
+  let nextManifest = localManifest;
+  for (const type of ["account_verification", "signed_approval"]) {
+    const artifact = completeArtifact(gateName, type);
+    const reference = `docs/launch/evidence/cloudflare-${type}.json`;
+    await writeFile(join(root, reference), `${JSON.stringify(artifact, null, 2)}\n`);
+    const result = await recordLaunchEvidence({
+      manifest: nextManifest,
+      artifactPath: reference,
+      rootDir: root,
+      confirm: type === "signed_approval",
+      approvedBy: type === "signed_approval" ? "Named infrastructure owner" : "",
+      approvedRole: type === "signed_approval" ? "Infrastructure owner" : "",
+      approvedAt: type === "signed_approval" ? "2026-07-17T10:00:00Z" : "",
+      now: new Date("2026-07-17T12:00:00Z"),
+    });
+    nextManifest = result.manifest;
+  }
+
+  const gate = nextManifest.gates[gateName];
+  assert.equal(gate.status, "confirmed");
+  assert.equal(gate.approved_by, "Named infrastructure owner");
+  assert.equal(gate.evidence.length, 2);
+  const accepted = validateLaunchEvidence(nextManifest, { rootDir: root, now: new Date("2026-07-17T12:00:00Z") });
+  assert.equal(accepted.valid, true, accepted.errors.join("; "));
+  await rm(root, { recursive: true, force: true });
+});
+
+test("rejects incomplete artifacts, duplicate evidence and approval metadata without confirmation", async () => {
+  const root = await mkdtemp(join(tmpdir(), "med250-reject-evidence-"));
+  const evidenceDir = join(root, "docs", "launch", "evidence");
+  await mkdir(evidenceDir, { recursive: true });
+  const gateName = "MED250_GATE_TURNSTILE_SERVER_VERIFIED";
+  const artifact = completeArtifact(gateName, "test_record");
+  const reference = "docs/launch/evidence/turnstile-test.json";
+  await writeFile(join(root, reference), `${JSON.stringify(artifact, null, 2)}\n`);
+
+  const first = await recordLaunchEvidence({
+    manifest: cleanManifest(),
+    artifactPath: reference,
+    rootDir: root,
+    now: new Date("2026-07-17T12:00:00Z"),
+  });
+  await assert.rejects(
+    () => recordLaunchEvidence({
+      manifest: first.manifest,
+      artifactPath: reference,
+      rootDir: root,
+      now: new Date("2026-07-17T12:00:00Z"),
+    }),
+    /already has test_record evidence/,
+  );
+  await assert.rejects(
+    () => recordLaunchEvidence({
+      manifest: cleanManifest(),
+      artifactPath: reference,
+      rootDir: root,
+      approvedBy: "Named owner",
+      now: new Date("2026-07-17T12:00:00Z"),
+    }),
+    /Approval metadata may be recorded only with --confirm/,
+  );
+
+  const incomplete = completeArtifact(gateName, "test_record");
+  incomplete.status = "pending";
+  const incompleteReference = "docs/launch/evidence/turnstile-incomplete.json";
+  await writeFile(join(root, incompleteReference), `${JSON.stringify(incomplete, null, 2)}\n`);
+  await assert.rejects(
+    () => recordLaunchEvidence({
+      manifest: cleanManifest(),
+      artifactPath: incompleteReference,
+      rootDir: root,
+      now: new Date("2026-07-17T12:00:00Z"),
+    }),
+    /Evidence artifact is not complete/,
+  );
   await rm(root, { recursive: true, force: true });
 });

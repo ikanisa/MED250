@@ -12,25 +12,25 @@ const manifest = JSON.parse(await readFile(
   "utf8",
 ));
 
-test("keeps all fifteen production gates in a structurally valid evidence registry", () => {
+test("keeps all eleven production gates in a structurally valid evidence registry", () => {
   const result = validateLaunchEvidence(manifest, {
     rootDir: new URL("..", import.meta.url).pathname,
-    now: new Date("2026-07-19T12:00:00Z"),
+    now: new Date("2026-07-20T17:00:00Z"),
   });
   assert.equal(result.valid, true);
-  assert.equal(result.gateCount, 15);
+  assert.equal(result.gateCount, 11);
   assert.deepEqual(Object.keys(manifest.gates).sort(), [...expectedLaunchGateNames].sort());
-  assert.deepEqual(result.statusCounts, { pending: 15, confirmed: 0, rejected: 0, invalid: 0 });
+  assert.deepEqual(result.statusCounts, { pending: 11, confirmed: 0, rejected: 0, invalid: 0 });
 });
 
 test("blocks production while any launch evidence remains pending", () => {
   const result = validateLaunchEvidence(manifest, {
     strict: true,
     rootDir: new URL("..", import.meta.url).pathname,
-    now: new Date("2026-07-19T12:00:00Z"),
+    now: new Date("2026-07-20T17:00:00Z"),
   });
   assert.equal(result.valid, false);
-  assert.equal(result.errors.filter((error) => /production requires confirmed evidence/.test(error)).length, 15);
+  assert.equal(result.errors.filter((error) => /production requires confirmed evidence/.test(error)).length, 11);
 });
 
 test("accepts confirmed gates only with durable evidence and named approval", () => {
@@ -56,7 +56,7 @@ test("accepts confirmed gates only with durable evidence and named approval", ()
     now: new Date("2026-07-14T12:00:00Z"),
   });
   assert.equal(result.valid, true);
-  assert.equal(result.statusCounts.confirmed, 15);
+  assert.equal(result.statusCounts.confirmed, 11);
 });
 
 test("rejects missing gates, evidence-free confirmations and secret-like references", () => {

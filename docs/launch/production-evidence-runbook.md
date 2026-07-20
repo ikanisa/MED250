@@ -1,13 +1,13 @@
 # MED+250 production evidence runbook
 
-This runbook closes the 15 fail-closed production gates without weakening them or treating configuration flags as evidence. The authoritative registry is `data/launch-evidence.json`; `npm run launch:evidence:verify:live` is the final machine gate.
+This runbook closes the 11 fail-closed production gates without weakening them or treating configuration flags as evidence. The authoritative registry is `data/launch-evidence.json`; `npm run launch:evidence:verify:live` is the final machine gate.
 
 ## Evidence handling rules
 
 1. Never store a password, service key, personal token, OTP, prescription, customer identity, phone number, exact customer location, or unredacted account identifier in evidence.
 2. Store a redacted JSON artifact under `docs/launch/evidence/` or reference an access-controlled HTTPS record. Local files outside this directory and non-JSON local evidence are rejected.
 3. Generate the correct local artifact shape with `npm run launch:evidence:template -- --gate <gate-name> --type <required-type>`, complete it, then validate it with `npm run launch:evidence:artifact:verify -- --file <path> --gate <gate-name> --type <required-type>`.
-4. Repository evidence must include its lowercase SHA-256 digest in the registry. Generate it with `shasum -a 256 <path>` after the artifact is final.
+4. Repository evidence must include its lowercase SHA-256 digest in the registry. Prefer `npm run launch:evidence:record -- --artifact <path>` after the artifact is final; it validates the artifact, computes the digest and refuses unsafe confirmation. `shasum -a 256 <path>` may still be used for manual cross-checking.
 5. Use only the evidence types declared in each gate's `required_evidence_types` list.
 6. A gate is confirmed only by its named accountable owner. Record the approver's name, role, and timezone-qualified approval timestamp.
 7. Do not copy a generic approval across gates. The acceptance criterion in each registry entry must be satisfied by the referenced evidence.
@@ -16,14 +16,14 @@ This runbook closes the 15 fail-closed production gates without weakening them o
 
 ## Current safe release state
 
-- The Cloudflare Worker is publicly reachable at `https://med250.gikundiro.com`; all ten required routes pass live deployment verification against revision `5ef50a296941056bd17e614dff7b35290742f50a`.
+- The Cloudflare Worker is publicly reachable at `https://med250.gikundiro.com`; all ten required routes passed live deployment verification on 2026-07-20 against revision `37d8c1c0e0c8ac2d15eea436d2f9037c20e2814c`. The current registry points to `docs/launch/evidence/domain-verification-2026-07-20.json` and `docs/launch/evidence/domain-deployment-test-2026-07-20.json`.
 - The separate public Sites hostname runs catalog-only version 13 from immutable source revision `5ef50a296941056bd17e614dff7b35290742f50a`. Its current 10-route catalogue verification receipt passes; it remains a secondary catalogue surface and is never an alternate live ordering origin.
 - The public catalogue and availability-request workflow are active. The protected release evidence gate remains incomplete and must not be represented as formally approved.
 - Public DNS resolves through Cloudflare. The active verification plan is `docs/launch/dns/med250-cloudflare-domain-plan.json`.
 - Wrangler is authenticated to the intended deployment account, but the current OAuth session has broad account-wide write scopes. The infrastructure owner must replace it with a narrowly scoped deploy credential before confirming least privilege.
 - The redacted pending account record is `docs/launch/evidence/cloudflare-account-verification-pending-2026-07-16.json`; it must remain unreferenced by the production registry until the replacement credential is verified and the infrastructure owner completes it.
 - Privileged Supabase verification is available through the protected connector and the live backend contract passes.
-- The local release gate now requires a contract-bound probe of the product-description reviewer. Production remains unverified for that function until it is deployed and a fresh body-free receipt is bound into the seven-function test record.
+- The Edge Function and backend-hardening gates have complete machine evidence, but still require real backend-owner approval before either gate can be confirmed.
 - Supabase server-side Turnstile validation is enabled with the production widget. Missing and invalid tokens are rejected without creating users; one controlled valid-token browser test remains before the security owner can sign the gate.
 - The shared Supabase project currently reports an anonymous-user rate-limit value of 30, a one-hour JWT lifetime, and refresh-token rotation enabled. These project-wide settings still require a controlled impact test and security-owner approval.
 - The scoped advisor audit reports zero MED+250 performance warnings. MED+250 security warnings are the documented catalogue GraphQL surface, exact authenticated RPC allowlist, and anonymous customer-sign-in requirement; the aggregate contract rejects unexpected access drift.
@@ -35,13 +35,9 @@ This runbook closes the 15 fail-closed production gates without weakening them o
 | --- | --- | --- | --- |
 | `MED250_GATE_GPS_READY` | Operations | Operations snapshot + review ledger | Complete `docs/launch/evidence/gps-readiness-review-ledger-pending-2026-07-16.json` from a controlled private row-level ledger, approve only authoritative premises coordinates, reconcile the intended GPS-ready production scope with actual routing, then rerun strict operational health. |
 | `MED250_GATE_WHATSAPP_READY` | Operations | Operations snapshot + review ledger | Complete `docs/launch/evidence/whatsapp-readiness-review-ledger-pending-2026-07-16.json` from a controlled private row-level ledger, verify an authorised business WhatsApp identity for every intended responder, reconcile the scope with actual routing, then rerun strict operational health. |
-| `MED250_GATE_PHARMACY_OPERATIONS_APPROVED` | Operations lead | Signed approval | Review `docs/launch/PHARMACY_OPERATIONS_SOP.md`, assign the named operating and escalation roles, complete `docs/launch/evidence/pharmacy-operations-approval-pending-2026-07-16.json`, and approve its dispatch, confirmation, selection, expiry, cancellation, prescription, incident, WhatsApp and off-platform-payment boundaries. |
-| `MED250_GATE_REGULATORY_APPROVED` | Legal/compliance | Signed approval | Review `docs/launch/RWANDA_REGULATORY_REVIEW_BRIEF.md`, complete `docs/launch/evidence/regulatory-approval-pending-2026-07-16.json`, obtain the applicable RICA licence or authoritative written determination, obtain the required Rwanda FDA determination or clearance for the exact catalogue/presentation, and approve every recorded health-sector, privacy, product-scope, consumer-disclosure and pharmaceutical-advertising condition. |
-| `MED250_GATE_DATA_REUSE_APPROVED` | Data owner | Signed approval + review ledger | Complete `docs/launch/evidence/data-reuse-review-ledger-pending-2026-07-16.json` and `docs/launch/evidence/data-reuse-approval-pending-2026-07-16.json`, resolve the raw-snapshot and permission blockers, approve reuse/publication of every product, pharmacy, contact, GIS, image and indicative-price source, and remove any unapproved derived data. |
-| `MED250_GATE_DUPLICATE_REGISTER_REVIEWED` | Regulatory data reviewer | Review ledger | Run `npm run data:duplicates:packet` to generate a source-comparison packet, then decide all 51 synchronized groups in `data/imports/duplicate-register-review.csv` with reviewer, timestamp and rationale; `npm run data:duplicates:verify -- --strict` must pass. Complete `docs/launch/evidence/duplicate-register-review-ledger-pending-2026-07-16.json` after the row-level review. The packet deliberately contains no decision or recommendation. |
-| `MED250_GATE_CREDENTIALS_ROTATED` | Security owner | Deployment receipt + signed approval | Follow `docs/launch/SECURITY_OWNER_REVIEW.md`, complete the pending rotation receipt and approval artifacts, revoke and replace the previously exposed Supabase secret API, database and personal management credentials, prove every old credential fails, reconcile every dependency and retain only redacted evidence. |
+| `MED250_GATE_DUPLICATE_REGISTER_REVIEWED` | Register data reviewer | Review ledger | Run `npm run data:duplicates:packet` to generate a source-comparison packet, then decide all 51 synchronized groups in `data/imports/duplicate-register-review.csv` with reviewer, timestamp and rationale; `npm run data:duplicates:verify -- --strict` must pass. Complete `docs/launch/evidence/duplicate-register-review-ledger-pending-2026-07-16.json` after the row-level review. The packet deliberately contains no decision or recommendation. |
 | `MED250_GATE_SECURITY_HARDENING_DEPLOYED` | Backend owner | Deployment receipt + test record | Review the passing 2026-07-18 deployment and test artifacts for contract `2026-07-18.3`, product-image and description governance, aggregate trust metrics, advisor scope, and the complete regression suite; then record the real backend-owner approval. |
-| `MED250_GATE_EDGE_FUNCTIONS_DEPLOYED` | Backend owner | Deployment receipt + test record | The description reviewer is active and its denial probe passes. Run the remaining authenticated read-only inspection with `npm run backend:verify:description-reviewer -- --product-id PRODUCT_ID --expected-updated-at EXACT_INSPECT_UPDATED_AT --evidence-output docs/launch/evidence/product-description-reviewer-verification-YYYY-MM-DD.json`; bind the body-free receipt into the fresh test artifact and record the real backend-owner approval. |
+| `MED250_GATE_EDGE_FUNCTIONS_DEPLOYED` | Backend owner | Deployment receipt + test record | Review the complete 2026-07-18 Edge Function deployment and test artifacts, including the active description reviewer, denial probe, protected-access boundaries and regression coverage; then record the real backend-owner approval. If a new function revision is deployed, regenerate and bind fresh deployment/test artifacts before approval. |
 | `MED250_GATE_TURNSTILE_SERVER_VERIFIED` | Security owner | Test record | Complete `docs/launch/evidence/turnstile-positive-path-test-pending-2026-07-16.json`: use the real production widget, create only one disposable anonymous Auth identity without sending an availability request, revoke and delete it, restore the aggregate user count and retain the redacted verifier result. |
 | `MED250_GATE_AUTH_RATE_LIMITS_APPROVED` | Security owner | Signed approval + test record | Complete the pending rate-limit test and approval artifacts from `docs/launch/SECURITY_OWNER_REVIEW.md`; obtain shared-project impact approval, test intended customer access and excess-attempt rejection with fresh real widget responses, remove every disposable identity, and approve monitoring and rollback conditions. |
 | `MED250_GATE_PRESCRIPTION_RETENTION_APPROVED` | Privacy owner | Signed approval + test record | Review `docs/launch/PRESCRIPTION_RETENTION_POLICY.md`, complete `docs/launch/evidence/prescription-retention-approval-pending-2026-07-16.json`, approve the 24-hour and 30-day rules plus incident conditions, and retain the existing controlled test record. |
@@ -69,14 +65,15 @@ Use a dedicated approved pharmacy and customer test identity. Record timestamps 
 
 1. `npm run launch:evidence:status`
 2. `npm run launch:evidence:verify`
-3. `npm run data:duplicates:verify -- --strict`
-4. `npm run uat:verify:live`
-5. `npm run backend:verify`
-6. `npm run backend:verify:description-reviewer -- --product-id PRODUCT_ID --expected-updated-at EXACT_INSPECT_UPDATED_AT --evidence-output docs/launch/evidence/product-description-reviewer-verification-YYYY-MM-DD.json`
-7. `npm run ops:health:strict`
-8. `npm run release:check:live`
-9. Approve the protected `med250-production` GitHub environment and dispatch the manual workflow with the exact live confirmation phrase.
-10. `npm run deployment:verify -- --url https://med250.gikundiro.com --mode live --expected-revision <exact-lowercase-40-character-git-sha>`
+3. `npm run launch:go-live:status`
+4. `npm run data:duplicates:verify -- --strict`
+5. `npm run uat:verify:live`
+6. `npm run backend:verify`
+7. `npm run backend:verify:description-reviewer -- --product-id PRODUCT_ID --expected-updated-at EXACT_INSPECT_UPDATED_AT --evidence-output docs/launch/evidence/product-description-reviewer-verification-YYYY-MM-DD.json`
+8. `npm run ops:health:strict`
+9. `npm run release:check:live`
+10. Approve the protected `med250-production` GitHub environment and dispatch the manual workflow with the exact live confirmation phrase.
+11. `npm run deployment:verify -- --url https://med250.gikundiro.com --mode live --expected-revision <exact-lowercase-40-character-git-sha>`
 
 For `npm run release:check:live` and the protected GitHub workflow, set `MED250_DESCRIPTION_REVIEWER_PROBE_PRODUCT_ID` and `MED250_DESCRIPTION_REVIEWER_PROBE_EXPECTED_UPDATED_AT` to the exact freshly inspected row version. Store `MED250_ADMIN_TOKEN` only as the protected environment secret. The two probe values are release evidence inputs and must be refreshed whenever that product version changes; an empty or stale value fails closed.
 

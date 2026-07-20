@@ -330,23 +330,19 @@ Complete the evidence-backed human, operational, security, and infrastructure wo
 
 1. authoritative GPS review ledger;
 2. pharmacy-authorized WhatsApp review ledger;
-3. pharmacy operations approval;
-4. regulatory approval;
-5. source-data reuse approval;
-6. all duplicate-register decisions;
-7. credential rotation;
-8. backend security-hardening approval;
-9. Edge Function approval;
-10. valid Turnstile server test;
-11. anonymous-auth rate-limit approval and test;
-12. prescription-retention approval;
-13. least-privilege Cloudflare account verification;
-14. domain/DNS approval; and
-15. all physical-device UAT scenarios.
+3. all duplicate-register decisions;
+4. backend security-hardening approval;
+5. Edge Function approval;
+6. valid Turnstile server test;
+7. anonymous-auth rate-limit approval and test;
+8. prescription-retention approval;
+9. least-privilege Cloudflare account verification;
+10. domain/DNS approval; and
+11. all physical-device UAT scenarios.
 
 ### Acceptance evidence
 
-- `npm run launch:evidence:verify:live` passes all 15 gates.
+- `npm run launch:evidence:verify:live` passes all 11 gates.
 - `npm run release:check:live` passes against the intended production environment.
 - Physical-device UAT proves GPS consent, OTP delivery, dispatch, realtime confirmation, selection, WhatsApp, MoMo, expiry, cancellation, and prescription access with controlled identities.
 - The deployed live revision passes the Goal 0 baseline and post-deployment monitoring has no critical finding.

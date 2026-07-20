@@ -20,7 +20,7 @@ const packet = buildDuplicateReviewPacket({
 });
 const [reviewCsvFile, reviewPacketFile, reviewLedger] = await Promise.all([
   readFile(new URL("../data/imports/duplicate-register-review.csv", import.meta.url)),
-  readFile(new URL("../desktop-output/goal-progress-2026-07-16/04-duplicate-review-packet.json", import.meta.url)),
+  readFile(new URL("../desktop-output/goal-progress-2026-07-20/duplicate-register-review-packet-2026-07-20.json", import.meta.url)),
   readFile(new URL("../docs/launch/evidence/duplicate-register-review-ledger-pending-2026-07-16.json", import.meta.url), "utf8")
     .then((source) => JSON.parse(source)),
 ]);
@@ -41,6 +41,7 @@ test("contains source comparisons but no inferred review decision or recommendat
   assert.doesNotMatch(serialized, /"decision"\s*:/i);
   assert.doesNotMatch(serialized, /"recommendation"\s*:/i);
   assert.match(packet.classification, /no regulatory decision or recommendation/);
+  assert.ok(packet.review_rules.some((rule) => /register data reviewer/.test(rule)));
 });
 
 test("preserves exact source values and identifies meaningful row differences", () => {

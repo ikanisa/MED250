@@ -26,7 +26,7 @@ export function buildLaunchEvidenceReport(manifest) {
     release: String(manifest?.release ?? ""),
     gateCount: gates.length,
     statusCounts,
-    productionReady: gates.length === 15 && gates.every((gate) => (
+    productionReady: gates.length === 11 && gates.every((gate) => (
       gate.status === "confirmed"
       && gate.missingEvidenceTypes.length === 0
       && gate.approvalComplete

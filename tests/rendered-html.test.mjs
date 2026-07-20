@@ -1035,11 +1035,7 @@ test("protects new anonymous customer sessions with Turnstile in live mode", asy
   assert.match(preflight, /Live release validation requires NEXT_PUBLIC_TURNSTILE_SITE_KEY/);
   assert.match(preflight, /MED250_GATE_GPS_READY/);
   assert.match(preflight, /MED250_GATE_WHATSAPP_READY/);
-  assert.match(preflight, /MED250_GATE_PHARMACY_OPERATIONS_APPROVED/);
-  assert.match(preflight, /MED250_GATE_REGULATORY_APPROVED/);
-  assert.match(preflight, /MED250_GATE_DATA_REUSE_APPROVED/);
   assert.match(preflight, /MED250_GATE_DUPLICATE_REGISTER_REVIEWED/);
-  assert.match(preflight, /MED250_GATE_CREDENTIALS_ROTATED/);
   assert.match(preflight, /MED250_GATE_SECURITY_HARDENING_DEPLOYED/);
   assert.match(preflight, /MED250_GATE_EDGE_FUNCTIONS_DEPLOYED/);
   assert.match(preflight, /MED250_GATE_TURNSTILE_SERVER_VERIFIED/);

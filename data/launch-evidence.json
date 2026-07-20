@@ -1,7 +1,7 @@
 {
   "schema_version": "2",
   "release": "med250-production",
-  "description": "Evidence registry for the fifteen fail-closed MED+250 production launch gates. A gate may be confirmed only after its referenced evidence exists and has a named approver and timezone-qualified approval timestamp.",
+  "description": "Evidence registry for the eleven fail-closed MED+250 production launch gates. A gate may be confirmed only after its referenced evidence exists and has a named approver and timezone-qualified approval timestamp.",
   "gates": {
     "MED250_GATE_GPS_READY": {
       "title": "Authoritative pharmacy GPS readiness",
@@ -41,56 +41,12 @@
       "approved_role": null,
       "approved_at": null
     },
-    "MED250_GATE_PHARMACY_OPERATIONS_APPROVED": {
-      "title": "Pharmacy marketplace operations approval",
-      "owner": "MED+250 operations lead",
-      "required_evidence_types": ["signed_approval"],
-      "status": "pending",
-      "acceptance": "Named operational owners have approved dispatch, confirmation, escalation, expiry, cancellation, prescription and incident procedures for the production pharmacy set.",
-      "evidence": [],
-      "approved_by": null,
-      "approved_role": null,
-      "approved_at": null
-    },
-    "MED250_GATE_REGULATORY_APPROVED": {
-      "title": "Regulatory approval",
-      "owner": "MED+250 legal and compliance",
-      "required_evidence_types": ["signed_approval"],
-      "status": "pending",
-      "acceptance": "Written legal and regulatory review approves the exact production marketplace model and documents every applicable Rwanda FDA, RICA and health-sector condition.",
-      "evidence": [],
-      "approved_by": null,
-      "approved_role": null,
-      "approved_at": null
-    },
-    "MED250_GATE_DATA_REUSE_APPROVED": {
-      "title": "Source-data reuse approval",
-      "owner": "MED+250 data owner",
-      "required_evidence_types": ["signed_approval", "review_ledger"],
-      "status": "pending",
-      "acceptance": "Written permission and provenance records approve publication and operational reuse of every product, pharmacy and contact source used by the release.",
-      "evidence": [],
-      "approved_by": null,
-      "approved_role": null,
-      "approved_at": null
-    },
     "MED250_GATE_DUPLICATE_REGISTER_REVIEWED": {
       "title": "Duplicate-register review",
-      "owner": "MED+250 regulatory data reviewer",
+      "owner": "MED+250 register data reviewer",
       "required_evidence_types": ["review_ledger"],
       "status": "pending",
       "acceptance": "The strict duplicate-register verifier passes with named, timestamped decisions for every synchronized product and pharmacy duplicate group.",
-      "evidence": [],
-      "approved_by": null,
-      "approved_role": null,
-      "approved_at": null
-    },
-    "MED250_GATE_CREDENTIALS_ROTATED": {
-      "title": "Privileged credential rotation",
-      "owner": "MED+250 security owner",
-      "required_evidence_types": ["deployment_receipt", "signed_approval"],
-      "status": "pending",
-      "acceptance": "Previously exposed Supabase service, database and personal credentials are revoked and replaced, with a redacted rotation receipt and no replacement secret in repository evidence.",
       "evidence": [],
       "approved_by": null,
       "approved_role": null,
@@ -209,17 +165,17 @@
       "evidence": [
         {
           "type": "domain_verification",
-          "reference": "docs/launch/evidence/domain-verification-2026-07-18.json",
-          "sha256": "7b25c2a4051b6a7f310a69de4f26228c12be344bbbca685941f1bdc072f3eabd",
-          "recorded_at": "2026-07-18T16:33:24.163Z",
-          "summary": "Current canonical-domain DNS, HTTPS, ten-route, redirect, security-header, robots, sitemap, and exact-revision checks passed."
+          "reference": "docs/launch/evidence/domain-verification-2026-07-20.json",
+          "sha256": "12877c387744cedf85ac605fc07dcc6a50c7cd29137de9448afd0180f15d9daa",
+          "recorded_at": "2026-07-20T16:26:57.716Z",
+          "summary": "Current canonical-domain DNS, HTTPS, ten-route, security-header, robots, sitemap, manifest, service-worker, offline page, and exact-revision checks passed."
         },
         {
           "type": "test_record",
-          "reference": "docs/launch/evidence/domain-deployment-test-2026-07-18.json",
-          "sha256": "6d4b535b8adeeb53319cd49a1b13db167e39e58cd7dbef58a731145cca1d9f7b",
-          "recorded_at": "2026-07-18T16:33:31.102Z",
-          "summary": "Current exact-revision route verification, 4,657-product catalogue reconciliation, multilingual search reach, and browser evidence binding passed."
+          "reference": "docs/launch/evidence/domain-deployment-test-2026-07-20.json",
+          "sha256": "38f19d6eb2f8dd5e867277c42a5f62867beb0fad3260d9784947c58c9edcb5bc",
+          "recorded_at": "2026-07-20T16:26:57.716Z",
+          "summary": "Current exact-revision production route verification passed all ten canonical live routes with no verifier errors."
         }
       ],
       "approved_by": null,

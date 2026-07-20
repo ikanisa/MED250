@@ -8,7 +8,7 @@ The read-only closure report reconciles seven authoritative sources:
 1. all 73 mapped audit source units in `data/audit-implementation-register.json`, including the 17 findings, preservation directives, scorecard rows, benchmark rows, roadmap actions, audit limitations, and audited surfaces;
 2. the three separately governed strategic decisions;
 3. the 16-scenario, 56-capture browser ledger;
-4. all 15 protected production launch gates;
+4. all 11 protected production launch gates;
 5. all 12 physical-device UAT scenarios;
 6. the governed Kinyarwanda locale release;
 7. the 72-entry source-bound product-content review.
@@ -29,7 +29,7 @@ The first command prints the live owner queues and every protected production ga
 - all 73 source units remain mapped to valid Goal 0–11 and audit-item records at the exact source revision;
 - every automated binding behind those items still passes;
 - all 16 browser scenarios and the overall browser ledger pass;
-- all 15 production launch gates are confirmed with their required evidence and approvals;
+- all 11 production launch gates are confirmed with their required evidence and approvals;
 - all 12 physical-device scenarios and the overall UAT ledger pass;
 - Kinyarwanda is an approved, runtime-ready public release;
 - all product-content decisions are complete with no correction blocker.
@@ -40,7 +40,7 @@ The first command prints the live owner queues and every protected production ga
 - 19 items remain open.
 - 73 of 73 audit source units are mapped; this proves goal coverage, not implementation closure.
 - 16 of 16 browser scenarios are passed with 56 immutable captures; the overall browser ledger remains pending until independent QA approval is recorded.
-- 0 of 15 production launch gates are confirmed.
+- 0 of 11 production launch gates are confirmed.
 - 0 of 12 physical-device scenarios are passed.
 - Kinyarwanda remains `awaiting_qualified_translation`.
 - 72 product-content decisions remain pending.
