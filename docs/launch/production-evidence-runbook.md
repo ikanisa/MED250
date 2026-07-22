@@ -14,6 +14,16 @@ This runbook closes the 11 fail-closed production gates without weakening them o
 8. For access-controlled HTTPS evidence, record the named verifier, verifier role and timezone-qualified verification time in the registry evidence entry.
 9. Re-run `npm run launch:evidence:verify` after every evidence edit. Run the strict command only when all owners believe the release is ready.
 
+## Owner closure board
+
+Run `npm run launch:closure:board` before accountable-owner execution sessions.
+It writes
+`desktop-output/goal-progress-2026-07-22/go-live-closure-board-2026-07-22.json`,
+which is a deterministic execution aid combining gate status, missing evidence,
+prepared pending artifact references, owner workstreams, blocker summaries and
+safe commands. The board is deliberately not evidence and never substitutes for
+row-level review, physical UAT, deployment verification or named approval.
+
 ## Current safe release state
 
 - The Cloudflare Worker is publicly reachable at `https://med250.gikundiro.com`; all ten required routes passed live deployment verification on 2026-07-20 against revision `37d8c1c0e0c8ac2d15eea436d2f9037c20e2814c`. The current registry points to `docs/launch/evidence/domain-verification-2026-07-20.json` and `docs/launch/evidence/domain-deployment-test-2026-07-20.json`.

@@ -9,13 +9,25 @@ Run:
 ```sh
 npm run launch:evidence:status
 npm run launch:go-live:status
+npm run launch:closure:board
 npm run launch:approval:packet
 npm run --silent launch:evidence:handoff > /tmp/med250-owner-evidence-handoff.json
 npm run audit:browser-evidence:verify
 npm run audit:closure:status
 ```
 
-The second command produces one deterministic handoff for the currently missing evidence types without changing the repository. Every one now has a prepared pending artifact with gate-specific checks, unresolved actions and completion instructions. Complete the listed file in place, validate it, hash it, and then add it to `data/launch-evidence.json`. Do not replace a prepared packet with a generic template.
+`npm run launch:closure:board` writes a deterministic owner work board to
+`desktop-output/goal-progress-2026-07-22/go-live-closure-board-2026-07-22.json`.
+It combines the current go-live status, evidence handoff, duplicate-register
+state and physical-device UAT state into one execution queue. It is not evidence
+and does not approve anything.
+
+The handoff command produces one deterministic packet for the currently missing
+evidence types without changing the repository. Every one now has a prepared
+pending artifact with gate-specific checks, unresolved actions and completion
+instructions. Complete the listed file in place, validate it, hash it, and then
+add it to `data/launch-evidence.json`. Do not replace a prepared packet with a
+generic template.
 
 For every artifact:
 

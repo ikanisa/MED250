@@ -84,6 +84,7 @@
     "launch:evidence:status": "node scripts/report-launch-evidence.mjs",
     "launch:go-live:status": "node scripts/report-go-live-readiness.mjs",
     "launch:go-live:status:json": "node scripts/report-go-live-readiness.mjs --json",
+    "launch:closure:board": "node scripts/create-go-live-closure-board.mjs --output desktop-output/goal-progress-2026-07-22/go-live-closure-board-2026-07-22.json",
     "launch:evidence:template": "node scripts/create-launch-evidence-template.mjs",
     "launch:evidence:handoff": "node scripts/create-launch-evidence-template.mjs --all-missing",
     "launch:approval:packet": "node scripts/create-launch-approval-packet.mjs --output desktop-output/goal-progress-2026-07-20/launch-approval-packet-2026-07-20.json",

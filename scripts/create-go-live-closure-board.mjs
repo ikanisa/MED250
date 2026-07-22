@@ -1,0 +1,370 @@
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
+
+import {
+  createLaunchEvidenceHandoff,
+  discoverPreparedLaunchEvidence,
+} from "./create-launch-evidence-template.mjs";
+import { buildGoLiveReadinessReport } from "./report-go-live-readiness.mjs";
+
+const CLOSURE_ORDER = [
+  "MED250_GATE_DUPLICATE_REGISTER_REVIEWED",
+  "MED250_GATE_GPS_READY",
+  "MED250_GATE_WHATSAPP_READY",
+  "MED250_GATE_SECURITY_HARDENING_DEPLOYED",
+  "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED",
+  "MED250_GATE_TURNSTILE_SERVER_VERIFIED",
+  "MED250_GATE_AUTH_RATE_LIMITS_APPROVED",
+  "MED250_GATE_PRESCRIPTION_RETENTION_APPROVED",
+  "MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED",
+  "MED250_GATE_DOMAIN_DNS_VERIFIED",
+  "MED250_GATE_PHYSICAL_UAT_PASSED",
+];
+
+const GATE_GUIDANCE = {
+  MED250_GATE_GPS_READY: {
+    workstream: "operations",
+    closure_focus: "Approve only authoritative pharmacy premises coordinates for the intended responder scope.",
+    next_actions: [
+      "Regenerate the GPS and WhatsApp operations review index.",
+      "Complete the controlled private GPS row-level review ledger for every active pharmacy record.",
+      "Reconcile the approved GPS scope with actual routing and dispatch eligibility.",
+      "Run strict operational health, then complete and record the redacted review-ledger artifact with accountable operations approval.",
+    ],
+    commands: [
+      "npm run ops:readiness:packet",
+      "npm run ops:health:strict",
+      "npm run launch:evidence:artifact:verify -- --file docs/launch/evidence/gps-readiness-review-ledger-pending-2026-07-16.json --gate MED250_GATE_GPS_READY --type review_ledger",
+      "npm run launch:evidence:record -- --artifact docs/launch/evidence/gps-readiness-review-ledger-pending-2026-07-16.json --confirm --approved-by \"Named operations owner\" --approved-role \"Operations owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\"",
+    ],
+  },
+  MED250_GATE_WHATSAPP_READY: {
+    workstream: "operations",
+    closure_focus: "Approve only pharmacy-authorised WhatsApp identities for the intended responder scope.",
+    next_actions: [
+      "Regenerate the GPS and WhatsApp operations review index.",
+      "Complete the controlled private WhatsApp row-level review ledger for every active pharmacy record.",
+      "Reconcile the approved WhatsApp responder scope with login-enabled portal access and routing.",
+      "Run strict operational health, then complete and record the redacted review-ledger artifact with accountable operations approval.",
+    ],
+    commands: [
+      "npm run ops:readiness:packet",
+      "npm run ops:health:strict",
+      "npm run launch:evidence:artifact:verify -- --file docs/launch/evidence/whatsapp-readiness-review-ledger-pending-2026-07-16.json --gate MED250_GATE_WHATSAPP_READY --type review_ledger",
+      "npm run launch:evidence:record -- --artifact docs/launch/evidence/whatsapp-readiness-review-ledger-pending-2026-07-16.json --confirm --approved-by \"Named operations owner\" --approved-role \"Operations owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\"",
+    ],
+  },
+  MED250_GATE_DUPLICATE_REGISTER_REVIEWED: {
+    workstream: "register-data",
+    closure_focus: "Resolve every synchronized duplicate official identifier without deleting or rewriting source rows to force a pass.",
+    next_actions: [
+      "Regenerate the duplicate source-comparison packet.",
+      "Have a named register data reviewer decide all 51 duplicate groups in the controlled CSV ledger.",
+      "Run the strict duplicate verifier and complete the redacted review-ledger artifact only after it passes.",
+      "Record the artifact and gate approval through the guarded registry helper.",
+    ],
+    commands: [
+      "npm run data:duplicates:packet",
+      "npm run data:duplicates:verify -- --strict",
+      "npm run launch:evidence:artifact:verify -- --file docs/launch/evidence/duplicate-register-review-ledger-pending-2026-07-16.json --gate MED250_GATE_DUPLICATE_REGISTER_REVIEWED --type review_ledger",
+      "npm run launch:evidence:record -- --artifact docs/launch/evidence/duplicate-register-review-ledger-pending-2026-07-16.json --confirm --approved-by \"Named register data reviewer\" --approved-role \"Register data reviewer\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\"",
+    ],
+  },
+  MED250_GATE_SECURITY_HARDENING_DEPLOYED: {
+    workstream: "backend",
+    closure_focus: "Review the complete backend hardening evidence and record real backend-owner approval.",
+    next_actions: [
+      "Regenerate the approval packet and inspect every referenced deployment/test artifact.",
+      "Confirm the evidence still satisfies the backend contract and hardening acceptance criterion.",
+      "Record named backend-owner approval without changing evidence facts.",
+    ],
+    commands: [
+      "npm run launch:approval:packet",
+      "npm run backend:verify",
+      "npm run launch:evidence:record -- --artifact docs/launch/evidence/security-hardening-test-2026-07-18.json --replace --confirm --approved-by \"Named backend owner\" --approved-role \"Backend owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\"",
+    ],
+  },
+  MED250_GATE_EDGE_FUNCTIONS_DEPLOYED: {
+    workstream: "backend",
+    closure_focus: "Review the complete Edge Function deployment evidence and record real backend-owner approval.",
+    next_actions: [
+      "Regenerate the approval packet and inspect every referenced Edge Function deployment/test artifact.",
+      "Confirm the active function versions and protected-access boundaries still match the intended release.",
+      "Record named backend-owner approval without changing evidence facts.",
+    ],
+    commands: [
+      "npm run launch:approval:packet",
+      "npm run backend:verify:description-reviewer -- --product-id \"$MED250_DESCRIPTION_REVIEWER_PROBE_PRODUCT_ID\" --expected-updated-at \"$MED250_DESCRIPTION_REVIEWER_PROBE_EXPECTED_UPDATED_AT\"",
+      "npm run launch:evidence:record -- --artifact docs/launch/evidence/edge-functions-test-2026-07-18.json --replace --confirm --approved-by \"Named backend owner\" --approved-role \"Backend owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\"",
+    ],
+  },
+  MED250_GATE_TURNSTILE_SERVER_VERIFIED: {
+    workstream: "security",
+    closure_focus: "Prove the production widget positive path while keeping invalid/missing-token rejection intact.",
+    next_actions: [
+      "Run the real production Turnstile widget positive-path test with one disposable anonymous identity.",
+      "Delete or revoke the disposable identity and verify aggregate user count returns to the approved baseline.",
+      "Complete the redacted test artifact and record security-owner approval.",
+    ],
+    commands: [
+      "npm run security:turnstile:verify -- --require-valid",
+      "npm run launch:evidence:artifact:verify -- --file docs/launch/evidence/turnstile-positive-path-test-pending-2026-07-16.json --gate MED250_GATE_TURNSTILE_SERVER_VERIFIED --type test_record",
+      "npm run launch:evidence:record -- --artifact docs/launch/evidence/turnstile-positive-path-test-pending-2026-07-16.json --confirm --approved-by \"Named security owner\" --approved-role \"Security owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\"",
+    ],
+  },
+  MED250_GATE_AUTH_RATE_LIMITS_APPROVED: {
+    workstream: "security",
+    closure_focus: "Approve the shared Supabase anonymous-auth limits only after impact testing intended access and excess-attempt rejection.",
+    next_actions: [
+      "Complete the controlled rate-limit test with fresh real widget responses.",
+      "Confirm excess anonymous identity creation is rejected and intended customers still complete ordering.",
+      "Remove disposable identities and record the project-wide security-owner approval.",
+    ],
+    commands: [
+      "npm run security:turnstile:verify -- --require-valid",
+      "npm run launch:evidence:artifact:verify -- --file docs/launch/evidence/auth-rate-limit-test-pending-2026-07-16.json --gate MED250_GATE_AUTH_RATE_LIMITS_APPROVED --type test_record",
+      "npm run launch:evidence:artifact:verify -- --file docs/launch/evidence/auth-rate-limit-approval-pending-2026-07-16.json --gate MED250_GATE_AUTH_RATE_LIMITS_APPROVED --type signed_approval",
+      "npm run launch:evidence:record -- --artifact docs/launch/evidence/auth-rate-limit-approval-pending-2026-07-16.json --confirm --approved-by \"Named security owner\" --approved-role \"Security owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\"",
+    ],
+  },
+  MED250_GATE_PRESCRIPTION_RETENTION_APPROVED: {
+    workstream: "privacy",
+    closure_focus: "Approve the implemented prescription retention periods and cleanup schedule against privacy-owner criteria.",
+    next_actions: [
+      "Review the retention policy and existing controlled cleanup test record.",
+      "Complete the signed approval artifact with the privacy owner.",
+      "Record approval only after the owner accepts the retention periods, cleanup cadence, monitoring and incident conditions.",
+    ],
+    commands: [
+      "npm run launch:evidence:artifact:verify -- --file docs/launch/evidence/prescription-retention-approval-pending-2026-07-16.json --gate MED250_GATE_PRESCRIPTION_RETENTION_APPROVED --type signed_approval",
+      "npm run launch:evidence:record -- --artifact docs/launch/evidence/prescription-retention-approval-pending-2026-07-16.json --confirm --approved-by \"Named privacy owner\" --approved-role \"Privacy owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\"",
+    ],
+  },
+  MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED: {
+    workstream: "infrastructure",
+    closure_focus: "Prove the intended Cloudflare account, route ownership, protected environments and least-privilege deployment credential.",
+    next_actions: [
+      "Replace any broad release-path access with a credential scoped to the MED+250 Worker, route, assets and read-only zone inspection.",
+      "Complete the redacted account-verification artifact without exposing account identifiers or tokens.",
+      "Complete the infrastructure approval artifact and record the gate only after least privilege is true.",
+    ],
+    commands: [
+      "wrangler whoami",
+      "npm run launch:evidence:artifact:verify -- --file docs/launch/evidence/cloudflare-account-verification-pending-2026-07-16.json --gate MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED --type account_verification",
+      "npm run launch:evidence:artifact:verify -- --file docs/launch/evidence/cloudflare-account-approval-pending-2026-07-16.json --gate MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED --type signed_approval",
+      "npm run launch:evidence:record -- --artifact docs/launch/evidence/cloudflare-account-approval-pending-2026-07-16.json --confirm --approved-by \"Named infrastructure owner\" --approved-role \"Infrastructure owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\"",
+    ],
+  },
+  MED250_GATE_DOMAIN_DNS_VERIFIED: {
+    workstream: "infrastructure",
+    closure_focus: "Review the fresh live domain evidence and record infrastructure-owner approval.",
+    next_actions: [
+      "Rerun DNS and live deployment verification if any Worker, route, DNS or repository revision changed.",
+      "Confirm med250.gikundiro.com is attached only to the intended Cloudflare Worker route.",
+      "Record named infrastructure-owner approval against the current domain and deployment evidence.",
+    ],
+    commands: [
+      "npm run domain:dns:verify",
+      "npm run deployment:verify -- --url https://med250.gikundiro.com --mode live --expected-revision <exact-lowercase-40-character-git-sha>",
+      "npm run launch:evidence:record -- --artifact docs/launch/evidence/domain-deployment-test-2026-07-20.json --replace --confirm --approved-by \"Named infrastructure owner\" --approved-role \"Infrastructure owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\"",
+    ],
+  },
+  MED250_GATE_PHYSICAL_UAT_PASSED: {
+    workstream: "qa",
+    closure_focus: "Execute all physical-device UAT scenarios with opaque approved identities and no unintended pharmacy contact.",
+    next_actions: [
+      "Regenerate the physical-device UAT packet.",
+      "Execute all 12 scenarios on approved physical devices with redacted evidence references.",
+      "Update the governed UAT ledger and paired test/approval artifacts.",
+      "Run strict UAT verification, then record QA-owner approval.",
+    ],
+    commands: [
+      "npm run uat:packet",
+      "npm run uat:verify:live",
+      "npm run launch:evidence:artifact:verify -- --file docs/launch/evidence/physical-device-uat-test-pending-2026-07-16.json --gate MED250_GATE_PHYSICAL_UAT_PASSED --type test_record",
+      "npm run launch:evidence:record -- --artifact docs/launch/evidence/physical-device-uat-approval-pending-2026-07-16.json --confirm --approved-by \"Named QA owner\" --approved-role \"QA owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\"",
+    ],
+  },
+};
+
+const COMMON_SAFETY_RULES = [
+  "Do not mark a gate confirmed until every required evidence type is recorded and the accountable owner has approved it.",
+  "Do not store credentials, tokens, phone numbers, OTPs, customer identifiers, email addresses, prescription contents, exact customer coordinates, or unredacted account identifiers.",
+  "Use pending artifacts only as completion workbooks; do not add them to data/launch-evidence.json until they are complete and pass validation.",
+  "Keep prepared-evidence and approval work separate; an automated result cannot sign for an accountable owner.",
+];
+
+function approvalComplete(gate) {
+  return Boolean(
+    typeof gate?.approved_by === "string" && gate.approved_by.trim()
+    && typeof gate?.approved_role === "string" && gate.approved_role.trim()
+    && typeof gate?.approved_at === "string" && gate.approved_at.trim(),
+  );
+}
+
+function gateSortIndex(gateName) {
+  const index = CLOSURE_ORDER.indexOf(gateName);
+  return index === -1 ? Number.MAX_SAFE_INTEGER : index;
+}
+
+function byGateOrder(left, right) {
+  return gateSortIndex(left.gate) - gateSortIndex(right.gate) || left.gate.localeCompare(right.gate);
+}
+
+function evidenceState(gateName, gate, handoffGate) {
+  const supplied = (gate.evidence ?? []).map((entry) => ({
+    type: entry.type,
+    reference: entry.reference,
+    recorded_at: entry.recorded_at,
+    sha256: entry.sha256,
+  }));
+  const prepared = Object.entries(handoffGate?.prepared_pending_evidence ?? {}).map(([type, artifact]) => ({
+    type,
+    reference: artifact.reference,
+    template_valid: artifact.template_valid,
+    unresolved_check_count: artifact.unresolved_checks.length,
+    completion_instruction_count: artifact.completion_instructions.length,
+  }));
+  const suppliedTypes = new Set(supplied.map((entry) => entry.type));
+  return {
+    required_types: gate.required_evidence_types ?? [],
+    supplied,
+    missing_types: (gate.required_evidence_types ?? []).filter((type) => !suppliedTypes.has(type)),
+    prepared_pending: prepared,
+    unprepared_types: handoffGate?.unprepared_evidence_types ?? [],
+    ci_launch_gate_variable: gateName,
+  };
+}
+
+function blockerSummary(gateName, gate, readinessGate, evidence, report) {
+  const blockers = [];
+  if (evidence.missing_types.length) blockers.push(`Missing required evidence type(s): ${evidence.missing_types.join(", ")}.`);
+  if (!approvalComplete(gate)) blockers.push("Missing named accountable-owner approval metadata.");
+  if (gateName === "MED250_GATE_DUPLICATE_REGISTER_REVIEWED") {
+    blockers.push(`${report.duplicateRegister.decisionCounts.pending} duplicate-register group(s) remain pending in data/imports/duplicate-register-review.csv.`);
+  }
+  if (gateName === "MED250_GATE_PHYSICAL_UAT_PASSED") {
+    blockers.push(`${report.physicalUat.statusCounts.pending} physical-device UAT scenario(s) remain pending in data/physical-device-uat.json.`);
+  }
+  if (readinessGate?.readiness === "approval_pending") {
+    blockers.push("Machine evidence is present; owner review and approval remain deliberately separate.");
+  }
+  return [...new Set(blockers)];
+}
+
+export function buildGoLiveClosureBoard({ manifest, handoff, readinessReport }) {
+  const handoffByGate = new Map((handoff.gates ?? []).map((gate) => [gate.gate, gate]));
+  const readinessByGate = new Map((readinessReport.gates ?? []).map((gate) => [gate.name, gate]));
+  const gates = Object.entries(manifest.gates ?? {})
+    .map(([gateName, gate]) => {
+      const guidance = GATE_GUIDANCE[gateName] ?? {
+        workstream: "unclassified",
+        closure_focus: "Complete the missing launch evidence and accountable-owner approval.",
+        next_actions: ["Complete the required evidence, validate it, record it, and rerun strict launch evidence verification."],
+        commands: ["npm run launch:evidence:verify:live"],
+      };
+      const handoffGate = handoffByGate.get(gateName);
+      const readinessGate = readinessByGate.get(gateName);
+      const evidence = evidenceState(gateName, gate, handoffGate);
+      return {
+        gate: gateName,
+        title: gate.title,
+        owner: gate.owner,
+        workstream: guidance.workstream,
+        current_status: gate.status,
+        readiness: readinessGate?.readiness ?? "unknown",
+        closure_focus: guidance.closure_focus,
+        acceptance: gate.acceptance,
+        evidence,
+        approval: {
+          required: true,
+          complete: approvalComplete(gate),
+          approved_by: gate.approved_by,
+          approved_role: gate.approved_role,
+          approved_at: gate.approved_at,
+        },
+        blockers: blockerSummary(gateName, gate, readinessGate, evidence, readinessReport),
+        next_actions: guidance.next_actions,
+        commands: guidance.commands,
+        safety_rules: COMMON_SAFETY_RULES,
+      };
+    })
+    .sort(byGateOrder);
+
+  const ownerWorkstreams = gates.reduce((workstreams, gate) => {
+    workstreams[gate.workstream] ??= { owners: [], gates: [], blocker_count: 0 };
+    if (!workstreams[gate.workstream].owners.includes(gate.owner)) workstreams[gate.workstream].owners.push(gate.owner);
+    workstreams[gate.workstream].gates.push(gate.gate);
+    workstreams[gate.workstream].blocker_count += gate.blockers.length;
+    return workstreams;
+  }, {});
+
+  return {
+    schema_version: "1",
+    release: manifest.release ?? "med250-production",
+    classification: "go-live closure board; execution aid only, not evidence or approval",
+    production_ready: readinessReport.productionReady,
+    summary: {
+      gate_count: readinessReport.launchEvidence.gateCount,
+      confirmed_gates: readinessReport.gateReadiness.confirmed,
+      approval_pending_gates: readinessReport.gateReadiness.approvalPending,
+      prepared_evidence_pending_gates: readinessReport.gateReadiness.preparedEvidencePending,
+      missing_evidence_gates: readinessReport.gateReadiness.missingEvidence,
+      duplicate_register_pending_groups: readinessReport.duplicateRegister.decisionCounts.pending,
+      physical_uat_pending_scenarios: readinessReport.physicalUat.statusCounts.pending,
+      prepared_handoff_artifacts: readinessReport.handoff.preparedPendingArtifactCount,
+      required_handoff_artifacts: readinessReport.handoff.missingEvidenceArtifactCount,
+    },
+    closure_order: CLOSURE_ORDER,
+    owner_workstreams: ownerWorkstreams,
+    instructions: [
+      "Work through gates in closure_order unless an accountable owner explicitly changes the sequence.",
+      "Complete row-level reviews and physical UAT before attempting final live release approval.",
+      "After every completed artifact, run npm run launch:evidence:verify and npm run launch:go-live:status.",
+      "Run npm run launch:evidence:verify:live only when every gate is ready for strict release.",
+    ],
+    gates,
+  };
+}
+
+async function main() {
+  const outputIndex = process.argv.indexOf("--output");
+  const outputPath = outputIndex >= 0 ? process.argv[outputIndex + 1] : "";
+  const known = new Set(outputIndex >= 0 ? ["--output", outputPath] : []);
+  const unknown = process.argv.slice(2).filter((argument) => !known.has(argument));
+  if (outputIndex >= 0 && !outputPath) throw new Error("--output requires a path.");
+  if (unknown.length) throw new Error(`Unknown argument(s): ${unknown.join(", ")}`);
+
+  const [manifest, prepared, readinessReport] = await Promise.all([
+    readFile("data/launch-evidence.json", "utf8").then(JSON.parse),
+    discoverPreparedLaunchEvidence(),
+    buildGoLiveReadinessReport(),
+  ]);
+  const board = buildGoLiveClosureBoard({
+    manifest,
+    handoff: createLaunchEvidenceHandoff(manifest, prepared),
+    readinessReport,
+  });
+  const serialized = `${JSON.stringify(board, null, 2)}\n`;
+  if (outputPath) {
+    const resolvedOutput = resolve(outputPath);
+    await mkdir(dirname(resolvedOutput), { recursive: true });
+    await writeFile(resolvedOutput, serialized, "utf8");
+    console.log(JSON.stringify({
+      status: "written",
+      output: outputPath,
+      gate_count: board.summary.gate_count,
+      production_ready: board.production_ready,
+      blocker_count: board.gates.reduce((total, gate) => total + gate.blockers.length, 0),
+    }, null, 2));
+  } else {
+    process.stdout.write(serialized);
+  }
+}
+
+const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+if (isMain) main().catch((error) => {
+  console.error(JSON.stringify({ status: "error", error: error.message }, null, 2));
+  process.exitCode = 1;
+});
