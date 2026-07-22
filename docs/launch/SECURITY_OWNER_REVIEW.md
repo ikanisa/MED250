@@ -64,13 +64,25 @@ Use a production browser and the real widget:
    - the aggregate Auth user count restored;
    - no identifier or token emitted.
 7. Confirm no cart, request, prescription, pharmacy message, or marketplace row was created.
-8. Retain only the redacted JSON command result and complete the pending test artifact.
+8. Retain only the redacted JSON command result and build the completed launch
+   artifact:
+
+   ```sh
+   npm run security:turnstile:evidence:build -- \
+     --input desktop-output/goal-progress-YYYY-MM-DD/turnstile-verifier-result.json \
+     --date YYYY-MM-DD \
+     --executed-by "Named security tester" \
+     --executor-role "Security owner" \
+     --started-at "YYYY-MM-DDTHH:mm:ss+02:00" \
+     --completed-at "YYYY-MM-DDTHH:mm:ss+02:00" \
+     --no-marketplace-side-effect-confirmed
+   ```
 
 If the browser token expires, is already consumed, or the positive path fails, do not weaken Turnstile. Obtain a new token and repeat the controlled test.
 
 ### Required artifact
 
-- `docs/launch/evidence/turnstile-positive-path-test-pending-2026-07-16.json`
+- `docs/launch/evidence/turnstile-positive-path-test-YYYY-MM-DD.json`
 
 ## Gate 2: anonymous-auth rate-limit approval
 

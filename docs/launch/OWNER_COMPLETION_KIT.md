@@ -242,7 +242,22 @@ positive path below remains:
    creates only one disposable anonymous identity with the valid token, revokes
    its session, deletes it, and confirms the aggregate user count is restored.
 6. Do not submit an availability request or contact a pharmacy.
-7. Retain the redacted command result without the token or identity.
+7. Retain the redacted command result without the token or identity, then build
+   the launch evidence:
+
+```sh
+npm run security:turnstile:evidence:build -- \
+  --input desktop-output/goal-progress-YYYY-MM-DD/turnstile-verifier-result.json \
+  --date YYYY-MM-DD \
+  --executed-by "Named security tester" \
+  --executor-role "Security owner" \
+  --started-at "YYYY-MM-DDTHH:mm:ss+02:00" \
+  --completed-at "YYYY-MM-DDTHH:mm:ss+02:00" \
+  --no-marketplace-side-effect-confirmed
+```
+
+The builder refuses negative-only verifier output, leaked tokens/identifiers,
+missing cleanup, or a missing no-marketplace-side-effect confirmation.
 
 Rate-limit test:
 

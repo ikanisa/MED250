@@ -61,6 +61,7 @@
     "security:audit:python": "node scripts/audit-python-requirements.mjs",
     "security:audit": "npm run security:audit:node && npm run security:audit:python",
     "security:turnstile:verify": "node scripts/verify-turnstile-auth.mjs",
+    "security:turnstile:evidence:build": "node scripts/create-turnstile-launch-evidence.mjs",
     "performance:budget": "node scripts/validate-performance-budget.mjs",
     "ops:health": "node scripts/monitor-operational-health.mjs",
     "ops:health:strict": "node scripts/monitor-operational-health.mjs --strict",

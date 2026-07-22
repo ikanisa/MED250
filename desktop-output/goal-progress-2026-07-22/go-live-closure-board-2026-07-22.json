@@ -471,12 +471,12 @@
       "next_actions": [
         "Run the real production Turnstile widget positive-path test with one disposable anonymous identity.",
         "Delete or revoke the disposable identity and verify aggregate user count returns to the approved baseline.",
-        "Complete the redacted test artifact and record security-owner approval."
+        "Build the redacted test artifact from the retained verifier result and record security-owner approval."
       ],
       "commands": [
         "npm run security:turnstile:verify -- --require-valid",
-        "npm run launch:evidence:artifact:verify -- --file docs/launch/evidence/turnstile-positive-path-test-pending-2026-07-16.json --gate MED250_GATE_TURNSTILE_SERVER_VERIFIED --type test_record",
-        "npm run launch:evidence:record -- --artifact docs/launch/evidence/turnstile-positive-path-test-pending-2026-07-16.json --confirm --approved-by \"Named security owner\" --approved-role \"Security owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\""
+        "npm run security:turnstile:evidence:build -- --input desktop-output/goal-progress-YYYY-MM-DD/turnstile-verifier-result.json --date YYYY-MM-DD --executed-by \"Named security tester\" --executor-role \"Security owner\" --started-at \"YYYY-MM-DDTHH:mm:ss+02:00\" --completed-at \"YYYY-MM-DDTHH:mm:ss+02:00\" --no-marketplace-side-effect-confirmed",
+        "npm run launch:evidence:record -- --artifact docs/launch/evidence/turnstile-positive-path-test-YYYY-MM-DD.json --replace --confirm --approved-by \"Named security owner\" --approved-role \"Security owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\""
       ],
       "safety_rules": [
         "Do not mark a gate confirmed until every required evidence type is recorded and the accountable owner has approved it.",
