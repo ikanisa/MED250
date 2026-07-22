@@ -71,7 +71,9 @@ missing, use the generated review packet:
 
 Refresh it with `npm run launch:approval:packet`. It lists the exact evidence,
 acceptance criterion and safe confirmation command for each evidence-complete
-gate.
+gate that is still current. Evidence-complete gates with stale release-bound
+artifacts appear under blocked approvals instead and must be refreshed before
+owner signature.
 
 Do not store a credential, token, phone number, OTP, customer identity, email address, prescription content, exact customer location, or unredacted account identifier.
 

@@ -2,6 +2,8 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
+import { buildGoLiveReadinessReport } from "./report-go-live-readiness.mjs";
+
 function evidenceTypes(gate) {
   return new Set((gate.evidence ?? []).map((entry) => entry?.type));
 }
@@ -14,11 +16,25 @@ function approvalComplete(gate) {
   );
 }
 
-export function buildLaunchApprovalPacket(manifest) {
+export function buildLaunchApprovalPacket(manifest, readinessReport = null) {
+  const readinessByGate = new Map((readinessReport?.gates ?? []).map((gate) => [gate.name, gate]));
+  const blockedApprovals = [];
   const gates = Object.entries(manifest?.gates ?? {}).flatMap(([gateName, gate]) => {
     const supplied = evidenceTypes(gate);
     const missingEvidenceTypes = (gate.required_evidence_types ?? []).filter((type) => !supplied.has(type));
     if (gate.status === "confirmed" || approvalComplete(gate) || missingEvidenceTypes.length) return [];
+    const readiness = readinessByGate.get(gateName);
+    if (readiness?.staleReleaseEvidence) {
+      blockedApprovals.push({
+        gate: gateName,
+        title: gate.title,
+        owner: gate.owner,
+        reason: "release-bound evidence is stale against the current repository checkout",
+        required_action: "Rerun exact-revision live verification, refresh the domain artifacts and registry digests, then regenerate this approval packet.",
+        release_revision_bindings: readiness.releaseRevisionBindings,
+      });
+      return [];
+    }
     const finalEvidence = gate.evidence.at(-1);
     return [{
       gate: gateName,
@@ -57,6 +73,8 @@ export function buildLaunchApprovalPacket(manifest) {
       "After recording approval, run npm run launch:evidence:verify and npm run launch:go-live:status.",
     ],
     approval_pending_gate_count: gates.length,
+    blocked_approval_gate_count: blockedApprovals.length,
+    blocked_approvals: blockedApprovals,
     gates,
   };
 }
@@ -69,8 +87,11 @@ async function main() {
   if (outputIndex >= 0 && !outputPath) throw new Error("--output requires a path.");
   if (unknown.length) throw new Error(`Unknown argument(s): ${unknown.join(", ")}`);
 
-  const manifest = JSON.parse(await readFile("data/launch-evidence.json", "utf8"));
-  const packet = buildLaunchApprovalPacket(manifest);
+  const [manifest, readinessReport] = await Promise.all([
+    readFile("data/launch-evidence.json", "utf8").then(JSON.parse),
+    buildGoLiveReadinessReport(),
+  ]);
+  const packet = buildLaunchApprovalPacket(manifest, readinessReport);
   const serialized = `${JSON.stringify(packet, null, 2)}\n`;
   if (outputPath) {
     const resolvedOutput = resolve(outputPath);
@@ -80,6 +101,7 @@ async function main() {
       status: "written",
       output: outputPath,
       approval_pending_gate_count: packet.approval_pending_gate_count,
+      blocked_approval_gate_count: packet.blocked_approval_gate_count,
     }, null, 2));
   } else {
     process.stdout.write(serialized);

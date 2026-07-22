@@ -8,7 +8,35 @@
     "Use the confirmation command only after the accountable owner has reviewed and approved the gate.",
     "After recording approval, run npm run launch:evidence:verify and npm run launch:go-live:status."
   ],
-  "approval_pending_gate_count": 3,
+  "approval_pending_gate_count": 2,
+  "blocked_approval_gate_count": 1,
+  "blocked_approvals": [
+    {
+      "gate": "MED250_GATE_DOMAIN_DNS_VERIFIED",
+      "title": "Production domain and DNS verification",
+      "owner": "MED+250 infrastructure owner",
+      "reason": "release-bound evidence is stale against the current repository checkout",
+      "required_action": "Rerun exact-revision live verification, refresh the domain artifacts and registry digests, then regenerate this approval packet.",
+      "release_revision_bindings": [
+        {
+          "type": "domain_verification",
+          "reference": "docs/launch/evidence/domain-verification-2026-07-20.json",
+          "expectedReleaseRevision": "37d8c1c0e0c8ac2d15eea436d2f9037c20e2814c",
+          "observedReleaseRevision": "37d8c1c0e0c8ac2d15eea436d2f9037c20e2814c",
+          "releaseRevisionExpectation": "matched",
+          "matchesCurrentRevision": false
+        },
+        {
+          "type": "test_record",
+          "reference": "docs/launch/evidence/domain-deployment-test-2026-07-20.json",
+          "expectedReleaseRevision": "37d8c1c0e0c8ac2d15eea436d2f9037c20e2814c",
+          "observedReleaseRevision": "37d8c1c0e0c8ac2d15eea436d2f9037c20e2814c",
+          "releaseRevisionExpectation": "matched",
+          "matchesCurrentRevision": false
+        }
+      ]
+    }
+  ],
   "gates": [
     {
       "gate": "MED250_GATE_SECURITY_HARDENING_DEPLOYED",
@@ -87,48 +115,6 @@
       "confirmation_command": [
         "npm run launch:evidence:record --",
         "  --artifact docs/launch/evidence/edge-functions-test-2026-07-18.json",
-        "  --replace",
-        "  --confirm",
-        "  --approved-by \"Named owner\"",
-        "  --approved-role \"Accountable role\"",
-        "  --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\""
-      ]
-    },
-    {
-      "gate": "MED250_GATE_DOMAIN_DNS_VERIFIED",
-      "title": "Production domain and DNS verification",
-      "owner": "MED+250 infrastructure owner",
-      "acceptance": "med250.gikundiro.com resolves through the intended Cloudflare account, TLS is healthy, the Worker custom-domain route is attached and the deployment verifier passes in live mode.",
-      "status": "pending",
-      "required_evidence_types": [
-        "domain_verification",
-        "test_record"
-      ],
-      "evidence": [
-        {
-          "type": "domain_verification",
-          "reference": "docs/launch/evidence/domain-verification-2026-07-20.json",
-          "sha256": "12877c387744cedf85ac605fc07dcc6a50c7cd29137de9448afd0180f15d9daa",
-          "recorded_at": "2026-07-20T16:26:57.716Z",
-          "summary": "Current canonical-domain DNS, HTTPS, ten-route, security-header, robots, sitemap, manifest, service-worker, offline page, and exact-revision checks passed."
-        },
-        {
-          "type": "test_record",
-          "reference": "docs/launch/evidence/domain-deployment-test-2026-07-20.json",
-          "sha256": "38f19d6eb2f8dd5e867277c42a5f62867beb0fad3260d9784947c58c9edcb5bc",
-          "recorded_at": "2026-07-20T16:26:57.716Z",
-          "summary": "Current exact-revision production route verification passed all ten canonical live routes with no verifier errors."
-        }
-      ],
-      "review_checks": [
-        "Confirm every evidence artifact is complete, redacted, source-bound and still current for the intended production release.",
-        "Confirm the acceptance criterion is satisfied by the referenced evidence.",
-        "Confirm no credential, token, phone number, OTP, customer identifier, prescription content or precise coordinate is present.",
-        "Confirm the accountable owner name, role and timezone-qualified approval timestamp are real."
-      ],
-      "confirmation_command": [
-        "npm run launch:evidence:record --",
-        "  --artifact docs/launch/evidence/domain-deployment-test-2026-07-20.json",
         "  --replace",
         "  --confirm",
         "  --approved-by \"Named owner\"",
