@@ -30,13 +30,13 @@ const GATE_GUIDANCE = {
       "Regenerate the GPS and WhatsApp operations review index.",
       "Complete the controlled private GPS row-level review ledger for every active pharmacy record.",
       "Reconcile the approved GPS scope with actual routing and dispatch eligibility.",
-      "Run strict operational health, then complete and record the redacted review-ledger artifact with accountable operations approval.",
+      "Run strict operational health, then build and record the redacted aggregate review-ledger artifact with accountable operations approval.",
     ],
     commands: [
       "npm run ops:readiness:packet",
       "npm run ops:health:strict",
-      "npm run launch:evidence:artifact:verify -- --file docs/launch/evidence/gps-readiness-review-ledger-pending-2026-07-16.json --gate MED250_GATE_GPS_READY --type review_ledger",
-      "npm run launch:evidence:record -- --artifact docs/launch/evidence/gps-readiness-review-ledger-pending-2026-07-16.json --confirm --approved-by \"Named operations owner\" --approved-role \"Operations owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\"",
+      "npm run ops:readiness:evidence:build -- --input desktop-output/goal-progress-YYYY-MM-DD/gps-readiness-review-result.json --date YYYY-MM-DD",
+      "npm run launch:evidence:record -- --artifact docs/launch/evidence/gps-readiness-review-ledger-YYYY-MM-DD.json --replace --confirm --approved-by \"Named operations owner\" --approved-role \"Operations owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\"",
     ],
   },
   MED250_GATE_WHATSAPP_READY: {
@@ -46,13 +46,13 @@ const GATE_GUIDANCE = {
       "Regenerate the GPS and WhatsApp operations review index.",
       "Complete the controlled private WhatsApp row-level review ledger for every active pharmacy record.",
       "Reconcile the approved WhatsApp responder scope with login-enabled portal access and routing.",
-      "Run strict operational health, then complete and record the redacted review-ledger artifact with accountable operations approval.",
+      "Run strict operational health, then build and record the redacted aggregate review-ledger artifact with accountable operations approval.",
     ],
     commands: [
       "npm run ops:readiness:packet",
       "npm run ops:health:strict",
-      "npm run launch:evidence:artifact:verify -- --file docs/launch/evidence/whatsapp-readiness-review-ledger-pending-2026-07-16.json --gate MED250_GATE_WHATSAPP_READY --type review_ledger",
-      "npm run launch:evidence:record -- --artifact docs/launch/evidence/whatsapp-readiness-review-ledger-pending-2026-07-16.json --confirm --approved-by \"Named operations owner\" --approved-role \"Operations owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\"",
+      "npm run ops:readiness:evidence:build -- --input desktop-output/goal-progress-YYYY-MM-DD/whatsapp-readiness-review-result.json --date YYYY-MM-DD",
+      "npm run launch:evidence:record -- --artifact docs/launch/evidence/whatsapp-readiness-review-ledger-YYYY-MM-DD.json --replace --confirm --approved-by \"Named operations owner\" --approved-role \"Operations owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\"",
     ],
   },
   MED250_GATE_DUPLICATE_REGISTER_REVIEWED: {

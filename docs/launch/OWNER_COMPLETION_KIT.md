@@ -147,12 +147,31 @@ operations ledger.
 
 Current aggregate evidence already records 93 GPS-ready pharmacies, 300 pharmacies with WhatsApp coverage, 338 login-enabled WhatsApp contacts, and 300 dispatch-ready pharmacies. These counts do not replace record-level GPS and WhatsApp review.
 
-Use these redacted aggregate ledger shells for the record-level readiness decisions:
+Use these redacted aggregate ledger shells only as the current pending templates:
 
 - `docs/launch/evidence/gps-readiness-review-ledger-pending-2026-07-16.json`
 - `docs/launch/evidence/whatsapp-readiness-review-ledger-pending-2026-07-16.json`
 
-Keep precise coordinates and contact values in the controlled private ledgers. The release artifacts contain only aggregate counts, source digests, allowed decisions and completion instructions.
+Keep precise coordinates and contact values in the controlled private ledgers.
+After every row is decided and `npm run ops:health:strict` passes, create a
+redacted aggregate review-result JSON containing only counts, source digests,
+reviewer metadata and the controlled private-ledger reference. Then build the
+launch artifact:
+
+```sh
+npm run ops:readiness:evidence:build -- \
+  --input desktop-output/goal-progress-YYYY-MM-DD/gps-readiness-review-result.json \
+  --date YYYY-MM-DD
+
+npm run ops:readiness:evidence:build -- \
+  --input desktop-output/goal-progress-YYYY-MM-DD/whatsapp-readiness-review-result.json \
+  --date YYYY-MM-DD
+```
+
+The builder refuses pending/blocked aggregate results and rejects phone numbers,
+coordinates, contact values, tokens or output paths outside `docs/launch/evidence/`.
+The release artifacts contain only aggregate counts, source digests, allowed
+decisions and completion instructions.
 
 ### Register data reviewer
 

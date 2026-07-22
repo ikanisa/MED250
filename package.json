@@ -67,6 +67,7 @@
     "ops:geocode": "node scripts/pharmacy-geocode-admin.mjs",
     "ops:contacts": "node scripts/pharmacy-contact-admin.mjs",
     "ops:readiness:packet": "node scripts/create-operations-readiness-packet.mjs --output desktop-output/goal-progress-2026-07-20/operations-readiness-packet-2026-07-20.json",
+    "ops:readiness:evidence:build": "node scripts/create-operations-launch-evidence.mjs",
     "ops:product-descriptions": "node scripts/product-description-admin.mjs",
     "ops:contacts:candidates:packet": "python3 scripts/import-data/merge-pharmacy-contact-audits.py --input work/deep-covered-a-audit.csv --input work/deep-covered-b-audit.csv --output work/pharmacy-contact-candidates-merged.csv --summary-output work/pharmacy-contact-candidates-summary.json && python3 scripts/import-data/build-december-2025-pharmacy-enrichment.py --audit work/pharmacy-contact-candidates-merged.csv --matched-output work/pharmacy-contact-registry-matches.csv --review-output work/pharmacy-contact-registry-review.csv --migration-output work/pharmacy-contact-candidate-import.sql",
     "ops:marketplace-products": "node scripts/marketplace-product-admin.mjs",

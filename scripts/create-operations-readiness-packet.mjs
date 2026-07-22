@@ -84,7 +84,7 @@ export function buildOperationsReadinessPacket({
       "Do not infer GPS readiness from a map search, name-only candidate, generated coordinate, or public listing without authoritative premises evidence.",
       "Do not infer WhatsApp authority from an ordinary public phone number, map listing, shared number, or browser observation.",
       "Every completed decision must include reviewer identity, role, timezone-qualified timestamp, source version, outcome, and redacted rationale in the controlled private ledger.",
-      "After all rows are decided, complete the redacted launch evidence artifact and record it with npm run launch:evidence:record.",
+      "After all rows are decided, create a redacted aggregate review-result JSON and build the launch evidence with npm run ops:readiness:evidence:build.",
     ],
     review_sections: [
       buildReviewSection({ gate: "MED250_GATE_GPS_READY", ledger: gpsLedger, rows }),
