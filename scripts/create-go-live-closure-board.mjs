@@ -252,6 +252,9 @@ function blockerSummary(gateName, gate, readinessGate, evidence, report) {
   if (readinessGate?.readiness === "approval_pending") {
     blockers.push("Machine evidence is present; owner review and approval remain deliberately separate.");
   }
+  if (readinessGate?.staleReleaseEvidence) {
+    blockers.push("Release-bound evidence is stale against the current repository checkout; rerun the exact-revision live verifier before approval.");
+  }
   return [...new Set(blockers)];
 }
 
@@ -313,6 +316,7 @@ export function buildGoLiveClosureBoard({ manifest, handoff, readinessReport }) 
       approval_pending_gates: readinessReport.gateReadiness.approvalPending,
       prepared_evidence_pending_gates: readinessReport.gateReadiness.preparedEvidencePending,
       missing_evidence_gates: readinessReport.gateReadiness.missingEvidence,
+      stale_release_evidence_gates: readinessReport.gateReadiness.staleReleaseEvidence,
       duplicate_register_pending_groups: readinessReport.duplicateRegister.decisionCounts.pending,
       physical_uat_pending_scenarios: readinessReport.physicalUat.statusCounts.pending,
       prepared_handoff_artifacts: readinessReport.handoff.preparedPendingArtifactCount,

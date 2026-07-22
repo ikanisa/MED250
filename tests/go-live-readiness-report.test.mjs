@@ -18,10 +18,16 @@ test("reports go-live readiness without promoting pending gates", async () => {
   });
   assert.deepEqual(report.gateReadiness, {
     confirmed: 0,
-    approvalPending: 3,
+    approvalPending: 2,
     preparedEvidencePending: 8,
     missingEvidence: 0,
+    staleReleaseEvidence: 1,
   });
+  assert.match(report.sourceControl.currentReleaseRevision, /^[a-f0-9]{40}$/);
+  const domain = report.gates.find((gate) => gate.name === "MED250_GATE_DOMAIN_DNS_VERIFIED");
+  assert.equal(domain.readiness, "stale_release_evidence");
+  assert.equal(domain.staleReleaseEvidence, true);
+  assert.ok(domain.releaseRevisionBindings.every((binding) => binding.observedReleaseRevision === "37d8c1c0e0c8ac2d15eea436d2f9037c20e2814c"));
   assert.equal(report.duplicateRegister.decisionCounts.pending, 51);
   assert.equal(report.physicalUat.statusCounts.pending, 12);
   assert.equal(report.handoff.preparedPendingArtifactCount, 11);

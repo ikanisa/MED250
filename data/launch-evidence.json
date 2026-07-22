@@ -166,14 +166,14 @@
         {
           "type": "domain_verification",
           "reference": "docs/launch/evidence/domain-verification-2026-07-20.json",
-          "sha256": "12877c387744cedf85ac605fc07dcc6a50c7cd29137de9448afd0180f15d9daa",
+          "sha256": "80f304f77cfbee602f134bec07f82bbfd517ea7129c0117050926d49774154e9",
           "recorded_at": "2026-07-20T16:26:57.716Z",
           "summary": "Current canonical-domain DNS, HTTPS, ten-route, security-header, robots, sitemap, manifest, service-worker, offline page, and exact-revision checks passed."
         },
         {
           "type": "test_record",
           "reference": "docs/launch/evidence/domain-deployment-test-2026-07-20.json",
-          "sha256": "38f19d6eb2f8dd5e867277c42a5f62867beb0fad3260d9784947c58c9edcb5bc",
+          "sha256": "d3cb225ef5859451bb631880aa42c1ce6dbed4ddfd0359ea36699830057ea813",
           "recorded_at": "2026-07-20T16:26:57.716Z",
           "summary": "Current exact-revision production route verification passed all ten canonical live routes with no verifier errors."
         }

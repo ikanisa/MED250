@@ -24,7 +24,7 @@ This note tracks progress toward confirming the 11 remaining production launch g
 6. Added `scripts/report-go-live-readiness.mjs` plus `npm run launch:go-live:status` and `npm run launch:go-live:status:json` to classify each gate as confirmed, approval-pending, or prepared-evidence-pending.
 7. Added `scripts/create-physical-uat-packet.mjs` plus `npm run uat:packet`; generated `desktop-output/goal-progress-2026-07-20/physical-device-uat-packet-2026-07-20.json` for the 12-scenario physical-device run.
 8. Added `scripts/record-launch-evidence.mjs` plus `npm run launch:evidence:record` so completed artifacts can be validated, hashed, recorded and optionally confirmed without hand-editing the registry.
-9. Added `scripts/create-launch-approval-packet.mjs` plus `npm run launch:approval:packet`; generated `desktop-output/goal-progress-2026-07-20/launch-approval-packet-2026-07-20.json` for the three evidence-complete approval-pending gates.
+9. Added `scripts/create-launch-approval-packet.mjs` plus `npm run launch:approval:packet`; generated `desktop-output/goal-progress-2026-07-20/launch-approval-packet-2026-07-20.json` for the evidence-complete approval-pending gates. Later revisions also classify release-bound evidence separately as stale when it no longer matches the current checkout.
 10. Added `scripts/create-operations-readiness-packet.mjs` plus `npm run ops:readiness:packet`; generated `desktop-output/goal-progress-2026-07-20/operations-readiness-packet-2026-07-20.json` for the 769-row GPS and WhatsApp operations review.
 
 ## Gate status by accountable owner
@@ -40,7 +40,7 @@ This note tracks progress toward confirming the 11 remaining production launch g
 | `MED250_GATE_AUTH_RATE_LIMITS_APPROVED` | Prepared test and approval artifacts exist; both remain pending. | Security owner must run the controlled rate-limit test, approve project-wide impact, and sign the gate. |
 | `MED250_GATE_PRESCRIPTION_RETENTION_APPROVED` | Controlled cleanup test artifact exists; signed approval missing. | Privacy owner must approve the retention policy and complete the signed approval artifact. |
 | `MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED` | Prepared account-verification and approval artifacts exist; both remain pending. | Infrastructure owner must verify intended account/route ownership, least-privilege deployment credentials, protected environment setup, and sign the gate. |
-| `MED250_GATE_DOMAIN_DNS_VERIFIED` | Required domain and test artifacts are present and refreshed on 2026-07-20. | Infrastructure owner must review current Cloudflare account/route context and sign the gate. |
+| `MED250_GATE_DOMAIN_DNS_VERIFIED` | Required domain and test artifacts are present and refreshed on 2026-07-20 against revision `37d8c1c0e0c8ac2d15eea436d2f9037c20e2814c`; later checkouts must treat this as stale release-bound evidence until rerun. | Rerun exact-revision live deployment verification against the current release SHA, update artifact digests, then have the infrastructure owner review current Cloudflare account/route context and sign the gate. |
 | `MED250_GATE_PHYSICAL_UAT_PASSED` | Prepared test and approval artifacts exist; strict UAT ledger has 12 pending scenarios; a July 20 execution packet is generated. | QA owner must execute all physical-device scenarios with opaque approved test identities, complete the test record, and sign the gate. |
 
 ## Next safe execution order

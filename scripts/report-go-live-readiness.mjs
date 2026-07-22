@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 
@@ -15,6 +16,15 @@ import { validatePhysicalUat } from "./validate-physical-uat.mjs";
 
 async function loadJson(path) {
   return JSON.parse(await readFile(path, "utf8"));
+}
+
+function currentGitRevision() {
+  try {
+    const revision = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+    return /^[a-f0-9]{40}$/.test(revision) ? revision : null;
+  } catch {
+    return null;
+  }
 }
 
 async function assessDuplicateRegister() {
@@ -44,15 +54,59 @@ function approvalComplete(gate) {
   );
 }
 
-function gateRows(manifest, handoff) {
+async function releaseBindingsForManifest(manifest, currentRevision) {
+  const bindings = new Map();
+  for (const [gateName, gate] of Object.entries(manifest.gates ?? {})) {
+    const gateBindings = [];
+    for (const evidence of gate.evidence ?? []) {
+      if (typeof evidence?.reference !== "string" || !evidence.reference.startsWith("docs/launch/evidence/")) continue;
+      try {
+        const artifact = await loadJson(evidence.reference);
+        const expectedReleaseRevision = String(artifact.expected_release_revision ?? "").trim();
+        const observedReleaseRevision = String(artifact.observed_release_revision ?? "").trim();
+        if (!expectedReleaseRevision && !observedReleaseRevision) continue;
+        const matchesCurrentRevision = Boolean(
+          currentRevision
+          && expectedReleaseRevision === currentRevision
+          && observedReleaseRevision === currentRevision
+          && artifact.release_revision_expectation === "matched",
+        );
+        gateBindings.push({
+          type: evidence.type,
+          reference: evidence.reference,
+          expectedReleaseRevision,
+          observedReleaseRevision,
+          releaseRevisionExpectation: artifact.release_revision_expectation ?? null,
+          matchesCurrentRevision,
+        });
+      } catch {
+        gateBindings.push({
+          type: evidence.type,
+          reference: evidence.reference,
+          expectedReleaseRevision: null,
+          observedReleaseRevision: null,
+          releaseRevisionExpectation: "unreadable",
+          matchesCurrentRevision: false,
+        });
+      }
+    }
+    bindings.set(gateName, gateBindings);
+  }
+  return bindings;
+}
+
+function gateRows(manifest, handoff, releaseBindings) {
   const handoffByGate = new Map((handoff.gates ?? []).map((gate) => [gate.gate, gate]));
   return Object.entries(manifest.gates ?? {}).map(([name, gate]) => {
     const suppliedTypes = new Set((gate.evidence ?? []).map((entry) => entry.type));
     const missingEvidenceTypes = (gate.required_evidence_types ?? []).filter((type) => !suppliedTypes.has(type));
     const preparedPendingEvidence = Object.keys(handoffByGate.get(name)?.prepared_pending_evidence ?? {});
     const approved = approvalComplete(gate);
+    const releaseRevisionBindings = releaseBindings.get(name) ?? [];
+    const staleReleaseEvidence = releaseRevisionBindings.some((binding) => !binding.matchesCurrentRevision);
     let readiness = "missing_evidence";
     if (gate.status === "confirmed" && approved && missingEvidenceTypes.length === 0) readiness = "confirmed";
+    else if (missingEvidenceTypes.length === 0 && staleReleaseEvidence) readiness = "stale_release_evidence";
     else if (missingEvidenceTypes.length === 0 && !approved) readiness = "approval_pending";
     else if (preparedPendingEvidence.length === missingEvidenceTypes.length) readiness = "prepared_evidence_pending";
     return {
@@ -66,6 +120,8 @@ function gateRows(manifest, handoff) {
       missingEvidenceTypes,
       preparedPendingEvidence,
       approvalComplete: approved,
+      releaseRevisionBindings,
+      staleReleaseEvidence,
     };
   });
 }
@@ -81,7 +137,9 @@ export async function buildGoLiveReadinessReport() {
   const launchNonStrict = validateLaunchEvidence(manifest);
   const launchStrict = validateLaunchEvidence(manifest, { strict: true });
   const physicalStrict = validatePhysicalUat(physicalUat, { strict: true });
-  const gates = gateRows(manifest, handoff);
+  const currentReleaseRevision = currentGitRevision();
+  const releaseBindings = await releaseBindingsForManifest(manifest, currentReleaseRevision);
+  const gates = gateRows(manifest, handoff, releaseBindings);
   const readinessCounts = gates.reduce((counts, gate) => {
     counts[gate.readiness] = (counts[gate.readiness] ?? 0) + 1;
     return counts;
@@ -90,7 +148,11 @@ export async function buildGoLiveReadinessReport() {
   return {
     schemaVersion: "1",
     release: manifest.release ?? "med250-production",
-    productionReady: launchStrict.valid && duplicateRegister.valid && physicalStrict.valid,
+    productionReady: launchStrict.valid && duplicateRegister.valid && physicalStrict.valid && !(readinessCounts.stale_release_evidence ?? 0),
+    sourceControl: {
+      currentReleaseRevision,
+      staleReleaseEvidenceGateCount: readinessCounts.stale_release_evidence ?? 0,
+    },
     launchEvidence: {
       valid: launchNonStrict.valid,
       strictValid: launchStrict.valid,
@@ -103,6 +165,7 @@ export async function buildGoLiveReadinessReport() {
       approvalPending: readinessCounts.approval_pending ?? 0,
       preparedEvidencePending: readinessCounts.prepared_evidence_pending ?? 0,
       missingEvidence: readinessCounts.missing_evidence ?? 0,
+      staleReleaseEvidence: readinessCounts.stale_release_evidence ?? 0,
     },
     duplicateRegister: {
       valid: duplicateRegister.valid,
@@ -133,6 +196,7 @@ function printText(report) {
   console.log("");
   console.log(`Launch evidence: ${report.launchEvidence.valid ? "valid" : "invalid"}; strict: ${report.launchEvidence.strictValid ? "passed" : "failed"} (${report.launchEvidence.strictErrorCount} blocker(s))`);
   console.log(`Gate readiness: ${report.gateReadiness.confirmed} confirmed, ${report.gateReadiness.approvalPending} approval pending, ${report.gateReadiness.preparedEvidencePending} prepared evidence pending, ${report.gateReadiness.missingEvidence} missing evidence`);
+  if (report.gateReadiness.staleReleaseEvidence) console.log(`Release-bound evidence: ${report.gateReadiness.staleReleaseEvidence} stale against current checkout ${report.sourceControl.currentReleaseRevision ?? "unknown"}`);
   console.log(`Duplicate register: ${report.duplicateRegister.decisionCounts.pending} pending, ${report.duplicateRegister.decisionCounts.accepted_source_duplicate} accepted, ${report.duplicateRegister.decisionCounts.blocked_source_correction} blocked`);
   console.log(`Physical UAT: ${report.physicalUat.statusCounts.passed}/${report.physicalUat.scenarioCount} scenarios passed`);
   console.log(`Prepared handoff artifacts: ${report.handoff.preparedPendingArtifactCount}/${report.handoff.missingEvidenceArtifactCount}`);
@@ -142,6 +206,7 @@ function printText(report) {
     console.log(`  Owner: ${gate.owner}`);
     console.log(`  Missing evidence: ${missing}`);
     console.log(`  Approval complete: ${gate.approvalComplete ? "yes" : "no"}`);
+    if (gate.staleReleaseEvidence) console.log("  Release evidence current: no");
   }
 }
 

@@ -285,7 +285,7 @@ The current machine evidence for the domain gate is:
 - `docs/launch/evidence/domain-verification-2026-07-20.json`
 - `docs/launch/evidence/domain-deployment-test-2026-07-20.json`
 
-It passed against live revision `37d8c1c0e0c8ac2d15eea436d2f9037c20e2814c`; the infrastructure owner still needs to sign the gate after confirming the intended Cloudflare account and route ownership.
+It passed against live revision `37d8c1c0e0c8ac2d15eea436d2f9037c20e2814c`. That revision binding is now recorded in the domain artifacts, and the checkout has advanced since that run. Before signing the domain gate, rerun the live deployment verifier with the current release SHA, update the domain artifacts and registry digests, then have the infrastructure owner confirm the intended Cloudflare account and route ownership.
 
 ### QA owner
 

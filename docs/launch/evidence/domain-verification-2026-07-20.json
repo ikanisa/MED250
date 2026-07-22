@@ -38,5 +38,8 @@
   "hostnames": ["med250.gikundiro.com"],
   "dns_passed": true,
   "tls_passed": true,
-  "routes_passed": true
+  "routes_passed": true,
+  "expected_release_revision": "37d8c1c0e0c8ac2d15eea436d2f9037c20e2814c",
+  "observed_release_revision": "37d8c1c0e0c8ac2d15eea436d2f9037c20e2814c",
+  "release_revision_expectation": "matched"
 }

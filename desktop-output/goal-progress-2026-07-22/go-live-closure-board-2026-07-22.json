@@ -6,9 +6,10 @@
   "summary": {
     "gate_count": 11,
     "confirmed_gates": 0,
-    "approval_pending_gates": 3,
+    "approval_pending_gates": 2,
     "prepared_evidence_pending_gates": 8,
     "missing_evidence_gates": 0,
+    "stale_release_evidence_gates": 1,
     "duplicate_register_pending_groups": 51,
     "physical_uat_pending_scenarios": 12,
     "prepared_handoff_artifacts": 11,
@@ -698,7 +699,7 @@
       "owner": "MED+250 infrastructure owner",
       "workstream": "infrastructure",
       "current_status": "pending",
-      "readiness": "approval_pending",
+      "readiness": "stale_release_evidence",
       "closure_focus": "Review the fresh live domain evidence and record infrastructure-owner approval.",
       "acceptance": "med250.gikundiro.com resolves through the intended Cloudflare account, TLS is healthy, the Worker custom-domain route is attached and the deployment verifier passes in live mode.",
       "evidence": {
@@ -711,13 +712,13 @@
             "type": "domain_verification",
             "reference": "docs/launch/evidence/domain-verification-2026-07-20.json",
             "recorded_at": "2026-07-20T16:26:57.716Z",
-            "sha256": "12877c387744cedf85ac605fc07dcc6a50c7cd29137de9448afd0180f15d9daa"
+            "sha256": "80f304f77cfbee602f134bec07f82bbfd517ea7129c0117050926d49774154e9"
           },
           {
             "type": "test_record",
             "reference": "docs/launch/evidence/domain-deployment-test-2026-07-20.json",
             "recorded_at": "2026-07-20T16:26:57.716Z",
-            "sha256": "38f19d6eb2f8dd5e867277c42a5f62867beb0fad3260d9784947c58c9edcb5bc"
+            "sha256": "d3cb225ef5859451bb631880aa42c1ce6dbed4ddfd0359ea36699830057ea813"
           }
         ],
         "missing_types": [],
@@ -734,7 +735,7 @@
       },
       "blockers": [
         "Missing named accountable-owner approval metadata.",
-        "Machine evidence is present; owner review and approval remain deliberately separate."
+        "Release-bound evidence is stale against the current repository checkout; rerun the exact-revision live verifier before approval."
       ],
       "next_actions": [
         "Rerun DNS and live deployment verification if any Worker, route, DNS or repository revision changed.",

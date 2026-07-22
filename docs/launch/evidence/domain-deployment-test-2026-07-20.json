@@ -35,5 +35,8 @@
   "executed_by": "Codex automated verifier",
   "executor_role": "Release verification agent",
   "started_at": "2026-07-20T16:26:53Z",
-  "completed_at": "2026-07-20T16:26:57.716Z"
+  "completed_at": "2026-07-20T16:26:57.716Z",
+  "expected_release_revision": "37d8c1c0e0c8ac2d15eea436d2f9037c20e2814c",
+  "observed_release_revision": "37d8c1c0e0c8ac2d15eea436d2f9037c20e2814c",
+  "release_revision_expectation": "matched"
 }

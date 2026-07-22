@@ -14,6 +14,7 @@ const allowedEvidenceTypes = new Set([
 
 const secretLike = /(?:sb_secret_|service[_-]?role|private[_-]?key|access[_-]?token|password|authorization:\s*bearer|[?&](?:token|secret|password|key)=)/i;
 const prohibitedIdentifier = /(?:\b(?:\+?250)?7\d{8}\b|\bOTP\s*[:=]?\s*\d{6}\b|@[a-z0-9.-]+\.[a-z]{2,}|-?\d{1,2}\.\d{3,}\s*,\s*-?\d{1,3}\.\d{3,})/i;
+const releaseRevisionPattern = /^[a-f0-9]{40}$/;
 
 function validTimestamp(value) {
   return typeof value === "string"
@@ -55,6 +56,16 @@ export function validateLaunchEvidenceArtifact(artifact, {
   if (validTimestamp(artifact?.recorded_at) && Date.parse(artifact.recorded_at) > now.getTime() + 300_000) errors.push("artifact recorded_at is in the future");
   requireNamed(errors, artifact, [["recorded_by", "artifact recorder"], ["recorded_role", "artifact recorder role"]]);
   if (artifact?.redactions_confirmed !== true) errors.push("artifact redactions_confirmed must be true");
+  const expectedReleaseRevision = String(artifact?.expected_release_revision ?? "").trim();
+  const observedReleaseRevision = String(artifact?.observed_release_revision ?? "").trim();
+  if (expectedReleaseRevision || observedReleaseRevision || artifact?.release_revision_expectation) {
+    if (!releaseRevisionPattern.test(expectedReleaseRevision)) errors.push("expected_release_revision must be a lowercase 40-character Git SHA when release revision binding is present");
+    if (!releaseRevisionPattern.test(observedReleaseRevision)) errors.push("observed_release_revision must be a lowercase 40-character Git SHA when release revision binding is present");
+    if (!new Set(["matched", "mismatched"]).has(artifact?.release_revision_expectation)) errors.push("release_revision_expectation must be matched or mismatched");
+    if (artifact?.release_revision_expectation === "matched" && expectedReleaseRevision !== observedReleaseRevision) {
+      errors.push("matched release_revision_expectation requires expected and observed release revisions to be equal");
+    }
+  }
   const serialized = JSON.stringify(artifact);
   if (secretLike.test(serialized)) errors.push("artifact contains secret-like material");
   if (prohibitedIdentifier.test(serialized)) errors.push("artifact contains a prohibited personal or precise-location identifier");
