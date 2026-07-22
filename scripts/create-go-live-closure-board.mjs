@@ -82,7 +82,7 @@ const GATE_GUIDANCE = {
     commands: [
       "npm run launch:approval:packet",
       "npm run backend:verify",
-      "npm run launch:evidence:record -- --artifact docs/launch/evidence/security-hardening-test-2026-07-18.json --replace --confirm --approved-by \"Named backend owner\" --approved-role \"Backend owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\"",
+      "npm run launch:gate:approve -- --gate MED250_GATE_SECURITY_HARDENING_DEPLOYED --approved-by \"Named backend owner\" --approved-role \"Backend owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\"",
     ],
   },
   MED250_GATE_EDGE_FUNCTIONS_DEPLOYED: {
@@ -96,7 +96,7 @@ const GATE_GUIDANCE = {
     commands: [
       "npm run launch:approval:packet",
       "npm run backend:verify:description-reviewer -- --product-id \"$MED250_DESCRIPTION_REVIEWER_PROBE_PRODUCT_ID\" --expected-updated-at \"$MED250_DESCRIPTION_REVIEWER_PROBE_EXPECTED_UPDATED_AT\"",
-      "npm run launch:evidence:record -- --artifact docs/launch/evidence/edge-functions-test-2026-07-18.json --replace --confirm --approved-by \"Named backend owner\" --approved-role \"Backend owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\"",
+      "npm run launch:gate:approve -- --gate MED250_GATE_EDGE_FUNCTIONS_DEPLOYED --approved-by \"Named backend owner\" --approved-role \"Backend owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\"",
     ],
   },
   MED250_GATE_TURNSTILE_SERVER_VERIFIED: {

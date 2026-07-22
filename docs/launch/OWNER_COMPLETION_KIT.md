@@ -316,6 +316,28 @@ Use the exact `updated_at` returned by a fresh inspection. The receipt contains 
 
 Configure the protected production environment with `MED250_ADMIN_TOKEN` as a secret and the exact probe inputs as `MED250_DESCRIPTION_REVIEWER_PROBE_PRODUCT_ID` and `MED250_DESCRIPTION_REVIEWER_PROBE_EXPECTED_UPDATED_AT` variables. The live release gate intentionally rejects missing or stale probe inputs.
 
+After the backend owner reviews the evidence-complete gates, record approval
+with the explicit gate approval helper instead of hand-editing
+`data/launch-evidence.json`:
+
+```sh
+npm run launch:gate:approve -- \
+  --gate MED250_GATE_SECURITY_HARDENING_DEPLOYED \
+  --approved-by "Named backend owner" \
+  --approved-role "Backend owner" \
+  --approved-at "YYYY-MM-DDTHH:mm:ss+02:00"
+
+npm run launch:gate:approve -- \
+  --gate MED250_GATE_EDGE_FUNCTIONS_DEPLOYED \
+  --approved-by "Named backend owner" \
+  --approved-role "Backend owner" \
+  --approved-at "YYYY-MM-DDTHH:mm:ss+02:00"
+```
+
+The helper refuses incomplete evidence, invalid launch evidence, stale
+release-bound evidence, unsafe approval metadata or timestamps without an
+explicit timezone.
+
 ### Privacy owner
 
 Gate:

@@ -71,10 +71,8 @@
         "Confirm the accountable owner name, role and timezone-qualified approval timestamp are real."
       ],
       "confirmation_command": [
-        "npm run launch:evidence:record --",
-        "  --artifact docs/launch/evidence/security-hardening-test-2026-07-18.json",
-        "  --replace",
-        "  --confirm",
+        "npm run launch:gate:approve --",
+        "  --gate MED250_GATE_SECURITY_HARDENING_DEPLOYED",
         "  --approved-by \"Named owner\"",
         "  --approved-role \"Accountable role\"",
         "  --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\""
@@ -113,10 +111,8 @@
         "Confirm the accountable owner name, role and timezone-qualified approval timestamp are real."
       ],
       "confirmation_command": [
-        "npm run launch:evidence:record --",
-        "  --artifact docs/launch/evidence/edge-functions-test-2026-07-18.json",
-        "  --replace",
-        "  --confirm",
+        "npm run launch:gate:approve --",
+        "  --gate MED250_GATE_EDGE_FUNCTIONS_DEPLOYED",
         "  --approved-by \"Named owner\"",
         "  --approved-role \"Accountable role\"",
         "  --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\""

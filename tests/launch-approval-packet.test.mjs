@@ -23,8 +23,8 @@ test("builds approval packets only for evidence-complete unapproved launch gates
   assert.match(packet.blocked_approvals[0].reason, /stale/);
   assert.ok(packet.blocked_approvals[0].release_revision_bindings.every((binding) => binding.matchesCurrentRevision === false));
   assert.ok(packet.gates.every((gate) => gate.evidence.length === gate.required_evidence_types.length));
-  assert.ok(packet.gates.every((gate) => gate.confirmation_command.some((line) => /--confirm/.test(line))));
-  assert.ok(packet.gates.every((gate) => gate.confirmation_command.some((line) => /--replace/.test(line))));
+  assert.ok(packet.gates.every((gate) => gate.confirmation_command.some((line) => /launch:gate:approve/.test(line))));
+  assert.ok(packet.gates.every((gate) => gate.confirmation_command.some((line) => /--gate MED250_GATE_/.test(line))));
   assert.ok(packet.gates.every((gate) => gate.review_checks.some((check) => /acceptance criterion/.test(check))));
   assert.ok(!gateNames.includes("MED250_GATE_GPS_READY"));
   assert.ok(!gateNames.includes("MED250_GATE_PHYSICAL_UAT_PASSED"));

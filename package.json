@@ -97,6 +97,7 @@
     "launch:approval:packet": "node scripts/create-launch-approval-packet.mjs --output desktop-output/goal-progress-2026-07-20/launch-approval-packet-2026-07-20.json",
     "launch:evidence:artifact:verify": "node scripts/validate-launch-evidence-artifact.mjs",
     "launch:evidence:record": "node scripts/record-launch-evidence.mjs",
+    "launch:gate:approve": "node scripts/approve-launch-gate.mjs",
     "uat:verify": "node scripts/validate-physical-uat.mjs",
     "uat:verify:live": "node scripts/validate-physical-uat.mjs --strict",
     "uat:packet": "node scripts/create-physical-uat-packet.mjs --output desktop-output/goal-progress-2026-07-20/physical-device-uat-packet-2026-07-20.json",

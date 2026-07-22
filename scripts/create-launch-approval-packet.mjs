@@ -35,7 +35,6 @@ export function buildLaunchApprovalPacket(manifest, readinessReport = null) {
       });
       return [];
     }
-    const finalEvidence = gate.evidence.at(-1);
     return [{
       gate: gateName,
       title: gate.title,
@@ -51,10 +50,8 @@ export function buildLaunchApprovalPacket(manifest, readinessReport = null) {
         "Confirm the accountable owner name, role and timezone-qualified approval timestamp are real.",
       ],
       confirmation_command: [
-        "npm run launch:evidence:record --",
-        `  --artifact ${finalEvidence.reference}`,
-        "  --replace",
-        "  --confirm",
+        "npm run launch:gate:approve --",
+        `  --gate ${gateName}`,
         "  --approved-by \"Named owner\"",
         "  --approved-role \"Accountable role\"",
         "  --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\"",
