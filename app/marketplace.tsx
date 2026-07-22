@@ -127,6 +127,7 @@ import { customerProductTitle } from "../lib/product-display";
 import type { PublicTrustMetrics } from "../lib/public-trust-metrics";
 import { marketplaceDate, marketplaceNumber, marketplaceRegionName } from "../lib/marketplace-locale";
 import { marketplaceFormatMessage, marketplaceMessage } from "../lib/marketplace-messages";
+import { publicContactChannels } from "../lib/public-contact-channels.mjs";
 
 const Turnstile = lazy(() => import("./turnstile"));
 const GoogleMapLocationPicker = lazy(() => import("./google-map-location-picker"));
@@ -235,6 +236,7 @@ const marketplaceMode = new Set(["preview", "catalog", "live"]).has(configuredMa
   : "preview";
 const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() ?? "";
 const googleMapsBrowserKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY?.trim() ?? "";
+const med250PublicContactChannels = publicContactChannels();
 
 function useDebouncedValue<T>(value: T, delayMs: number) {
   const [debounced, setDebounced] = useState(value);
@@ -3060,7 +3062,7 @@ export default function Marketplace({
       </>}
       </div>
 
-      <footer><Link className="brand footer-brand" href="/" aria-label={marketplaceMessage("inventory.b579c24fb600")}><BrandLogo /></Link><p>{marketplaceMessage("clinical.marketplace_disclaimer")}</p><nav aria-label={marketplaceMessage("inventory.26c87bb51e69")}><Link href="/categories">{marketplaceMessage("navigation.products")}</Link><Link href="/privacy">{marketplaceMessage("navigation.privacy")}</Link><Link href="/terms">{marketplaceMessage("navigation.terms")}</Link><button onClick={openPortal}>{marketplaceMessage("navigation.pharmacies")}</button></nav></footer>
+      <footer><Link className="brand footer-brand" href="/" aria-label={marketplaceMessage("inventory.b579c24fb600")}><BrandLogo /></Link><p>{marketplaceMessage("clinical.marketplace_disclaimer")}</p><nav aria-label={marketplaceMessage("inventory.26c87bb51e69")}><Link href="/categories">{marketplaceMessage("navigation.products")}</Link><Link href="/privacy">{marketplaceMessage("navigation.privacy")}</Link><Link href="/terms">{marketplaceMessage("navigation.terms")}</Link><button onClick={openPortal}>{marketplaceMessage("navigation.pharmacies")}</button></nav>{med250PublicContactChannels.length ? <div className="public-contact-links" aria-label={marketplaceMessage("public_contact.label")}>{med250PublicContactChannels.map((channel) => <a key={channel.label} href={channel.href} target={channel.href.startsWith("http") ? "_blank" : undefined} rel={channel.href.startsWith("http") ? "noreferrer" : undefined}>{channel.label === "email" ? marketplaceMessage("public_contact.email") : channel.label === "whatsapp" ? marketplaceMessage("public_contact.whatsapp") : marketplaceMessage("public_contact.booking")}</a>)}</div> : null}</footer>
 
       {filtersOpen ? <div className="filter-overlay" onMouseDown={(event) => event.target === event.currentTarget && setFiltersOpen(false)}>
         <section className="filter-dialog" role="dialog" aria-modal="true" aria-labelledby="catalogue-filter-title" aria-describedby="catalogue-filter-description" data-modal-root="catalogue-filters" tabIndex={-1}>

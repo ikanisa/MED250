@@ -13,3 +13,5 @@ export const defaultDescription = marketplaceMode === "catalog"
 export function absoluteUrl(path = "/") {
   return new URL(path, `${siteUrl}/`).toString();
 }
+
+export { publicContactChannels, publicContactChannelErrors } from "./public-contact-channels.mjs";

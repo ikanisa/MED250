@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { publicContactChannelErrors } from "../lib/public-contact-channels.mjs";
 
 const liveRequired = process.argv.includes("--live");
 const envPath = [".env.local", ".env"].map((path) => resolve(path)).find(existsSync);
@@ -129,6 +130,7 @@ if (liveRequired) {
   if (!siteUrl) errors.push("Live release validation requires an explicit NEXT_PUBLIC_SITE_URL.");
   if (!turnstileSiteKey) errors.push("Live release validation requires NEXT_PUBLIC_TURNSTILE_SITE_KEY.");
   if (observabilityMode !== "cloud") errors.push("Live release validation requires NEXT_PUBLIC_MED250_OBSERVABILITY=cloud.");
+  errors.push(...publicContactChannelErrors(env, { requireAll: true }));
   for (const gateName of liveGateNames) {
     if (env[gateName]?.trim().toLowerCase() !== "confirmed") {
       errors.push(`Live release validation requires ${gateName}=confirmed.`);

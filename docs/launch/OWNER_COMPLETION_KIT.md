@@ -75,6 +75,16 @@ gate.
 
 Do not store a credential, token, phone number, OTP, customer identity, email address, prescription content, exact customer location, or unredacted account identifier.
 
+Before live approval, configure the approved public MED+250 owner channels:
+
+- `NEXT_PUBLIC_MED250_CONTACT_EMAIL`
+- `NEXT_PUBLIC_MED250_SUPPORT_WHATSAPP`
+- `NEXT_PUBLIC_MED250_MEETING_URL`
+
+These are public support/meeting-booking channels for the marketplace owner, not
+pharmacy responder contacts. Keep staff-private accounts and all server-only
+WhatsApp Cloud credentials out of these variables.
+
 ## Independent browser QA approval
 
 The controlled browser execution is complete against production release

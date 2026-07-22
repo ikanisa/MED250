@@ -36,6 +36,7 @@ row-level review, physical UAT, deployment verification or named approval.
 - The Edge Function and backend-hardening gates have complete machine evidence, but still require real backend-owner approval before either gate can be confirmed.
 - Supabase server-side Turnstile validation is enabled with the production widget. Missing and invalid tokens are rejected without creating users; one controlled valid-token browser test remains before the security owner can sign the gate.
 - The shared Supabase project currently reports an anonymous-user rate-limit value of 30, a one-hour JWT lifetime, and refresh-token rotation enabled. These project-wide settings still require a controlled impact test and security-owner approval.
+- Public owner contact channels are now explicit live configuration: `NEXT_PUBLIC_MED250_CONTACT_EMAIL`, `NEXT_PUBLIC_MED250_SUPPORT_WHATSAPP` and `NEXT_PUBLIC_MED250_MEETING_URL`. They must be approved public channels, and `release:check:live` rejects missing or unsafe values.
 - The scoped advisor audit reports zero MED+250 performance warnings. MED+250 security warnings are the documented catalogue GraphQL surface, exact authenticated RPC allowlist, and anonymous customer-sign-in requirement; the aggregate contract rejects unexpected access drift.
 - All 51 duplicate-register groups remain pending named human review.
 
