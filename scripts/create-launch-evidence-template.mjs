@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -32,6 +33,10 @@ export function createLaunchEvidenceTemplate(gateName, evidenceType) {
   return { ...base, ...extensions[evidenceType] };
 }
 
+function sha256(source) {
+  return createHash("sha256").update(source).digest("hex");
+}
+
 function preparedArtifactKey(gate, type) {
   return `${gate}\0${type}`;
 }
@@ -49,9 +54,10 @@ export async function discoverPreparedLaunchEvidence(directory = "docs/launch/ev
   const prepared = [];
   for (const name of (await readdir(directoryPath)).filter((candidate) => candidate.endsWith(".json")).sort()) {
     const reference = join(directoryPath, name).replaceAll("\\", "/");
-    const artifact = JSON.parse(await readFile(reference, "utf8"));
+    const source = await readFile(reference, "utf8");
+    const artifact = JSON.parse(source);
     if (artifact?.status !== "pending") continue;
-    prepared.push({ reference, artifact });
+    prepared.push({ reference, artifact, sha256: sha256(source), byte_length: Buffer.byteLength(source, "utf8") });
   }
   return prepared;
 }
@@ -61,6 +67,8 @@ export function createLaunchEvidenceHandoff(manifest, preparedArtifacts = []) {
   for (const candidate of preparedArtifacts) {
     const artifact = candidate?.artifact ?? candidate;
     const reference = candidate?.reference ?? null;
+    const digest = candidate?.sha256 ?? null;
+    const byteLength = candidate?.byte_length ?? null;
     if (artifact?.status !== "pending" || !artifact?.gate || !artifact?.evidence_type) continue;
     const key = preparedArtifactKey(artifact.gate, artifact.evidence_type);
     if (preparedByKey.has(key)) throw new Error(`Duplicate prepared evidence for ${artifact.gate} ${artifact.evidence_type}.`);
@@ -71,6 +79,8 @@ export function createLaunchEvidenceHandoff(manifest, preparedArtifacts = []) {
     });
     preparedByKey.set(key, {
       reference,
+      sha256: digest,
+      byte_length: byteLength,
       status: artifact.status,
       recorded_at: artifact.recorded_at ?? null,
       template_valid: validation.valid,

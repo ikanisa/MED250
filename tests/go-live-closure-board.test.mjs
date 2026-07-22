@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
@@ -60,6 +61,8 @@ test("binds every gate to actionable owner commands and prepared evidence", () =
   assert.equal(gps.workstream, "operations");
   assert.deepEqual(gps.evidence.missing_types, ["review_ledger"]);
   assert.equal(gps.evidence.prepared_pending[0].reference, "docs/launch/evidence/gps-readiness-review-ledger-pending-2026-07-16.json");
+  assert.match(gps.evidence.prepared_pending[0].sha256, /^[a-f0-9]{64}$/);
+  assert.ok(gps.evidence.prepared_pending[0].byte_length > 0);
   assert.ok(gps.commands.includes("npm run ops:readiness:packet"));
 
   assert.equal(duplicate.workstream, "register-data");
@@ -76,8 +79,17 @@ test("binds every gate to actionable owner commands and prepared evidence", () =
   assert.ok(uat.commands.includes("npm run uat:verify:live"));
 });
 
+test("binds prepared-pending evidence to its current source digest", async () => {
+  const byGate = new Map(board.gates.map((gate) => [gate.gate, gate]));
+  const duplicate = byGate.get("MED250_GATE_DUPLICATE_REGISTER_REVIEWED");
+  const prepared = duplicate.evidence.prepared_pending[0];
+  const source = await readFile(new URL(`../${prepared.reference}`, import.meta.url), "utf8");
+  assert.equal(prepared.sha256, createHash("sha256").update(source).digest("hex"));
+  assert.equal(prepared.byte_length, Buffer.byteLength(source, "utf8"));
+});
+
 test("keeps the closure board privacy-safe", () => {
-  const serialized = JSON.stringify(board);
+  const serialized = JSON.stringify(board).replaceAll(/"sha256":"[a-f0-9]{64}"/g, '"sha256":"redacted-digest"');
   assert.doesNotMatch(serialized, /(?:\+?250)?7\d{8}/);
   assert.doesNotMatch(serialized, /access[_-]?token|authorization:\s*bearer|password|service[_-]?role/i);
   assert.doesNotMatch(serialized, /\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}\\b/i);

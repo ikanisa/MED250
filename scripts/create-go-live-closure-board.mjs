@@ -222,6 +222,8 @@ function evidenceState(gateName, gate, handoffGate) {
   const prepared = Object.entries(handoffGate?.prepared_pending_evidence ?? {}).map(([type, artifact]) => ({
     type,
     reference: artifact.reference,
+    sha256: artifact.sha256,
+    byte_length: artifact.byte_length,
     template_valid: artifact.template_valid,
     unresolved_check_count: artifact.unresolved_checks.length,
     completion_instruction_count: artifact.completion_instructions.length,

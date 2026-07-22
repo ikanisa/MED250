@@ -98,6 +98,12 @@ test("builds one owner-ready handoff using every prepared pending artifact", asy
   const duplicates = handoff.gates.find((gate) => gate.gate === "MED250_GATE_DUPLICATE_REGISTER_REVIEWED");
   assert.match(duplicates.suggested_filenames.review_ledger, /duplicate-register-review-ledger-pending-2026-07-16\.json$/);
   assert.equal(duplicates.prepared_pending_evidence.review_ledger.check_status_counts.blocked, 1);
+  const duplicateSource = await readFile(new URL("../docs/launch/evidence/duplicate-register-review-ledger-pending-2026-07-16.json", import.meta.url), "utf8");
+  assert.equal(
+    duplicates.prepared_pending_evidence.review_ledger.sha256,
+    createHash("sha256").update(duplicateSource).digest("hex"),
+  );
+  assert.equal(duplicates.prepared_pending_evidence.review_ledger.byte_length, Buffer.byteLength(duplicateSource, "utf8"));
   const authRate = handoff.gates.find((gate) => gate.gate === "MED250_GATE_AUTH_RATE_LIMITS_APPROVED");
   assert.deepEqual(authRate.missing_evidence_types, ["signed_approval", "test_record"]);
   assert.equal(authRate.prepared_pending_evidence.signed_approval.template_valid, true);

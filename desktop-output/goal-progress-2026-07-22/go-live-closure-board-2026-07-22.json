@@ -124,6 +124,8 @@
           {
             "type": "review_ledger",
             "reference": "docs/launch/evidence/duplicate-register-review-ledger-pending-2026-07-16.json",
+            "sha256": "c4caaff554d7846ba1db7c45426687bee265b82e3547be4cbc5e30bbbab4c205",
+            "byte_length": 3975,
             "template_valid": true,
             "unresolved_check_count": 2,
             "completion_instruction_count": 6
@@ -192,6 +194,8 @@
           {
             "type": "review_ledger",
             "reference": "docs/launch/evidence/gps-readiness-review-ledger-pending-2026-07-16.json",
+            "sha256": "7395c111b11d8d960df78070f5be65d0e69f78a41013c5c524e4b3de10c4abba",
+            "byte_length": 4264,
             "template_valid": true,
             "unresolved_check_count": 2,
             "completion_instruction_count": 6
@@ -259,6 +263,8 @@
           {
             "type": "review_ledger",
             "reference": "docs/launch/evidence/whatsapp-readiness-review-ledger-pending-2026-07-16.json",
+            "sha256": "7afabcf594627b49633d24cab9f8a4c9a1325965273c8b8ffddde29aeed6edf1",
+            "byte_length": 4581,
             "template_valid": true,
             "unresolved_check_count": 2,
             "completion_instruction_count": 7
@@ -440,6 +446,8 @@
           {
             "type": "test_record",
             "reference": "docs/launch/evidence/turnstile-positive-path-test-pending-2026-07-16.json",
+            "sha256": "5e4d07c89f7df5ba2a42dff2d741832b1f9b1386b17475c4849d155d0dad6dc0",
+            "byte_length": 3654,
             "template_valid": true,
             "unresolved_check_count": 5,
             "completion_instruction_count": 5
@@ -499,6 +507,8 @@
           {
             "type": "signed_approval",
             "reference": "docs/launch/evidence/auth-rate-limit-approval-pending-2026-07-16.json",
+            "sha256": "d12a2ba58394168c0b49304d1626e6199672fffdd0c8915126769a2fede14145",
+            "byte_length": 3365,
             "template_valid": true,
             "unresolved_check_count": 6,
             "completion_instruction_count": 5
@@ -506,6 +516,8 @@
           {
             "type": "test_record",
             "reference": "docs/launch/evidence/auth-rate-limit-test-pending-2026-07-16.json",
+            "sha256": "a097f876ddadcd3f802091170cc47198e819c80cbfbfe4cd04573e0b923da2ef",
+            "byte_length": 3936,
             "template_valid": true,
             "unresolved_check_count": 7,
             "completion_instruction_count": 6
@@ -572,6 +584,8 @@
           {
             "type": "signed_approval",
             "reference": "docs/launch/evidence/prescription-retention-approval-pending-2026-07-16.json",
+            "sha256": "ac1d8a085a4248f88d1e9de180d296cd368cc9a483d4292149d3ce87e2e6c8be",
+            "byte_length": 3397,
             "template_valid": true,
             "unresolved_check_count": 2,
             "completion_instruction_count": 6
@@ -630,6 +644,8 @@
           {
             "type": "account_verification",
             "reference": "docs/launch/evidence/cloudflare-account-verification-pending-2026-07-16.json",
+            "sha256": "acab00848593ff22ca094bc934151b63f91bf2737607183133b744493d4dcb62",
+            "byte_length": 2172,
             "template_valid": true,
             "unresolved_check_count": 2,
             "completion_instruction_count": 0
@@ -637,6 +653,8 @@
           {
             "type": "signed_approval",
             "reference": "docs/launch/evidence/cloudflare-account-approval-pending-2026-07-16.json",
+            "sha256": "a98fb0e9eda526e4efb9ffb24bb71130291a0c4a46b2e638d0e5c9dbcfe92307",
+            "byte_length": 3731,
             "template_valid": true,
             "unresolved_check_count": 7,
             "completion_instruction_count": 6
@@ -758,6 +776,8 @@
           {
             "type": "signed_approval",
             "reference": "docs/launch/evidence/physical-device-uat-approval-pending-2026-07-16.json",
+            "sha256": "4f7ff02776f27b3b00af4607bb3aadc06d5ae66d01dd4404e94825270fa87f6c",
+            "byte_length": 3395,
             "template_valid": true,
             "unresolved_check_count": 7,
             "completion_instruction_count": 5
@@ -765,6 +785,8 @@
           {
             "type": "test_record",
             "reference": "docs/launch/evidence/physical-device-uat-test-pending-2026-07-16.json",
+            "sha256": "764ea78ae4c63eae68fc6a180fcf31c5826ffcd3d75c8e2202d702b4656d0f01",
+            "byte_length": 4743,
             "template_valid": true,
             "unresolved_check_count": 12,
             "completion_instruction_count": 6
