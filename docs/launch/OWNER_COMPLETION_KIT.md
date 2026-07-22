@@ -277,7 +277,8 @@ Commands:
 ```sh
 npm run domain:dns:verify
 npm run cloudflare:check:production
-npm run deployment:verify -- --url https://med250.gikundiro.com --mode live --expected-revision <exact-lowercase-40-character-git-sha>
+npm run deployment:verify -- --url https://med250.gikundiro.com --mode live --expected-revision <exact-lowercase-40-character-git-sha> --evidence-output desktop-output/goal-progress-YYYY-MM-DD/domain-deployment-receipt.json
+npm run domain:evidence:refresh -- --deployment-evidence desktop-output/goal-progress-YYYY-MM-DD/domain-deployment-receipt.json --expected-revision git --date YYYY-MM-DD
 ```
 
 The current machine evidence for the domain gate is:
@@ -285,7 +286,7 @@ The current machine evidence for the domain gate is:
 - `docs/launch/evidence/domain-verification-2026-07-20.json`
 - `docs/launch/evidence/domain-deployment-test-2026-07-20.json`
 
-It passed against live revision `37d8c1c0e0c8ac2d15eea436d2f9037c20e2814c`. That revision binding is now recorded in the domain artifacts, and the checkout has advanced since that run. Before signing the domain gate, rerun the live deployment verifier with the current release SHA, update the domain artifacts and registry digests, then have the infrastructure owner confirm the intended Cloudflare account and route ownership.
+It passed against live revision `37d8c1c0e0c8ac2d15eea436d2f9037c20e2814c`. That revision binding is now recorded in the domain artifacts, and the checkout has advanced since that run. Before signing the domain gate, rerun the live deployment verifier with the current release SHA, then use `npm run domain:evidence:refresh` to update the domain artifacts and registry digests from the passed receipt. The helper does not approve the gate; the infrastructure owner must still confirm the intended Cloudflare account and route ownership.
 
 ### QA owner
 

@@ -231,6 +231,7 @@ test("keeps preview and production Workers isolated behind manual protected depl
   assert.match(packageJson.scripts["build:sites"], /NEXT_PUBLIC_MARKETPLACE_MODE=catalog/);
   assert.match(packageJson.scripts["build:sites"], /NEXT_PUBLIC_SITE_URL=https:\/\/med250-rwanda\.ikanisa\.chatgpt\.site/);
   assert.match(packageJson.scripts["sites:verify:catalog"], /--mode catalog/);
+  assert.match(packageJson.scripts["domain:evidence:refresh"], /refresh-domain-launch-evidence\.mjs/);
   assert.match(packageJson.scripts["test:sites:catalog"], /npm run build:sites/);
   assert.match(packageJson.scripts["test:sites:catalog"], /NEXT_PUBLIC_MARKETPLACE_MODE=catalog/);
   assert.match(packageJson.scripts["release:check:live"], /npm run test:preview/);

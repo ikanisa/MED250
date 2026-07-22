@@ -166,8 +166,9 @@ const GATE_GUIDANCE = {
     ],
     commands: [
       "npm run domain:dns:verify",
-      "npm run deployment:verify -- --url https://med250.gikundiro.com --mode live --expected-revision <exact-lowercase-40-character-git-sha>",
-      "npm run launch:evidence:record -- --artifact docs/launch/evidence/domain-deployment-test-2026-07-20.json --replace --confirm --approved-by \"Named infrastructure owner\" --approved-role \"Infrastructure owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\"",
+      "npm run deployment:verify -- --url https://med250.gikundiro.com --mode live --expected-revision <exact-lowercase-40-character-git-sha> --evidence-output desktop-output/goal-progress-YYYY-MM-DD/domain-deployment-receipt.json",
+      "npm run domain:evidence:refresh -- --deployment-evidence desktop-output/goal-progress-YYYY-MM-DD/domain-deployment-receipt.json --expected-revision git --date YYYY-MM-DD",
+      "npm run launch:evidence:record -- --artifact docs/launch/evidence/domain-deployment-test-YYYY-MM-DD.json --replace --confirm --approved-by \"Named infrastructure owner\" --approved-role \"Infrastructure owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\"",
     ],
   },
   MED250_GATE_PHYSICAL_UAT_PASSED: {
