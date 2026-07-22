@@ -79,6 +79,7 @@ test("binds every gate to actionable owner commands and prepared evidence", () =
   assert.equal(domain.readiness, "stale_release_evidence");
   assert.match(domain.blockers.join("\n"), /Release-bound evidence is stale/);
   assert.ok(domain.commands.some((command) => /domain:evidence:refresh/.test(command)));
+  assert.ok(domain.commands.some((command) => /launch:gate:approve -- --gate MED250_GATE_DOMAIN_DNS_VERIFIED/.test(command)));
 
   assert.equal(uat.workstream, "qa");
   assert.match(uat.blockers.join("\n"), /12 physical-device UAT scenario/);
