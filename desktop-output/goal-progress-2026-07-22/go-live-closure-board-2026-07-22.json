@@ -545,9 +545,9 @@
       ],
       "commands": [
         "npm run security:turnstile:verify -- --require-valid",
-        "npm run launch:evidence:artifact:verify -- --file docs/launch/evidence/auth-rate-limit-test-pending-2026-07-16.json --gate MED250_GATE_AUTH_RATE_LIMITS_APPROVED --type test_record",
-        "npm run launch:evidence:artifact:verify -- --file docs/launch/evidence/auth-rate-limit-approval-pending-2026-07-16.json --gate MED250_GATE_AUTH_RATE_LIMITS_APPROVED --type signed_approval",
-        "npm run launch:evidence:record -- --artifact docs/launch/evidence/auth-rate-limit-approval-pending-2026-07-16.json --confirm --approved-by \"Named security owner\" --approved-role \"Security owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\""
+        "npm run security:auth-rate-limit:evidence:build -- --input desktop-output/goal-progress-YYYY-MM-DD/auth-rate-limit-result.json --date YYYY-MM-DD --executed-by \"Named security tester\" --executor-role \"Security owner\" --started-at \"YYYY-MM-DDTHH:mm:ss+02:00\" --completed-at \"YYYY-MM-DDTHH:mm:ss+02:00\" --approved-by \"Named security owner\" --approved-role \"Security owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\" --next-review-at \"YYYY-MM-DDTHH:mm:ss+02:00\" --change-authority \"Named security owner with shared-project owner notice\" --rollback-criteria \"Restore the prior project setting if aggregate Auth health or legitimate customer access regresses\" --legitimate-peak-profile \"Privacy-safe expected anonymous customer session demand for the launch window\" --abuse-risk-decision \"Selected limit balances launch demand with automated abuse resistance\" --monitoring-decision \"Aggregate Auth and Worker health monitoring remains active through launch and first review\"",
+        "npm run launch:evidence:record -- --artifact docs/launch/evidence/auth-rate-limit-test-YYYY-MM-DD.json --replace",
+        "npm run launch:evidence:record -- --artifact docs/launch/evidence/auth-rate-limit-approval-YYYY-MM-DD.json --replace --confirm --approved-by \"Named security owner\" --approved-role \"Security owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\""
       ],
       "safety_rules": [
         "Do not mark a gate confirmed until every required evidence type is recorded and the accountable owner has approved it.",

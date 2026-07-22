@@ -121,8 +121,36 @@ Do not record tokens, user identifiers, IP addresses, phone numbers, request ide
 
 ### Required artifacts
 
-- `docs/launch/evidence/auth-rate-limit-test-pending-2026-07-16.json`
-- `docs/launch/evidence/auth-rate-limit-approval-pending-2026-07-16.json`
+Build the completed artifacts from the retained redacted aggregate test result:
+
+```sh
+npm run security:auth-rate-limit:evidence:build -- \
+  --input desktop-output/goal-progress-YYYY-MM-DD/auth-rate-limit-result.json \
+  --date YYYY-MM-DD \
+  --executed-by "Named security tester" \
+  --executor-role "Security owner" \
+  --started-at "YYYY-MM-DDTHH:mm:ss+02:00" \
+  --completed-at "YYYY-MM-DDTHH:mm:ss+02:00" \
+  --approved-by "Named security owner" \
+  --approved-role "Security owner" \
+  --approved-at "YYYY-MM-DDTHH:mm:ss+02:00" \
+  --next-review-at "YYYY-MM-DDTHH:mm:ss+02:00" \
+  --change-authority "Named security owner with shared-project owner notice" \
+  --rollback-criteria "Restore the prior project setting if aggregate Auth health or legitimate customer access regresses" \
+  --legitimate-peak-profile "Privacy-safe expected anonymous customer session demand for the launch window" \
+  --abuse-risk-decision "Selected limit balances launch demand with automated abuse resistance" \
+  --monitoring-decision "Aggregate Auth and Worker health monitoring remains active through launch and first review"
+```
+
+The builder writes:
+
+- `docs/launch/evidence/auth-rate-limit-test-YYYY-MM-DD.json`
+- `docs/launch/evidence/auth-rate-limit-approval-YYYY-MM-DD.json`
+
+It refuses pending tests, missing shared-project or maintenance-window approval,
+missing cleanup, failed excess-attempt rejection, leaked tokens/identifiers,
+marketplace side effects, shared-application regressions, or approval metadata
+without a future review date.
 
 ## Completion and registry rule
 

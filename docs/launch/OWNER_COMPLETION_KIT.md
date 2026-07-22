@@ -270,7 +270,32 @@ be approved without changing unrelated DineIn or BioPay behavior.
 2. Verify intended anonymous customer access.
 3. Verify repeated abusive creation attempts are rejected.
 4. Confirm no unintended user, request, or pharmacy record remains.
-5. Sign the selected limits and their operational impact.
+5. Retain only a redacted aggregate rate-limit test result.
+6. Build the completed test and approval artifacts:
+
+```sh
+npm run security:auth-rate-limit:evidence:build -- \
+  --input desktop-output/goal-progress-YYYY-MM-DD/auth-rate-limit-result.json \
+  --date YYYY-MM-DD \
+  --executed-by "Named security tester" \
+  --executor-role "Security owner" \
+  --started-at "YYYY-MM-DDTHH:mm:ss+02:00" \
+  --completed-at "YYYY-MM-DDTHH:mm:ss+02:00" \
+  --approved-by "Named security owner" \
+  --approved-role "Security owner" \
+  --approved-at "YYYY-MM-DDTHH:mm:ss+02:00" \
+  --next-review-at "YYYY-MM-DDTHH:mm:ss+02:00" \
+  --change-authority "Named security owner with shared-project owner notice" \
+  --rollback-criteria "Restore the prior project setting if aggregate Auth health or legitimate customer access regresses" \
+  --legitimate-peak-profile "Privacy-safe expected anonymous customer session demand for the launch window" \
+  --abuse-risk-decision "Selected limit balances launch demand with automated abuse resistance" \
+  --monitoring-decision "Aggregate Auth and Worker health monitoring remains active through launch and first review"
+```
+
+The builder refuses pending tests, missing shared-project approval, missing
+cleanup, failed excess-attempt rejection, leaked tokens/identifiers, marketplace
+side effects, shared-application regressions, or approval metadata without a
+future review date.
 
 ### Backend owner
 
