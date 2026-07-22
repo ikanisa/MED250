@@ -1,4 +1,3 @@
-import { execFileSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 
@@ -13,18 +12,13 @@ import {
 } from "./create-launch-evidence-template.mjs";
 import { validateLaunchEvidence } from "./validate-launch-evidence.mjs";
 import { validatePhysicalUat } from "./validate-physical-uat.mjs";
+import {
+  currentGitRevision,
+  releaseBindingsForManifest,
+} from "./launch-release-bindings.mjs";
 
 async function loadJson(path) {
   return JSON.parse(await readFile(path, "utf8"));
-}
-
-function currentGitRevision() {
-  try {
-    const revision = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
-    return /^[a-f0-9]{40}$/.test(revision) ? revision : null;
-  } catch {
-    return null;
-  }
 }
 
 async function assessDuplicateRegister() {
@@ -52,47 +46,6 @@ function approvalComplete(gate) {
     && typeof gate?.approved_role === "string" && gate.approved_role.trim()
     && typeof gate?.approved_at === "string" && gate.approved_at.trim(),
   );
-}
-
-async function releaseBindingsForManifest(manifest, currentRevision) {
-  const bindings = new Map();
-  for (const [gateName, gate] of Object.entries(manifest.gates ?? {})) {
-    const gateBindings = [];
-    for (const evidence of gate.evidence ?? []) {
-      if (typeof evidence?.reference !== "string" || !evidence.reference.startsWith("docs/launch/evidence/")) continue;
-      try {
-        const artifact = await loadJson(evidence.reference);
-        const expectedReleaseRevision = String(artifact.expected_release_revision ?? "").trim();
-        const observedReleaseRevision = String(artifact.observed_release_revision ?? "").trim();
-        if (!expectedReleaseRevision && !observedReleaseRevision) continue;
-        const matchesCurrentRevision = Boolean(
-          currentRevision
-          && expectedReleaseRevision === currentRevision
-          && observedReleaseRevision === currentRevision
-          && artifact.release_revision_expectation === "matched",
-        );
-        gateBindings.push({
-          type: evidence.type,
-          reference: evidence.reference,
-          expectedReleaseRevision,
-          observedReleaseRevision,
-          releaseRevisionExpectation: artifact.release_revision_expectation ?? null,
-          matchesCurrentRevision,
-        });
-      } catch {
-        gateBindings.push({
-          type: evidence.type,
-          reference: evidence.reference,
-          expectedReleaseRevision: null,
-          observedReleaseRevision: null,
-          releaseRevisionExpectation: "unreadable",
-          matchesCurrentRevision: false,
-        });
-      }
-    }
-    bindings.set(gateName, gateBindings);
-  }
-  return bindings;
 }
 
 function gateRows(manifest, handoff, releaseBindings) {
@@ -138,7 +91,7 @@ export async function buildGoLiveReadinessReport() {
   const launchStrict = validateLaunchEvidence(manifest, { strict: true });
   const physicalStrict = validatePhysicalUat(physicalUat, { strict: true });
   const currentReleaseRevision = currentGitRevision();
-  const releaseBindings = await releaseBindingsForManifest(manifest, currentReleaseRevision);
+  const releaseBindings = await releaseBindingsForManifest(manifest, { currentRevision: currentReleaseRevision });
   const gates = gateRows(manifest, handoff, releaseBindings);
   const readinessCounts = gates.reduce((counts, gate) => {
     counts[gate.readiness] = (counts[gate.readiness] ?? 0) + 1;

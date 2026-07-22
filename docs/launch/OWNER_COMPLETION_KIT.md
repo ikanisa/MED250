@@ -75,6 +75,10 @@ gate that is still current. Evidence-complete gates with stale release-bound
 artifacts appear under blocked approvals instead and must be refreshed before
 owner signature.
 
+The lower-level recorder enforces the same rule. `npm run launch:evidence:record -- --confirm`
+refuses to confirm a release-bound gate when the artifact's expected and observed
+release revisions do not match the current Git checkout.
+
 Do not store a credential, token, phone number, OTP, customer identity, email address, prescription content, exact customer location, or unredacted account identifier.
 
 Before live approval, configure the approved public MED+250 owner channels:

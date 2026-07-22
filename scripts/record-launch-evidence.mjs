@@ -5,6 +5,7 @@ import { pathToFileURL } from "node:url";
 
 import { validateLaunchEvidence } from "./validate-launch-evidence.mjs";
 import { validateLaunchEvidenceArtifact } from "./validate-launch-evidence-artifact.mjs";
+import { staleReleaseEvidenceGateNames } from "./launch-release-bindings.mjs";
 
 function sha256(source) {
   return createHash("sha256").update(source).digest("hex");
@@ -103,6 +104,13 @@ export async function recordLaunchEvidence({
   const validation = validateLaunchEvidence(nextManifest, { rootDir, now });
   if (!validation.valid) {
     throw new Error(`Updated launch evidence would be invalid: ${validation.errors.join("; ")}`);
+  }
+
+  if (confirm) {
+    const staleGateNames = await staleReleaseEvidenceGateNames(nextManifest, { rootDir });
+    if (staleGateNames.has(gateName)) {
+      throw new Error(`Cannot confirm ${gateName}: release-bound evidence is stale against the current repository checkout. Refresh exact-revision evidence before approval.`);
+    }
   }
 
   return {

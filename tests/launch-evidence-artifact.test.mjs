@@ -211,6 +211,23 @@ test("confirms a gate only after all required evidence and owner approval are pr
   await rm(root, { recursive: true, force: true });
 });
 
+test("rejects confirmation when release-bound evidence targets an older checkout", async () => {
+  await assert.rejects(
+    () => recordLaunchEvidence({
+      manifest: structuredClone(manifest),
+      artifactPath: "docs/launch/evidence/domain-deployment-test-2026-07-20.json",
+      rootDir: new URL("..", import.meta.url).pathname,
+      confirm: true,
+      replace: true,
+      approvedBy: "Named infrastructure owner",
+      approvedRole: "Infrastructure owner",
+      approvedAt: "2026-07-20T18:00:00Z",
+      now: new Date("2026-07-21T12:00:00Z"),
+    }),
+    /release-bound evidence is stale against the current repository checkout/,
+  );
+});
+
 test("rejects incomplete artifacts, duplicate evidence and approval metadata without confirmation", async () => {
   const root = await mkdtemp(join(tmpdir(), "med250-reject-evidence-"));
   const evidenceDir = join(root, "docs", "launch", "evidence");
