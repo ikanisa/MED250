@@ -608,12 +608,12 @@
       ],
       "next_actions": [
         "Review the retention policy and existing controlled cleanup test record.",
-        "Complete the signed approval artifact with the privacy owner.",
+        "Build the signed approval artifact with the privacy owner decisions.",
         "Record approval only after the owner accepts the retention periods, cleanup cadence, monitoring and incident conditions."
       ],
       "commands": [
-        "npm run launch:evidence:artifact:verify -- --file docs/launch/evidence/prescription-retention-approval-pending-2026-07-16.json --gate MED250_GATE_PRESCRIPTION_RETENTION_APPROVED --type signed_approval",
-        "npm run launch:evidence:record -- --artifact docs/launch/evidence/prescription-retention-approval-pending-2026-07-16.json --confirm --approved-by \"Named privacy owner\" --approved-role \"Privacy owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\""
+        "npm run privacy:prescription-retention:evidence:build -- --date YYYY-MM-DD --approved-by \"Named privacy owner\" --approved-role \"Privacy owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\" --next-review-at \"YYYY-MM-DDTHH:mm:ss+02:00\" --legal-basis-decision \"Privacy-safe legal basis decision\" --controller-processor-decision \"Privacy-safe controller and processor decision\" --transfer-decision \"Privacy-safe transfer and evidence-storage decision\" --notification-decision \"Privacy-safe notification assessment decision\" --incident-contacts-decision \"Controlled staff register contains accountable privacy and security incident roles\" --retention-decision \"The implemented 24-hour and 30-day prescription retention periods are accepted\" --pharmacy-handling-decision \"Selected pharmacy staff handling requirements are accepted\" --review-conditions \"Review is required after material workflow, storage, retention, incident or legal-obligation changes\"",
+        "npm run launch:evidence:record -- --artifact docs/launch/evidence/prescription-retention-approval-YYYY-MM-DD.json --replace --confirm --approved-by \"Named privacy owner\" --approved-role \"Privacy owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\""
       ],
       "safety_rules": [
         "Do not mark a gate confirmed until every required evidence type is recorded and the accountable owner has approved it.",

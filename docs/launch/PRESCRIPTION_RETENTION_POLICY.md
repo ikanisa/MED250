@@ -113,4 +113,7 @@ The privacy owner may sign only after confirming:
 - any controller, processor, transfer, notification or legal-basis conditions are recorded in the signed decision; and
 - the approval artifact is redacted.
 
-Complete `docs/launch/evidence/prescription-retention-approval-pending-2026-07-16.json` after this review.
+After this review, build the completed signed approval with
+`npm run privacy:prescription-retention:evidence:build` and record the resulting
+`docs/launch/evidence/prescription-retention-approval-YYYY-MM-DD.json` artifact
+in the launch registry.

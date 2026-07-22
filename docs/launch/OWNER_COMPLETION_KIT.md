@@ -324,7 +324,32 @@ Gate:
 
 Review and approve the implemented 24-hour orphan/abandoned-file rule, 24-hour selected-pharmacy access window, 30-day completed-order deletion rule, six-hour protected schedule, lease/retry behavior, and incident procedure. The controlled cleanup test artifact already exists; a signed privacy decision remains required.
 
-Use `docs/launch/PRESCRIPTION_RETENTION_POLICY.md` as the exact policy under review and complete `docs/launch/evidence/prescription-retention-approval-pending-2026-07-16.json`. The pending artifact already binds the policy and controlled cleanup test to their SHA-256 values; the privacy owner must add the legal, role and incident decisions.
+Use `docs/launch/PRESCRIPTION_RETENTION_POLICY.md` as the exact policy under
+review and the existing strict cleanup test artifact as the technical proof.
+After the privacy owner records the redacted legal, role, transfer,
+notification, incident, retention and pharmacy-handling decisions, build the
+completed approval artifact:
+
+```sh
+npm run privacy:prescription-retention:evidence:build -- \
+  --date YYYY-MM-DD \
+  --approved-by "Named privacy owner" \
+  --approved-role "Privacy owner" \
+  --approved-at "YYYY-MM-DDTHH:mm:ss+02:00" \
+  --next-review-at "YYYY-MM-DDTHH:mm:ss+02:00" \
+  --legal-basis-decision "Privacy-safe legal basis decision" \
+  --controller-processor-decision "Privacy-safe controller and processor decision" \
+  --transfer-decision "Privacy-safe transfer and evidence-storage decision" \
+  --notification-decision "Privacy-safe notification assessment decision" \
+  --incident-contacts-decision "Controlled staff register contains accountable privacy and security incident roles" \
+  --retention-decision "The implemented 24-hour and 30-day prescription retention periods are accepted" \
+  --pharmacy-handling-decision "Selected pharmacy staff handling requirements are accepted" \
+  --review-conditions "Review is required after material workflow, storage, retention, incident or legal-obligation changes"
+```
+
+The builder refuses stale or incomplete cleanup test evidence, missing policy
+sections, unsafe identifiers, secret-like material, missing privacy-owner
+decisions, or a next review timestamp that is not after approval.
 
 ### Infrastructure owner
 

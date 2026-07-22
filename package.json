@@ -63,6 +63,7 @@
     "security:turnstile:verify": "node scripts/verify-turnstile-auth.mjs",
     "security:turnstile:evidence:build": "node scripts/create-turnstile-launch-evidence.mjs",
     "security:auth-rate-limit:evidence:build": "node scripts/create-auth-rate-limit-launch-evidence.mjs",
+    "privacy:prescription-retention:evidence:build": "node scripts/create-prescription-retention-approval-evidence.mjs",
     "performance:budget": "node scripts/validate-performance-budget.mjs",
     "ops:health": "node scripts/monitor-operational-health.mjs",
     "ops:health:strict": "node scripts/monitor-operational-health.mjs --strict",
