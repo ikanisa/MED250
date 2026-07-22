@@ -677,14 +677,14 @@
       ],
       "next_actions": [
         "Replace any broad release-path access with a credential scoped to the MED+250 Worker, route, assets and read-only zone inspection.",
-        "Complete the redacted account-verification artifact without exposing account identifiers or tokens.",
-        "Complete the infrastructure approval artifact and record the gate only after least privilege is true."
+        "Build the redacted account-verification artifact without exposing account identifiers or tokens.",
+        "Build the infrastructure approval artifact and record the gate only after least privilege is true."
       ],
       "commands": [
         "wrangler whoami",
-        "npm run launch:evidence:artifact:verify -- --file docs/launch/evidence/cloudflare-account-verification-pending-2026-07-16.json --gate MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED --type account_verification",
-        "npm run launch:evidence:artifact:verify -- --file docs/launch/evidence/cloudflare-account-approval-pending-2026-07-16.json --gate MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED --type signed_approval",
-        "npm run launch:evidence:record -- --artifact docs/launch/evidence/cloudflare-account-approval-pending-2026-07-16.json --confirm --approved-by \"Named infrastructure owner\" --approved-role \"Infrastructure owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\""
+        "npm run infra:cloudflare-account:evidence:build -- --input desktop-output/goal-progress-YYYY-MM-DD/cloudflare-account-result.json --date YYYY-MM-DD --verified-by \"Named infrastructure verifier\" --verifier-role \"Infrastructure owner\" --verified-at \"YYYY-MM-DDTHH:mm:ss+02:00\" --approved-by \"Named infrastructure owner\" --approved-role \"Infrastructure owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\" --next-review-at \"YYYY-MM-DDTHH:mm:ss+02:00\" --account-ownership-decision \"Redacted account, production Worker and preview Worker are intended MED+250 release assets\" --credential-scope-decision \"Replacement release credential is limited to MED+250 deployment needs and read-only zone inspection\" --release-path-decision \"Broad interactive access is removed from the release path and cannot deploy production\" --environment-ownership-decision \"Protected production and preview environments have named ownership, approval rules, secrets and variables\" --routing-boundary-decision \"The direct production Worker route is the sole active owner of the production hostname\" --rollback-decision \"Rollback authority and emergency release access are assigned to the infrastructure owner group\"",
+        "npm run launch:evidence:record -- --artifact docs/launch/evidence/cloudflare-account-verification-YYYY-MM-DD.json --replace",
+        "npm run launch:evidence:record -- --artifact docs/launch/evidence/cloudflare-account-approval-YYYY-MM-DD.json --replace --confirm --approved-by \"Named infrastructure owner\" --approved-role \"Infrastructure owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\""
       ],
       "safety_rules": [
         "Do not mark a gate confirmed until every required evidence type is recorded and the accountable owner has approved it.",

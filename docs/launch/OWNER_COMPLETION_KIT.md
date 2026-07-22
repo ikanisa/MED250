@@ -364,13 +364,37 @@ The current redacted snapshot is
 `docs/launch/evidence/cloudflare-account-verification-pending-2026-07-16.json`.
 It confirms one intended account and the production deployment are visible,
 but records that the interactive OAuth session still has 29 broad permissions.
-The paired infrastructure signature is
-`docs/launch/evidence/cloudflare-account-approval-pending-2026-07-16.json`.
+Do not record that pending artifact. After the replacement least-privilege
+credential and protected release path are verified, build completed artifacts
+from a redacted aggregate verification result:
 
 1. Create and install the least-privilege Cloudflare deployment token described above.
 2. Confirm the intended account, production Worker, custom-domain route, protected GitHub environment, and secret/variable ownership.
 3. Review the fresh July 20 domain artifacts, then rerun DNS, TLS, redirects, headers, robots, sitemap, and all ten required routes immediately before signing.
-4. Add the redacted account-verification artifact and signed approval.
+4. Build and record the redacted account-verification artifact and signed approval.
+
+```sh
+npm run infra:cloudflare-account:evidence:build -- \
+  --input desktop-output/goal-progress-YYYY-MM-DD/cloudflare-account-result.json \
+  --date YYYY-MM-DD \
+  --verified-by "Named infrastructure verifier" \
+  --verifier-role "Infrastructure owner" \
+  --verified-at "YYYY-MM-DDTHH:mm:ss+02:00" \
+  --approved-by "Named infrastructure owner" \
+  --approved-role "Infrastructure owner" \
+  --approved-at "YYYY-MM-DDTHH:mm:ss+02:00" \
+  --next-review-at "YYYY-MM-DDTHH:mm:ss+02:00" \
+  --account-ownership-decision "Redacted account, production Worker and preview Worker are intended MED+250 release assets" \
+  --credential-scope-decision "Replacement release credential is limited to MED+250 deployment needs and read-only zone inspection" \
+  --release-path-decision "Broad interactive access is removed from the release path and cannot deploy production" \
+  --environment-ownership-decision "Protected production and preview environments have named ownership, approval rules, secrets and variables" \
+  --routing-boundary-decision "The direct production Worker route is the sole active owner of the production hostname" \
+  --rollback-decision "Rollback authority and emergency release access are assigned to the infrastructure owner group"
+```
+
+The builder refuses broad write permissions, missing route ownership, missing
+protected environments, competing hostname owners, leaked tokens/identifiers, or
+approval decisions without a future review timestamp.
 5. Inspect the existing domain artifacts and add named infrastructure approval.
 
 Commands:
