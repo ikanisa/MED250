@@ -812,14 +812,15 @@
       "next_actions": [
         "Regenerate the physical-device UAT packet.",
         "Execute all 12 scenarios on approved physical devices with redacted evidence references.",
-        "Update the governed UAT ledger and paired test/approval artifacts.",
+        "Update the governed UAT ledger, then build the paired test/approval artifacts from the strict ledger.",
         "Run strict UAT verification, then record QA-owner approval."
       ],
       "commands": [
         "npm run uat:packet",
         "npm run uat:verify:live",
-        "npm run launch:evidence:artifact:verify -- --file docs/launch/evidence/physical-device-uat-test-pending-2026-07-16.json --gate MED250_GATE_PHYSICAL_UAT_PASSED --type test_record",
-        "npm run launch:evidence:record -- --artifact docs/launch/evidence/physical-device-uat-approval-pending-2026-07-16.json --confirm --approved-by \"Named QA owner\" --approved-role \"QA owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\""
+        "npm run uat:evidence:build -- --date YYYY-MM-DD",
+        "npm run launch:evidence:record -- --artifact docs/launch/evidence/physical-device-uat-test-YYYY-MM-DD.json --replace",
+        "npm run launch:evidence:record -- --artifact docs/launch/evidence/physical-device-uat-approval-YYYY-MM-DD.json --replace --confirm --approved-by \"Named QA owner\" --approved-role \"QA owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\""
       ],
       "safety_rules": [
         "Do not mark a gate confirmed until every required evidence type is recorded and the accountable owner has approved it.",

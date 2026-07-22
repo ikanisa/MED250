@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import test from "node:test";
 
 const rosterManifest = JSON.parse(await readFile(
@@ -24,12 +24,8 @@ const retentionReceiptFile = await readFile(
   new URL("../docs/launch/evidence/source-retention-bundle-2026-07-16.json", import.meta.url),
 );
 const retentionReceipt = JSON.parse(retentionReceiptFile.toString("utf8"));
-const dataReuseLedgerFile = await readFile(
-  new URL("../docs/launch/evidence/data-reuse-review-ledger-pending-2026-07-16.json", import.meta.url),
-);
-const dataReuseLedger = JSON.parse(dataReuseLedgerFile.toString("utf8"));
-const dataReuseApproval = JSON.parse(await readFile(
-  new URL("../docs/launch/evidence/data-reuse-approval-pending-2026-07-16.json", import.meta.url),
+const launchEvidence = JSON.parse(await readFile(
+  new URL("../data/launch-evidence.json", import.meta.url),
   "utf8",
 ));
 
@@ -95,21 +91,12 @@ test("redacted retention receipt records verified lineage without claiming owner
   assert.ok(retentionReceipt.checks.some((check) => check.name === "Approved durable evidence store" && check.status === "pending"));
 });
 
-test("data-reuse ledger has no unresolved technical retention blocker", () => {
-  assert.equal(dataReuseLedger.total_records, dataReuseLedger.source_records.length);
-  assert.equal(dataReuseLedger.pending_records, dataReuseLedger.source_records.length);
-  assert.equal(dataReuseLedger.blocked_records, 0);
-  assert.ok(dataReuseLedger.source_records.every((record) => record.decision_status.startsWith("pending_owner_")));
-  assert.equal(dataReuseLedger.source_digests.controlled_source_bundle_digest, retentionReceipt.bundle_digest);
-  assert.equal(dataReuseLedger.source_digests.controlled_source_bundle_manifest, retentionReceipt.manifest_sha256);
-  assert.equal(dataReuseLedger.source_digests.controlled_source_bundle_spec, retentionReceipt.source_spec_sha256);
-  assert.equal(dataReuseLedger.source_digests.controlled_source_bundle_verifier, retentionReceipt.verifier_sha256);
-});
-
-test("pending data-owner approval is bound to the current ledger and retention receipt", () => {
-  assert.equal(dataReuseApproval.status, "pending");
-  assert.equal(dataReuseApproval.review_ledger_sha256, sha256(dataReuseLedgerFile));
-  assert.equal(dataReuseApproval.source_retention_receipt_sha256, sha256(retentionReceiptFile));
-  assert.equal(dataReuseApproval.decision, null);
-  assert.ok(dataReuseApproval.checks.every((check) => ["passed", "pending"].includes(check.status)));
+test("source provenance remains retained without a source-data reuse launch gate", async () => {
+  assert.equal(retentionReceipt.status, "complete");
+  assert.equal(retentionReceipt.source_spec_sha256, sha256(Buffer.from(`${JSON.stringify(retentionSpec, null, 2)}\n`, "utf8")));
+  assert.equal(retentionReceipt.verifier_sha256, sha256(retentionVerifierFile));
+  assert.ok(!Object.keys(launchEvidence.gates).some((gate) => /SOURCE|DATA_REUSE|REUSE/.test(gate)));
+  assert.doesNotMatch(JSON.stringify(launchEvidence), /data-reuse|source-data reuse/i);
+  const evidenceNames = await readdir(new URL("../docs/launch/evidence", import.meta.url));
+  assert.ok(evidenceNames.every((name) => !/data-reuse/.test(name)));
 });

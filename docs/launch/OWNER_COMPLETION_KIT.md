@@ -307,12 +307,13 @@ Start from:
 - `docs/launch/evidence/physical-device-uat-test-pending-2026-07-16.json`
 - `docs/launch/evidence/physical-device-uat-approval-pending-2026-07-16.json`
 
-Generate or refresh the execution packet with `npm run uat:packet`. Use only approved, opaque customer, pharmacy, and unrelated-pharmacy test identities. Execute all 12 scenarios in `data/physical-device-uat.json`. Do not record real phone numbers, OTPs, order IDs, prescription contents, or exact coordinates. Do not contact an unintended pharmacy.
+Generate or refresh the execution packet with `npm run uat:packet`. Use only approved, opaque customer, pharmacy, and unrelated-pharmacy test identities. Execute all 12 scenarios in `data/physical-device-uat.json`. Do not record real phone numbers, OTPs, order IDs, prescription contents, or exact coordinates. Do not contact an unintended pharmacy. After the strict ledger passes, run `npm run uat:evidence:build -- --date YYYY-MM-DD`; it refuses pending or unsafe ledgers and writes complete launch evidence artifacts from the governed UAT record.
 
 Final check:
 
 ```sh
 npm run uat:verify:live
+npm run uat:evidence:build -- --date YYYY-MM-DD
 ```
 
 The browser approval above is independent of physical-device UAT. Responsive

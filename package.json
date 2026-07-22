@@ -94,6 +94,7 @@
     "uat:verify": "node scripts/validate-physical-uat.mjs",
     "uat:verify:live": "node scripts/validate-physical-uat.mjs --strict",
     "uat:packet": "node scripts/create-physical-uat-packet.mjs --output desktop-output/goal-progress-2026-07-20/physical-device-uat-packet-2026-07-20.json",
+    "uat:evidence:build": "node scripts/create-physical-uat-launch-evidence.mjs",
     "release:preflight": "npm run launch:evidence:verify && node scripts/validate-release-config.mjs",
     "release:preflight:live": "npm run launch:evidence:verify:live && node scripts/validate-release-config.mjs --live",
     "release:check": "npm run release:preflight && npm run security:audit && npm run lint && npm run data:validate && npm run data:quality && npm run python:test && npm test && npm run performance:budget && wrangler deploy --dry-run --strict",

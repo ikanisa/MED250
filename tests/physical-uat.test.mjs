@@ -2,7 +2,9 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
+import { buildPhysicalUatLaunchEvidence } from "../scripts/create-physical-uat-launch-evidence.mjs";
 import { buildPhysicalUatPacket } from "../scripts/create-physical-uat-packet.mjs";
+import { validateLaunchEvidenceArtifact } from "../scripts/validate-launch-evidence-artifact.mjs";
 import { validatePhysicalUat } from "../scripts/validate-physical-uat.mjs";
 
 const ledger = JSON.parse(await readFile(new URL("../data/physical-device-uat.json", import.meta.url), "utf8"));
@@ -66,6 +68,54 @@ test("accepts a complete redacted UAT record with evidence and named approval", 
   });
   assert.equal(result.valid, true);
   assert.equal(result.statusCounts.passed, 12);
+});
+
+test("builds strict launch evidence only from a completed physical UAT ledger", () => {
+  assert.throws(
+    () => buildPhysicalUatLaunchEvidence(ledger, {
+      ledgerSha256: "a".repeat(64),
+      now: new Date("2026-07-14T10:00:00Z"),
+    }),
+    /Physical UAT ledger is not production-ready/,
+  );
+
+  const complete = structuredClone(ledger);
+  complete.status = "passed";
+  complete.customer_identity_label = "customer-uat-a";
+  complete.pharmacy_identity_label = "pharmacy-uat-a";
+  complete.unrelated_pharmacy_identity_label = "pharmacy-control-b";
+  complete.executed_by = "Named QA operator";
+  complete.started_at = "2026-07-14T08:00:00Z";
+  complete.completed_at = "2026-07-14T09:00:00Z";
+  complete.approved_by = "Named QA approver";
+  complete.approved_role = "QA owner";
+  complete.approved_at = "2026-07-14T09:30:00Z";
+  for (const scenario of Object.values(complete.scenarios)) {
+    scenario.status = "passed";
+    scenario.evidence_reference = "README.md";
+    scenario.note = "Redacted controlled-device outcome retained for verification.";
+  }
+
+  const { testRecord, signedApproval } = buildPhysicalUatLaunchEvidence(complete, {
+    ledgerSha256: "a".repeat(64),
+    now: new Date("2026-07-14T10:00:00Z"),
+  });
+
+  assert.equal(testRecord.evidence_type, "test_record");
+  assert.equal(testRecord.checks.length, 12);
+  assert.equal(testRecord.passed_scenarios, 12);
+  assert.equal(testRecord.pending_scenarios, 0);
+  assert.equal(signedApproval.evidence_type, "signed_approval");
+  assert.equal(signedApproval.decision, "approved");
+  assert.equal(signedApproval.approved_by, "Named QA approver");
+  for (const artifact of [testRecord, signedApproval]) {
+    const validation = validateLaunchEvidenceArtifact(artifact, {
+      expectedGate: "MED250_GATE_PHYSICAL_UAT_PASSED",
+      expectedType: artifact.evidence_type,
+      now: new Date("2026-07-14T10:00:00Z"),
+    });
+    assert.equal(validation.valid, true, validation.errors.join("; "));
+  }
 });
 
 test("rejects phone numbers, OTPs, UUID order IDs, secrets and incomplete evidence", () => {

@@ -105,9 +105,9 @@
       "goals": [6],
       "status": "external_gate",
       "owner": "Legal/privacy owner",
-      "dependencies": ["Registered entity details", "Approved privacy contact", "DPIA and regulatory decisions"],
+      "dependencies": ["Registered entity details", "Approved privacy contact", "DPIA and privacy decisions"],
       "acceptance": ["Terms and Privacy publish the approved legal entity, registered address, and privacy contact.", "Published legal copy matches the implemented data flow, retention, processors, transfers, rights, and complaints route."],
-      "evidence": ["docs/launch/RWANDA_REGULATORY_REVIEW_BRIEF.md", "docs/launch/PRESCRIPTION_RETENTION_POLICY.md", "data/launch-evidence.json"],
+      "evidence": ["app/privacy/page.tsx", "app/terms/page.tsx", "docs/launch/PRESCRIPTION_RETENTION_POLICY.md", "data/launch-evidence.json"],
       "remaining": ["Obtain the accountable legal and privacy decisions and replace all unresolved identity/contact placeholders with approved facts."]
     },
     {
@@ -267,7 +267,7 @@
         "goals": [4, 6, 8],
         "owner": "Product owner and legal/privacy owner",
         "acceptance": ["Every public template retains the approved non-diagnostic and non-prescribing boundary.", "New product, localization, and request surfaces cannot imply diagnosis, treatment recommendation, or replacement of a qualified professional."],
-        "evidence": ["docs/launch/RWANDA_REGULATORY_REVIEW_BRIEF.md", "tests/rendered-html.test.mjs", "data/localization/source-copy-inventory.json"]
+        "evidence": ["app/privacy/page.tsx", "app/terms/page.tsx", "tests/rendered-html.test.mjs", "data/localization/source-copy-inventory.json"]
       },
       {
         "id": "W-5",
