@@ -173,14 +173,25 @@ Review all 51 groups in `desktop-output/goal-progress-2026-07-20/duplicate-regis
 
 Every decision needs reviewer name, timezone-qualified timestamp, and rationale. Never merge or delete source rows merely to make the verifier pass.
 
-Complete the prepared redacted launch ledger after the row-level review:
+After the strict CSV review passes, build the completed launch ledger from the
+governed inputs:
 
-- `docs/launch/evidence/duplicate-register-review-ledger-pending-2026-07-16.json`
+```sh
+npm run data:duplicates:evidence:build -- \
+  --date YYYY-MM-DD \
+  --reviewed-by "Named register data reviewer" \
+  --reviewer-role "Register data reviewer" \
+  --reviewed-at "YYYY-MM-DDTHH:mm:ss+02:00"
+```
+
+The builder refuses the current pending ledger and writes only under
+`docs/launch/evidence/`.
 
 Final check:
 
 ```sh
 npm run data:duplicates:verify -- --strict
+npm run data:duplicates:evidence:build -- --date YYYY-MM-DD --reviewed-by "Named register data reviewer" --reviewer-role "Register data reviewer" --reviewed-at "YYYY-MM-DDTHH:mm:ss+02:00"
 ```
 
 ### Security owner

@@ -150,14 +150,14 @@
       "next_actions": [
         "Regenerate the duplicate source-comparison packet.",
         "Have a named register data reviewer decide all 51 duplicate groups in the controlled CSV ledger.",
-        "Run the strict duplicate verifier and complete the redacted review-ledger artifact only after it passes.",
+        "Run the strict duplicate verifier and build the redacted review-ledger artifact only after it passes.",
         "Record the artifact and gate approval through the guarded registry helper."
       ],
       "commands": [
         "npm run data:duplicates:packet",
         "npm run data:duplicates:verify -- --strict",
-        "npm run launch:evidence:artifact:verify -- --file docs/launch/evidence/duplicate-register-review-ledger-pending-2026-07-16.json --gate MED250_GATE_DUPLICATE_REGISTER_REVIEWED --type review_ledger",
-        "npm run launch:evidence:record -- --artifact docs/launch/evidence/duplicate-register-review-ledger-pending-2026-07-16.json --confirm --approved-by \"Named register data reviewer\" --approved-role \"Register data reviewer\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\""
+        "npm run data:duplicates:evidence:build -- --date YYYY-MM-DD --reviewed-by \"Named register data reviewer\" --reviewer-role \"Register data reviewer\" --reviewed-at \"YYYY-MM-DDTHH:mm:ss+02:00\"",
+        "npm run launch:evidence:record -- --artifact docs/launch/evidence/duplicate-register-review-ledger-YYYY-MM-DD.json --replace --confirm --approved-by \"Named register data reviewer\" --approved-role \"Register data reviewer\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\""
       ],
       "safety_rules": [
         "Do not mark a gate confirmed until every required evidence type is recorded and the accountable owner has approved it.",

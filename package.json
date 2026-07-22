@@ -28,6 +28,7 @@
     "data:validate": "node scripts/import-data/validate-imports.mjs && node scripts/import-data/verify-duplicate-register-review.mjs && node scripts/import-data/product-content-review.mjs verify",
     "data:duplicates:verify": "node scripts/import-data/verify-duplicate-register-review.mjs",
     "data:duplicates:packet": "node scripts/import-data/generate-duplicate-review-packet.mjs --output desktop-output/goal-progress-2026-07-20/duplicate-register-review-packet-2026-07-20.json",
+    "data:duplicates:evidence:build": "node scripts/import-data/create-duplicate-register-launch-evidence.mjs",
     "data:review-products": "node scripts/import-data/apply-product-orderability-review.mjs",
     "data:import-marketplace-products": "node scripts/import-data/load-marketplace-products.mjs",
     "data:validate-marketplace-products": "node scripts/import-data/load-marketplace-products.mjs --dry-run",
