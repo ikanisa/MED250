@@ -1,12 +1,12 @@
 {
   "schema_version": "2",
-  "captured_at": "2026-07-23T18:48:00+02:00",
+  "captured_at": "2026-07-23T19:05:46+02:00",
   "classification": "Cloudflare Worker production-domain cutover verification plan",
   "worker_route": "med-250.com",
   "hostnames": [
     {
       "hostname": "med-250.com",
-      "status": "pending_attachment",
+      "status": "active",
       "records": [
         {
           "type": "A",
