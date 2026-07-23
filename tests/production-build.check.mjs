@@ -8,7 +8,7 @@ async function render(pathname) {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set("production-test", `${process.pid}-${Date.now()}-${pathname}`);
   const { default: worker } = await import(workerUrl.href);
-  return worker.fetch(new Request(`https://med250.gikundiro.com${pathname}`, {
+  return worker.fetch(new Request(`https://med-250.com${pathname}`, {
     headers: { accept: "text/html,*/*" },
   }), {
     ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) },
@@ -22,8 +22,9 @@ test("builds the explicit production Worker and custom-domain routes", async () 
   assert.equal(config.vars.MED250_RELEASE_MODE, "live");
   assert.equal(config.workers_dev, false);
   assert.deepEqual(config.routes.map((route) => route.pattern), [
-    "med250.gikundiro.com",
+    "med-250.com",
   ]);
+  assert.doesNotMatch(JSON.stringify(config.routes), /med250\.gikundiro\.com/);
   assert.equal(config.assets.binding, "ASSETS");
   assert.equal(config.images.binding, "IMAGES");
 });
@@ -47,12 +48,12 @@ test("publishes live robots directives and the complete source-backed sitemap", 
   assert.match(robots, /User-Agent: \*/i);
   assert.match(robots, /Allow: \//i);
   assert.match(robots, /Disallow: \/pharmacies/i);
-  assert.match(robots, /Sitemap: https:\/\/med250\.gikundiro\.com\/sitemap\.xml/i);
+  assert.match(robots, /Sitemap: https:\/\/med-250\.com\/sitemap\.xml/i);
 
   const sitemapResponse = await render("/sitemap.xml");
   assert.equal(sitemapResponse.status, 200);
   const sitemap = await sitemapResponse.text();
   assert.ok((sitemap.match(/<url>/g) ?? []).length >= 4_600);
-  assert.match(sitemap, /https:\/\/med250\.gikundiro\.com\/product\/rwanda-fda-hm-/);
-  assert.match(sitemap, /https:\/\/med250\.gikundiro\.com\/product\/AMZ-/);
+  assert.match(sitemap, /https:\/\/med-250\.com\/product\/rwanda-fda-hm-/);
+  assert.match(sitemap, /https:\/\/med-250\.com\/product\/AMZ-/);
 });

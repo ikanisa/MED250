@@ -38,6 +38,7 @@ export function validateLaunchEvidenceArtifact(artifact, {
   strict = true,
   expectedGate = "",
   expectedType = "",
+  allowedDomainHostnames = ["med-250.com"],
   now = new Date(),
 } = {}) {
   const errors = [];
@@ -114,7 +115,12 @@ export function validateLaunchEvidenceArtifact(artifact, {
       case "domain_verification":
         requireNamed(errors, artifact, [["verified_by", "domain verifier"], ["verifier_role", "domain verifier role"]]);
         requireTimestamp(errors, artifact, "verified_at", "domain verification");
-        for (const hostname of ["med250.gikundiro.com"]) if (!Array.isArray(artifact?.hostnames) || !artifact.hostnames.includes(hostname)) errors.push(`domain verification must include ${hostname}`);
+        if (
+          !Array.isArray(artifact?.hostnames)
+          || !allowedDomainHostnames.some((hostname) => artifact.hostnames.includes(hostname))
+        ) {
+          errors.push(`domain verification must include ${allowedDomainHostnames.join(" or ")}`);
+        }
         for (const field of ["dns_passed", "tls_passed", "routes_passed"]) if (artifact?.[field] !== true) errors.push(`domain verification ${field} must be true`);
         break;
       case "operations_snapshot":

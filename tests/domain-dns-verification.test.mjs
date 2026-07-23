@@ -10,7 +10,7 @@ const plan = JSON.parse(await readFile(
 ));
 
 test("accepts a resolved Cloudflare production hostname", () => {
-  const observed = { "A:med250.gikundiro.com": ["203.0.113.10", "203.0.113.11"] };
+  const observed = { "A:med-250.com": ["203.0.113.10", "203.0.113.11"] };
   const result = assessDomainDns(plan, observed);
   assert.equal(result.status, "passed");
   assert.equal(result.matchingRecordCount, result.recordCount);
@@ -18,13 +18,13 @@ test("accepts a resolved Cloudflare production hostname", () => {
 });
 
 test("does not treat an empty answer as sufficient for a minimum-count record", () => {
-  const result = assessDomainDns(plan, { "A:med250.gikundiro.com": [] });
+  const result = assessDomainDns(plan, { "A:med-250.com": [] });
   assert.equal(result.status, "pending");
   assert.equal(result.productionReady, false);
 });
 
 test("reports pending when the production hostname does not resolve", () => {
-  const observed = { "A:med250.gikundiro.com": [] };
+  const observed = { "A:med-250.com": [] };
   const result = assessDomainDns(plan, observed);
   assert.equal(result.status, "pending");
   assert.equal(result.matchingRecordCount, 0);

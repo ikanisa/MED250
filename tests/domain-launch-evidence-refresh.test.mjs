@@ -20,7 +20,7 @@ function deploymentReceipt(overrides = {}) {
     schemaVersion: "1.0",
     capturedAt,
     status: "passed",
-    origin: "https://med250.gikundiro.com",
+    origin: "https://med-250.com",
     mode: "live",
     observedReleaseRevision: releaseRevision,
     expectedReleaseRevision: releaseRevision,
@@ -29,7 +29,7 @@ function deploymentReceipt(overrides = {}) {
     routes: Array.from({ length: 10 }, (_, index) => ({
       route: index === 0 ? "/" : `/route-${index}`,
       status: 200,
-      finalOrigin: "https://med250.gikundiro.com",
+      finalOrigin: "https://med-250.com",
       headers: index < 7 ? { "x-med250-release-revision": releaseRevision } : {},
       bodyBytes: 100 + index,
       bodySha256: String(index).repeat(64).slice(0, 64).replaceAll(/[^0-9]/g, "a"),

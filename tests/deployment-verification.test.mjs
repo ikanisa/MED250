@@ -70,7 +70,7 @@ test("accepts a protected preview deployment", () => {
 });
 
 test("accepts an indexable live custom domain", () => {
-  const origin = "https://med250.gikundiro.com";
+  const origin = "https://med-250.com";
   const result = assessDeploymentEvidence({
     origin,
     mode: "live",
@@ -82,7 +82,7 @@ test("accepts an indexable live custom domain", () => {
 });
 
 test("requires an exact release revision when one is supplied", () => {
-  const origin = "https://med250.gikundiro.com";
+  const origin = "https://med-250.com";
   const matching = assessDeploymentEvidence({
     origin,
     mode: "live",
@@ -102,7 +102,7 @@ test("requires an exact release revision when one is supplied", () => {
 });
 
 test("rejects a mixed-revision Worker deployment even when the homepage is current", () => {
-  const origin = "https://med250.gikundiro.com";
+  const origin = "https://med-250.com";
   const evidenceRecords = records(origin, "live");
   const categories = evidenceRecords.find((record) => record.route === "/categories");
   categories.headers["x-med250-release-revision"] = "fedcba9876543210fedcba9876543210fedcba98";
@@ -117,7 +117,7 @@ test("rejects a mixed-revision Worker deployment even when the homepage is curre
 });
 
 test("builds a durable receipt without response bodies or unapproved headers", () => {
-  const origin = "https://med250.gikundiro.com";
+  const origin = "https://med-250.com";
   const evidenceRecords = records(origin, "live");
   evidenceRecords[0].headers["set-cookie"] = "secret=value";
   const result = assessDeploymentEvidence({
@@ -146,7 +146,7 @@ test("accepts an indexable public catalog on Sites", () => {
   assert.deepEqual(assessDeploymentEvidence({ origin, mode: "catalog", records: records(origin, "catalog") }).errors, []);
   assert.equal(validateDeploymentOrigin(origin, "catalog"), origin);
   assert.throws(
-    () => validateDeploymentOrigin("https://med250.gikundiro.com", "catalog"),
+    () => validateDeploymentOrigin("https://med-250.com", "catalog"),
     /governed MED\+250 Sites origin/,
   );
 });
@@ -160,7 +160,7 @@ test("keeps the public Sites deployment catalog-only", () => {
 });
 
 test("requires immutable Git provenance for every live CLI verification", () => {
-  const origin = "https://med250.gikundiro.com";
+  const origin = "https://med-250.com";
   assert.throws(
     () => parseArguments(["--url", origin, "--mode", "live"]),
     /exact lowercase 40-character Git release revision/,
@@ -176,7 +176,7 @@ test("requires immutable Git provenance for every live CLI verification", () => 
 });
 
 test("detects indexing, security-header, redirect and sitemap failures", () => {
-  const origin = "https://med250.gikundiro.com";
+  const origin = "https://med-250.com";
   const evidence = records(origin, "live");
   evidence[0].headers["x-robots-tag"] = "noindex, nofollow";
   delete evidence[0].headers["content-security-policy"];
@@ -193,7 +193,7 @@ test("detects indexing, security-header, redirect and sitemap failures", () => {
 });
 
 test("requires HTTPS and a custom domain for live verification", () => {
-  assert.throws(() => validateDeploymentOrigin("http://med250.gikundiro.com", "live"), /requires HTTPS/);
+  assert.throws(() => validateDeploymentOrigin("http://med-250.com", "live"), /requires HTTPS/);
   assert.throws(() => validateDeploymentOrigin("https://med250.workers.dev", "live"), /custom domain/);
   assert.equal(validateDeploymentOrigin("https://preview.workers.dev", "preview"), "https://preview.workers.dev");
 });
@@ -219,13 +219,14 @@ test("keeps preview and production Workers isolated behind manual protected depl
   assert.equal(wrangler.env.production.preview_urls, false);
   assert.equal(wrangler.env.production.vars.MED250_RELEASE_MODE, "live");
   assert.equal(wrangler.env.production.vars.NEXT_PUBLIC_MED250_DEPLOYMENT_MODE, "live");
-  assert.equal(wrangler.env.production.vars.NEXT_PUBLIC_MED250_DEPLOYMENT_ORIGIN, "https://med250.gikundiro.com");
+  assert.equal(wrangler.env.production.vars.NEXT_PUBLIC_MED250_DEPLOYMENT_ORIGIN, "https://med-250.com");
   assert.equal(wrangler.env.production.vars.NEXT_PUBLIC_MARKETPLACE_MODE, "live");
-  assert.equal(wrangler.env.production.vars.NEXT_PUBLIC_SITE_URL, "https://med250.gikundiro.com");
+  assert.equal(wrangler.env.production.vars.NEXT_PUBLIC_SITE_URL, "https://med-250.com");
   assert.equal(wrangler.env.production.vars.NEXT_PUBLIC_MED250_OBSERVABILITY, "cloud");
   assert.deepEqual(wrangler.env.production.routes.map((route) => route.pattern), [
-    "med250.gikundiro.com",
+    "med-250.com",
   ]);
+  assert.doesNotMatch(JSON.stringify(wrangler.env.production.routes), /med250\.gikundiro\.com/);
   assert.match(packageJson.scripts["build:production"], /CLOUDFLARE_ENV=production/);
   assert.match(packageJson.scripts["build:sites"], /NEXT_PUBLIC_MED250_DEPLOYMENT_MODE=catalog/);
   assert.match(packageJson.scripts["build:sites"], /NEXT_PUBLIC_MARKETPLACE_MODE=catalog/);
@@ -268,7 +269,7 @@ test("prepares an immutable live-only config from the generated vinext artifact"
   assert.match(source, /name: "med250-marketplace-gikundiro"/);
   assert.match(source, /workers_dev: false/);
   assert.match(source, /preview_urls: false/);
-  assert.match(source, /pattern: "med250\.gikundiro\.com", custom_domain: true/);
+  assert.match(source, /pattern: "med-250\.com", custom_domain: true/);
   assert.match(source, /revisionPattern = \/\^\[a-f0-9\]\{40\}\$\//);
   assert.match(source, /execFileAsync\("git", \["rev-parse", "HEAD"\]/);
   assert.match(source, /MED250_RELEASE_REVISION: releaseRevision/);

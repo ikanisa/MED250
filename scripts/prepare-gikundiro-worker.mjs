@@ -7,7 +7,7 @@ const root = resolve(import.meta.dirname, "..");
 const serverDirectory = join(root, "dist", "server");
 const sourceConfigPath = join(serverDirectory, "wrangler.json");
 const outputConfigPath = join(serverDirectory, "wrangler.gikundiro.json");
-const deploymentOrigin = "https://med250.gikundiro.com";
+const deploymentOrigin = "https://med-250.com";
 const revisionPattern = /^[a-f0-9]{40}$/;
 const execFileAsync = promisify(execFile);
 
@@ -52,7 +52,7 @@ const deployment = {
   name: "med250-marketplace-gikundiro",
   workers_dev: false,
   preview_urls: false,
-  routes: [{ pattern: "med250.gikundiro.com", custom_domain: true }],
+  routes: [{ pattern: "med-250.com", custom_domain: true }],
   vars: {
     MED250_RELEASE_MODE: "live",
     MED250_RELEASE_REVISION: releaseRevision,

@@ -26,7 +26,7 @@ export function createLaunchEvidenceTemplate(gateName, evidenceType) {
     review_ledger: { reviewed_by: null, reviewer_role: null, reviewed_at: null, total_records: null, pending_records: null, blocked_records: null, source_digests: {} },
     deployment_receipt: { deployed_by: null, deployer_role: null, deployed_at: null, environment: null, release_identifier: null },
     account_verification: { verified_by: null, verifier_role: null, verified_at: null, account_label: null, least_privilege_confirmed: false },
-    domain_verification: { verified_by: null, verifier_role: null, verified_at: null, hostnames: ["med250.gikundiro.com"], dns_passed: false, tls_passed: false, routes_passed: false },
+    domain_verification: { verified_by: null, verifier_role: null, verified_at: null, hostnames: ["med-250.com"], dns_passed: false, tls_passed: false, routes_passed: false },
     operations_snapshot: { captured_by: null, capturer_role: null, captured_at: null, critical_count: null, metrics: {} },
   };
   if (!extensions[evidenceType]) throw new Error(`Unsupported evidence type ${evidenceType}.`);

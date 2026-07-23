@@ -68,8 +68,8 @@ if (!existsSync(wranglerPath)) {
       if (selectedWorker?.workers_dev !== false) errors.push("The production Worker must disable workers.dev.");
       const productionRoutes = Array.isArray(selectedWorker?.routes) ? selectedWorker.routes : [];
       const routePatterns = productionRoutes.map((route) => typeof route === "string" ? route : route?.pattern);
-      if (!routePatterns.includes("med250.gikundiro.com")) {
-        errors.push("The production Worker must route med250.gikundiro.com.");
+      if (!routePatterns.includes("med-250.com")) {
+        errors.push("The production Worker must route med-250.com.");
       }
     }
   } catch {
@@ -111,7 +111,7 @@ if (unsafePublicKeys.length) {
 
 if (!envPath) warnings.push("No .env.local or .env file was found; only process environment values were checked.");
 if (mode !== "live") warnings.push(`Marketplace mode is ${mode || "preview"}, so customer ordering remains disabled.`);
-if (!siteUrl) warnings.push("NEXT_PUBLIC_SITE_URL is not explicitly configured; metadata uses the med250.gikundiro.com default.");
+if (!siteUrl) warnings.push("NEXT_PUBLIC_SITE_URL is not explicitly configured; metadata uses the med-250.com default.");
 
 if (siteUrl) {
   try {

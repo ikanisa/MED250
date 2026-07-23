@@ -88,7 +88,7 @@ test("live release validation requires all public contact channels", () => {
       NEXT_PUBLIC_SUPABASE_URL: "https://uskfnszcdqpcfrhjxitl.supabase.co",
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_example",
       NEXT_PUBLIC_MARKETPLACE_MODE: "live",
-      NEXT_PUBLIC_SITE_URL: "https://med250.gikundiro.com",
+      NEXT_PUBLIC_SITE_URL: "https://med-250.com",
       NEXT_PUBLIC_TURNSTILE_SITE_KEY: "0x4AAAA-example",
       NEXT_PUBLIC_MED250_OBSERVABILITY: "cloud",
     },

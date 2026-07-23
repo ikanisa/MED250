@@ -161,12 +161,12 @@ const GATE_GUIDANCE = {
     closure_focus: "Review the fresh live domain evidence and record infrastructure-owner approval.",
     next_actions: [
       "Rerun DNS and live deployment verification if any Worker, route, DNS or repository revision changed.",
-      "Confirm med250.gikundiro.com is attached only to the intended Cloudflare Worker route.",
+      "Confirm med-250.com is attached only to the intended Cloudflare Worker route.",
       "Record named infrastructure-owner approval against the current domain and deployment evidence.",
     ],
     commands: [
       "npm run domain:dns:verify",
-      "npm run deployment:verify -- --url https://med250.gikundiro.com --mode live --expected-revision <exact-lowercase-40-character-git-sha> --evidence-output desktop-output/goal-progress-YYYY-MM-DD/domain-deployment-receipt.json",
+      "npm run deployment:verify -- --url https://med-250.com --mode live --expected-revision <exact-lowercase-40-character-git-sha> --evidence-output desktop-output/goal-progress-YYYY-MM-DD/domain-deployment-receipt.json",
       "npm run domain:evidence:refresh -- --deployment-evidence desktop-output/goal-progress-YYYY-MM-DD/domain-deployment-receipt.json --expected-revision git --date YYYY-MM-DD",
       "npm run launch:gate:approve -- --gate MED250_GATE_DOMAIN_DNS_VERIFIED --approved-by \"Named infrastructure owner\" --approved-role \"Infrastructure owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\"",
     ],

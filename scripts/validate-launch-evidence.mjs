@@ -130,6 +130,9 @@ export function validateLaunchEvidence(manifest, {
               strict: true,
               expectedGate: name,
               expectedType: evidence.type,
+              allowedDomainHostnames: name === "MED250_GATE_DOMAIN_DNS_VERIFIED" && status !== "confirmed"
+                ? ["med-250.com", "med250.gikundiro.com"]
+                : ["med-250.com"],
               now,
             });
             for (const artifactError of artifactResult.errors) errors.push(`${name} evidence ${index + 1} artifact: ${artifactError}`);

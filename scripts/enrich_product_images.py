@@ -48,7 +48,7 @@ DEFAULT_REPORT = REPO_ROOT / "data/product-images/report.json"
 DEFAULT_VERIFICATION_REPORT = (
     REPO_ROOT / "data/product-images/live-url-verification.json"
 )
-USER_AGENT = "MED250ProductImageBot/1.0 (+https://med250.gikundiro.com/terms)"
+USER_AGENT = "MED250ProductImageBot/1.0 (+https://med-250.com/terms)"
 SEARCH_USER_AGENT = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0 Safari/537.36"

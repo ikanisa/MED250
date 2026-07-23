@@ -8,7 +8,7 @@ import { validateLaunchEvidence } from "./validate-launch-evidence.mjs";
 import { validateLaunchEvidenceArtifact } from "./validate-launch-evidence-artifact.mjs";
 
 const DOMAIN_GATE = "MED250_GATE_DOMAIN_DNS_VERIFIED";
-const LIVE_ORIGIN = "https://med250.gikundiro.com";
+const LIVE_ORIGIN = "https://med-250.com";
 const revisionPattern = /^[a-f0-9]{40}$/;
 
 function sha256(source) {
@@ -78,7 +78,7 @@ function domainVerificationArtifact(receipt, expectedRevision) {
     verified_by: "Codex automated verifier",
     verifier_role: "Release verification agent",
     verified_at: capturedAt,
-    hostnames: ["med250.gikundiro.com"],
+    hostnames: ["med-250.com"],
     dns_passed: true,
     tls_passed: true,
     routes_passed: true,
@@ -212,7 +212,7 @@ function parseArgs(values) {
     else if (flag === "--manifest") args.manifest = values[++index] ?? "";
     else throw new Error(`Unknown argument ${flag}.`);
   }
-  if (!args.deploymentEvidence) throw new Error("--deployment-evidence is required. Generate it with npm run deployment:verify -- --url https://med250.gikundiro.com --mode live --expected-revision <sha> --evidence-output <path>.");
+  if (!args.deploymentEvidence) throw new Error("--deployment-evidence is required. Generate it with npm run deployment:verify -- --url https://med-250.com --mode live --expected-revision <sha> --evidence-output <path>.");
   if (!args.manifest) throw new Error("--manifest requires a path.");
   return args;
 }

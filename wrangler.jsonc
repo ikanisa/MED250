@@ -29,14 +29,14 @@
       "workers_dev": false,
       "preview_urls": false,
       "routes": [
-        { "pattern": "med250.gikundiro.com", "custom_domain": true }
+        { "pattern": "med-250.com", "custom_domain": true }
       ],
       "vars": {
         "MED250_RELEASE_MODE": "live",
         "NEXT_PUBLIC_MED250_DEPLOYMENT_MODE": "live",
-        "NEXT_PUBLIC_MED250_DEPLOYMENT_ORIGIN": "https://med250.gikundiro.com",
+        "NEXT_PUBLIC_MED250_DEPLOYMENT_ORIGIN": "https://med-250.com",
         "NEXT_PUBLIC_MARKETPLACE_MODE": "live",
-        "NEXT_PUBLIC_SITE_URL": "https://med250.gikundiro.com",
+        "NEXT_PUBLIC_SITE_URL": "https://med-250.com",
         "NEXT_PUBLIC_MED250_OBSERVABILITY": "cloud"
       },
       "assets": {
@@ -51,14 +51,14 @@
       "workers_dev": false,
       "preview_urls": false,
       "routes": [
-        { "pattern": "med250.gikundiro.com", "custom_domain": true }
+        { "pattern": "med-250.com", "custom_domain": true }
       ],
       "vars": {
         "MED250_RELEASE_MODE": "live",
         "NEXT_PUBLIC_MED250_DEPLOYMENT_MODE": "live",
-        "NEXT_PUBLIC_MED250_DEPLOYMENT_ORIGIN": "https://med250.gikundiro.com",
+        "NEXT_PUBLIC_MED250_DEPLOYMENT_ORIGIN": "https://med-250.com",
         "NEXT_PUBLIC_MARKETPLACE_MODE": "live",
-        "NEXT_PUBLIC_SITE_URL": "https://med250.gikundiro.com",
+        "NEXT_PUBLIC_SITE_URL": "https://med-250.com",
         "NEXT_PUBLIC_MED250_OBSERVABILITY": "cloud"
       },
       "assets": {

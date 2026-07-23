@@ -11,7 +11,7 @@ function assertCataloguedMessage(source, id, expected) {
   assert.match(source, new RegExp(`marketplace(?:Format)?Message\\("${escapedId}"`));
 }
 
-async function render(pathname = "/", envOverrides = {}, origin = "https://med250.gikundiro.com") {
+async function render(pathname = "/", envOverrides = {}, origin = "https://med-250.com") {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
   const { default: worker } = await import(workerUrl.href);
@@ -147,7 +147,7 @@ test("keeps the production server usable when local vinext provides no Cloudflar
   workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}-no-env`);
   const { default: worker } = await import(workerUrl.href);
   const response = await worker.fetch(
-    new Request("https://med250.gikundiro.com/", { headers: { accept: "text/html" } }),
+    new Request("https://med-250.com/", { headers: { accept: "text/html" } }),
     undefined,
     { waitUntil() {}, passThroughOnException() {} },
   );
@@ -160,7 +160,7 @@ test("server-renders canonical product metadata with its approved public product
   const response = await render("/product/rwanda-fda-hm-0734");
   assert.equal(response.status, 200);
   const html = await response.text();
-  const metadataOrigin = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "https://med250.gikundiro.com";
+  const metadataOrigin = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "https://med-250.com";
   assert.match(html, /<title>Ibupar caplets 400mg\/325mg \| MED\+250<\/title>/);
   assert.ok(html.includes(`rel="canonical" href="${metadataOrigin}/product/rwanda-fda-hm-0734"`));
   assert.match(html, /storage\/v1\/object\/public\/product-images\/v1\/rwanda-fda-hm-0734\//);
@@ -214,7 +214,7 @@ test("keeps previews and workers.dev unindexed while permitting an explicit live
   const robotsText = await previewRobots.text();
   const bundleAllowsIndexing = /(?:^|\n)Allow:\s*\//i.test(robotsText);
   if (bundleAllowsIndexing) {
-    const expectedSitemapOrigin = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "https://med250.gikundiro.com";
+    const expectedSitemapOrigin = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "https://med-250.com";
     assert.match(robotsText, /User-Agent: \*[\s\S]*(?:^|\n)Allow:\s*\//im);
     assert.ok(robotsText.includes(`Sitemap: ${expectedSitemapOrigin}/sitemap.xml`));
   } else {
@@ -261,7 +261,7 @@ test("blocks releases when frontend and Worker modes diverge", () => {
   const result = spawnSync(process.execPath, ["scripts/validate-release-config.mjs"], {
     cwd: new URL("..", import.meta.url),
     encoding: "utf8",
-    env: { ...process.env, NEXT_PUBLIC_MARKETPLACE_MODE: "live", NEXT_PUBLIC_SITE_URL: "https://med250.gikundiro.com" },
+    env: { ...process.env, NEXT_PUBLIC_MARKETPLACE_MODE: "live", NEXT_PUBLIC_SITE_URL: "https://med-250.com" },
   });
   assert.equal(result.status, 1);
   assert.match(result.stdout, /Frontend and Worker release modes do not match/);
@@ -340,7 +340,7 @@ test("accepts only privacy-safe bucketed marketplace telemetry", async () => {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}-telemetry`);
   const { default: worker } = await import(workerUrl.href);
-  const accepted = await worker.fetch(new Request("https://med250.gikundiro.com/api/telemetry", {
+  const accepted = await worker.fetch(new Request("https://med-250.com/api/telemetry", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -351,14 +351,14 @@ test("accepts only privacy-safe bucketed marketplace telemetry", async () => {
   assert.equal(accepted.status, 202);
   assert.deepEqual(await accepted.json(), { accepted: true });
 
-  const rejected = await worker.fetch(new Request("https://med250.gikundiro.com/api/telemetry", {
+  const rejected = await worker.fetch(new Request("https://med-250.com/api/telemetry", {
     method: "POST",
     headers: { "Content-Type": "application/json", "Content-Length": "4096" },
     body: JSON.stringify({ name: "unknown_event" }),
   }), {}, { waitUntil() {}, passThroughOnException() {} });
   assert.equal(rejected.status, 413);
 
-  const rejectedWithoutLength = await worker.fetch(new Request("https://med250.gikundiro.com/api/telemetry", {
+  const rejectedWithoutLength = await worker.fetch(new Request("https://med-250.com/api/telemetry", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name: "catalogue_search", properties: { unexpected: "x".repeat(3000) } }),

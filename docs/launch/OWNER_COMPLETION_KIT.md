@@ -424,7 +424,7 @@ Commands:
 ```sh
 npm run domain:dns:verify
 npm run cloudflare:check:production
-npm run deployment:verify -- --url https://med250.gikundiro.com --mode live --expected-revision <exact-lowercase-40-character-git-sha> --evidence-output desktop-output/goal-progress-YYYY-MM-DD/domain-deployment-receipt.json
+npm run deployment:verify -- --url https://med-250.com --mode live --expected-revision <exact-lowercase-40-character-git-sha> --evidence-output desktop-output/goal-progress-YYYY-MM-DD/domain-deployment-receipt.json
 npm run domain:evidence:refresh -- --deployment-evidence desktop-output/goal-progress-YYYY-MM-DD/domain-deployment-receipt.json --expected-revision git --date YYYY-MM-DD
 npm run launch:gate:approve -- --gate MED250_GATE_DOMAIN_DNS_VERIFIED --approved-by "Named infrastructure owner" --approved-role "Infrastructure owner" --approved-at "YYYY-MM-DDTHH:mm:ss+02:00"
 ```
@@ -495,7 +495,7 @@ npm run backend:verify
 npm run ops:health:strict
 npm run security:audit
 npm run release:check:live
-npm run deployment:verify -- --url https://med250.gikundiro.com --mode live --expected-revision <exact-lowercase-40-character-git-sha>
+npm run deployment:verify -- --url https://med-250.com --mode live --expected-revision <exact-lowercase-40-character-git-sha>
 ```
 
 The protected production workflow additionally requires the exact live confirmation phrase and approval of the `med250-production` GitHub environment.

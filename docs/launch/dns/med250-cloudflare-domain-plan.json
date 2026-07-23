@@ -1,16 +1,16 @@
 {
   "schema_version": "2",
-  "captured_at": "2026-07-16T00:00:00+02:00",
-  "classification": "active Cloudflare Worker production-domain verification plan",
-  "worker_route": "med250.gikundiro.com",
+  "captured_at": "2026-07-23T18:48:00+02:00",
+  "classification": "Cloudflare Worker production-domain cutover verification plan",
+  "worker_route": "med-250.com",
   "hostnames": [
     {
-      "hostname": "med250.gikundiro.com",
-      "status": "active",
+      "hostname": "med-250.com",
+      "status": "pending_attachment",
       "records": [
         {
           "type": "A",
-          "name": "med250.gikundiro.com",
+          "name": "med-250.com",
           "values": [],
           "minimum_count": 1,
           "purpose": "Cloudflare-proxied Worker production routing"

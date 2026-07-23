@@ -84,6 +84,18 @@ test("rejects incomplete, mislabelled, unredacted and secret-bearing artifacts",
   assert.ok(result.errors.some((error) => /check 1 must be passed/.test(error)));
 });
 
+test("rejects the retired production hostname for new domain verification", () => {
+  const artifact = completeArtifact("MED250_GATE_DOMAIN_DNS_VERIFIED", "domain_verification");
+  artifact.hostnames = ["med250.gikundiro.com"];
+  const result = validateLaunchEvidenceArtifact(artifact, {
+    expectedGate: "MED250_GATE_DOMAIN_DNS_VERIFIED",
+    expectedType: "domain_verification",
+    now: new Date("2026-07-14T12:00:00Z"),
+  });
+  assert.equal(result.valid, false);
+  assert.ok(result.errors.some((error) => /must include med-250\.com/.test(error)));
+});
+
 test("builds one owner-ready handoff using every prepared pending artifact", async () => {
   const prepared = await discoverPreparedLaunchEvidence(new URL("../docs/launch/evidence", import.meta.url));
   const handoff = createLaunchEvidenceHandoff(manifest, prepared);
@@ -211,7 +223,7 @@ test("confirms a gate only after all required evidence and owner approval are pr
   await rm(root, { recursive: true, force: true });
 });
 
-test("rejects confirmation when release-bound evidence targets an older checkout", async () => {
+test("rejects confirmation when domain evidence targets the retired hostname", async () => {
   await assert.rejects(
     () => recordLaunchEvidence({
       manifest: structuredClone(manifest),
@@ -224,7 +236,7 @@ test("rejects confirmation when release-bound evidence targets an older checkout
       approvedAt: "2026-07-20T18:00:00Z",
       now: new Date("2026-07-21T12:00:00Z"),
     }),
-    /release-bound evidence is stale against the current repository checkout/,
+    /domain verification must include med-250\.com/,
   );
 });
 

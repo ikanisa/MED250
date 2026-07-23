@@ -79,21 +79,21 @@ test("preserves catalogue URL state on the English alias and blocks draft locale
   const context = { waitUntil() {}, passThroughOnException() {} };
 
   const english = await worker.fetch(
-    new Request("https://med250.gikundiro.com/en/categories?search=ibupar&view=list"),
+    new Request("https://med-250.com/en/categories?search=ibupar&view=list"),
     env,
     context,
   );
   assert.equal(english.status, 308);
-  assert.equal(english.headers.get("location"), "https://med250.gikundiro.com/categories?search=ibupar&view=list");
+  assert.equal(english.headers.get("location"), "https://med-250.com/categories?search=ibupar&view=list");
 
   for (const path of ["/rw/categories", "/fr/privacy"]) {
-    const response = await worker.fetch(new Request(`https://med250.gikundiro.com${path}`), env, context);
+    const response = await worker.fetch(new Request(`https://med-250.com${path}`), env, context);
     assert.equal(response.status, 404);
     assert.equal(response.headers.get("x-robots-tag"), "noindex, nofollow");
   }
 
   const root = await worker.fetch(
-    new Request("https://med250.gikundiro.com/", { headers: { accept: "text/html" } }),
+    new Request("https://med-250.com/", { headers: { accept: "text/html" } }),
     env,
     context,
   );
