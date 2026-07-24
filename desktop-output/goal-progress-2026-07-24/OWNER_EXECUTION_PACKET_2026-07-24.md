@@ -2,7 +2,7 @@
 
 - Classification: execution aid only; not evidence, approval, or production authorization
 - Prepared: 24 July 2026
-- Audited application-code revision: `c38ef94a78ad7402e8732bd56e660c4c64b23240`
+- Validated application-code revision: `8ca3f6dc79f57f89c7e3d4b221a357b4fba7c49f`
 - Production origin: `https://med-250.com`
 - Public catalogue: Sites version 15 in `catalog` mode
 
@@ -12,6 +12,13 @@ Production is correctly **NO-GO**. The application candidate, production build,
 catalogue build, dependency audits, performance budget, and automated
 regression suites pass. The direct production Worker still exposes revision
 `468a3003e3b27c0f42a4ee089c8dae38028c1740`, not the candidate.
+
+The current technical receipt is
+`automated-release-validation-2026-07-24.json`. It records 373/373 Node tests,
+171 Python tests with one intentional skip, 58/58 Sites tests, localization,
+dependency audits, performance, production build checks, the ten-route live
+catalogue check, and Cloudflare dry runs. It is not owner approval and does not
+replace strict launch gates.
 
 The remaining work requires accountable owners and an approved isolated
 Supabase staging target. Read-only management access to the configured shared
@@ -320,7 +327,7 @@ disabled and use the local release commands. Verify the repository guard with
 npm run deployment:verify -- \
   --url https://med-250.com \
   --mode live \
-  --expected-revision c38ef94a78ad7402e8732bd56e660c4c64b23240 \
+  --expected-revision 8ca3f6dc79f57f89c7e3d4b221a357b4fba7c49f \
   --evidence-output desktop-output/goal-progress-2026-07-24/domain-deployment-receipt.json
 ```
 

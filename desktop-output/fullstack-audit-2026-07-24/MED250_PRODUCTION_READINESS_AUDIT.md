@@ -3,7 +3,7 @@
 Audit date: 24 July 2026  
 Repository: `https://github.com/ikanisa/MED250`  
 Candidate branch: `codex/med250-go-live-hardening`  
-Audited application revision: `c38ef94a78ad7402e8732bd56e660c4c64b23240`  
+Validated application revision: `8ca3f6dc79f57f89c7e3d4b221a357b4fba7c49f`
 Canonical production origin: `https://med-250.com`  
 Public catalogue origin: `https://med250-rwanda.ikanisa.chatgpt.site`  
 Release decision: **NO-GO**
@@ -13,8 +13,8 @@ Release decision: **NO-GO**
 The application code, catalogue-mode build, production-mode build, dependency
 set, localization inventory, performance budget, SEO implementation, responsive
 navigation, and core marketplace interactions are technically release-capable.
-The hardening candidate passes 372 Node tests, 171 Python tests with one
-intentional skip, 57 Sites catalogue/rendering tests, three production build
+The hardening candidate passes 373 Node tests, 171 Python tests with one
+intentional skip, 58 Sites catalogue/rendering tests, three production build
 tests, lint, catalogue validation, localization validation, two dependency
 audits, and the Cloudflare production dry run.
 
@@ -54,10 +54,12 @@ HTTPS is live, robots and sitemap respond, and production routes return HTTP
 `468a3003e3b27c0f42a4ee089c8dae38028c1740`, not this audited hardening
 revision, so production must not be represented as running the fix.
 
-The separate public Sites catalogue is now version 15, deployed from the exact
-audited application revision in `catalog` mode. Requests and pharmacy
-fulfilment remain disabled there. Its live product page has been visually
-verified to omit the held mismatched Paracetamol image.
+The separate public Sites catalogue remains version 15 in `catalog` mode.
+Requests and pharmacy fulfilment remain disabled there, and its ten-route live
+verification passes. The Sites response does not expose a Git revision header,
+so this check does not claim that application revision `8ca3f6d…` is deployed
+there. Its live product page has been visually verified to omit the held
+mismatched Paracetamol image.
 
 ## Critical status register
 
@@ -123,11 +125,11 @@ verified to omit the held mismatched Paracetamol image.
 
 | Gate | Result |
 |---|---:|
-| Node application and integration suite | **372/372 passed** |
+| Node application and integration suite | **373/373 passed** |
 | Python suite | **171 passed, 1 intentionally skipped** |
 | Source-authority preview verification | **Passed; pending owner decision remains visible** |
 | Source-authority strict verification | **Failed correctly before credentials or deployment: owner authority pending** |
-| Sites catalogue/rendering suite | **57/57 passed** |
+| Sites catalogue/rendering suite | **58/58 passed** |
 | Production build checks | **3/3 passed** |
 | ESLint | **Passed** |
 | Localization | **596 inventoried, 0 hard-coded, 0 high-risk hard-coded** |
@@ -138,6 +140,11 @@ verified to omit the held mismatched Paracetamol image.
 | DNS verification | **Passed** |
 | Full live exact-revision verification | **Failed correctly: live revision is older than the candidate** |
 | Deno Edge type-check | **Environment-blocked: jsr.io package manifest could not be fetched** |
+
+The privacy-safe automated execution record is
+`desktop-output/goal-progress-2026-07-24/automated-release-validation-2026-07-24.json`.
+It is a technical receipt only and is not launch approval, physical-device
+evidence, backend deployment evidence, or proof that the candidate is live.
 
 The performance budget passes:
 

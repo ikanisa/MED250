@@ -1,7 +1,7 @@
 # MED+250 Source-Retention Authority Decision
 
 - Classification: accountable-owner decision workbook; not approval or source evidence
-- Application release candidate: `c38ef94a78ad7402e8732bd56e660c4c64b23240`
+- Application release candidate: `8ca3f6dc79f57f89c7e3d4b221a357b4fba7c49f`
 - Decision owner: named MED+250 data owner
 - Required role: data owner with authority over catalogue provenance, retention, and reuse
 

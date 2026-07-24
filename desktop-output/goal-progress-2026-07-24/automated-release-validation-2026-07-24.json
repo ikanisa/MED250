@@ -1,0 +1,96 @@
+{
+  "schema_version": "1",
+  "classification": "automated_execution_record_not_approval",
+  "status": "passed",
+  "candidate_revision": "8ca3f6dc79f57f89c7e3d4b221a357b4fba7c49f",
+  "executed_at": "2026-07-24T12:38:35+02:00",
+  "executed_by": "Codex local validation executor",
+  "execution_environment": "local controlled MED250 checkout",
+  "github_policy": {
+    "account_policy": "free_only",
+    "automatic_hosted_workflows": false,
+    "verification": "passed_for_two_manual_workflows"
+  },
+  "results": [
+    {
+      "command": "npm run release:check",
+      "status": "passed",
+      "coverage": {
+        "node_tests": "373/373 passed",
+        "python_tests": "171 passed, 1 intentionally skipped",
+        "eslint": "passed",
+        "catalogue_validation": "passed",
+        "catalogue_quality": "passed",
+        "npm_dependency_audit": "0 vulnerabilities",
+        "python_osv_audit": "10 packages checked, 0 vulnerable",
+        "performance_budget": "passed",
+        "preview_worker_dry_run": "passed"
+      },
+      "ephemeral_log_sha256": "02718ade71e062b181876effb903eb84029694ce240bfad1c723fc3b3b010d45",
+      "ephemeral_log_bytes": 104361
+    },
+    {
+      "command": "npm run localization:verify",
+      "status": "passed",
+      "coverage": {
+        "locales": 3,
+        "public_locales": 1,
+        "source_messages": 596,
+        "hardcoded_messages": 0,
+        "high_risk_hardcoded_messages": 0
+      }
+    },
+    {
+      "command": "npm run test:sites:catalog",
+      "status": "passed",
+      "coverage": {
+        "tests": "58/58 passed",
+        "mode": "catalog",
+        "ordering": "disabled"
+      }
+    },
+    {
+      "command": "npm run sites:verify:catalog",
+      "status": "passed",
+      "coverage": {
+        "origin": "https://med250-rwanda.ikanisa.chatgpt.site",
+        "routes": "10/10 passed",
+        "release_revision_exposed": false
+      }
+    },
+    {
+      "command": "npm run cloudflare:check:production",
+      "status": "passed",
+      "coverage": {
+        "production_build_checks": "3/3 passed",
+        "canonical_origin": "https://med-250.com",
+        "production_worker_dry_run": "passed"
+      }
+    }
+  ],
+  "known_non_strict_warnings": {
+    "duplicate_register_pending": 51,
+    "product_content_pending": 72,
+    "source_authority_pending": true
+  },
+  "current_readiness_snapshot": {
+    "production_ready": false,
+    "launch_gates_confirmed": 0,
+    "launch_gates_pending": 11,
+    "physical_uat_passed": 0,
+    "physical_uat_total": 12,
+    "rendered_audit_current_and_approved": false,
+    "live_origin": "https://med-250.com",
+    "expected_release_revision": "8ca3f6dc79f57f89c7e3d4b221a357b4fba7c49f",
+    "observed_live_release_revision": "468a3003e3b27c0f42a4ee089c8dae38028c1740",
+    "exact_revision_live_check": "failed_correctly"
+  },
+  "limitations": [
+    "This record is automated technical evidence and is not human approval.",
+    "It does not prove physical-device UAT, assistive-technology UAT, or a rendered audit on the candidate revision.",
+    "It does not prove that the hardening migration or Edge Function is deployed.",
+    "It does not prove production backend contract or operational health.",
+    "It does not prove that candidate revision 8ca3f6dc79f57f89c7e3d4b221a357b4fba7c49f is live.",
+    "The direct production Worker was separately observed serving older revision 468a3003e3b27c0f42a4ee089c8dae38028c1740."
+  ]
+}
