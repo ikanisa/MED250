@@ -15,6 +15,9 @@
     "product_content_pending_entries": 72,
     "product_content_blocking_corrections": 0,
     "physical_uat_pending_scenarios": 12,
+    "rendered_audit_passed_scenarios": 16,
+    "rendered_audit_current_revision": false,
+    "rendered_audit_strict_valid": false,
     "prepared_handoff_artifacts": 15,
     "required_handoff_artifacts": 15
   },
@@ -138,11 +141,40 @@
         "Do not infer missing clinical facts or approve a source exception without authoritative Rwanda FDA evidence.",
         "A correction-required decision remains production-blocking until the source is corrected and the packet is regenerated."
       ]
+    },
+    "rendered_production_audit": {
+      "owner": "Named MED+250 QA owner",
+      "artifact": "data/audit-browser-evidence.json",
+      "valid": false,
+      "status": "pending",
+      "execution_status": "completed_awaiting_approval",
+      "origin": "https://med250.gikundiro.com",
+      "required_origin": "https://med-250.com",
+      "evidence_release_revision": "5ef50a296941056bd17e614dff7b35290742f50a",
+      "current_release_revision": "37ad00fb20d47dcf66cc13fd40e94262f747a3a5",
+      "release_revision_current": false,
+      "passed_scenarios": 16,
+      "required_scenarios": 16,
+      "capture_count": 56,
+      "blocker": "The prior 16-scenario rendered audit is historical. Rerun every governed desktop/mobile scenario on med-250.com against the exact candidate revision, bind fresh deployment and catalogue receipts, and obtain named QA approval.",
+      "commands": [
+        "npm run deployment:verify -- --url https://med-250.com --mode live --expected-revision <exact-lowercase-40-character-git-sha>",
+        "npm run catalogue:verify:live",
+        "npm run audit:browser-evidence:verify",
+        "npm run audit:browser-evidence:verify:live"
+      ],
+      "safety_rules": [
+        "Do not relabel historical med250.gikundiro.com screenshots or receipts as med-250.com evidence.",
+        "Do not approve browser evidence captured against a different Git revision from the deployed candidate.",
+        "Retain only privacy-safe screenshots and receipts with no customer, pharmacy-login, prescription, credential, token, or precise-location data.",
+        "Only a named QA owner can supply the final rendered-production approval."
+      ]
     }
   },
   "instructions": [
     "Close source authority before production approval; it is a release prerequisite even though it is not one of the eleven operational launch gates.",
     "Complete all source-bound product-content decisions and corrections before production approval.",
+    "Rerun and approve the complete rendered production audit on med-250.com for the exact candidate revision; historical-domain evidence cannot close this prerequisite.",
     "Work through gates in closure_order unless an accountable owner explicitly changes the sequence.",
     "Complete row-level reviews and physical UAT before attempting final live release approval.",
     "After every completed artifact, run npm run launch:evidence:verify and npm run launch:go-live:status.",
@@ -372,8 +404,8 @@
           {
             "type": "deployment_receipt",
             "reference": "docs/launch/evidence/security-hardening-deployment-pending-2026-07-24.json",
-            "sha256": "b1c330e93c223bcd660e32690eb728967291989c36b61de852a416d35c03d7c1",
-            "byte_length": 2264,
+            "sha256": "9bed13cdc9dedd90fd6e20cfb4dfed80dd7c3834bd1bcb767622c3770eb93e00",
+            "byte_length": 2303,
             "template_valid": true,
             "unresolved_check_count": 3,
             "completion_instruction_count": 5
@@ -381,8 +413,8 @@
           {
             "type": "test_record",
             "reference": "docs/launch/evidence/security-hardening-test-pending-2026-07-24.json",
-            "sha256": "0da8f88be92c7ecac0629b884f63b320b2c0883df5c1ebd5097b8cf00e2a59cd",
-            "byte_length": 2102,
+            "sha256": "4af09adcd740855a7bc45609b8f41903970bfae568d78b1ea27bf968a42998f1",
+            "byte_length": 2091,
             "template_valid": true,
             "unresolved_check_count": 3,
             "completion_instruction_count": 4
@@ -445,8 +477,8 @@
           {
             "type": "deployment_receipt",
             "reference": "docs/launch/evidence/edge-functions-deployment-pending-2026-07-24.json",
-            "sha256": "04a58366774528d8033219aad14fbac563130886d63514fc8a428d5e35b34d78",
-            "byte_length": 1854,
+            "sha256": "074783611969cd1eeea6971e3445080b0e5dbc52c5c1a60d0f71ae412b163ee2",
+            "byte_length": 2111,
             "template_valid": true,
             "unresolved_check_count": 2,
             "completion_instruction_count": 4
@@ -454,8 +486,8 @@
           {
             "type": "test_record",
             "reference": "docs/launch/evidence/edge-functions-test-pending-2026-07-24.json",
-            "sha256": "3ec125296412774852c7803665237733c5577d6bcd236e8e05859aacd6ebf541",
-            "byte_length": 2074,
+            "sha256": "206586750238d636a761f8898d20b66320cc064fca0ad11b43bb02dd48ed26fd",
+            "byte_length": 2085,
             "template_valid": true,
             "unresolved_check_count": 3,
             "completion_instruction_count": 3
@@ -714,17 +746,17 @@
           {
             "type": "account_verification",
             "reference": "docs/launch/evidence/cloudflare-account-verification-pending-2026-07-16.json",
-            "sha256": "acab00848593ff22ca094bc934151b63f91bf2737607183133b744493d4dcb62",
-            "byte_length": 2172,
+            "sha256": "8a70caf4884423b18f41dda8338162d5a3c70d0fd17d1034033c097e47628564",
+            "byte_length": 2917,
             "template_valid": true,
-            "unresolved_check_count": 2,
-            "completion_instruction_count": 0
+            "unresolved_check_count": 5,
+            "completion_instruction_count": 5
           },
           {
             "type": "signed_approval",
             "reference": "docs/launch/evidence/cloudflare-account-approval-pending-2026-07-16.json",
-            "sha256": "a98fb0e9eda526e4efb9ffb24bb71130291a0c4a46b2e638d0e5c9dbcfe92307",
-            "byte_length": 3731,
+            "sha256": "19a47da5dc7222f1d9122b0ff4bdc53dc7b46c19868c99bbb31fcfe0e6e456f0",
+            "byte_length": 3707,
             "template_valid": true,
             "unresolved_check_count": 7,
             "completion_instruction_count": 6
@@ -770,7 +802,7 @@
       "current_status": "pending",
       "readiness": "stale_release_evidence",
       "closure_focus": "Review the fresh live domain evidence and record infrastructure-owner approval.",
-      "acceptance": "med250.gikundiro.com resolves through the intended Cloudflare account, TLS is healthy, the Worker custom-domain route is attached and the deployment verifier passes in live mode.",
+      "acceptance": "med-250.com resolves through the intended Cloudflare account, TLS is healthy, the Worker custom-domain route is attached and the deployment verifier passes in live mode against the exact approved release revision.",
       "evidence": {
         "required_types": [
           "domain_verification",

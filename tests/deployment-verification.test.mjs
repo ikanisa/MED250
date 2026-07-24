@@ -239,6 +239,10 @@ test("keeps preview and production Workers isolated behind manual protected depl
   assert.match(packageJson.scripts["release:check:live"], /npm run test:production/);
   assert.match(packageJson.scripts["release:check:live"], /npm run launch:go-live:status/);
   assert.match(packageJson.scripts["release:check:live"], /^npm run data:source-authority:verify:strict/);
+  assert.match(packageJson.scripts["release:check:live"], /npm run audit:browser-evidence:verify:live/);
+  assert.match(packageJson.scripts["release:check:live"], /npm run localization:verify/);
+  assert.match(packageJson.scripts["release:check:live"], /npm run test:sites:catalog/);
+  assert.match(packageJson.scripts["release:check:live"], /npm run sites:verify:catalog/);
   assert.match(packageJson.scripts["release:check:live"], /wrangler deploy --env production --dry-run --strict/);
   assert.match(packageJson.scripts["deploy:live"], /wrangler deploy --env production --keep-vars --strict/);
   assert.match(packageJson.scripts["cloudflare:check:production"], /wrangler deploy --env production --dry-run --strict/);
@@ -251,6 +255,10 @@ test("keeps preview and production Workers isolated behind manual protected depl
   assert.match(deployment, /environment: med250-production/);
   assert.match(deployment, /DEPLOY MED250 LIVE/);
   assert.match(deployment, /npm run uat:verify:live/);
+  assert.match(deployment, /npm run audit:browser-evidence:verify:live/);
+  assert.match(deployment, /npm run localization:verify/);
+  assert.match(deployment, /npm run test:sites:catalog/);
+  assert.match(deployment, /npm run sites:verify:catalog/);
   assert.match(deployment, /npm run backend:verify[\s\S]*npm run backend:verify:description-reviewer[\s\S]*npm run ops:health:strict/);
   assert.match(deployment, /SUPABASE_SECRET_KEY:[^\n]*secrets\.SUPABASE_SECRET_KEY/);
   assert.match(deployment, /MED250_ADMIN_TOKEN:[^\n]*secrets\.MED250_ADMIN_TOKEN/);

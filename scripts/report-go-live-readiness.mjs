@@ -15,6 +15,10 @@ import { validateLaunchEvidence } from "./validate-launch-evidence.mjs";
 import { validatePhysicalUat } from "./validate-physical-uat.mjs";
 import { assessSourceAuthorityDecision } from "./source-authority-decision.mjs";
 import {
+  canonicalProductionOrigin,
+  validateAuditBrowserEvidence,
+} from "./validate-audit-browser-evidence.mjs";
+import {
   currentGitRevision,
   releaseBindingsForManifest,
 } from "./launch-release-bindings.mjs";
@@ -88,6 +92,7 @@ export async function buildGoLiveReadinessReport() {
     physicalUat,
     duplicateRegister,
     productContentReview,
+    auditBrowserEvidence,
     sourceAuthorityDecision,
   ] = await Promise.all([
     loadJson("data/launch-evidence.json"),
@@ -95,6 +100,7 @@ export async function buildGoLiveReadinessReport() {
     loadJson("data/physical-device-uat.json"),
     assessDuplicateRegister(),
     assessCurrentProductContentReview({ strict: true }),
+    loadJson("data/audit-browser-evidence.json"),
     loadJson("data/source-authority-decision.json"),
   ]);
   const sourceAuthority = await assessSourceAuthorityDecision(sourceAuthorityDecision, { strict: true });
@@ -103,6 +109,10 @@ export async function buildGoLiveReadinessReport() {
   const launchStrict = validateLaunchEvidence(manifest, { strict: true });
   const physicalStrict = validatePhysicalUat(physicalUat, { strict: true });
   const currentReleaseRevision = currentGitRevision();
+  const renderedProductionAudit = validateAuditBrowserEvidence(auditBrowserEvidence, {
+    strict: true,
+    currentReleaseRevision,
+  });
   const releaseBindings = await releaseBindingsForManifest(manifest, { currentRevision: currentReleaseRevision });
   const gates = gateRows(manifest, handoff, releaseBindings);
   const readinessCounts = gates.reduce((counts, gate) => {
@@ -118,6 +128,7 @@ export async function buildGoLiveReadinessReport() {
       && duplicateRegister.valid
       && productContentReview.valid
       && physicalStrict.valid
+      && renderedProductionAudit.valid
       && !(readinessCounts.stale_release_evidence ?? 0),
     sourceControl: {
       currentReleaseRevision,
@@ -173,6 +184,23 @@ export async function buildGoLiveReadinessReport() {
       statusCounts: physicalStrict.statusCounts,
       errorCount: physicalStrict.errors.length,
     },
+    renderedProductionAudit: {
+      valid: renderedProductionAudit.valid,
+      status: auditBrowserEvidence.status ?? null,
+      executionStatus: auditBrowserEvidence.execution_status ?? null,
+      origin: auditBrowserEvidence.origin ?? null,
+      canonicalOrigin: canonicalProductionOrigin,
+      releaseRevision: auditBrowserEvidence.release_revision ?? null,
+      currentReleaseRevision,
+      releaseRevisionCurrent: Boolean(
+        currentReleaseRevision
+        && auditBrowserEvidence.release_revision === currentReleaseRevision
+      ),
+      scenarioCount: renderedProductionAudit.scenarioCount,
+      captureCount: renderedProductionAudit.captureCount,
+      statusCounts: renderedProductionAudit.statusCounts,
+      errorCount: renderedProductionAudit.errors.length,
+    },
     handoff: {
       gateCount: handoff.gate_count,
       missingEvidenceArtifactCount: handoff.missing_evidence_artifact_count,
@@ -194,6 +222,7 @@ function printText(report) {
   console.log(`Duplicate register: ${report.duplicateRegister.decisionCounts.pending} pending, ${report.duplicateRegister.decisionCounts.accepted_source_duplicate} accepted, ${report.duplicateRegister.decisionCounts.blocked_source_correction} blocked`);
   console.log(`Product content: ${report.productContentReview.pendingCount} pending, ${report.productContentReview.blockingCorrectionCount} correction-required`);
   console.log(`Physical UAT: ${report.physicalUat.statusCounts.passed}/${report.physicalUat.scenarioCount} scenarios passed`);
+  console.log(`Rendered production audit: ${report.renderedProductionAudit.statusCounts.passed}/${report.renderedProductionAudit.scenarioCount} scenarios passed; current origin/revision and approval: ${report.renderedProductionAudit.valid ? "yes" : "no"}`);
   console.log(`Prepared handoff artifacts: ${report.handoff.preparedPendingArtifactCount}/${report.handoff.missingEvidenceArtifactCount}`);
   for (const gate of report.gates) {
     const missing = gate.missingEvidenceTypes.length ? gate.missingEvidenceTypes.join(", ") : "none";

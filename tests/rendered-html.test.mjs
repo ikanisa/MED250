@@ -1103,7 +1103,9 @@ test("uses WhatsApp Cloud OTP only for pharmacy portal access", async () => {
   assert.match(shared, /WHATSAPP_TEMPLATE_URL_BUTTON_INDEX/);
   assert.match(shared, /crypto\.getRandomValues/);
   assert.match(shared, /from\("dawanear_pharmacy_contacts"\)/);
-  assert.match(shared, /https:\/\/med250-rwanda\.ikanisa\.chatgpt\.site/);
+  assert.match(shared, /https:\/\/med-250\.com/);
+  assert.doesNotMatch(shared, /https:\/\/med250\.gikundiro\.com/);
+  assert.doesNotMatch(shared, /https:\/\/med250-rwanda\.ikanisa\.chatgpt\.site/);
   const manifest = JSON.parse(contactManifest);
   assert.equal(manifest.roster_pdfs_processed, 11);
   assert.equal(manifest.matched_contact_rows, 288);

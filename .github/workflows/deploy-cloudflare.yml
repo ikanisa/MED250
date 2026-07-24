@@ -110,7 +110,7 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Validate production attestations and governed sources
-        run: npm run release:preflight:live && npm run data:duplicates:verify -- --strict && npm run uat:verify:live
+        run: npm run data:source-authority:verify:strict && npm run release:preflight:live && npm run data:duplicates:verify -- --strict && npm run data:content-review:verify -- --strict && npm run uat:verify:live && npm run audit:browser-evidence:verify:live && npm run launch:go-live:status
       - name: Verify privileged production backend
         env:
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
@@ -120,7 +120,7 @@ jobs:
           npm run backend:verify:description-reviewer -- --product-id "$MED250_DESCRIPTION_REVIEWER_PROBE_PRODUCT_ID" --expected-updated-at "$MED250_DESCRIPTION_REVIEWER_PROBE_EXPECTED_UPDATED_AT"
           npm run ops:health:strict
       - name: Run unprivileged production release checks
-        run: npm run data:source-authority:verify:strict && npm run lint && npm run data:validate && npm run data:quality && npm run test:preview && npm run test:production && npm run performance:budget && wrangler deploy --env production --dry-run --strict
+        run: npm run data:source-authority:verify:strict && npm run lint && npm run data:validate && npm run data:quality && npm run localization:verify && npm run test:sites:catalog && npm run sites:verify:catalog && npm run test:preview && npm run test:production && npm run performance:budget && wrangler deploy --env production --dry-run --strict
       - name: Verify source-bound live catalogue
         run: npm run catalogue:verify:live
       - name: Deploy production Worker

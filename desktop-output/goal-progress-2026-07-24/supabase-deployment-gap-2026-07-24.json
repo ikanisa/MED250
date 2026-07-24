@@ -1,0 +1,53 @@
+{
+  "schema_version": "1",
+  "classification": "read-only deployment-gap snapshot; execution aid only, not deployment evidence or approval",
+  "observed_at": "2026-07-24T12:18:16+02:00",
+  "recorded_by": "Codex release evidence preparer",
+  "management_access": {
+    "configured_shared_project_visible": true,
+    "project_status": "ACTIVE_HEALTHY",
+    "med250_schema_present": true,
+    "isolated_staging_target_verified": false,
+    "staging_branch_listing_succeeded": false,
+    "aggregate_contract_query_succeeded": false,
+    "aggregate_contract_query_outcome": "management connector timed out; no result was accepted as evidence",
+    "production_change_authorized": false
+  },
+  "migration_gap": {
+    "latest_observed_med250_migration_version": "20260718134000",
+    "required_candidate_version": "20260723120000",
+    "required_candidate_name": "marketplace_go_live_hardening",
+    "required_candidate_sha256": "b5b0b8abf07c921ab36f08553e4cef73dd6cf84a0ff111236cc9a3190ed42e15",
+    "candidate_observed_in_remote_migration_history": false
+  },
+  "edge_function_gap": {
+    "function": "dawanear-pharmacy-verify-otp",
+    "observed_remote_version": 12,
+    "remote_source_uses_reviewed_identity_binding_rpc": false,
+    "remote_source_rejects_duplicate_phone_binding_before_identity_change": false,
+    "remote_shared_origin_uses_retired_hostname": true,
+    "candidate_entrypoint_sha256": "9047fb567051efc8f2ec43ae8c27751e33a3f13b10463723641585ae1737e9a9",
+    "candidate_shared_auth_sha256": "c5e689207b035706f8cb63cbc5af690f489995b3afc8afaef4a1c2cdd37143be",
+    "candidate_bundle_sha256": "c6674d06e29eac14def4aa9a2088a5dc20802a416c83c29bd7d410d5c3c7861f",
+    "candidate_deployed": false
+  },
+  "required_owner_input": {
+    "owner": "Named MED+250 backend owner",
+    "decision": "Approve an isolated staging project or development branch and authorize the exact migration and Edge Function candidate for staging only.",
+    "production_boundary": "Do not apply the migration or deploy the function to the shared production project until staging negative tests, rollback, redacted evidence and explicit production approval are complete."
+  },
+  "next_actions": [
+    "Provide or authorize an isolated staging project or development branch.",
+    "Dry-run and apply only the exact candidate migration in staging.",
+    "Deploy the exact candidate Edge Function bundle in staging.",
+    "Execute the governed negative authorization, origin, concurrency, description-permission, image-hold, operational-health and rollback probes.",
+    "Retain redacted staging receipts and obtain named backend-owner approval.",
+    "Promote the same immutable artifacts only after every production prerequisite and launch gate is complete."
+  ],
+  "privacy": {
+    "contains_project_reference": false,
+    "contains_account_identifier": false,
+    "contains_credentials": false,
+    "contains_personal_data": false
+  }
+}

@@ -2,7 +2,7 @@
 
 - Classification: execution aid only; not evidence, approval, or production authorization
 - Prepared: 24 July 2026
-- Application release candidate: `c38ef94a78ad7402e8732bd56e660c4c64b23240`
+- Audited application-code revision: `c38ef94a78ad7402e8732bd56e660c4c64b23240`
 - Production origin: `https://med-250.com`
 - Public catalogue: Sites version 15 in `catalog` mode
 
@@ -13,8 +13,10 @@ catalogue build, dependency audits, performance budget, and automated
 regression suites pass. The direct production Worker still exposes revision
 `468a3003e3b27c0f42a4ee089c8dae38028c1740`, not the candidate.
 
-The remaining work requires accountable owners or MED+250 Supabase project
-access. GitHub billing is not part of this release path.
+The remaining work requires accountable owners and an approved isolated
+Supabase staging target. Read-only management access to the configured shared
+project is now available; it does not authorize production mutation. GitHub
+billing is not part of this release path.
 
 | Workstream | Accountable owner | Exact remaining input | Ready execution artifact |
 |---|---|---|---|
@@ -22,10 +24,11 @@ access. GitHub billing is not part of this release path.
 | Duplicate register | Named register data reviewer | 51 authoritative decisions | `duplicate-register-review-packet-2026-07-24.json` |
 | Product content | Named regulatory or clinical data reviewer | 72 authoritative decisions | `data/imports/product-content-review-pending-2026-07-18.json` |
 | Operations | Named MED+250 operations owner | Controlled GPS and WhatsApp review results | `operations-readiness-packet-2026-07-24.json` |
-| Backend | Named MED+250 backend owner | Accessible staging and production Supabase projects | Migration and Edge Function hashes below |
+| Backend | Named MED+250 backend owner | Approve an isolated staging target, staging execution and later production promotion | `supabase-deployment-gap-2026-07-24.json` and candidate hashes below |
 | Security | Named MED+250 security owner | Production Turnstile and rate-limit controlled tests and approval | `launch-evidence-handoff-2026-07-24.json` |
 | Privacy | Named MED+250 privacy owner | Signed prescription-retention decision | `launch-evidence-handoff-2026-07-24.json` |
 | Infrastructure | Named infrastructure owner | Least-privilege Cloudflare review and later exact-revision approval | `go-live-closure-board-2026-07-24.json` |
+| Rendered production audit | Named QA executor and QA owner | Rerun 16 desktop/mobile scenarios on `med-250.com` for the exact candidate revision and approve the privacy-safe evidence | `data/audit-browser-evidence.json` |
 | QA | Named QA executor and QA owner | 12 physical-device executions and approval | `physical-device-uat-packet-2026-07-24.json` |
 
 ## 1. Source authority
@@ -159,15 +162,25 @@ Acceptance: 72 reviewed, zero pending, zero correction-required.
 
 ## 4. Supabase hardening deployment
 
-The currently authenticated Supabase account does not contain the MED+250
-project. It lists only IKANISA, FANZONE, and FANAFRIKA. The backend owner must:
+Read-only management inspection now reaches the configured shared production
+project and confirms that the MED+250 schema is present. It also confirms:
 
-1. grant this operator access to an isolated MED+250 staging project;
-2. provide the staging project reference through the authenticated Supabase
-   CLI session, not in this repository;
-3. approve staging execution; and
-4. only later grant access to the MED+250 production project
-   `uskfnszcdqpcfrhjxitl`.
+- the remote migration history stops at MED+250 migration
+  `20260718134000`; candidate `20260723120000` is not deployed;
+- deployed `dawanear-pharmacy-verify-otp` version 12 still uses the
+  pre-hardening identity and membership path;
+- its deployed shared origin list still contains the retired hostname; and
+- no isolated staging project or development branch has been verified.
+
+The privacy-safe snapshot is
+`supabase-deployment-gap-2026-07-24.json`. Management visibility is not
+deployment approval. The backend owner must:
+
+1. approve or provide an isolated MED+250 staging project or development branch;
+2. authorize the exact migration and Edge Function bundle for staging only;
+3. approve the staging negative-test and rollback results; and
+4. explicitly authorize promotion of the same immutable artifacts to the
+   shared production project only after every other prerequisite is complete.
 
 Exact candidate artifacts:
 
@@ -175,6 +188,11 @@ Exact candidate artifacts:
   SHA-256 `b5b0b8abf07c921ab36f08553e4cef73dd6cf84a0ff111236cc9a3190ed42e15`.
 - Edge Function: `supabase/functions/dawanear-pharmacy-verify-otp/index.ts`;
   SHA-256 `9047fb567051efc8f2ec43ae8c27751e33a3f13b10463723641585ae1737e9a9`.
+- Shared authentication boundary:
+  `supabase/functions/_shared/dawanear-pharmacy-auth.ts`; SHA-256
+  `c5e689207b035706f8cb63cbc5af690f489995b3afc8afaef4a1c2cdd37143be`.
+- Exact two-file function bundle SHA-256:
+  `c6674d06e29eac14def4aa9a2088a5dc20802a416c83c29bd7d410d5c3c7861f`.
 - Backend invariant verifier: `scripts/backend-contract-invariants.mjs`;
   SHA-256 `6e9de5ee9be424975d6f73b10d0b765e7dfa4421c9eac1f67f6b8774386f19bd`.
 
@@ -206,7 +224,29 @@ tests for:
 Do not promote to production until the staging receipts are approved and every
 other production gate is ready.
 
-## 5. Physical-device UAT — 12 scenarios
+## 5. Rendered production audit — 16 scenarios
+
+The retained 16-scenario, 56-capture browser run is historical evidence from
+`med250.gikundiro.com` at revision
+`5ef50a296941056bd17e614dff7b35290742f50a`. It must not be relabelled or
+approved as evidence for `med-250.com`.
+
+After the exact candidate revision is deployed, rerun every governed desktop
+and mobile scenario on `https://med-250.com`, capture new privacy-safe
+screenshots, bind fresh deployment and catalogue receipts, and obtain named QA
+approval. Then run:
+
+```sh
+npm run audit:browser-evidence:verify
+npm run audit:browser-evidence:verify:live
+```
+
+Acceptance: the strict verifier reports 16/16 scenarios and 56/56 captures
+passed, the evidence origin is `https://med-250.com`, the evidence and live
+deployment revisions equal the exact candidate Git SHA, and named QA approval
+is present.
+
+## 6. Physical-device UAT — 12 scenarios
 
 Execution packet:
 
@@ -229,7 +269,7 @@ npm run uat:evidence:build -- --date YYYY-MM-DD
 Acceptance: 12 passed, zero pending, failed, blocked, or invalid; named QA-owner
 approval recorded with timezone-qualified timestamps.
 
-## 6. Eleven launch gates
+## 7. Eleven launch gates
 
 Current-revision workbooks:
 
@@ -263,7 +303,7 @@ npm run release:check:live
 
 These commands must report 11 confirmed gates and `productionReady: true`.
 
-## 7. Exact-revision production verification
+## 8. Exact-revision production verification
 
 Only after all prior sections pass, deploy the approved immutable application
 revision through the local free-only release path. GitHub must remain a free

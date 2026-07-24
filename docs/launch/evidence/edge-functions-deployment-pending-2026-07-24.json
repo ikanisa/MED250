@@ -5,7 +5,7 @@
   "evidence_type": "deployment_receipt",
   "status": "pending",
   "title": "Revised pharmacy OTP Edge Function deployment",
-  "summary": "Owner-ready receipt for controlled staging and production deployment of the revised pharmacy OTP verifier. The reviewed source is complete but the authenticated Supabase account cannot access the MED+250 project.",
+  "summary": "Owner-ready receipt for controlled staging and production deployment of the revised pharmacy OTP verifier. Read-only access confirms the deployed version is pre-hardening, but no isolated staging target or deployment approval is established.",
   "recorded_at": "2026-07-24T11:20:00+02:00",
   "recorded_by": "MED+250 release readiness review",
   "recorded_role": "Release evidence preparer",
@@ -14,12 +14,12 @@
     {
       "name": "Candidate function digest",
       "status": "passed",
-      "detail": "The reviewed dawanear-pharmacy-verify-otp source SHA-256 is 9047fb567051efc8f2ec43ae8c27751e33a3f13b10463723641585ae1737e9a9."
+      "detail": "The reviewed entrypoint SHA-256 is 9047fb567051efc8f2ec43ae8c27751e33a3f13b10463723641585ae1737e9a9, the shared authentication boundary SHA-256 is c5e689207b035706f8cb63cbc5af690f489995b3afc8afaef4a1c2cdd37143be, and the deterministic two-file bundle SHA-256 is c6674d06e29eac14def4aa9a2088a5dc20802a416c83c29bd7d410d5c3c7861f."
     },
     {
       "name": "Controlled staging deployment",
       "status": "blocked",
-      "detail": "The authenticated Supabase account cannot access a MED+250 staging project."
+      "detail": "No isolated MED+250 staging project or development branch has been verified or approved for mutation."
     },
     {
       "name": "Approved production deployment",

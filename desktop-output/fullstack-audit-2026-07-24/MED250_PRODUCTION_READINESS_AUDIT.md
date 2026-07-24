@@ -13,7 +13,7 @@ Release decision: **NO-GO**
 The application code, catalogue-mode build, production-mode build, dependency
 set, localization inventory, performance budget, SEO implementation, responsive
 navigation, and core marketplace interactions are technically release-capable.
-The hardening candidate passes 370 Node tests, 171 Python tests with one
+The hardening candidate passes 372 Node tests, 171 Python tests with one
 intentional skip, 57 Sites catalogue/rendering tests, three production build
 tests, lint, catalogue validation, localization validation, two dependency
 audits, and the Cloudflare production dry run.
@@ -31,9 +31,14 @@ blockers**:
    release-bound evidence stale;
 5. all 12 physical-device UAT scenarios require execution and named QA
    approval;
-6. the security-hardening migration and revised pharmacy OTP Edge Function
-   cannot be deployed because the connected Supabase account cannot access the
-   MED+250 project.
+6. read-only management access now reaches the configured shared Supabase
+   production project, but no isolated staging target or staging approval is
+   established; the July 23 hardening migration is absent and the deployed
+   pharmacy OTP verifier is still the pre-hardening implementation;
+7. the completed 16-scenario rendered audit is historical evidence from the
+   retired `med250.gikundiro.com` origin and revision `5ef50a296941056bd17e614dff7b35290742f50a`;
+   it requires a fresh run on `med-250.com` for the exact candidate revision
+   and named QA approval.
 
 GitHub Actions billing is deliberately outside the release path. GitHub is
 used only as a free source repository and the local release gate is
@@ -63,7 +68,8 @@ verified to omit the held mismatched Paracetamol image.
 | Product-content review | **BLOCKED** | 72/72 entries remain `pending` | Named regulatory/clinical reviewer records all source-bound decisions |
 | Launch authority | **BLOCKED** | 0/11 gates confirmed; ten prepared-evidence-pending, one stale, zero evidence-complete gates ready for approval | Every gate has complete current evidence, named owner approval, timezone-qualified timestamps, and exact release binding where required |
 | Physical UAT | **BLOCKED** | 0/12 scenarios passed | Execute the committed matrix on physical devices and attach redacted evidence and named approval |
-| Supabase hardening | **BLOCKED** | Migration and Edge Function are tested locally; target project is unavailable to the connected account | Grant project access, deploy to staging, execute negative authorization probes, approve, then promote the same immutable revision |
+| Rendered production audit | **BLOCKED / HISTORICAL** | 16/16 scenarios and 56 captures exist, but they belong to the retired hostname and revision `5ef50a…` and have no named approval | Rerun on `med-250.com` for the exact candidate revision, bind fresh deployment/catalogue receipts and obtain named QA approval |
+| Supabase hardening | **BLOCKED** | Read-only access reaches the shared project; migration `20260723120000` is absent, deployed OTP version 12 is pre-hardening, and no isolated staging target is verified | Approve an isolated staging target, deploy and negatively test the exact candidate there, approve rollback, then explicitly authorize production promotion |
 | GitHub source hosting | **PASS / FREE-ONLY** | Candidate branch is pushed; paid hosted CI is not a release dependency | Keep automatic workflows disabled and use the local immutable release evidence |
 | Production DNS/TLS | **RESOLVED** | Cloudflare A answers, HTTPS route checks, robots, sitemap, and security headers respond | Refresh immutable deployment evidence after the audited revision is deployed |
 | Application build | **PASS** | Production build and Wrangler strict dry run pass | Preserve exact source and environment mode through deployment |
@@ -117,7 +123,7 @@ verified to omit the held mismatched Paracetamol image.
 
 | Gate | Result |
 |---|---:|
-| Node application and integration suite | **370/370 passed** |
+| Node application and integration suite | **372/372 passed** |
 | Python suite | **171 passed, 1 intentionally skipped** |
 | Source-authority preview verification | **Passed; pending owner decision remains visible** |
 | Source-authority strict verification | **Failed correctly before credentials or deployment: owner authority pending** |
@@ -272,7 +278,9 @@ closed after the P0 governance blockers are resolved:
 
 ## Exact release path
 
-1. Grant MED+250 Supabase project access.
+1. Approve or provide an isolated MED+250 Supabase staging target; read-only
+   access to the configured shared production project is already available but
+   does not authorize mutation.
 2. Deploy the migration and Edge Function to staging.
 3. Execute negative tenant, revoked-authority, public-description, and
    mismatched-media probes; retain redacted deployment receipts.

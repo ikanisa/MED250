@@ -21,6 +21,8 @@ test("keeps all eleven production gates in a structurally valid evidence registr
   assert.equal(result.gateCount, 11);
   assert.deepEqual(Object.keys(manifest.gates).sort(), [...expectedLaunchGateNames].sort());
   assert.deepEqual(result.statusCounts, { pending: 11, confirmed: 0, rejected: 0, invalid: 0 });
+  assert.match(manifest.gates.MED250_GATE_DOMAIN_DNS_VERIFIED.acceptance, /med-250\.com/);
+  assert.doesNotMatch(manifest.gates.MED250_GATE_DOMAIN_DNS_VERIFIED.acceptance, /med250\.gikundiro\.com/);
 });
 
 test("blocks production while any launch evidence remains pending", () => {

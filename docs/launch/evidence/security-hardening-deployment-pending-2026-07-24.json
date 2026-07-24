@@ -5,7 +5,7 @@
   "evidence_type": "deployment_receipt",
   "status": "pending",
   "title": "MED+250 2026-07-23.1 hardening deployment",
-  "summary": "Owner-ready receipt for controlled staging and production deployment of the current marketplace hardening migration. The migration is tested locally but has not been deployed because the authenticated Supabase account cannot access the MED+250 project.",
+  "summary": "Owner-ready receipt for controlled staging and production deployment of the current marketplace hardening migration. Read-only access confirms the candidate is absent from the shared project, but no isolated staging target or deployment approval is established.",
   "recorded_at": "2026-07-24T11:20:00+02:00",
   "recorded_by": "MED+250 release readiness review",
   "recorded_role": "Release evidence preparer",
@@ -19,7 +19,7 @@
     {
       "name": "Controlled staging deployment",
       "status": "blocked",
-      "detail": "The authenticated Supabase account cannot access a MED+250 staging project."
+      "detail": "No isolated MED+250 staging project or development branch has been verified or approved for mutation."
     },
     {
       "name": "Staging rollback",
@@ -38,7 +38,7 @@
   "environment": null,
   "release_identifier": null,
   "completion_instructions": [
-    "Grant the release operator access to an isolated MED+250 staging project without storing credentials in the repository.",
+    "Approve or provide an isolated MED+250 staging project or development branch without storing credentials in the repository.",
     "Dry-run and deploy the exact migration whose SHA-256 is recorded above.",
     "Execute all negative authorization, privilege, locking, image-hold, backend-contract, operational-health, and rollback checks.",
     "After accountable staging approval, repeat on production for the exact immutable release and retain redacted provider receipts.",

@@ -5,7 +5,7 @@
   "evidence_type": "test_record",
   "status": "pending",
   "title": "Revised pharmacy OTP Edge Function deployed tests",
-  "summary": "Owner-ready record for the deployed revised pharmacy OTP verification boundary. Local integration tests pass; staging and production probes require MED+250 project access and deployment.",
+  "summary": "Owner-ready record for the deployed revised pharmacy OTP verification boundary. Local integration tests pass; staging and production probes await an approved isolated staging target and deployment.",
   "recorded_at": "2026-07-24T11:20:00+02:00",
   "recorded_by": "MED+250 release readiness review",
   "recorded_role": "Release evidence preparer",

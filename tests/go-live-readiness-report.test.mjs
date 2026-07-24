@@ -53,6 +53,26 @@ test("reports go-live readiness without promoting pending gates", async () => {
   assert.ok(domain.releaseRevisionBindings.every((binding) => binding.observedReleaseRevision === "37d8c1c0e0c8ac2d15eea436d2f9037c20e2814c"));
   assert.equal(report.duplicateRegister.decisionCounts.pending, 51);
   assert.equal(report.physicalUat.statusCounts.pending, 12);
+  assert.deepEqual(report.renderedProductionAudit, {
+    valid: false,
+    status: "pending",
+    executionStatus: "completed_awaiting_approval",
+    origin: "https://med250.gikundiro.com",
+    canonicalOrigin: "https://med-250.com",
+    releaseRevision: "5ef50a296941056bd17e614dff7b35290742f50a",
+    currentReleaseRevision: report.sourceControl.currentReleaseRevision,
+    releaseRevisionCurrent: false,
+    scenarioCount: 16,
+    captureCount: 56,
+    statusCounts: {
+      pending: 0,
+      passed: 16,
+      failed: 0,
+      blocked: 0,
+      invalid: 0,
+    },
+    errorCount: 6,
+  });
   assert.equal(report.handoff.preparedPendingArtifactCount, 15);
   assert.equal(report.handoff.unpreparedEvidenceArtifactCount, 0);
 });

@@ -131,7 +131,7 @@
       "owner": "MED+250 infrastructure owner",
       "required_evidence_types": ["domain_verification", "test_record"],
       "status": "pending",
-      "acceptance": "med250.gikundiro.com resolves through the intended Cloudflare account, TLS is healthy, the Worker custom-domain route is attached and the deployment verifier passes in live mode.",
+      "acceptance": "med-250.com resolves through the intended Cloudflare account, TLS is healthy, the Worker custom-domain route is attached and the deployment verifier passes in live mode against the exact approved release revision.",
       "evidence": [
         {
           "type": "domain_verification",

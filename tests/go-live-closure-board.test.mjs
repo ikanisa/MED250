@@ -38,6 +38,14 @@ test("builds an owner closure board without promoting pending gates", () => {
   assert.equal(board.summary.stale_release_evidence_gates, 1);
   assert.equal(board.summary.duplicate_register_pending_groups, 51);
   assert.equal(board.summary.physical_uat_pending_scenarios, 12);
+  assert.equal(board.summary.rendered_audit_passed_scenarios, 16);
+  assert.equal(board.summary.rendered_audit_current_revision, false);
+  assert.equal(board.summary.rendered_audit_strict_valid, false);
+  assert.equal(board.prerequisites.rendered_production_audit.valid, false);
+  assert.equal(board.prerequisites.rendered_production_audit.required_origin, "https://med-250.com");
+  assert.equal(board.prerequisites.rendered_production_audit.release_revision_current, false);
+  assert.match(board.prerequisites.rendered_production_audit.blocker, /prior 16-scenario rendered audit is historical/);
+  assert.ok(board.prerequisites.rendered_production_audit.commands.includes("npm run audit:browser-evidence:verify:live"));
   assert.equal(board.summary.prepared_handoff_artifacts, 15);
   assert.equal(board.summary.required_handoff_artifacts, 15);
   assert.equal(board.gates.length, 11);
