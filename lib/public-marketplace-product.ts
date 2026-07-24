@@ -1,5 +1,6 @@
 import { cache } from "react";
 import type { CatalogueTaxonomyRow, Product } from "./dawanear-client";
+import { governPublicProductMedia, isPublicProductMediaHeld } from "./product-media-governance";
 
 type CatalogueRow = Record<string, unknown>;
 const PUBLIC_FETCH_TIMEOUT_MS = 8_000;
@@ -79,6 +80,12 @@ function mapPublicMarketplaceProduct(row: CatalogueRow, fallbackId: string): Pro
   const brand = text(row, "brand_name") || text(row, "generic_name") || id;
   const indicativePriceRwf = Math.max(0, Math.round(number(row, "indicative_price_rwf") || number(row, "price_min_rwf")));
 
+  const media = governPublicProductMedia(
+    id,
+    text(row, "image_url") || null,
+    textArray(row, "image_urls"),
+  );
+
   return {
     id,
     brand,
@@ -103,8 +110,8 @@ function mapPublicMarketplaceProduct(row: CatalogueRow, fallbackId: string): Pro
     indicativePriceBasis: text(row, "indicative_price_basis"),
     indicativePriceSourceUrl: text(row, "indicative_price_source_url") || null,
     indicativePriceUpdatedAt: text(row, "indicative_price_updated_at") || null,
-    imageUrl: text(row, "image_url") || null,
-    imageUrls: textArray(row, "image_urls"),
+    imageUrl: media.imageUrl,
+    imageUrls: media.imageUrls,
     description: text(row, "description") || null,
     descriptionSourceName: text(row, "description_source_name") || null,
     descriptionSourceUrl: httpsUrl(row, "description_source_url"),
@@ -131,7 +138,7 @@ export const getPublicCatalogueTaxonomy = cache(async function getPublicCatalogu
 
 export const getPublicProductImages = cache(async function getPublicProductImages(id: string): Promise<string[]> {
   const productId = id.trim();
-  if (!/^[A-Za-z0-9-]{1,80}$/.test(productId)) return [];
+  if (!/^[A-Za-z0-9-]{1,80}$/.test(productId) || isPublicProductMediaHeld(productId)) return [];
 
   const connection = publicSupabaseEndpoint("/rest/v1/dawanear_product_images");
   if (!connection) return [];

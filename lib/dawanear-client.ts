@@ -1,6 +1,7 @@
 import type { Session, User } from "@supabase/supabase-js";
 
 import { normalizeCatalogueText } from "./catalogue-search";
+import { governPublicProductMedia, isPublicProductMediaHeld } from "./product-media-governance";
 import {
   clearPharmacySession,
   customerSupabase,
@@ -585,6 +586,7 @@ export async function loadCustomerProfile(): Promise<CustomerProfile | null> {
     .maybeSingle();
   if (error) rethrow("Could not load your MED250 profile", error);
   if (!isRecord(data)) return null;
+
   return {
     userId: requiredString(data, "profile", "user_id"),
     whatsapp: nullableString(data, "whatsapp"),
@@ -675,6 +677,11 @@ function mapProduct(row: JsonRecord): Product {
   const min = indicativePriceRwf;
   const max = indicativePriceRwf;
   const defaultOrderable = !["expired", "withdrawn", "suspended"].includes(regulatoryStatus.toLowerCase());
+  const media = governPublicProductMedia(
+    id,
+    nullableString(row, "image_url", "imageUrl"),
+    stringArray(row, "image_urls", "imageUrls"),
+  );
 
   return {
     id,
@@ -702,8 +709,8 @@ function mapProduct(row: JsonRecord): Product {
     indicativePriceBasis: stringValue(row, "indicative_price_basis", "indicativePriceBasis"),
     indicativePriceSourceUrl: nullableString(row, "indicative_price_source_url", "indicativePriceSourceUrl"),
     indicativePriceUpdatedAt: nullableString(row, "indicative_price_updated_at", "indicativePriceUpdatedAt"),
-    imageUrl: nullableString(row, "image_url", "imageUrl"),
-    imageUrls: stringArray(row, "image_urls", "imageUrls"),
+    imageUrl: media.imageUrl,
+    imageUrls: media.imageUrls,
     description: nullableString(row, "description"),
     descriptionSourceName: nullableString(row, "description_source_name", "descriptionSourceName"),
     descriptionSourceUrl: nullableString(row, "description_source_url", "descriptionSourceUrl"),
@@ -764,7 +771,11 @@ export async function loadCatalogueProductsByIds(productIds: string[]): Promise<
  * source asset is enlarged into a featured visual.
  */
 export async function loadProductImagePresentation(productIds: string[]): Promise<ProductImagePresentation[]> {
-  const ids = [...new Set(productIds.map((id) => id.trim()).filter(Boolean))];
+  const ids = [...new Set(
+    productIds
+      .map((id) => id.trim())
+      .filter((id) => Boolean(id) && !isPublicProductMediaHeld(id)),
+  )];
   if (!ids.length) return [];
   if (ids.length > MAX_FEATURED_IMAGE_IDS) {
     throw new Error(`Featured image ranking accepts no more than ${MAX_FEATURED_IMAGE_IDS} products at once.`);
