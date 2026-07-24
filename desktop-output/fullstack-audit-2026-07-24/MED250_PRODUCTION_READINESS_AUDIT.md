@@ -13,7 +13,7 @@ Release decision: **NO-GO**
 The application code, catalogue-mode build, production-mode build, dependency
 set, localization inventory, performance budget, SEO implementation, responsive
 navigation, and core marketplace interactions are technically release-capable.
-The hardening candidate passes 367 Node tests, 171 Python tests with one
+The hardening candidate passes 370 Node tests, 171 Python tests with one
 intentional skip, 57 Sites catalogue/rendering tests, three production build
 tests, lint, catalogue validation, localization validation, two dependency
 audits, and the Cloudflare production dry run.
@@ -37,7 +37,11 @@ blockers**:
 
 GitHub Actions billing is deliberately outside the release path. GitHub is
 used only as a free source repository and the local release gate is
-authoritative.
+authoritative. The free-account requirement is permanent: no paid plan,
+Actions overage, paid runner, paid Marketplace app, paid storage, or other
+billable GitHub add-on is permitted for MED+250. Optional manual workflows
+require separate confirmation that both the account and remaining Actions
+allocation are free.
 
 The former DNS blocker is resolved. `med-250.com` resolves through Cloudflare,
 HTTPS is live, robots and sitemap respond, and production routes return HTTP
@@ -113,7 +117,7 @@ verified to omit the held mismatched Paracetamol image.
 
 | Gate | Result |
 |---|---:|
-| Node application and integration suite | **367/367 passed** |
+| Node application and integration suite | **370/370 passed** |
 | Python suite | **171 passed, 1 intentionally skipped** |
 | Source-authority preview verification | **Passed; pending owner decision remains visible** |
 | Source-authority strict verification | **Failed correctly before credentials or deployment: owner authority pending** |

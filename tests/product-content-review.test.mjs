@@ -10,6 +10,7 @@ import {
   DEFAULT_DATASET_PATH,
   DEFAULT_RECOVERED_VALIDATION_DATASET_PATH,
   applyProductContentReviewDecision,
+  assessCurrentProductContentReview,
   assessProductContentReview,
   buildProductContentReviewPacket,
   deriveProductContentReviewPopulation,
@@ -61,6 +62,18 @@ test("keeps the committed owner packet synchronized and pending without inventin
   assert.equal(result.blockingCorrectionCount, 0);
   assert.equal(result.decisionCounts.pending, 72);
   assert.equal(JSON.stringify(committed).includes('"recommendation"'), false);
+});
+
+test("keeps the current 72-entry review in the strict production-readiness result", async () => {
+  const result = await assessCurrentProductContentReview({
+    strict: true,
+    now: new Date("2026-07-24T12:00:00+02:00"),
+  });
+  assert.equal(result.valid, false);
+  assert.equal(result.pendingCount, 72);
+  assert.equal(result.blockingCorrectionCount, 0);
+  assert.equal(result.errors.filter((error) => /still pending/.test(error)).length, 72);
+  assert.equal(result.originalSourceRetentionSatisfied, false);
 });
 
 test("fails strict review until every owner decision is complete", () => {

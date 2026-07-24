@@ -21,10 +21,16 @@ test("builds an owner closure board without promoting pending gates", () => {
   assert.equal(board.production_ready, false);
   assert.equal(board.summary.gate_count, 11);
   assert.equal(board.summary.source_authority_production_authorized, false);
+  assert.equal(board.summary.product_content_pending_entries, 72);
+  assert.equal(board.summary.product_content_blocking_corrections, 0);
   assert.equal(board.prerequisites.source_authority.artifact, "data/source-authority-decision.json");
   assert.equal(board.prerequisites.source_authority.production_authorized, false);
   assert.match(board.prerequisites.source_authority.blocker, /exact original controlled bundle|bounded replacement decision/);
   assert.ok(board.prerequisites.source_authority.commands.includes("npm run data:source-authority:verify:strict"));
+  assert.equal(board.prerequisites.product_content_review.pending_entries, 72);
+  assert.equal(board.prerequisites.product_content_review.valid, false);
+  assert.match(board.prerequisites.product_content_review.blocker, /72 product-content decision/);
+  assert.ok(board.prerequisites.product_content_review.commands.includes("npm run data:content-review:verify -- --strict"));
   assert.equal(board.summary.confirmed_gates, 0);
   assert.equal(board.summary.approval_pending_gates, 0);
   assert.equal(board.summary.prepared_evidence_pending_gates, 10);
@@ -101,7 +107,10 @@ test("binds prepared-pending evidence to its current source digest", async () =>
 });
 
 test("keeps the closure board privacy-safe", () => {
-  const serialized = JSON.stringify(board).replaceAll(/"sha256":"[a-f0-9]{64}"/g, '"sha256":"redacted-digest"');
+  const serialized = JSON.stringify(board).replaceAll(
+    /"[^"]*sha256":"[a-f0-9]{64}"/g,
+    '"sha256":"redacted-digest"',
+  );
   assert.doesNotMatch(serialized, /(?:\+?250)?7\d{8}/);
   assert.doesNotMatch(serialized, /access[_-]?token|authorization:\s*bearer|password|service[_-]?role/i);
   assert.doesNotMatch(serialized, /\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}\\b/i);

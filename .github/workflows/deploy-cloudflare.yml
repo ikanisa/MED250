@@ -26,8 +26,9 @@ concurrency:
 jobs:
   validate-request:
     name: Validate deployment request
-    # GitHub Actions is optional and must never consume paid minutes.
-    if: ${{ vars.MED250_GITHUB_ACTIONS_FREE_TIER_CONFIRMED == 'true' }}
+    # GitHub Actions is optional. MED+250 never uses a billed GitHub account or
+    # paid Actions capacity, so both free-only confirmations are mandatory.
+    if: ${{ vars.MED250_GITHUB_FREE_ACCOUNT_CONFIRMED == 'true' && vars.MED250_GITHUB_ACTIONS_FREE_TIER_CONFIRMED == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:

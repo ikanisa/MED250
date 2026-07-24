@@ -12,6 +12,8 @@
     "missing_evidence_gates": 0,
     "stale_release_evidence_gates": 1,
     "duplicate_register_pending_groups": 51,
+    "product_content_pending_entries": 72,
+    "product_content_blocking_corrections": 0,
     "physical_uat_pending_scenarios": 12,
     "prepared_handoff_artifacts": 15,
     "required_handoff_artifacts": 15
@@ -116,10 +118,31 @@
         "Never store the restored private bundle path, credentials, or private source bytes in Git.",
         "Only the named MED+250 data owner can supply the authority decision and approved storage evidence."
       ]
+    },
+    "product_content_review": {
+      "owner": "Named regulatory or clinical data reviewer",
+      "artifact": "data/imports/product-content-review-pending-2026-07-18.json",
+      "valid": false,
+      "pending_entries": 72,
+      "blocking_corrections": 0,
+      "review_source_path": "outputs/019f66ce-d480-7a90-9bb7-ee6e417b5ce7/corrected/research/corrected-catalog-dataset-2026-07-15.json",
+      "review_source_sha256": "5000580eb85403a58de8e604bdd055b25b22958ae5755206913a070bcae31383",
+      "blocker": "72 product-content decision(s) remain pending and 0 correction-required decision(s) remain open.",
+      "commands": [
+        "npm run data:content-review:next",
+        "npm run data:content-review:decide -- --dataset <approved-source-dataset-path> <one-accountable-decision>",
+        "npm run data:content-review:verify -- --strict"
+      ],
+      "safety_rules": [
+        "Only a named regulatory or clinical data reviewer may make product-content decisions.",
+        "Do not infer missing clinical facts or approve a source exception without authoritative Rwanda FDA evidence.",
+        "A correction-required decision remains production-blocking until the source is corrected and the packet is regenerated."
+      ]
     }
   },
   "instructions": [
     "Close source authority before production approval; it is a release prerequisite even though it is not one of the eleven operational launch gates.",
+    "Complete all source-bound product-content decisions and corrections before production approval.",
     "Work through gates in closure_order unless an accountable owner explicitly changes the sequence.",
     "Complete row-level reviews and physical UAT before attempting final live release approval.",
     "After every completed artifact, run npm run launch:evidence:verify and npm run launch:go-live:status.",

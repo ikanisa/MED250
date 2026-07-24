@@ -6,6 +6,7 @@ import {
   deriveDuplicateGroups,
   parseCsv,
 } from "./import-data/verify-duplicate-register-review.mjs";
+import { assessCurrentProductContentReview } from "./import-data/product-content-review.mjs";
 import {
   createLaunchEvidenceHandoff,
   discoverPreparedLaunchEvidence,
@@ -81,11 +82,19 @@ function gateRows(manifest, handoff, releaseBindings) {
 }
 
 export async function buildGoLiveReadinessReport() {
-  const [manifest, prepared, physicalUat, duplicateRegister, sourceAuthorityDecision] = await Promise.all([
+  const [
+    manifest,
+    prepared,
+    physicalUat,
+    duplicateRegister,
+    productContentReview,
+    sourceAuthorityDecision,
+  ] = await Promise.all([
     loadJson("data/launch-evidence.json"),
     discoverPreparedLaunchEvidence(),
     loadJson("data/physical-device-uat.json"),
     assessDuplicateRegister(),
+    assessCurrentProductContentReview({ strict: true }),
     loadJson("data/source-authority-decision.json"),
   ]);
   const sourceAuthority = await assessSourceAuthorityDecision(sourceAuthorityDecision, { strict: true });
@@ -107,6 +116,7 @@ export async function buildGoLiveReadinessReport() {
     productionReady: sourceAuthority.productionAuthorized
       && launchStrict.valid
       && duplicateRegister.valid
+      && productContentReview.valid
       && physicalStrict.valid
       && !(readinessCounts.stale_release_evidence ?? 0),
     sourceControl: {
@@ -144,6 +154,19 @@ export async function buildGoLiveReadinessReport() {
       decisionCounts: duplicateRegister.decisionCounts,
       errorCount: duplicateRegister.errors.length,
     },
+    productContentReview: {
+      valid: productContentReview.valid,
+      expectedEntryCount: productContentReview.expectedEntryCount,
+      reviewedEntryCount: productContentReview.reviewedEntryCount,
+      pendingCount: productContentReview.pendingCount,
+      blockingCorrectionCount: productContentReview.blockingCorrectionCount,
+      decisionCounts: productContentReview.decisionCounts,
+      recoveredValidation: productContentReview.recoveredValidation,
+      originalSourceRetentionSatisfied: productContentReview.originalSourceRetentionSatisfied,
+      reviewSourcePath: productContentReview.reviewSourcePath,
+      reviewSourceSha256: productContentReview.reviewSourceSha256,
+      errorCount: productContentReview.errors.length,
+    },
     physicalUat: {
       valid: physicalStrict.valid,
       scenarioCount: physicalStrict.scenarioCount,
@@ -169,6 +192,7 @@ function printText(report) {
   console.log(`Gate readiness: ${report.gateReadiness.confirmed} confirmed, ${report.gateReadiness.approvalPending} approval pending, ${report.gateReadiness.preparedEvidencePending} prepared evidence pending, ${report.gateReadiness.missingEvidence} missing evidence`);
   if (report.gateReadiness.staleReleaseEvidence) console.log(`Release-bound evidence: ${report.gateReadiness.staleReleaseEvidence} stale against current checkout ${report.sourceControl.currentReleaseRevision ?? "unknown"}`);
   console.log(`Duplicate register: ${report.duplicateRegister.decisionCounts.pending} pending, ${report.duplicateRegister.decisionCounts.accepted_source_duplicate} accepted, ${report.duplicateRegister.decisionCounts.blocked_source_correction} blocked`);
+  console.log(`Product content: ${report.productContentReview.pendingCount} pending, ${report.productContentReview.blockingCorrectionCount} correction-required`);
   console.log(`Physical UAT: ${report.physicalUat.statusCounts.passed}/${report.physicalUat.scenarioCount} scenarios passed`);
   console.log(`Prepared handoff artifacts: ${report.handoff.preparedPendingArtifactCount}/${report.handoff.missingEvidenceArtifactCount}`);
   for (const gate of report.gates) {

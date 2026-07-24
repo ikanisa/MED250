@@ -8,6 +8,7 @@ import { officialCatalogueTitle } from "../../lib/product-display.ts";
 export const DEFAULT_DATASET_PATH = "outputs/019f66ce-d480-7a90-9bb7-ee6e417b5ce7/corrected/research/corrected-catalog-dataset-2026-07-15.json";
 export const DEFAULT_RECOVERED_VALIDATION_DATASET_PATH = "outputs/recovered-evidence/med250-marketplace-public-recovery-2026-07-23/recovered-public-marketplace-catalogue.json";
 export const DEFAULT_REVIEW_PATH = "data/imports/product-content-review-pending-2026-07-18.json";
+const RECORDED_ORIGINAL_DATASET_SHA256 = "5000580eb85403a58de8e604bdd055b25b22958ae5755206913a070bcae31383";
 
 export const REVIEW_DECISIONS = Object.freeze({
   duplicate_title_group: Object.freeze([
@@ -184,6 +185,55 @@ export function buildProductContentReviewPacket(dataset, { sourcePath = DEFAULT_
     duplicate_title_groups: population.duplicateTitleGroups,
     missing_medicine_generics: population.missingMedicineGenerics,
     short_or_pack_like_titles: population.shortOrPackLikeTitles,
+  };
+}
+
+export async function assessCurrentProductContentReview({
+  datasetPath = DEFAULT_DATASET_PATH,
+  recoveredDatasetPath = DEFAULT_RECOVERED_VALIDATION_DATASET_PATH,
+  reviewPath = DEFAULT_REVIEW_PATH,
+  strict = false,
+  now = new Date(),
+} = {}) {
+  let validationDatasetPath = datasetPath;
+  let recoveredValidation = false;
+  let datasetSource;
+  try {
+    datasetSource = await readFile(datasetPath, "utf8");
+  } catch (error) {
+    if (error?.code !== "ENOENT" || datasetPath !== DEFAULT_DATASET_PATH) throw error;
+    validationDatasetPath = recoveredDatasetPath;
+    datasetSource = await readFile(validationDatasetPath, "utf8");
+    recoveredValidation = true;
+  }
+  const dataset = JSON.parse(datasetSource);
+  const expected = buildProductContentReviewPacket(dataset, {
+    sourcePath: validationDatasetPath,
+    sourceSha256: sha256(datasetSource),
+  });
+  const actual = JSON.parse(await readFile(reviewPath, "utf8"));
+  if (recoveredValidation) {
+    const originalBound = (
+      actual?.source?.path === DEFAULT_DATASET_PATH
+      && actual?.source?.sha256 === RECORDED_ORIGINAL_DATASET_SHA256
+    );
+    const replacementBound = (
+      actual?.source?.path === validationDatasetPath
+      && actual?.source?.sha256 === expected.source.sha256
+    );
+    if (!originalBound && !replacementBound) {
+      throw new Error("The recovered validation dataset may only verify a review packet bound to the recorded original dataset or to the exact recovered replacement.");
+    }
+    if (originalBound) expected.source = structuredClone(actual.source);
+  }
+  const result = assessProductContentReview(expected, actual, { strict, now });
+  return {
+    ...result,
+    validationDatasetPath,
+    recoveredValidation,
+    originalSourceRetentionSatisfied: !recoveredValidation,
+    reviewSourcePath: actual?.source?.path ?? null,
+    reviewSourceSha256: actual?.source?.sha256 ?? null,
   };
 }
 
@@ -460,6 +510,16 @@ function parseArguments(values) {
 
 async function main() {
   const options = parseArguments(process.argv.slice(2));
+  if (options.command === "verify") {
+    const result = await assessCurrentProductContentReview({
+      datasetPath: options.dataset,
+      reviewPath: options.output,
+      strict: options.strict,
+    });
+    console.log(JSON.stringify(result, null, 2));
+    if (!result.valid) process.exitCode = 1;
+    return;
+  }
   let validationDatasetPath = options.dataset;
   let recoveredValidation = false;
   let datasetSource;
@@ -521,27 +581,25 @@ async function main() {
   }
   const actual = JSON.parse(await readFile(options.output, "utf8"));
   if (recoveredValidation) {
-    if (
-      actual?.source?.path !== DEFAULT_DATASET_PATH
-      || actual?.source?.sha256 !== "5000580eb85403a58de8e604bdd055b25b22958ae5755206913a070bcae31383"
-    ) {
-      throw new Error("The recovered validation dataset may only verify the review packet bound to the recorded original corrected dataset.");
+    const originalBound = (
+      actual?.source?.path === DEFAULT_DATASET_PATH
+      && actual?.source?.sha256 === RECORDED_ORIGINAL_DATASET_SHA256
+    );
+    const replacementBound = (
+      actual?.source?.path === validationDatasetPath
+      && actual?.source?.sha256 === expected.source.sha256
+    );
+    if (!originalBound && !replacementBound) {
+      throw new Error("The recovered validation dataset may only inspect a review packet bound to the recorded original dataset or to the exact recovered replacement.");
     }
-    expected.source = structuredClone(actual.source);
+    if (originalBound) expected.source = structuredClone(actual.source);
   }
   if (options.command === "next") {
     const next = nextPendingProductContentReview(expected, actual);
     console.log(JSON.stringify({ status: next.entry ? "pending_review" : "no_pending_review", ...next }, null, 2));
     return;
   }
-  const result = assessProductContentReview(expected, actual, { strict: options.strict });
-  console.log(JSON.stringify({
-    ...result,
-    validationDatasetPath,
-    recoveredValidation,
-    originalSourceRetentionSatisfied: !recoveredValidation,
-  }, null, 2));
-  if (!result.valid) process.exitCode = 1;
+  throw new Error(`Unhandled product-content review command ${options.command}.`);
 }
 
 const isMain = process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url;

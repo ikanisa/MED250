@@ -327,6 +327,8 @@ export function buildGoLiveClosureBoard({ manifest, handoff, readinessReport }) 
       missing_evidence_gates: readinessReport.gateReadiness.missingEvidence,
       stale_release_evidence_gates: readinessReport.gateReadiness.staleReleaseEvidence,
       duplicate_register_pending_groups: readinessReport.duplicateRegister.decisionCounts.pending,
+      product_content_pending_entries: readinessReport.productContentReview.pendingCount,
+      product_content_blocking_corrections: readinessReport.productContentReview.blockingCorrectionCount,
       physical_uat_pending_scenarios: readinessReport.physicalUat.statusCounts.pending,
       prepared_handoff_artifacts: readinessReport.handoff.preparedPendingArtifactCount,
       required_handoff_artifacts: readinessReport.handoff.missingEvidenceArtifactCount,
@@ -354,9 +356,32 @@ export function buildGoLiveClosureBoard({ manifest, handoff, readinessReport }) 
           "Only the named MED+250 data owner can supply the authority decision and approved storage evidence.",
         ],
       },
+      product_content_review: {
+        owner: "Named regulatory or clinical data reviewer",
+        artifact: "data/imports/product-content-review-pending-2026-07-18.json",
+        valid: readinessReport.productContentReview.valid,
+        pending_entries: readinessReport.productContentReview.pendingCount,
+        blocking_corrections: readinessReport.productContentReview.blockingCorrectionCount,
+        review_source_path: readinessReport.productContentReview.reviewSourcePath,
+        review_source_sha256: readinessReport.productContentReview.reviewSourceSha256,
+        blocker: readinessReport.productContentReview.valid
+          ? null
+          : `${readinessReport.productContentReview.pendingCount} product-content decision(s) remain pending and ${readinessReport.productContentReview.blockingCorrectionCount} correction-required decision(s) remain open.`,
+        commands: [
+          "npm run data:content-review:next",
+          "npm run data:content-review:decide -- --dataset <approved-source-dataset-path> <one-accountable-decision>",
+          "npm run data:content-review:verify -- --strict",
+        ],
+        safety_rules: [
+          "Only a named regulatory or clinical data reviewer may make product-content decisions.",
+          "Do not infer missing clinical facts or approve a source exception without authoritative Rwanda FDA evidence.",
+          "A correction-required decision remains production-blocking until the source is corrected and the packet is regenerated.",
+        ],
+      },
     },
     instructions: [
       "Close source authority before production approval; it is a release prerequisite even though it is not one of the eleven operational launch gates.",
+      "Complete all source-bound product-content decisions and corrections before production approval.",
       "Work through gates in closure_order unless an accountable owner explicitly changes the sequence.",
       "Complete row-level reviews and physical UAT before attempting final live release approval.",
       "After every completed artifact, run npm run launch:evidence:verify and npm run launch:go-live:status.",

@@ -17,6 +17,19 @@ test("reports go-live readiness without promoting pending gates", async () => {
     durableStorageApproved: false,
     errorCount: 1,
   });
+  assert.deepEqual(report.productContentReview, {
+    valid: false,
+    expectedEntryCount: 72,
+    reviewedEntryCount: 72,
+    pendingCount: 72,
+    blockingCorrectionCount: 0,
+    decisionCounts: { pending: 72 },
+    recoveredValidation: true,
+    originalSourceRetentionSatisfied: false,
+    reviewSourcePath: "outputs/019f66ce-d480-7a90-9bb7-ee6e417b5ce7/corrected/research/corrected-catalog-dataset-2026-07-15.json",
+    reviewSourceSha256: "5000580eb85403a58de8e604bdd055b25b22958ae5755206913a070bcae31383",
+    errorCount: 72,
+  });
   assert.equal(report.launchEvidence.valid, true);
   assert.equal(report.launchEvidence.strictValid, false);
   assert.equal(report.launchEvidence.gateCount, 11);

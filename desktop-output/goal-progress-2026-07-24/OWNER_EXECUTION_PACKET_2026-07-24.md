@@ -270,6 +270,12 @@ revision through the local free-only release path. GitHub must remain a free
 source host only: do not enable a billed plan, paid Actions capacity, paid
 deployment service, or billing-recovery workflow for this release. Then:
 
+This is a permanent owner constraint, not a temporary cost preference. Do not
+upgrade the GitHub account for MED+250. If included free Actions minutes are
+unavailable, exhausted, or uncertain, leave the optional manual workflows
+disabled and use the local release commands. Verify the repository guard with
+`npm run github:free-only:verify`.
+
 ```sh
 npm run deployment:verify -- \
   --url https://med-250.com \
