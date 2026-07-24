@@ -151,14 +151,26 @@ Validate the complete production artifact without publishing it:
 npm run cloudflare:check:production
 ```
 
-That command supplies the live public mode only for the smoke build, checks indexable metadata, production robots and the source-backed sitemap, and then runs a strict dry run against the explicit `production` Wrangler environment. Both the local `deploy:live` command and the protected GitHub production job include `--env production`; this is a tested safety boundary so a production approval cannot accidentally deploy the default preview Worker.
+That command supplies the live public mode only for the smoke build, checks indexable metadata, production robots and the source-backed sitemap, and then runs a strict dry run against the explicit `production` Wrangler environment. Both the local `deploy:live` command and the optional manual GitHub production job include `--env production`; this is a tested safety boundary so a production approval cannot accidentally deploy the default preview Worker.
 
-The repository also contains `.github/workflows/quality.yml` and `.github/workflows/deploy-cloudflare.yml`. Quality checks run without private credentials using the committed preview-safe public configuration. Deployment is manual only:
+MED+250 uses GitHub as a free source repository and does not depend on paid
+GitHub-hosted runners. The authoritative release gate is the local
+`npm run release:check` or `npm run release:check:live` execution retained with
+the immutable release evidence. `.github/workflows/quality.yml` and
+`.github/workflows/deploy-cloudflare.yml` are optional manual mirrors only:
 
-- `preview` uses the protected `med250-preview` GitHub environment, deploys only the preview Worker, then verifies routes, headers, HTTPS, `robots.txt`, sitemap suppression, and `X-Robots-Tag`.
-- `production` requires the exact `DEPLOY MED250 LIVE` confirmation plus approval of the `med250-production` GitHub environment. It runs every attestation, duplicate-review, backend-contract and operational-health gate before building the production environment, deploying, and verifying the custom domain is indexable with at least 2,400 sitemap URLs.
+- neither workflow runs on push or pull request;
+- every hosted-runner job is skipped unless the repository owner explicitly
+  sets `MED250_GITHUB_ACTIONS_FREE_TIER_CONFIRMED=true` after confirming free
+  included minutes are available;
+- no release gate may require a GitHub Actions result; and
+- normal preview and production deployment uses the local Wrangler commands
+  below after all governed gates pass.
 
-Configure `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as secrets in both GitHub environments. The production environment additionally needs `SUPABASE_SECRET_KEY` as a secret and the public build variables plus all eleven launch gates as protected environment variables. Keep the Cloudflare token scoped to the single deployment account and relevant zone. Cloudflare documents the required CI credentials and official Wrangler action at https://developers.cloudflare.com/workers/ci-cd/external-cicd/github-actions/ and its named-environment behavior at https://developers.cloudflare.com/workers/wrangler/environments/.
+Do not add a GitHub payment method, buy Actions minutes, or make GitHub billing
+part of launch recovery. If the optional mirror is ever used within the free
+allowance, keep its Cloudflare token scoped to the single deployment account
+and relevant zone and keep production secrets in the protected environment.
 
 To publish manually after the data, privacy, regulatory, and operational gates are complete:
 
@@ -169,7 +181,7 @@ npm run deploy:preview
 npm run deploy:live
 ```
 
-Set `NEXT_PUBLIC_SITE_URL` to the final HTTPS origin and configure the public Supabase URL and publishable key as build variables. The customer address picker also needs a dedicated `NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY` with Maps JavaScript API and Geocoding API enabled and HTTP-referrer restrictions limited to the MED+250 origins. This browser key is intentionally public; never reuse the server-only `GOOGLE_MAPS_API_KEY` used for pharmacy geocoding. Live public-contact readiness requires approved owner channels in `NEXT_PUBLIC_MED250_CONTACT_EMAIL`, `NEXT_PUBLIC_MED250_SUPPORT_WHATSAPP`, and `NEXT_PUBLIC_MED250_MEETING_URL`; the storefront renders them only when configured, and release validation rejects unsafe email, WhatsApp or non-HTTPS booking values. Keep service-role, WhatsApp Cloud API, the server Google Maps key, admin-token, and other server credentials only in protected CI or Supabase Edge Function secrets. `npm run deployment:verify -- --url <https-url> --mode preview|live` can be rerun independently after any deployment. A successful dry run proves the Worker bundle and bindings are valid; it does not replace production domain, DNS, runtime, authentication, order-dispatch, or Core Web Vitals verification. Wrangler is currently authenticated to the intended account, and the production Worker and deployment history are visible, but the local OAuth session has broad account-wide write scopes. Replace it with a least-privilege MED+250 deploy credential and retain a redacted account-verification record before confirming the Cloudflare gate.
+Set `NEXT_PUBLIC_SITE_URL` to the final HTTPS origin and configure the public Supabase URL and publishable key as build variables. The customer address picker also needs a dedicated `NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY` with Maps JavaScript API and Geocoding API enabled and HTTP-referrer restrictions limited to the MED+250 origins. This browser key is intentionally public; never reuse the server-only `GOOGLE_MAPS_API_KEY` used for pharmacy geocoding. Live public-contact readiness requires approved owner channels in `NEXT_PUBLIC_MED250_CONTACT_EMAIL`, `NEXT_PUBLIC_MED250_SUPPORT_WHATSAPP`, and `NEXT_PUBLIC_MED250_MEETING_URL`; the storefront renders them only when configured, and release validation rejects unsafe email, WhatsApp or non-HTTPS booking values. Keep service-role, WhatsApp Cloud API, the server Google Maps key, admin-token, and other server credentials only in the local protected release environment or Supabase Edge Function secrets. `npm run deployment:verify -- --url <https-url> --mode preview|live` can be rerun independently after any deployment. A successful dry run proves the Worker bundle and bindings are valid; it does not replace production domain, DNS, runtime, authentication, order-dispatch, or Core Web Vitals verification. Wrangler is currently authenticated to the intended account, and the production Worker and deployment history are visible, but the local OAuth session has broad account-wide write scopes. Replace it with a least-privilege MED+250 deploy credential and retain a redacted account-verification record before confirming the Cloudflare gate.
 
 The active custom domain is `med-250.com`, routed directly to the production-named Cloudflare Worker. DNS and TLS reachability are necessary but do not by themselves confirm the launch gate; the strict deployment verifier, account evidence, backend health, controlled UAT and named infrastructure approval must all pass before the current public release can be formally approved or redeployed through the protected production workflow.
 

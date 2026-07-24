@@ -26,6 +26,8 @@ concurrency:
 jobs:
   validate-request:
     name: Validate deployment request
+    # GitHub Actions is optional and must never consume paid minutes.
+    if: ${{ vars.MED250_GITHUB_ACTIONS_FREE_TIER_CONFIRMED == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:

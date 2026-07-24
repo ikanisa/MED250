@@ -33,8 +33,9 @@ blockers**:
 6. the security-hardening migration and revised pharmacy OTP Edge Function
    cannot be deployed because the connected Supabase account cannot access the
    MED+250 project; and
-7. GitHub Actions cannot start because the repository owner's account is locked
-   for a billing issue.
+7. none. GitHub Actions billing is deliberately outside the release path;
+   GitHub is used only as a free source repository and the local release gate
+   is authoritative.
 
 The former DNS blocker is resolved. `med-250.com` resolves through Cloudflare,
 HTTPS is live, robots and sitemap respond, and production routes return HTTP
@@ -52,7 +53,7 @@ revision, so production must not be represented as running the fix.
 | Launch authority | **BLOCKED** | 0/11 gates confirmed; two approval-pending, eight prepared-evidence-pending, one stale | Every gate has complete current evidence, named owner approval, timezone-qualified timestamps, and exact release binding where required |
 | Physical UAT | **BLOCKED** | 0/12 scenarios passed | Execute the committed matrix on physical devices and attach redacted evidence and named approval |
 | Supabase hardening | **BLOCKED** | Migration and Edge Function are tested locally; target project is unavailable to the connected account | Grant project access, deploy to staging, execute negative authorization probes, approve, then promote the same immutable revision |
-| GitHub CI | **BLOCKED** | Actions annotation: job not started because the account is locked for billing | Repository owner restores Actions billing and the exact candidate passes the remote workflow |
+| GitHub source hosting | **PASS / FREE-ONLY** | Candidate branch is pushed; paid hosted CI is not a release dependency | Keep automatic workflows disabled and use the local immutable release evidence |
 | Production DNS/TLS | **RESOLVED** | Cloudflare A answers, HTTPS route checks, robots, sitemap, and security headers respond | Refresh immutable deployment evidence after the audited revision is deployed |
 | Application build | **PASS** | Production build and Wrangler strict dry run pass | Preserve exact source and environment mode through deployment |
 | Dependency security | **PASS** | npm and PyPI audits report zero known vulnerable packages | Re-run on the immutable release revision |
@@ -256,21 +257,19 @@ closed after the P0 governance blockers are resolved:
 
 ## Exact release path
 
-1. Restore Actions billing and run the full workflow on the immutable
-   candidate.
-2. Grant MED+250 Supabase project access.
-3. Deploy the migration and Edge Function to staging.
-4. Execute negative tenant, revoked-authority, public-description, and
+1. Grant MED+250 Supabase project access.
+2. Deploy the migration and Edge Function to staging.
+3. Execute negative tenant, revoked-authority, public-description, and
    mismatched-media probes; retain redacted deployment receipts.
-5. Complete 51 duplicate and 72 product-content decisions.
-6. Recover or formally replace the controlled source bundle.
-7. Complete all 12 physical-device UAT scenarios.
-8. Record named, role-qualified approvals for all 11 launch gates.
-9. Rebase or merge without changing audited bytes, rerun every gate, and deploy
+4. Complete 51 duplicate and 72 product-content decisions.
+5. Recover or formally replace the controlled source bundle.
+6. Complete all 12 physical-device UAT scenarios.
+7. Record named, role-qualified approvals for all 11 launch gates.
+8. Rebase or merge without changing audited bytes, rerun every local gate, and deploy
    the exact revision.
-10. Verify all live routes, headers, robots, sitemap, revision headers,
+9. Verify all live routes, headers, robots, sitemap, revision headers,
     authentication boundaries, request flows, rollback, and monitoring.
-11. Refresh release-bound evidence and only then change the decision to
+10. Refresh release-bound evidence and only then change the decision to
     **GO-LIVE**.
 
 No approval, device result, source decision, or production deployment receipt

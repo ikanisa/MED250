@@ -1,8 +1,6 @@
 name: MED+250 quality
 
 on:
-  push:
-  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -15,6 +13,10 @@ concurrency:
 jobs:
   release-check:
     name: Preview-safe release gate
+    # MED+250 does not use paid GitHub-hosted minutes. The repository owner may
+    # enable this optional manual copy of the local gate only after confirming
+    # that the current account has free included minutes available.
+    if: ${{ vars.MED250_GITHUB_ACTIONS_FREE_TIER_CONFIRMED == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
