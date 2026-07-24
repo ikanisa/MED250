@@ -22,6 +22,10 @@ import {
   currentGitRevision,
   releaseBindingsForManifest,
 } from "./launch-release-bindings.mjs";
+import {
+  currentLegacyRedirectVerifierSha256,
+  validateLegacyDomainRedirectEvidence,
+} from "./verify-legacy-domain-redirect.mjs";
 
 async function loadJson(path) {
   return JSON.parse(await readFile(path, "utf8"));
@@ -94,6 +98,7 @@ export async function buildGoLiveReadinessReport() {
     productContentReview,
     auditBrowserEvidence,
     sourceAuthorityDecision,
+    legacyDomainRedirectEvidence,
   ] = await Promise.all([
     loadJson("data/launch-evidence.json"),
     discoverPreparedLaunchEvidence(),
@@ -102,6 +107,7 @@ export async function buildGoLiveReadinessReport() {
     assessCurrentProductContentReview({ strict: true }),
     loadJson("data/audit-browser-evidence.json"),
     loadJson("data/source-authority-decision.json"),
+    loadJson("desktop-output/goal-progress-2026-07-24/legacy-domain-redirect-probe-2026-07-24.json"),
   ]);
   const sourceAuthority = await assessSourceAuthorityDecision(sourceAuthorityDecision, { strict: true });
   const handoff = createLaunchEvidenceHandoff(manifest, prepared);
@@ -112,6 +118,10 @@ export async function buildGoLiveReadinessReport() {
   const renderedProductionAudit = validateAuditBrowserEvidence(auditBrowserEvidence, {
     strict: true,
     currentReleaseRevision,
+  });
+  const expectedLegacyRedirectVerifierSha256 = await currentLegacyRedirectVerifierSha256();
+  const legacyDomainRedirect = validateLegacyDomainRedirectEvidence(legacyDomainRedirectEvidence, {
+    expectedVerifierSha256: expectedLegacyRedirectVerifierSha256,
   });
   const releaseBindings = await releaseBindingsForManifest(manifest, { currentRevision: currentReleaseRevision });
   const gates = gateRows(manifest, handoff, releaseBindings);
@@ -129,6 +139,7 @@ export async function buildGoLiveReadinessReport() {
       && productContentReview.valid
       && physicalStrict.valid
       && renderedProductionAudit.valid
+      && legacyDomainRedirect.valid
       && !(readinessCounts.stale_release_evidence ?? 0),
     sourceControl: {
       currentReleaseRevision,
@@ -201,6 +212,17 @@ export async function buildGoLiveReadinessReport() {
       statusCounts: renderedProductionAudit.statusCounts,
       errorCount: renderedProductionAudit.errors.length,
     },
+    legacyDomainRedirect: {
+      valid: legacyDomainRedirect.valid,
+      status: legacyDomainRedirectEvidence.status ?? null,
+      legacyOrigin: legacyDomainRedirect.assessment.legacyOrigin,
+      canonicalOrigin: legacyDomainRedirect.assessment.canonicalOrigin,
+      capturedAt: legacyDomainRedirectEvidence.captured_at ?? null,
+      verifierCurrent: legacyDomainRedirectEvidence.verifier_sha256 === expectedLegacyRedirectVerifierSha256,
+      probeCount: legacyDomainRedirect.assessment.probeCount,
+      passedProbeCount: legacyDomainRedirect.assessment.passedProbeCount,
+      errorCount: legacyDomainRedirect.errors.length,
+    },
     handoff: {
       gateCount: handoff.gate_count,
       missingEvidenceArtifactCount: handoff.missing_evidence_artifact_count,
@@ -223,6 +245,7 @@ function printText(report) {
   console.log(`Product content: ${report.productContentReview.pendingCount} pending, ${report.productContentReview.blockingCorrectionCount} correction-required`);
   console.log(`Physical UAT: ${report.physicalUat.statusCounts.passed}/${report.physicalUat.scenarioCount} scenarios passed`);
   console.log(`Rendered production audit: ${report.renderedProductionAudit.statusCounts.passed}/${report.renderedProductionAudit.scenarioCount} scenarios passed; current origin/revision and approval: ${report.renderedProductionAudit.valid ? "yes" : "no"}`);
+  console.log(`Historical hostname redirect: ${report.legacyDomainRedirect.passedProbeCount}/${report.legacyDomainRedirect.probeCount} probes passed; redirect-only contract valid: ${report.legacyDomainRedirect.valid ? "yes" : "no"}`);
   console.log(`Prepared handoff artifacts: ${report.handoff.preparedPendingArtifactCount}/${report.handoff.missingEvidenceArtifactCount}`);
   for (const gate of report.gates) {
     const missing = gate.missingEvidenceTypes.length ? gate.missingEvidenceTypes.join(", ") : "none";

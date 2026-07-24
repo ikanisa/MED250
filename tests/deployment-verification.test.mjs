@@ -240,6 +240,7 @@ test("keeps preview and production Workers isolated behind manual protected depl
   assert.match(packageJson.scripts["release:check:live"], /npm run launch:go-live:status/);
   assert.match(packageJson.scripts["release:check:live"], /^npm run data:source-authority:verify:strict/);
   assert.match(packageJson.scripts["release:check:live"], /npm run audit:browser-evidence:verify:live/);
+  assert.match(packageJson.scripts["release:check:live"], /npm run domain:legacy-redirect:verify/);
   assert.match(packageJson.scripts["release:check:live"], /npm run localization:verify/);
   assert.match(packageJson.scripts["release:check:live"], /npm run test:sites:catalog/);
   assert.match(packageJson.scripts["release:check:live"], /npm run sites:verify:catalog/);
@@ -259,6 +260,7 @@ test("keeps preview and production Workers isolated behind manual protected depl
   assert.match(deployment, /npm run localization:verify/);
   assert.match(deployment, /npm run test:sites:catalog/);
   assert.match(deployment, /npm run sites:verify:catalog/);
+  assert.match(deployment, /npm run domain:legacy-redirect:verify/);
   assert.match(deployment, /npm run backend:verify[\s\S]*npm run backend:verify:description-reviewer[\s\S]*npm run ops:health:strict/);
   assert.match(deployment, /SUPABASE_SECRET_KEY:[^\n]*secrets\.SUPABASE_SECRET_KEY/);
   assert.match(deployment, /MED250_ADMIN_TOKEN:[^\n]*secrets\.MED250_ADMIN_TOKEN/);

@@ -86,6 +86,7 @@
     "catalogue:verify:live": "node --env-file-if-exists=.env.local scripts/verify-live-catalogue.mjs",
     "catalogue:recover:public": "node scripts/recover-public-marketplace-catalogue.mjs",
     "domain:dns:verify": "node scripts/verify-domain-dns.mjs",
+    "domain:legacy-redirect:verify": "node scripts/verify-legacy-domain-redirect.mjs",
     "domain:evidence:refresh": "node scripts/refresh-domain-launch-evidence.mjs",
     "seo:generate-products": "node scripts/generate-product-seo-index.mjs && node scripts/generate-product-sitemap-index.mjs && node scripts/generate-product-related-index.mjs",
     "seo:generate-sitemap": "node scripts/generate-product-sitemap-index.mjs",
@@ -110,7 +111,7 @@
     "release:preflight": "npm run github:free-only:verify && npm run launch:evidence:verify && node scripts/validate-release-config.mjs",
     "release:preflight:live": "npm run github:free-only:verify && npm run launch:evidence:verify:live && node scripts/validate-release-config.mjs --live",
     "release:check": "npm run release:preflight && npm run security:audit && npm run lint && npm run data:validate && npm run data:quality && npm run python:test && npm test && npm run performance:budget && wrangler deploy --dry-run --strict",
-    "release:check:live": "npm run data:source-authority:verify:strict && npm run release:preflight:live && npm run launch:go-live:status && npm run data:duplicates:verify -- --strict && npm run data:content-review:verify -- --strict && npm run uat:verify:live && npm run audit:browser-evidence:verify:live && npm run backend:verify && npm run backend:verify:description-reviewer -- --product-id \"$MED250_DESCRIPTION_REVIEWER_PROBE_PRODUCT_ID\" --expected-updated-at \"$MED250_DESCRIPTION_REVIEWER_PROBE_EXPECTED_UPDATED_AT\" && npm run ops:health:strict && npm run security:audit && npm run lint && npm run data:validate && npm run data:quality && npm run localization:verify && npm run python:test && npm run test:sites:catalog && npm run sites:verify:catalog && npm run test:preview && npm run test:production && npm run performance:budget && wrangler deploy --env production --dry-run --strict",
+    "release:check:live": "npm run data:source-authority:verify:strict && npm run release:preflight:live && npm run launch:go-live:status && npm run data:duplicates:verify -- --strict && npm run data:content-review:verify -- --strict && npm run uat:verify:live && npm run audit:browser-evidence:verify:live && npm run domain:legacy-redirect:verify && npm run backend:verify && npm run backend:verify:description-reviewer -- --product-id \"$MED250_DESCRIPTION_REVIEWER_PROBE_PRODUCT_ID\" --expected-updated-at \"$MED250_DESCRIPTION_REVIEWER_PROBE_EXPECTED_UPDATED_AT\" && npm run ops:health:strict && npm run security:audit && npm run lint && npm run data:validate && npm run data:quality && npm run localization:verify && npm run python:test && npm run test:sites:catalog && npm run sites:verify:catalog && npm run test:preview && npm run test:production && npm run performance:budget && wrangler deploy --env production --dry-run --strict",
     "deploy:preview": "npm run release:check && wrangler deploy --strict",
     "deploy:live": "npm run release:check:live && wrangler deploy --env production --keep-vars --strict"
   },

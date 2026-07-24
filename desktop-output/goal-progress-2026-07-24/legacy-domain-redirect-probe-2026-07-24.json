@@ -1,0 +1,57 @@
+{
+  "schema_version": "1",
+  "captured_at": "2026-07-24T10:44:20.273Z",
+  "verifier_sha256": "e6ab0e024c219d52652dce93955b86dd96a6a45aa22eb00c261100fea9ecab1e",
+  "status": "failed",
+  "productionReady": false,
+  "classification": "redirect_only_external_probe_not_launch_approval",
+  "legacyOrigin": "https://med250.gikundiro.com",
+  "canonicalOrigin": "https://med-250.com",
+  "probeCount": 5,
+  "passedProbeCount": 0,
+  "errors": [
+    "/: dns_unresolved",
+    "/categories?search=paracetamol&view=list: dns_unresolved",
+    "/product/rwanda-fda-hm-0734: dns_unresolved",
+    "/privacy: dns_unresolved",
+    "/terms?source=legacy-domain: dns_unresolved"
+  ],
+  "records": [
+    {
+      "path": "/",
+      "status": null,
+      "location": null,
+      "set_cookie_present": false,
+      "error_code": "dns_unresolved"
+    },
+    {
+      "path": "/categories?search=paracetamol&view=list",
+      "status": null,
+      "location": null,
+      "set_cookie_present": false,
+      "error_code": "dns_unresolved"
+    },
+    {
+      "path": "/product/rwanda-fda-hm-0734",
+      "status": null,
+      "location": null,
+      "set_cookie_present": false,
+      "error_code": "dns_unresolved"
+    },
+    {
+      "path": "/privacy",
+      "status": null,
+      "location": null,
+      "set_cookie_present": false,
+      "error_code": "dns_unresolved"
+    },
+    {
+      "path": "/terms?source=legacy-domain",
+      "status": null,
+      "location": null,
+      "set_cookie_present": false,
+      "error_code": "dns_unresolved"
+    }
+  ],
+  "note": "A passing redirect probe is necessary infrastructure evidence only; it does not approve launch or prove the candidate revision is live."
+}

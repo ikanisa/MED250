@@ -18,6 +18,9 @@
     "rendered_audit_passed_scenarios": 16,
     "rendered_audit_current_revision": false,
     "rendered_audit_strict_valid": false,
+    "legacy_redirect_passed_probes": 0,
+    "legacy_redirect_required_probes": 5,
+    "legacy_redirect_valid": false,
     "prepared_handoff_artifacts": 15,
     "required_handoff_artifacts": 15
   },
@@ -151,7 +154,7 @@
       "origin": "https://med250.gikundiro.com",
       "required_origin": "https://med-250.com",
       "evidence_release_revision": "5ef50a296941056bd17e614dff7b35290742f50a",
-      "current_release_revision": "37ad00fb20d47dcf66cc13fd40e94262f747a3a5",
+      "current_release_revision": "2ab145ee63cefe8f979c1d64371e0ac156bcca59",
       "release_revision_current": false,
       "passed_scenarios": 16,
       "required_scenarios": 16,
@@ -169,12 +172,37 @@
         "Retain only privacy-safe screenshots and receipts with no customer, pharmacy-login, prescription, credential, token, or precise-location data.",
         "Only a named QA owner can supply the final rendered-production approval."
       ]
+    },
+    "legacy_domain_redirect": {
+      "owner": "Named MED+250 infrastructure owner with Gikundiro Cloudflare zone authority",
+      "artifact": "desktop-output/goal-progress-2026-07-24/legacy-domain-redirect-probe-2026-07-24.json",
+      "valid": false,
+      "status": "failed",
+      "legacy_origin": "https://med250.gikundiro.com",
+      "canonical_origin": "https://med-250.com",
+      "captured_at": "2026-07-24T10:44:20.273Z",
+      "verifier_current": true,
+      "passed_probes": 0,
+      "required_probes": 5,
+      "blocker": "The historical hostname does not satisfy the redirect-only contract. Configure DNS and TLS under accountable zone-owner control, then require exact path-and-query-preserving 301/308 redirects to med-250.com with no cookies.",
+      "commands": [
+        "npm run domain:legacy-redirect:verify",
+        "npm run domain:legacy-redirect:verify -- --evidence-output <new-privacy-safe-receipt-path>",
+        "npm run launch:go-live:status"
+      ],
+      "safety_rules": [
+        "Do not attach med250.gikundiro.com as a second ordering origin or emit canonical metadata for it.",
+        "Do not add the historical hostname to Supabase, OTP, CORS, or public Sites allowed origins.",
+        "Do not store Cloudflare credentials, zone identifiers, account identifiers, or private approval material in the receipt.",
+        "Only the named Gikundiro zone owner may authorize DNS, certificate, or redirect-rule changes."
+      ]
     }
   },
   "instructions": [
     "Close source authority before production approval; it is a release prerequisite even though it is not one of the eleven operational launch gates.",
     "Complete all source-bound product-content decisions and corrections before production approval.",
     "Rerun and approve the complete rendered production audit on med-250.com for the exact candidate revision; historical-domain evidence cannot close this prerequisite.",
+    "Configure med250.gikundiro.com as redirect-only and require the five-probe verifier to pass before launch; it must never become a second ordering origin.",
     "Work through gates in closure_order unless an accountable owner explicitly changes the sequence.",
     "Complete row-level reviews and physical UAT before attempting final live release approval.",
     "After every completed artifact, run npm run launch:evidence:verify and npm run launch:go-live:status.",

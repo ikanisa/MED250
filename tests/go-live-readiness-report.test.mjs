@@ -73,6 +73,15 @@ test("reports go-live readiness without promoting pending gates", async () => {
     },
     errorCount: 6,
   });
+  assert.equal(report.legacyDomainRedirect.valid, false);
+  assert.equal(report.legacyDomainRedirect.status, "failed");
+  assert.equal(report.legacyDomainRedirect.legacyOrigin, "https://med250.gikundiro.com");
+  assert.equal(report.legacyDomainRedirect.canonicalOrigin, "https://med-250.com");
+  assert.match(report.legacyDomainRedirect.capturedAt, /^2026-07-24T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+  assert.equal(report.legacyDomainRedirect.verifierCurrent, true);
+  assert.equal(report.legacyDomainRedirect.probeCount, 5);
+  assert.equal(report.legacyDomainRedirect.passedProbeCount, 0);
+  assert.equal(report.legacyDomainRedirect.errorCount, 5);
   assert.equal(report.handoff.preparedPendingArtifactCount, 15);
   assert.equal(report.handoff.unpreparedEvidenceArtifactCount, 0);
 });

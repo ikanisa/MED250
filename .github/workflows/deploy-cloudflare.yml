@@ -132,3 +132,5 @@ jobs:
           command: deploy --env production --keep-vars --strict --var MED250_RELEASE_MODE:live --var MED250_RELEASE_REVISION:${{ github.sha }}
       - name: Verify production deployment
         run: npm run deployment:verify -- --url "$NEXT_PUBLIC_SITE_URL" --mode live --expected-revision "${{ github.sha }}"
+      - name: Verify historical hostname redirects to canonical production
+        run: npm run domain:legacy-redirect:verify
