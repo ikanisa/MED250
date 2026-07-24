@@ -320,6 +320,7 @@ export function buildGoLiveClosureBoard({ manifest, handoff, readinessReport }) 
     production_ready: readinessReport.productionReady,
     summary: {
       gate_count: readinessReport.launchEvidence.gateCount,
+      source_authority_production_authorized: readinessReport.sourceAuthority.productionAuthorized,
       confirmed_gates: readinessReport.gateReadiness.confirmed,
       approval_pending_gates: readinessReport.gateReadiness.approvalPending,
       prepared_evidence_pending_gates: readinessReport.gateReadiness.preparedEvidencePending,
@@ -332,7 +333,30 @@ export function buildGoLiveClosureBoard({ manifest, handoff, readinessReport }) 
     },
     closure_order: CLOSURE_ORDER,
     owner_workstreams: ownerWorkstreams,
+    prerequisites: {
+      source_authority: {
+        owner: "Named MED+250 data owner",
+        artifact: "data/source-authority-decision.json",
+        status: readinessReport.sourceAuthority.status,
+        decision: readinessReport.sourceAuthority.decision,
+        production_authorized: readinessReport.sourceAuthority.productionAuthorized,
+        blocker: readinessReport.sourceAuthority.productionAuthorized
+          ? null
+          : "Restore and verify the exact original controlled bundle, or record an explicitly bounded replacement decision with named owner authority and approved durable storage.",
+        commands: [
+          "npm run data:source-authority:verify",
+          "npm run data:source-authority:record -- --decision <restore_original|approve_replacement|reject> <owner-and-scope-fields> --confirm",
+          "npm run data:source-authority:verify:strict",
+        ],
+        safety_rules: [
+          "Never relabel the reconstructed public catalogue as the missing original source.",
+          "Never store the restored private bundle path, credentials, or private source bytes in Git.",
+          "Only the named MED+250 data owner can supply the authority decision and approved storage evidence.",
+        ],
+      },
+    },
     instructions: [
+      "Close source authority before production approval; it is a release prerequisite even though it is not one of the eleven operational launch gates.",
       "Work through gates in closure_order unless an accountable owner explicitly changes the sequence.",
       "Complete row-level reviews and physical UAT before attempting final live release approval.",
       "After every completed artifact, run npm run launch:evidence:verify and npm run launch:go-live:status.",

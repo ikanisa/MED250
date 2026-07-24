@@ -13,7 +13,7 @@ Release decision: **NO-GO**
 The application code, catalogue-mode build, production-mode build, dependency
 set, localization inventory, performance budget, SEO implementation, responsive
 navigation, and core marketplace interactions are technically release-capable.
-The hardening candidate passes 361 Node tests, 170 Python tests with one
+The hardening candidate passes 367 Node tests, 171 Python tests with one
 intentional skip, 57 Sites catalogue/rendering tests, three production build
 tests, lint, catalogue validation, localization validation, two dependency
 audits, and the Cloudflare production dry run.
@@ -21,8 +21,9 @@ audits, and the Cloudflare production dry run.
 Production remains **NO-GO only for evidence-backed external or governance
 blockers**:
 
-1. the original controlled source-retention bundle and original private source
-   contents have not been recovered;
+1. source authority remains pending: the original controlled source-retention
+   bundle has not been recovered and no named data owner has yet approved the
+   bounded public reconstruction as a new operational baseline;
 2. 51 duplicate-register decisions require a named register-data reviewer;
 3. 72 product-content decisions require a named regulatory or clinical data
    reviewer;
@@ -53,10 +54,10 @@ verified to omit the held mismatched Paracetamol image.
 
 | Area | Status | Evidence | Release condition |
 |---|---|---|---|
-| Source retention | **BLOCKED** | Required controlled manifest is absent; public recovery explicitly reports `originalSourceRecovered: false` | Restore the original controlled bytes or approve a formally governed replacement with provenance and rights evidence |
+| Source authority | **BLOCKED** | `data/source-authority-decision.json` is valid but pending; strict verification blocks production | Restore and checksum-verify the original controlled bytes, or record a named, bounded replacement decision with approved durable storage |
 | Duplicate-register review | **BLOCKED** | 51/51 rows remain `pending` | Named reviewer records an allowed decision for every source-bound row |
 | Product-content review | **BLOCKED** | 72/72 entries remain `pending` | Named regulatory/clinical reviewer records all source-bound decisions |
-| Launch authority | **BLOCKED** | 0/11 gates confirmed; two approval-pending, eight prepared-evidence-pending, one stale | Every gate has complete current evidence, named owner approval, timezone-qualified timestamps, and exact release binding where required |
+| Launch authority | **BLOCKED** | 0/11 gates confirmed; ten prepared-evidence-pending, one stale, zero evidence-complete gates ready for approval | Every gate has complete current evidence, named owner approval, timezone-qualified timestamps, and exact release binding where required |
 | Physical UAT | **BLOCKED** | 0/12 scenarios passed | Execute the committed matrix on physical devices and attach redacted evidence and named approval |
 | Supabase hardening | **BLOCKED** | Migration and Edge Function are tested locally; target project is unavailable to the connected account | Grant project access, deploy to staging, execute negative authorization probes, approve, then promote the same immutable revision |
 | GitHub source hosting | **PASS / FREE-ONLY** | Candidate branch is pushed; paid hosted CI is not a release dependency | Keep automatic workflows disabled and use the local immutable release evidence |
@@ -112,8 +113,10 @@ verified to omit the held mismatched Paracetamol image.
 
 | Gate | Result |
 |---|---:|
-| Node application and integration suite | **361/361 passed** |
-| Python suite | **170 passed, 1 intentionally skipped** |
+| Node application and integration suite | **367/367 passed** |
+| Python suite | **171 passed, 1 intentionally skipped** |
+| Source-authority preview verification | **Passed; pending owner decision remains visible** |
+| Source-authority strict verification | **Failed correctly before credentials or deployment: owner authority pending** |
 | Sites catalogue/rendering suite | **57/57 passed** |
 | Production build checks | **3/3 passed** |
 | ESLint | **Passed** |
@@ -130,10 +133,10 @@ The performance budget passes:
 
 | Asset class | Result |
 |---|---:|
-| JavaScript raw | 809,547 B |
-| Estimated JavaScript transfer | 236,341 B |
-| Marketplace JavaScript raw | 453,352 B |
-| Estimated marketplace transfer | 122,299 B |
+| JavaScript raw | 809,829 B |
+| Estimated JavaScript transfer | 236,468 B |
+| Marketplace JavaScript raw | 453,634 B |
+| Estimated marketplace transfer | 122,438 B |
 | CSS raw | 204,438 B |
 | Estimated CSS transfer | 34,137 B |
 | Initial visual assets | 73,183 B |

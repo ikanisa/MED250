@@ -5,6 +5,11 @@
 - Decision owner: named MED+250 data owner
 - Required role: data owner with authority over catalogue provenance, retention, and reuse
 
+The signed outcome must be recorded in
+`data/source-authority-decision.json` with
+`npm run data:source-authority:record`. This workbook is the human decision
+aid; the JSON record and strict verifier are the production release control.
+
 ## Facts the owner is being asked to decide
 
 The original private bundle `med250-source-retention-2026-07-16` was previously

@@ -7,6 +7,16 @@ test("reports go-live readiness without promoting pending gates", async () => {
   const report = await buildGoLiveReadinessReport();
 
   assert.equal(report.productionReady, false);
+  assert.deepEqual(report.sourceAuthority, {
+    valid: false,
+    productionAuthorized: false,
+    status: "pending",
+    decision: "pending",
+    originalAvailable: false,
+    replacementAvailable: true,
+    durableStorageApproved: false,
+    errorCount: 1,
+  });
   assert.equal(report.launchEvidence.valid, true);
   assert.equal(report.launchEvidence.strictValid, false);
   assert.equal(report.launchEvidence.gateCount, 11);

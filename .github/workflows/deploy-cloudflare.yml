@@ -119,7 +119,7 @@ jobs:
           npm run backend:verify:description-reviewer -- --product-id "$MED250_DESCRIPTION_REVIEWER_PROBE_PRODUCT_ID" --expected-updated-at "$MED250_DESCRIPTION_REVIEWER_PROBE_EXPECTED_UPDATED_AT"
           npm run ops:health:strict
       - name: Run unprivileged production release checks
-        run: npm run lint && npm run data:validate && npm run data:quality && npm run test:preview && npm run test:production && npm run performance:budget && wrangler deploy --env production --dry-run --strict
+        run: npm run data:source-authority:verify:strict && npm run lint && npm run data:validate && npm run data:quality && npm run test:preview && npm run test:production && npm run performance:budget && wrangler deploy --env production --dry-run --strict
       - name: Verify source-bound live catalogue
         run: npm run catalogue:verify:live
       - name: Deploy production Worker

@@ -1,0 +1,45 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "classification": "accountable source-authority decision; not original source evidence",
+  "status": "pending",
+  "decision": "pending",
+  "original_evidence": {
+    "bundle_id": "med250-source-retention-2026-07-16",
+    "classification": "controlled_private_source_evidence",
+    "artifact_count": 25,
+    "total_bytes": 25220675,
+    "bundle_digest": "c96bd6445e983398cceb92de4328aa59fa5a1c043107e524124b99e610f12057",
+    "manifest_sha256": "181bca849b252f0acd3000e066247cb5e04c934b815d5f8fe83c4732f63d428e",
+    "source_spec_sha256": "da70f8b651d3ed1d137adc9a95dcfd155f6d0029b6b76608a2f39331b3d2871b",
+    "availability": "missing"
+  },
+  "replacement_candidate": {
+    "classification": "reconstructed_public_catalogue_evidence",
+    "path": "outputs/recovered-evidence/med250-marketplace-public-recovery-2026-07-23/recovered-public-marketplace-catalogue.json",
+    "sha256": "5cad7067c8d904454f66f7e8a2d7bc276d72ac645bc2acdb30fc8a52642a6395",
+    "original_corrected_dataset_sha256": "5000580eb85403a58de8e604bdd055b25b22958ae5755206913a070bcae31383",
+    "is_original": false,
+    "limitations_acknowledged": false
+  },
+  "durable_storage": {
+    "approved": false,
+    "label": null,
+    "verification_reference": null
+  },
+  "replacement_scope": {
+    "permitted_uses": null,
+    "prohibited_uses": null,
+    "retention_and_review": null,
+    "correction_process": null,
+    "future_provenance_rules": null
+  },
+  "authority": {
+    "decided_by": null,
+    "role": null,
+    "decided_at": null,
+    "next_review_at": null,
+    "rationale": null,
+    "evidence_reference": null
+  }
+}

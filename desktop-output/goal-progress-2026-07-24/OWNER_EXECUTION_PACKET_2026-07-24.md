@@ -18,7 +18,7 @@ access. GitHub billing is not part of this release path.
 
 | Workstream | Accountable owner | Exact remaining input | Ready execution artifact |
 |---|---|---|---|
-| Source authority | Named MED+250 data owner | Restore original private bundle or sign a bounded replacement decision | `SOURCE_RETENTION_AUTHORITY_DECISION_2026-07-24.md` |
+| Source authority | Named MED+250 data owner | Restore original private bundle or sign a bounded replacement decision | `data/source-authority-decision.json` and `SOURCE_RETENTION_AUTHORITY_DECISION_2026-07-24.md` |
 | Duplicate register | Named register data reviewer | 51 authoritative decisions | `duplicate-register-review-packet-2026-07-24.json` |
 | Product content | Named regulatory or clinical data reviewer | 72 authoritative decisions | `data/imports/product-content-review-pending-2026-07-18.json` |
 | Operations | Named MED+250 operations owner | Controlled GPS and WhatsApp review results | `operations-readiness-packet-2026-07-24.json` |
@@ -34,14 +34,64 @@ Open `SOURCE_RETENTION_AUTHORITY_DECISION_2026-07-24.md`. The data owner must
 select restore, bounded replacement, or rejection. A reconstructed baseline
 must never be relabelled as the lost original.
 
-If the original bundle is restored:
+The machine-verifiable pending record is:
+
+`data/source-authority-decision.json`
+
+Check its exact committed source bindings:
 
 ```sh
-npm run data:source-retention:verify
+npm run data:source-authority:verify
+```
+
+If the original bundle is restored, record the named owner's decision while
+supplying the private bundle path only through the process:
+
+```sh
+MED250_SOURCE_RETENTION_BUNDLE=/private/restored-bundle \
+npm run data:source-authority:record -- \
+  --decision restore_original \
+  --decided-by "Named MED+250 data owner" \
+  --role "Catalogue provenance and retention owner" \
+  --decided-at "YYYY-MM-DDTHH:mm:ss+02:00" \
+  --next-review-at "YYYY-MM-DDTHH:mm:ss+02:00" \
+  --rationale "Substantive exact-bundle restoration decision" \
+  --evidence-reference "Controlled source authority record reference" \
+  --storage-label "Approved durable evidence store label" \
+  --storage-verification-reference "Controlled custody receipt reference" \
+  --confirm
 ```
 
 Acceptance: every manifest entry and aggregate digest verifies, durable storage
 is named and approved, and no private bytes are committed to Git.
+
+For a bounded replacement, use `--decision approve_replacement` with all the
+same owner/storage fields plus substantive `--permitted-uses`,
+`--prohibited-uses`, `--retention-and-review`, `--correction-process`, and
+`--future-provenance-rules` fields. The recorder verifies SHA-256
+`5cad7067c8d904454f66f7e8a2d7bc276d72ac645bc2acdb30fc8a52642a6395`
+and preserves `is_original: false`.
+
+After either approved path:
+
+```sh
+npm run data:source-authority:verify:strict
+```
+
+If and only if the owner approved the bounded replacement, rebind the still
+fully pending 72-entry review packet to the exact replacement SHA-256 before
+recording product decisions:
+
+```sh
+npm run data:content-review:generate -- \
+  --dataset outputs/recovered-evidence/med250-marketplace-public-recovery-2026-07-23/recovered-public-marketplace-catalogue.json \
+  --output data/imports/product-content-review-pending-2026-07-18.json \
+  --force
+```
+
+This intentionally changes the packet's source identity to the approved new
+baseline. It must never retain the missing original path or digest after that
+replacement decision.
 
 ## 2. Duplicate register — 51 decisions
 
@@ -86,6 +136,7 @@ Record one accountable decision at a time:
 
 ```sh
 npm run data:content-review:decide -- \
+  --dataset "<approved-source-dataset-path>" \
   --key "<exact-key-from-next>" \
   --decision "<allowed-decision>" \
   --reviewer "Named regulatory or clinical reviewer" \

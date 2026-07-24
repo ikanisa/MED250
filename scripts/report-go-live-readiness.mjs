@@ -12,6 +12,7 @@ import {
 } from "./create-launch-evidence-template.mjs";
 import { validateLaunchEvidence } from "./validate-launch-evidence.mjs";
 import { validatePhysicalUat } from "./validate-physical-uat.mjs";
+import { assessSourceAuthorityDecision } from "./source-authority-decision.mjs";
 import {
   currentGitRevision,
   releaseBindingsForManifest,
@@ -80,12 +81,14 @@ function gateRows(manifest, handoff, releaseBindings) {
 }
 
 export async function buildGoLiveReadinessReport() {
-  const [manifest, prepared, physicalUat, duplicateRegister] = await Promise.all([
+  const [manifest, prepared, physicalUat, duplicateRegister, sourceAuthorityDecision] = await Promise.all([
     loadJson("data/launch-evidence.json"),
     discoverPreparedLaunchEvidence(),
     loadJson("data/physical-device-uat.json"),
     assessDuplicateRegister(),
+    loadJson("data/source-authority-decision.json"),
   ]);
+  const sourceAuthority = await assessSourceAuthorityDecision(sourceAuthorityDecision, { strict: true });
   const handoff = createLaunchEvidenceHandoff(manifest, prepared);
   const launchNonStrict = validateLaunchEvidence(manifest);
   const launchStrict = validateLaunchEvidence(manifest, { strict: true });
@@ -101,10 +104,24 @@ export async function buildGoLiveReadinessReport() {
   return {
     schemaVersion: "1",
     release: manifest.release ?? "med250-production",
-    productionReady: launchStrict.valid && duplicateRegister.valid && physicalStrict.valid && !(readinessCounts.stale_release_evidence ?? 0),
+    productionReady: sourceAuthority.productionAuthorized
+      && launchStrict.valid
+      && duplicateRegister.valid
+      && physicalStrict.valid
+      && !(readinessCounts.stale_release_evidence ?? 0),
     sourceControl: {
       currentReleaseRevision,
       staleReleaseEvidenceGateCount: readinessCounts.stale_release_evidence ?? 0,
+    },
+    sourceAuthority: {
+      valid: sourceAuthority.valid,
+      productionAuthorized: sourceAuthority.productionAuthorized,
+      status: sourceAuthority.status,
+      decision: sourceAuthority.decision,
+      originalAvailable: sourceAuthority.originalAvailable,
+      replacementAvailable: sourceAuthority.replacementAvailable,
+      durableStorageApproved: sourceAuthority.durableStorageApproved,
+      errorCount: sourceAuthority.errors.length,
     },
     launchEvidence: {
       valid: launchNonStrict.valid,
@@ -148,6 +165,7 @@ function printText(report) {
   console.log(`Production ready: ${report.productionReady ? "yes" : "no"}`);
   console.log("");
   console.log(`Launch evidence: ${report.launchEvidence.valid ? "valid" : "invalid"}; strict: ${report.launchEvidence.strictValid ? "passed" : "failed"} (${report.launchEvidence.strictErrorCount} blocker(s))`);
+  console.log(`Source authority: ${report.sourceAuthority.productionAuthorized ? "approved for production" : `${report.sourceAuthority.status}/${report.sourceAuthority.decision}`} (${report.sourceAuthority.errorCount} blocker(s))`);
   console.log(`Gate readiness: ${report.gateReadiness.confirmed} confirmed, ${report.gateReadiness.approvalPending} approval pending, ${report.gateReadiness.preparedEvidencePending} prepared evidence pending, ${report.gateReadiness.missingEvidence} missing evidence`);
   if (report.gateReadiness.staleReleaseEvidence) console.log(`Release-bound evidence: ${report.gateReadiness.staleReleaseEvidence} stale against current checkout ${report.sourceControl.currentReleaseRevision ?? "unknown"}`);
   console.log(`Duplicate register: ${report.duplicateRegister.decisionCounts.pending} pending, ${report.duplicateRegister.decisionCounts.accepted_source_duplicate} accepted, ${report.duplicateRegister.decisionCounts.blocked_source_correction} blocked`);

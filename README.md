@@ -46,7 +46,7 @@ MED+250 is installed in Supabase project `uskfnszcdqpcfrhjxitl`. Its prefixed ta
 
 1. Add CAPTCHA/Turnstile and confirm suitable anonymous-sign-in rate limits. This is a project-wide Auth setting, so review every existing app before changing it.
 2. Keep the protected live-request release gate closed until authoritative pharmacy readiness and the documented Rwanda marketplace operating approvals are complete. The public catalogue may be reachable while formal production approval remains pending, but that state must not be represented as an approved launch.
-3. Run both `npm run data:validate` and `npm run data:quality` after every source refresh.
+3. Run both `npm run data:validate` and `npm run data:quality` after every source refresh. `data:validate` also verifies that `data/source-authority-decision.json` is still bound to the exact original receipt and bounded public-recovery candidate; it does not treat the pending owner decision as production approval.
 4. Import the validated source pack from a private environment:
 
    ```sh
@@ -68,6 +68,50 @@ MED+250 is installed in Supabase project `uskfnszcdqpcfrhjxitl`. Its prefixed ta
 10. Do not approve or redeploy `NEXT_PUBLIC_MARKETPLACE_MODE=live` through the protected release workflow until every gate above is satisfied. Create and validate a new build after the gates close.
 
 The secret/service key and third-party API credentials must never be stored in the frontend or committed to the repository.
+
+## Controlled source authority
+
+`data/source-authority-decision.json` is the machine-verifiable production
+source-authority record. It preserves the missing original bundle facts and the
+public reconstruction's separate identity. A named MED+250 data owner must
+choose exactly one of:
+
+- restore and verify the unchanged original 25-artifact bundle;
+- approve the reconstructed public catalogue as a new, bounded operational
+  baseline while explicitly acknowledging that it is not the original; or
+- reject production source authority.
+
+Preview validation keeps a structurally valid pending record visible:
+
+```sh
+npm run data:source-authority:verify
+```
+
+Production validation is deliberately fail-closed:
+
+```sh
+# For exact original restoration, supply the private path only in the process.
+MED250_SOURCE_RETENTION_BUNDLE=/private/restored-bundle \
+npm run data:source-authority:verify:strict
+
+# A bounded replacement decision verifies its exact local recovery SHA-256.
+npm run data:source-authority:verify:strict
+```
+
+Record a decision only from the named owner's explicit inputs with
+`npm run data:source-authority:record -- --decision <restore_original|approve_replacement|reject> ... --confirm`.
+The recorder requires named authority, timezone-qualified decision and review
+timestamps, substantive rationale, controlled evidence references, durable
+storage approval for an approved source, and all bounded-use fields for a
+replacement. It never stores the restored private bundle path and cannot label
+the reconstruction as the original.
+
+After an `approve_replacement` decision passes strict verification, regenerate
+the still-pending product-content review packet with
+`data:content-review:generate -- --dataset <approved-replacement-path> --output data/imports/product-content-review-pending-2026-07-18.json --force`.
+All later `next`, `decide`, and `verify` commands must use that same approved
+dataset path. This is an explicit source rebind, not restoration of the missing
+original.
 
 ## Controlled product review
 
@@ -95,6 +139,7 @@ Only `prescription_status` and `is_orderable` on matched `dawanear_products` row
 
 ```sh
 npm run release:preflight
+npm run data:source-authority:verify
 npm run data:validate
 npm run data:quality
 npm run security:audit
@@ -105,9 +150,9 @@ npm run performance:budget
 npm run cloudflare:check
 ```
 
-`npm run release:check` runs the complete preview-safe gate in one command. Its dependency gate audits the complete Node tree at moderate severity or higher and checks every exact Python requirement pin against OSV. The image pipeline requires Python 3.11+ because supported Pillow and rembg releases no longer support the macOS system Python. Before any protected production approval or redeployment, `npm run release:preflight:live` additionally requires live marketplace mode and an explicit HTTPS site origin. It never prints key values. The final `npm run release:check:live` command then requires the deployed backend contract and strict operational-health snapshot to pass before the dependency audit, lint, data validation, tests, budgets, and Cloudflare packaging can proceed. Keep routine local development in preview mode until the GPS, WhatsApp, duplicate-register, authorised test-identity, and production-domain gates are complete.
+`npm run release:check` runs the complete preview-safe gate in one command. Its dependency gate audits the complete Node tree at moderate severity or higher and checks every exact Python requirement pin against OSV. The image pipeline requires Python 3.11+ because supported Pillow and rembg releases no longer support the macOS system Python. Before any protected production approval or redeployment, `npm run release:preflight:live` additionally requires live marketplace mode and an explicit HTTPS site origin. It never prints key values. The final `npm run release:check:live` command first requires strict source authority, then requires the deployed backend contract and strict operational-health snapshot to pass before the dependency audit, lint, data validation, tests, budgets, and Cloudflare packaging can proceed. Keep routine local development in preview mode until source authority, GPS, WhatsApp, duplicate-register, authorised test-identity, and production-domain gates are complete.
 
-The live preflight also requires `NEXT_PUBLIC_MED250_OBSERVABILITY=cloud`, a public Turnstile site key, and eleven CI-only launch attestations to be set to `confirmed`: GPS readiness, WhatsApp readiness, duplicate-register review, security-hardening migration deployment, revised Edge Function deployment, Supabase Turnstile server verification, approved anonymous-auth rate limits, prescription-retention approval, Cloudflare account verification, domain/DNS verification, and physical-device UAT. These values are deliberate release locks, not substitutes for evidence. Keep them unset until the corresponding signed approval, deployment receipt, or controlled test record exists. `npm run launch:go-live:status` summarizes the full gate posture and fails closed until the registry, duplicate-register review, and physical-device UAT are all production-ready; `npm run launch:closure:board` generates the owner execution queue for the remaining evidence and approvals; `npm run release:check:live` runs the fail-closed readiness gate before any service-credential or Cloudflare packaging checks.
+The live preflight also requires `NEXT_PUBLIC_MED250_OBSERVABILITY=cloud`, a public Turnstile site key, and eleven CI-only launch attestations to be set to `confirmed`: GPS readiness, WhatsApp readiness, duplicate-register review, security-hardening migration deployment, revised Edge Function deployment, Supabase Turnstile server verification, approved anonymous-auth rate limits, prescription-retention approval, Cloudflare account verification, domain/DNS verification, and physical-device UAT. These values are deliberate release locks, not substitutes for evidence. Keep them unset until the corresponding signed approval, deployment receipt, or controlled test record exists. `npm run launch:go-live:status` summarizes source authority plus the full gate posture and fails closed until source authority, the registry, duplicate-register review, and physical-device UAT are all production-ready; `npm run launch:closure:board` generates the owner execution queue for the remaining evidence and approvals; `npm run release:check:live` runs the fail-closed readiness gate before any service-credential or Cloudflare packaging checks.
 
 Physical-device UAT is governed by `data/physical-device-uat.json`. `npm run uat:packet` generates the redacted 12-scenario execution packet for QA; `npm run uat:verify` validates the complete pending ledger; `npm run uat:verify:live` requires every scenario to pass with a redacted evidence reference, useful note, opaque test-identity labels, named executor, named approver and timezone-qualified timestamps. It rejects phone numbers, OTPs, UUID-like order identifiers and secret-like material. The strict UAT verifier is mandatory in `release:check:live`.
 
