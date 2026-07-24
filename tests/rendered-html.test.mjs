@@ -156,34 +156,38 @@ test("keeps the production server usable when local vinext provides no Cloudflar
   assert.match(await response.text(), /<title>MED\+250/);
 });
 
-test("server-renders canonical product metadata with its approved public product photo", async () => {
-  const response = await render("/product/rwanda-fda-hm-0734");
+test("server-renders canonical product metadata and fails image delivery blank without public bindings", async () => {
+  const productId = "rwanda-fda-hm-0002";
+  const response = await render(`/product/${productId}`);
   assert.equal(response.status, 200);
   const html = await response.text();
   const metadataOrigin = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "https://med-250.com";
-  assert.match(html, /<title>Ibupar caplets 400mg\/325mg \| MED\+250<\/title>/);
-  assert.ok(html.includes(`rel="canonical" href="${metadataOrigin}/product/rwanda-fda-hm-0734"`));
-  assert.match(html, /storage\/v1\/object\/public\/product-images\/v1\/rwanda-fda-hm-0734\//);
+  assert.match(html, /<title>Bupicaine heavy \| MED\+250<\/title>/);
+  assert.ok(html.includes(`rel="canonical" href="${metadataOrigin}/product/${productId}"`));
+  assert.doesNotMatch(html, /storage\/v1\/object\/public\/product-images\/v1\/rwanda-fda-hm-0002\//);
   assert.doesNotMatch(html, /storage\/v1\/render\/image\/public\/product-images/);
   assert.match(html, /"@type":"Product"/);
-  assert.match(html, /"alternateName":"IBUPAR CAPLETS"/);
+  assert.match(html, /"alternateName":"BUPICAINE HEAVY"/);
   assert.match(html, /Official catalogue name/);
   assert.match(html, /"@type":"BreadcrumbList"/);
   assert.match(html, /Manufacturer/);
   assert.match(html, /Rwanda FDA registration/);
-  assert.match(html, /DAWA limited/);
+  assert.match(html, /Tyche Industries Limited/);
   assert.ok(!html.includes(`"image":"${metadataOrigin}/og-marketplace-v2.png"`));
   assert.doesNotMatch(html, /About this product/);
 });
 
-test("server-renders similar catalogue cards only when their real product images are available", async () => {
-  const response = await render("/product/AMZ-B0GNQMMSZ3");
-  assert.equal(response.status, 200);
-  const html = await response.text();
-  const relatedSection = html.match(/<section class="marketplace-section related-products"[\s\S]*?<p class="related-products-note"/)?.[0] ?? "";
-  assert.match(relatedSection, /class="product-image-wrap"/);
-  assert.match(relatedSection, /storage\/v1\/object\/public\/product-images\/v1\/AMZ-/);
-  assert.doesNotMatch(relatedSection, /product-card[^"']*without-image/);
+test("server filters similar catalogue cards unless a real public image is available", async () => {
+  const [productPage, marketplace] = await Promise.all([
+    readFile(new URL("../app/product/[id]/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/marketplace.tsx", import.meta.url), "utf8"),
+  ]);
+  assert.match(
+    productPage,
+    /filter\(\(candidate\) => Boolean\(candidate\.imageUrl \?\? candidate\.imageUrls\?\.\[0\]\)\)/,
+  );
+  assert.match(marketplace, /className="marketplace-section related-products"/);
+  assert.match(marketplace, /className="product-image-wrap"/);
 });
 
 test("shows only governed public product descriptions with source attribution", async () => {

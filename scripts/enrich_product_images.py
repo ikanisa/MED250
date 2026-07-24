@@ -42,6 +42,11 @@ DEFAULT_DATASET = (
     / "outputs/019f66ce-d480-7a90-9bb7-ee6e417b5ce7/corrected/research/"
     "corrected-catalog-dataset-2026-07-15.json"
 )
+RECOVERED_VALIDATION_DATASET = (
+    REPO_ROOT
+    / "outputs/recovered-evidence/med250-marketplace-public-recovery-2026-07-23/"
+    "recovered-public-marketplace-catalogue.json"
+)
 DEFAULT_CHECKPOINT = REPO_ROOT / "data/product-images/checkpoint.sqlite3"
 DEFAULT_CACHE = REPO_ROOT / "data/product-images/cache"
 DEFAULT_REPORT = REPO_ROOT / "data/product-images/report.json"
@@ -55,7 +60,7 @@ SEARCH_USER_AGENT = (
 )
 WEB_SEARCH_USER_AGENT = "Mozilla/5.0"
 IMAGE_BUCKET = "product-images"
-EXPECTED_BACKEND_CONTRACT_VERSION = "2026-07-18.3"
+EXPECTED_BACKEND_CONTRACT_VERSION = "2026-07-23.1"
 CONTRACT_ATTESTATION_PATH = Path(
     f"/tmp/med250-product-image-contract-{EXPECTED_BACKEND_CONTRACT_VERSION}.ok"
 )

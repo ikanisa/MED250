@@ -142,7 +142,8 @@
   display:block;
   overflow-x:auto;
   overscroll-behavior-inline:contain;
-  scroll-snap-type:none;
+  scroll-snap-type:inline proximity;
+  scroll-padding-inline:3px;
   scrollbar-width:thin;
   -webkit-mask-image:linear-gradient(90deg,transparent 0,var(--color-black) 2.5%,var(--color-black) 97.5%,transparent 100%);
   mask-image:linear-gradient(90deg,transparent 0,var(--color-black) 2.5%,var(--color-black) 97.5%,transparent 100%);
@@ -171,6 +172,8 @@
   background:linear-gradient(145deg,var(--surface-page),var(--surface-lavender-soft) 52%,var(--surface-mint));
   box-shadow:0 12px 28px var(--alpha-ink-06),inset 0 1px 0 var(--alpha-white-92);
   text-align:left;
+  scroll-snap-align:start;
+  scroll-snap-stop:normal;
   transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease;
 }
 .subcategory-rail button:hover,

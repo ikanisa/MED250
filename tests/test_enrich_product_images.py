@@ -956,7 +956,12 @@ class ProductImagePipelineTests(unittest.TestCase):
         )
 
     def test_catalogue_contains_all_4680_source_products(self):
-        products = MODULE.load_products(MODULE.DEFAULT_DATASET)
+        dataset = (
+            MODULE.DEFAULT_DATASET
+            if MODULE.DEFAULT_DATASET.exists()
+            else MODULE.RECOVERED_VALIDATION_DATASET
+        )
+        products = MODULE.load_products(dataset)
         self.assertEqual(len(products), 4680)
         self.assertEqual(len({product.id for product in products}), 4680)
 

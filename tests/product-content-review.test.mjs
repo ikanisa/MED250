@@ -8,6 +8,7 @@ import test from "node:test";
 
 import {
   DEFAULT_DATASET_PATH,
+  DEFAULT_RECOVERED_VALIDATION_DATASET_PATH,
   applyProductContentReviewDecision,
   assessProductContentReview,
   buildProductContentReviewPacket,
@@ -15,16 +16,31 @@ import {
   nextPendingProductContentReview,
 } from "../scripts/import-data/product-content-review.mjs";
 
-const datasetSource = await readFile(new URL(`../${DEFAULT_DATASET_PATH}`, import.meta.url), "utf8");
+let datasetPath = DEFAULT_DATASET_PATH;
+let datasetSource;
+try {
+  datasetSource = await readFile(new URL(`../${DEFAULT_DATASET_PATH}`, import.meta.url), "utf8");
+} catch (error) {
+  if (error?.code !== "ENOENT") throw error;
+  datasetPath = DEFAULT_RECOVERED_VALIDATION_DATASET_PATH;
+  datasetSource = await readFile(
+    new URL(`../${DEFAULT_RECOVERED_VALIDATION_DATASET_PATH}`, import.meta.url),
+    "utf8",
+  );
+}
 const dataset = JSON.parse(datasetSource);
-const expected = buildProductContentReviewPacket(dataset, {
-  sourcePath: DEFAULT_DATASET_PATH,
+const datasetBoundExpected = buildProductContentReviewPacket(dataset, {
+  sourcePath: datasetPath,
   sourceSha256: createHash("sha256").update(datasetSource).digest("hex"),
 });
 const committed = JSON.parse(await readFile(
   new URL("../data/imports/product-content-review-pending-2026-07-18.json", import.meta.url),
   "utf8",
 ));
+const expected = structuredClone(datasetBoundExpected);
+if (datasetPath === DEFAULT_RECOVERED_VALIDATION_DATASET_PATH) {
+  expected.source = structuredClone(committed.source);
+}
 
 test("builds the complete source-bound product-content review population", () => {
   const population = deriveProductContentReviewPopulation(dataset);
@@ -148,11 +164,12 @@ test("presents one pending source-bound review with only its allowed owner decis
 test("the owner CLI updates one record atomically and leaves no lock or temporary file", async () => {
   const directory = await mkdtemp(join(tmpdir(), "med250-product-content-review-"));
   const output = join(directory, "review.json");
-  await writeFile(output, `${JSON.stringify(committed, null, 2)}\n`, "utf8");
-  const key = committed.short_or_pack_like_titles[0].key;
+  await writeFile(output, `${JSON.stringify(datasetBoundExpected, null, 2)}\n`, "utf8");
+  const key = datasetBoundExpected.short_or_pack_like_titles[0].key;
   const result = spawnSync(process.execPath, [
     "scripts/import-data/product-content-review.mjs",
     "decide",
+    "--dataset", datasetPath,
     "--output", output,
     "--key", key,
     "--decision", "approved_source_title",

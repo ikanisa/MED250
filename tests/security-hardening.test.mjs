@@ -72,7 +72,9 @@ test("enforces pharmacy identity and order lifecycle invariants in the database"
   assert.match(migration, /v_pharmacy\.updated_at is distinct from p_expected_updated_at/);
   assert.match(sendOtp, /dawanear_issue_pharmacy_otp/);
   assert.doesNotMatch(sendOtp, /enforceOtpRateLimits/);
-  assert.match(verifyOtp, /membership\.status !== "active"/);
+  assert.match(verifyOtp, /dawanear_bind_pharmacy_identity/);
+  assert.match(verifyOtp, /pharmacies\.length !== 1/);
+  assert.doesNotMatch(verifyOtp, /\.from\("dawanear_pharmacy_memberships"\)/);
   assert.doesNotMatch(verifyOtp, /\.upsert\([\s\S]*dawanear_pharmacy_memberships/);
   assert.doesNotMatch(sharedAuth, /user-agent/);
   assert.match(geocoder, /dawanear_approve_geocode_candidate/);

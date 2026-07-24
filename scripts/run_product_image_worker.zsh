@@ -15,7 +15,7 @@ MYDAWA_SITEMAP_MANIFEST="$REPO/data/product-images/mydawa-sitemap-candidates.jso
 CATALOG_SITEMAP_MANIFEST="$REPO/data/product-images/catalog-sitemap-candidates.json"
 TRUEMEDS_SITEMAP_MANIFEST="$REPO/data/product-images/truemeds-sitemap-candidates.json"
 PHARMEASY_SITEMAP_MANIFEST="$REPO/data/product-images/pharmeasy-sitemap-candidates.json"
-CONTRACT_VERSION="2026-07-18.3"
+CONTRACT_VERSION="2026-07-23.1"
 CONTRACT_CACHE="/tmp/med250-product-image-contract-${CONTRACT_VERSION}.ok"
 CONTRACT_LOCK="/tmp/med250-product-image-contract.lock"
 CONTRACT_CACHE_SECONDS=600
@@ -140,7 +140,7 @@ contract_is_current() {
     return 2
   fi
   print -r -- "$response" | /usr/bin/jq -e '
-      .contract_version == "2026-07-18.3" and
+      .contract_version == "2026-07-23.1" and
       .product_images.publication_mode == "automated_provenance" and
       .product_images.target_image_count == 23977 and
       .product_images.rights_verified_required == false and

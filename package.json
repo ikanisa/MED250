@@ -80,6 +80,7 @@
     "deployment:verify": "node scripts/verify-deployed-site.mjs",
     "sites:verify:catalog": "node scripts/verify-deployed-site.mjs --url https://med250-rwanda.ikanisa.chatgpt.site --mode catalog",
     "catalogue:verify:live": "node --env-file-if-exists=.env.local scripts/verify-live-catalogue.mjs",
+    "catalogue:recover:public": "node scripts/recover-public-marketplace-catalogue.mjs",
     "domain:dns:verify": "node scripts/verify-domain-dns.mjs",
     "domain:evidence:refresh": "node scripts/refresh-domain-launch-evidence.mjs",
     "seo:generate-products": "node scripts/generate-product-seo-index.mjs && node scripts/generate-product-sitemap-index.mjs && node scripts/generate-product-related-index.mjs",
@@ -114,7 +115,7 @@
     "drizzle-orm": "0.45.2",
     "libphonenumber-js": "1.13.8",
     "lucide-react": "0.468.0",
-    "next": "16.2.6",
+    "next": "16.2.11",
     "react": "19.2.6",
     "react-dom": "19.2.6"
   },
@@ -129,7 +130,7 @@
     "@vitejs/plugin-rsc": "0.5.26",
     "drizzle-kit": "0.31.10",
     "eslint": "9.39.4",
-    "eslint-config-next": "16.2.6",
+    "eslint-config-next": "16.2.11",
     "react-server-dom-webpack": "19.2.6",
     "tailwindcss": "4.2.1",
     "typescript": "5.9.3",
@@ -141,7 +142,15 @@
     "@esbuild-kit/core-utils": {
       "esbuild": "0.25.12"
     },
-    "postcss": "8.5.14"
+    "postcss": "8.5.14",
+    "sharp": "0.35.0",
+    "fast-uri": "3.1.4",
+    "minimatch@3.1.5": {
+      "brace-expansion": "1.1.16"
+    },
+    "minimatch@10.2.5": {
+      "brace-expansion": "5.0.8"
+    }
   },
   "type": "module"
 }

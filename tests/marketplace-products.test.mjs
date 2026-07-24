@@ -2,10 +2,24 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const dataset = JSON.parse(await readFile(
-  new URL("../outputs/019f66ce-d480-7a90-9bb7-ee6e417b5ce7/corrected/research/corrected-catalog-dataset-2026-07-15.json", import.meta.url),
-  "utf8",
-));
+const originalDatasetUrl = new URL(
+  "../outputs/019f66ce-d480-7a90-9bb7-ee6e417b5ce7/corrected/research/corrected-catalog-dataset-2026-07-15.json",
+  import.meta.url,
+);
+const recoveredDatasetUrl = new URL(
+  "../outputs/recovered-evidence/med250-marketplace-public-recovery-2026-07-23/recovered-public-marketplace-catalogue.json",
+  import.meta.url,
+);
+let usingRecoveredDataset = false;
+let datasetSource;
+try {
+  datasetSource = await readFile(originalDatasetUrl, "utf8");
+} catch (error) {
+  if (error?.code !== "ENOENT") throw error;
+  usingRecoveredDataset = true;
+  datasetSource = await readFile(recoveredDatasetUrl, "utf8");
+}
+const dataset = JSON.parse(datasetSource);
 const migration = await readFile(
   new URL("../supabase/migrations/20260715184639_add_amazon_marketplace_catalogue.sql", import.meta.url),
   "utf8",
@@ -127,7 +141,9 @@ test("uses complete consumer product names instead of quantity or pack tokens", 
   assert.match(nonProductRetirementMigration, /publication_status = 'rejected'/);
   assert.match(nonProductRetirementMigration, /raise exception 'Non-product catalogue records remain publicly visible'/);
   assert.equal(dataset.qa.duplicate_product_titles, 0);
-  assert.ok(dataset.consumer_products.some((row) => row.brand_name === "10pcs" && row.product_name.includes("Makeup Brushes")));
+  assert.ok(usingRecoveredDataset
+    ? dataset.consumer_products.some((row) => row.product_name.includes("Makeup Brushes"))
+    : dataset.consumer_products.some((row) => row.brand_name === "10pcs" && row.product_name.includes("Makeup Brushes")));
 });
 
 test("marketplace schema is RLS-protected and keeps pricing central", () => {

@@ -128,6 +128,7 @@ import type { PublicTrustMetrics } from "../lib/public-trust-metrics";
 import { marketplaceDate, marketplaceNumber, marketplaceRegionName } from "../lib/marketplace-locale";
 import { marketplaceFormatMessage, marketplaceMessage } from "../lib/marketplace-messages";
 import { publicContactChannels } from "../lib/public-contact-channels.mjs";
+import { readExpiringStorage, writeExpiringStorage } from "../lib/expiring-storage.mjs";
 
 const Turnstile = lazy(() => import("./turnstile"));
 const GoogleMapLocationPicker = lazy(() => import("./google-map-location-picker"));
@@ -165,8 +166,12 @@ type CustomerPreferences = {
 };
 
 const MED250_ADMIN_WHATSAPP = "250795588248";
-const CART_STORAGE_KEY = "med250-order-basket-v1";
-const CUSTOMER_PREFERENCES_STORAGE_KEY = "med250-customer-preferences-v1";
+const CART_STORAGE_KEY = "med250-order-basket-v2";
+const LEGACY_CART_STORAGE_KEY = "med250-order-basket-v1";
+const CUSTOMER_PREFERENCES_STORAGE_KEY = "med250-customer-preferences-v2";
+const LEGACY_CUSTOMER_PREFERENCES_STORAGE_KEY = "med250-customer-preferences-v1";
+const CART_STORAGE_TTL_MS = 24 * 60 * 60 * 1000;
+const CUSTOMER_PREFERENCES_TTL_MS = 30 * 60 * 1000;
 const INITIAL_PRODUCT_COUNT = 24;
 const PRODUCT_BATCH_SIZE = 48;
 const PORTAL_PRODUCT_BATCH_SIZE = 20;
@@ -642,33 +647,6 @@ function SubcategoryRail({
   items: CatalogueHierarchyItem[];
   onSelectCategory: (category: string) => void;
 }) {
-  const railRef = useRef<HTMLElement>(null);
-  const pausedRef = useRef(false);
-
-  useEffect(() => {
-    const rail = railRef.current;
-    if (!rail || items.length < 2 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
-    let frame = 0;
-    let previousTime = performance.now();
-    let direction = 1;
-
-    const animate = (time: number) => {
-      const maxScroll = Math.max(0, rail.scrollWidth - rail.clientWidth);
-      if (!pausedRef.current && document.visibilityState === "visible" && maxScroll > 0) {
-        const elapsed = Math.min(time - previousTime, 48);
-        rail.scrollLeft += elapsed * 0.032 * direction;
-        if (rail.scrollLeft >= maxScroll - 1) direction = -1;
-        if (rail.scrollLeft <= 1) direction = 1;
-      }
-      previousTime = time;
-      frame = window.requestAnimationFrame(animate);
-    };
-
-    frame = window.requestAnimationFrame(animate);
-    return () => window.cancelAnimationFrame(frame);
-  }, [items.length]);
-
-  const setPaused = (paused: boolean) => { pausedRef.current = paused; };
   const renderItem = (item: CatalogueHierarchyItem) => <button
     type="button"
     key={`${item.department}-${item.value}`}
@@ -686,17 +664,8 @@ function SubcategoryRail({
   </button>;
 
   return <nav
-    ref={railRef}
     className="subcategory-rail"
     aria-label={marketplaceFormatMessage("inventory.545b56483487", [contextLabel])}
-    onPointerEnter={() => setPaused(true)}
-    onPointerLeave={() => setPaused(false)}
-    onTouchStart={() => setPaused(true)}
-    onTouchEnd={() => setPaused(false)}
-    onFocusCapture={() => setPaused(true)}
-    onBlurCapture={(event) => {
-      if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setPaused(false);
-    }}
   >
     <div className="subcategory-rail-track">
       <div className="subcategory-rail-sequence">{items.map((item) => renderItem(item))}</div>
@@ -1432,15 +1401,13 @@ export default function Marketplace({
   useEffect(() => {
     let restoredCart: CartItem[] = [];
     try {
-      const saved = window.localStorage.getItem(CART_STORAGE_KEY);
-      if (saved) {
-        const parsed: unknown = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          restoredCart = parsed.filter((item): item is CartItem => Boolean(
+      window.localStorage.removeItem(LEGACY_CART_STORAGE_KEY);
+      const parsed: unknown = readExpiringStorage(window.localStorage, CART_STORAGE_KEY);
+      if (Array.isArray(parsed)) {
+        restoredCart = parsed.filter((item): item is CartItem => Boolean(
             item && typeof item === "object" && "id" in item && "quantity" in item
             && typeof item.id === "string" && typeof item.quantity === "number" && item.quantity > 0,
-          ));
-        }
+        ));
       }
     } catch {
       window.localStorage.removeItem(CART_STORAGE_KEY);
@@ -1453,7 +1420,11 @@ export default function Marketplace({
 
   useEffect(() => {
     if (!cartHydrated) return;
-    window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+    if (cart.length === 0) {
+      window.localStorage.removeItem(CART_STORAGE_KEY);
+      return;
+    }
+    writeExpiringStorage(window.localStorage, CART_STORAGE_KEY, cart, CART_STORAGE_TTL_MS);
   }, [cart, cartHydrated]);
 
   useEffect(() => {
@@ -1484,9 +1455,10 @@ export default function Marketplace({
   useEffect(() => {
     let savedPreferences: CustomerPreferences | null = null;
     try {
-      const saved = window.localStorage.getItem(CUSTOMER_PREFERENCES_STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved) as Partial<CustomerPreferences>;
+      window.localStorage.removeItem(LEGACY_CUSTOMER_PREFERENCES_STORAGE_KEY);
+      const restored = readExpiringStorage(window.sessionStorage, CUSTOMER_PREFERENCES_STORAGE_KEY);
+      if (restored && typeof restored === "object") {
+        const parsed = restored as Partial<CustomerPreferences>;
         const country = typeof parsed.whatsappCountry === "string" && getCountries().includes(parsed.whatsappCountry as CountryCode)
           ? parsed.whatsappCountry as CountryCode
           : "RW";
@@ -1514,7 +1486,7 @@ export default function Marketplace({
         };
       }
     } catch {
-      window.localStorage.removeItem(CUSTOMER_PREFERENCES_STORAGE_KEY);
+      window.sessionStorage.removeItem(CUSTOMER_PREFERENCES_STORAGE_KEY);
     }
     queueMicrotask(() => {
       if (savedPreferences) {
@@ -1539,7 +1511,12 @@ export default function Marketplace({
       coordinates,
       locationLabel: coordinates ? location : "",
     };
-    window.localStorage.setItem(CUSTOMER_PREFERENCES_STORAGE_KEY, JSON.stringify(preferences));
+    writeExpiringStorage(
+      window.sessionStorage,
+      CUSTOMER_PREFERENCES_STORAGE_KEY,
+      preferences,
+      CUSTOMER_PREFERENCES_TTL_MS,
+    );
   }, [coordinates, deliveryPreference, location, preferencesHydrated, whatsapp, whatsappCountry]);
 
   useEffect(() => {
