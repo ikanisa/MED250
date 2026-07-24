@@ -3,7 +3,7 @@
 Audit date: 24 July 2026  
 Repository: `https://github.com/ikanisa/MED250`  
 Candidate branch: `codex/med250-go-live-hardening`  
-Candidate revision: `b7136bda77f202e5bfd58eb620b2dbc2aa1fa46f`  
+Audited application revision: `c38ef94a78ad7402e8732bd56e660c4c64b23240`  
 Canonical production origin: `https://med-250.com`  
 Public catalogue origin: `https://med250-rwanda.ikanisa.chatgpt.site`  
 Release decision: **NO-GO**
@@ -13,7 +13,7 @@ Release decision: **NO-GO**
 The application code, catalogue-mode build, production-mode build, dependency
 set, localization inventory, performance budget, SEO implementation, responsive
 navigation, and core marketplace interactions are technically release-capable.
-The hardening candidate passes 357 Node tests, 170 Python tests with one
+The hardening candidate passes 361 Node tests, 170 Python tests with one
 intentional skip, 57 Sites catalogue/rendering tests, three production build
 tests, lint, catalogue validation, localization validation, two dependency
 audits, and the Cloudflare production dry run.
@@ -32,16 +32,22 @@ blockers**:
    approval;
 6. the security-hardening migration and revised pharmacy OTP Edge Function
    cannot be deployed because the connected Supabase account cannot access the
-   MED+250 project; and
-7. none. GitHub Actions billing is deliberately outside the release path;
-   GitHub is used only as a free source repository and the local release gate
-   is authoritative.
+   MED+250 project.
+
+GitHub Actions billing is deliberately outside the release path. GitHub is
+used only as a free source repository and the local release gate is
+authoritative.
 
 The former DNS blocker is resolved. `med-250.com` resolves through Cloudflare,
 HTTPS is live, robots and sitemap respond, and production routes return HTTP
-200. The live Worker is still revision
+200. The direct production Worker is still revision
 `468a3003e3b27c0f42a4ee089c8dae38028c1740`, not this audited hardening
 revision, so production must not be represented as running the fix.
+
+The separate public Sites catalogue is now version 15, deployed from the exact
+audited application revision in `catalog` mode. Requests and pharmacy
+fulfilment remain disabled there. Its live product page has been visually
+verified to omit the held mismatched Paracetamol image.
 
 ## Critical status register
 
@@ -79,11 +85,12 @@ revision, so production must not be represented as running the fix.
   the non-description columns needed by the security-invoker public projection.
 - Kept draft and governed description fields unavailable to public roles until
   the approved-only database contract is deployed and proven.
-- Held the mismatched `rwanda-fda-hm-1594` image from publication. The current
-  live page labels the product as a 125 mg suppository while visibly showing
-  oral-suspension bottles. This is a regulated-product trust failure and is a
-  production P0 until the hardening migration is live or a correct
-  product-specific gallery is approved.
+- Held the mismatched `rwanda-fda-hm-1594` image from publication in both the
+  database migration and a frontend fail-closed guard. The older direct
+  production Worker labels the product as a 125 mg suppository while visibly
+  showing oral-suspension bottles. The current Sites catalogue now omits the
+  gallery. The direct Worker remains a regulated-product trust P0 until this
+  code is deployed there or a correct product-specific gallery is approved.
 
 ### Privacy and client-side retention
 
@@ -105,7 +112,7 @@ revision, so production must not be represented as running the fix.
 
 | Gate | Result |
 |---|---:|
-| Node application and integration suite | **357/357 passed** |
+| Node application and integration suite | **361/361 passed** |
 | Python suite | **170 passed, 1 intentionally skipped** |
 | Sites catalogue/rendering suite | **57/57 passed** |
 | Production build checks | **3/3 passed** |
@@ -177,6 +184,7 @@ Evidence:
 - `evidence/03-live-product-paracetamol-desktop.png`
 - `evidence/04-live-home-mobile.png`
 - `evidence/05-live-mobile-menu.png`
+- `evidence/06-sites-held-product-mobile.png`
 
 ## Accessibility readiness
 
