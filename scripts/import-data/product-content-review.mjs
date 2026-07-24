@@ -468,7 +468,7 @@ async function main() {
   } catch (error) {
     const mayUseRecovery = (
       error?.code === "ENOENT"
-      && options.command === "verify"
+      && new Set(["verify", "next"]).has(options.command)
       && options.dataset === DEFAULT_DATASET_PATH
     );
     if (!mayUseRecovery) throw error;

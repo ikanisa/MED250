@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
@@ -8,9 +9,29 @@ import { validateLaunchEvidence } from "../scripts/validate-launch-evidence.mjs"
 const manifest = JSON.parse(await readFile(new URL("../data/launch-evidence.json", import.meta.url), "utf8"));
 const rootDir = new URL("..", import.meta.url).pathname;
 
+async function withCompleteFixtureEvidence(gateName, filenames) {
+  const fixture = structuredClone(manifest);
+  fixture.gates[gateName].evidence = await Promise.all(filenames.map(async (filename) => {
+    const reference = `docs/launch/evidence/${filename}`;
+    const source = await readFile(new URL(`../${reference}`, import.meta.url), "utf8");
+    const artifact = JSON.parse(source);
+    return {
+      type: artifact.evidence_type,
+      reference,
+      recorded_at: artifact.recorded_at,
+      sha256: createHash("sha256").update(source).digest("hex"),
+      summary: artifact.summary,
+    };
+  }));
+  return fixture;
+}
+
 test("approves an evidence-complete backend gate with named owner metadata", async () => {
   const result = await approveLaunchGate({
-    manifest: structuredClone(manifest),
+    manifest: await withCompleteFixtureEvidence("MED250_GATE_SECURITY_HARDENING_DEPLOYED", [
+      "security-hardening-deployment-2026-07-18.json",
+      "security-hardening-test-2026-07-18.json",
+    ]),
     gateName: "MED250_GATE_SECURITY_HARDENING_DEPLOYED",
     approvedBy: "Named backend owner",
     approvedRole: "Backend owner",
@@ -61,9 +82,13 @@ test("rejects launch gate approval when release-bound evidence is stale", async 
 });
 
 test("rejects launch gate approval with unsafe or incomplete metadata", async () => {
+  const evidenceCompleteManifest = await withCompleteFixtureEvidence("MED250_GATE_EDGE_FUNCTIONS_DEPLOYED", [
+    "edge-functions-deployment-2026-07-18.json",
+    "edge-functions-test-2026-07-18.json",
+  ]);
   await assert.rejects(
     () => approveLaunchGate({
-      manifest: structuredClone(manifest),
+      manifest: structuredClone(evidenceCompleteManifest),
       gateName: "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED",
       approvedBy: "",
       approvedRole: "Backend owner",
@@ -75,7 +100,7 @@ test("rejects launch gate approval with unsafe or incomplete metadata", async ()
   );
   await assert.rejects(
     () => approveLaunchGate({
-      manifest: structuredClone(manifest),
+      manifest: structuredClone(evidenceCompleteManifest),
       gateName: "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED",
       approvedBy: "Named backend owner",
       approvedRole: "Backend owner",

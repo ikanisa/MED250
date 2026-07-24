@@ -1,0 +1,45 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_SECURITY_HARDENING_DEPLOYED",
+  "evidence_type": "test_record",
+  "status": "pending",
+  "title": "MED+250 2026-07-23.1 deployed hardening tests",
+  "summary": "Owner-ready record for deployed staging and production negative tests. The complete local suite passes, but deployed backend verification cannot run until MED+250 project access and deployment exist.",
+  "recorded_at": "2026-07-24T11:20:00+02:00",
+  "recorded_by": "MED+250 release readiness review",
+  "recorded_role": "Release evidence preparer",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Local migration integration suite",
+      "status": "passed",
+      "detail": "The complete 361-test Node suite applies the migration and passes the reviewed authorization and privilege invariants."
+    },
+    {
+      "name": "Deployed tenant and authority tests",
+      "status": "pending",
+      "detail": "Duplicate phone binding, cross-tenant membership, revoked and suspended authority, concurrent binding, and offer-item ownership must pass against staging and production."
+    },
+    {
+      "name": "Deployed description and media tests",
+      "status": "pending",
+      "detail": "Public description privileges, governed projection, and the rwanda-fda-hm-1594 media hold must pass against the deployed schema."
+    },
+    {
+      "name": "Deployed contract and health tests",
+      "status": "pending",
+      "detail": "The protected backend contract, operational health, provider advisors, and rollback verification must pass."
+    }
+  ],
+  "executed_by": null,
+  "executor_role": null,
+  "started_at": null,
+  "completed_at": null,
+  "completion_instructions": [
+    "Execute the checks against controlled staging after the exact migration is deployed.",
+    "Retain only redacted aggregate output and body-free receipts.",
+    "Repeat the approved checks against production after promotion.",
+    "Set every check to passed, complete named executor metadata and timezone-qualified timestamps, and set status to complete."
+  ]
+}

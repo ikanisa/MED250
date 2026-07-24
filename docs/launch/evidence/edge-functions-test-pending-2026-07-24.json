@@ -1,0 +1,44 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED",
+  "evidence_type": "test_record",
+  "status": "pending",
+  "title": "Revised pharmacy OTP Edge Function deployed tests",
+  "summary": "Owner-ready record for the deployed revised pharmacy OTP verification boundary. Local integration tests pass; staging and production probes require MED+250 project access and deployment.",
+  "recorded_at": "2026-07-24T11:20:00+02:00",
+  "recorded_by": "MED+250 release readiness review",
+  "recorded_role": "Release evidence preparer",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Local identity-binding tests",
+      "status": "passed",
+      "detail": "Local integration tests pass for one-phone/one-tenant binding, revoked authority, cross-tenant rejection, and created-user cleanup."
+    },
+    {
+      "name": "Staging origin and eligibility probes",
+      "status": "pending",
+      "detail": "Allowed and rejected origins, duplicate phone eligibility, and no-side-effect rejection must be proven in staging."
+    },
+    {
+      "name": "Staging authority and concurrency probes",
+      "status": "pending",
+      "detail": "Revoked, suspended, concurrent bind, concurrent revoke, and cross-tenant paths must fail closed in staging."
+    },
+    {
+      "name": "Production protected-boundary probes",
+      "status": "pending",
+      "detail": "The approved redacted probe set must pass after promotion without retaining OTPs, phone numbers, user identifiers, tokens, or response bodies."
+    }
+  ],
+  "executed_by": null,
+  "executor_role": null,
+  "started_at": null,
+  "completed_at": null,
+  "completion_instructions": [
+    "Execute the complete redacted probe set against the staged function and verify no unintended Auth or marketplace side effect.",
+    "After backend-owner staging approval and production promotion, repeat the approved body-free probes.",
+    "Set every check to passed, complete named executor metadata and timezone-qualified timestamps, and set status to complete."
+  ]
+}

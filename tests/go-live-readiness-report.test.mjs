@@ -18,8 +18,8 @@ test("reports go-live readiness without promoting pending gates", async () => {
   });
   assert.deepEqual(report.gateReadiness, {
     confirmed: 0,
-    approvalPending: 2,
-    preparedEvidencePending: 8,
+    approvalPending: 0,
+    preparedEvidencePending: 10,
     missingEvidence: 0,
     staleReleaseEvidence: 1,
   });
@@ -30,6 +30,6 @@ test("reports go-live readiness without promoting pending gates", async () => {
   assert.ok(domain.releaseRevisionBindings.every((binding) => binding.observedReleaseRevision === "37d8c1c0e0c8ac2d15eea436d2f9037c20e2814c"));
   assert.equal(report.duplicateRegister.decisionCounts.pending, 51);
   assert.equal(report.physicalUat.statusCounts.pending, 12);
-  assert.equal(report.handoff.preparedPendingArtifactCount, 11);
+  assert.equal(report.handoff.preparedPendingArtifactCount, 15);
   assert.equal(report.handoff.unpreparedEvidenceArtifactCount, 0);
 });

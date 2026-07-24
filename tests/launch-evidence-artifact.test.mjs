@@ -101,11 +101,13 @@ test("builds one owner-ready handoff using every prepared pending artifact", asy
   const handoff = createLaunchEvidenceHandoff(manifest, prepared);
   assert.equal(handoff.release, "med250-production");
   assert.equal(handoff.gate_count, 11);
-  assert.equal(handoff.missing_evidence_artifact_count, 11);
-  assert.equal(handoff.prepared_pending_artifact_count, 11);
+  assert.equal(handoff.missing_evidence_artifact_count, 15);
+  assert.equal(handoff.prepared_pending_artifact_count, 15);
   assert.equal(handoff.unprepared_evidence_artifact_count, 0);
   const security = handoff.gates.find((gate) => gate.gate === "MED250_GATE_SECURITY_HARDENING_DEPLOYED");
-  assert.deepEqual(security.missing_evidence_types, []);
+  assert.deepEqual(security.missing_evidence_types, ["deployment_receipt", "test_record"]);
+  assert.equal(security.prepared_pending_evidence.deployment_receipt.template_valid, true);
+  assert.equal(security.prepared_pending_evidence.test_record.template_valid, true);
   assert.equal(security.approval_required.approved_by, null);
   const duplicates = handoff.gates.find((gate) => gate.gate === "MED250_GATE_DUPLICATE_REGISTER_REVIEWED");
   assert.match(duplicates.suggested_filenames.review_ledger, /duplicate-register-review-ledger-pending-2026-07-16\.json$/);

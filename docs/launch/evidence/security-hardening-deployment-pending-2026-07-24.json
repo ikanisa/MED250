@@ -1,0 +1,47 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_SECURITY_HARDENING_DEPLOYED",
+  "evidence_type": "deployment_receipt",
+  "status": "pending",
+  "title": "MED+250 2026-07-23.1 hardening deployment",
+  "summary": "Owner-ready receipt for controlled staging and production deployment of the current marketplace hardening migration. The migration is tested locally but has not been deployed because the authenticated Supabase account cannot access the MED+250 project.",
+  "recorded_at": "2026-07-24T11:20:00+02:00",
+  "recorded_by": "MED+250 release readiness review",
+  "recorded_role": "Release evidence preparer",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Candidate migration digest",
+      "status": "passed",
+      "detail": "The reviewed migration SHA-256 is b5b0b8abf07c921ab36f08553e4cef73dd6cf84a0ff111236cc9a3190ed42e15."
+    },
+    {
+      "name": "Controlled staging deployment",
+      "status": "blocked",
+      "detail": "The authenticated Supabase account cannot access a MED+250 staging project."
+    },
+    {
+      "name": "Staging rollback",
+      "status": "pending",
+      "detail": "The backend owner must execute and approve rollback against the controlled staging snapshot."
+    },
+    {
+      "name": "Approved production deployment",
+      "status": "pending",
+      "detail": "Production deployment must occur only after staging, negative tests, owner review, and the other release gates are ready."
+    }
+  ],
+  "deployed_by": null,
+  "deployer_role": null,
+  "deployed_at": null,
+  "environment": null,
+  "release_identifier": null,
+  "completion_instructions": [
+    "Grant the release operator access to an isolated MED+250 staging project without storing credentials in the repository.",
+    "Dry-run and deploy the exact migration whose SHA-256 is recorded above.",
+    "Execute all negative authorization, privilege, locking, image-hold, backend-contract, operational-health, and rollback checks.",
+    "After accountable staging approval, repeat on production for the exact immutable release and retain redacted provider receipts.",
+    "Set every check to passed, complete the named deployer metadata and timezone-qualified timestamps, and set status to complete."
+  ]
+}

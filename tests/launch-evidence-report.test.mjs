@@ -25,7 +25,7 @@ test("reports every pending gate and its exact missing evidence categories", () 
   );
   assert.deepEqual(
     report.gates.find((gate) => gate.name === "MED250_GATE_SECURITY_HARDENING_DEPLOYED").missingEvidenceTypes,
-    [],
+    ["deployment_receipt", "test_record"],
   );
 });
 

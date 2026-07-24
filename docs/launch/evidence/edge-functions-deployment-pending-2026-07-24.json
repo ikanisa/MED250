@@ -1,0 +1,41 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED",
+  "evidence_type": "deployment_receipt",
+  "status": "pending",
+  "title": "Revised pharmacy OTP Edge Function deployment",
+  "summary": "Owner-ready receipt for controlled staging and production deployment of the revised pharmacy OTP verifier. The reviewed source is complete but the authenticated Supabase account cannot access the MED+250 project.",
+  "recorded_at": "2026-07-24T11:20:00+02:00",
+  "recorded_by": "MED+250 release readiness review",
+  "recorded_role": "Release evidence preparer",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Candidate function digest",
+      "status": "passed",
+      "detail": "The reviewed dawanear-pharmacy-verify-otp source SHA-256 is 9047fb567051efc8f2ec43ae8c27751e33a3f13b10463723641585ae1737e9a9."
+    },
+    {
+      "name": "Controlled staging deployment",
+      "status": "blocked",
+      "detail": "The authenticated Supabase account cannot access a MED+250 staging project."
+    },
+    {
+      "name": "Approved production deployment",
+      "status": "pending",
+      "detail": "Production deployment requires staging verification, accountable backend-owner approval, and the exact immutable release."
+    }
+  ],
+  "deployed_by": null,
+  "deployer_role": null,
+  "deployed_at": null,
+  "environment": null,
+  "release_identifier": null,
+  "completion_instructions": [
+    "Deploy the exact reviewed source to an isolated MED+250 staging project.",
+    "Retrieve or otherwise verify the deployed source digest and function version.",
+    "Complete the staging negative-test record and obtain accountable backend-owner approval.",
+    "Promote the same source to production, retain a redacted provider receipt, complete deployer metadata, and set status to complete."
+  ]
+}

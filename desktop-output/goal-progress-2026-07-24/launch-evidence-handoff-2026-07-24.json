@@ -1,0 +1,924 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "instructions": [
+    "Complete only evidence produced by the accountable owner or named executor.",
+    "Never store credentials, tokens, phone numbers, OTPs, customer identifiers, prescription contents, email addresses, or precise customer coordinates.",
+    "Use a prepared_pending_evidence file when one is listed; it already contains the scoped checks and completion instructions for that gate.",
+    "Validate each completed artifact before adding its SHA-256 digest and approval metadata to data/launch-evidence.json.",
+    "Do not mark a gate confirmed until every required evidence type and the named gate approval are complete."
+  ],
+  "gate_count": 11,
+  "missing_evidence_artifact_count": 15,
+  "prepared_pending_artifact_count": 15,
+  "unprepared_evidence_artifact_count": 0,
+  "gates": [
+    {
+      "gate": "MED250_GATE_GPS_READY",
+      "title": "Authoritative pharmacy GPS readiness",
+      "owner": "MED+250 operations",
+      "acceptance": "The approved operating pharmacy set has authoritative premises coordinates with reviewer identity and durable source evidence, and strict operational health reports dispatch-ready coverage.",
+      "current_status": "pending",
+      "approval_required": {
+        "approved_by": null,
+        "approved_role": null,
+        "approved_at": null
+      },
+      "missing_evidence_types": [
+        "review_ledger"
+      ],
+      "prepared_pending_evidence": {
+        "review_ledger": {
+          "reference": "docs/launch/evidence/gps-readiness-review-ledger-pending-2026-07-16.json",
+          "sha256": "7395c111b11d8d960df78070f5be65d0e69f78a41013c5c524e4b3de10c4abba",
+          "byte_length": 4264,
+          "status": "pending",
+          "recorded_at": "2026-07-16T13:55:39+02:00",
+          "template_valid": true,
+          "template_errors": [],
+          "check_status_counts": {
+            "passed": 3,
+            "blocked": 1,
+            "pending": 1
+          },
+          "unresolved_checks": [
+            {
+              "name": "Full active-registry review",
+              "status": "blocked",
+              "detail": "Six hundred seventy-six active pharmacy records do not yet have approved GPS evidence. The operations owner must approve authoritative premises evidence or explicitly remove each unresolved record from the intended GPS-ready production scope."
+            },
+            {
+              "name": "Record-level owner decisions",
+              "status": "pending",
+              "detail": "A controlled private ledger must record one decision per active pharmacy with reviewer identity, source version, evidence outcome and timezone-qualified review timestamp."
+            }
+          ],
+          "completion_instructions": [
+            "Keep the row-level ledger in the controlled operations location because it contains precise pharmacy locations.",
+            "Decide every active pharmacy record and make the intended GPS-ready production scope match actual routing and customer presentation.",
+            "Do not approve a Google Maps link, generated search URL or name-only candidate as authoritative premises GPS.",
+            "Regenerate the aggregate production health snapshot after applying every approved or excluded decision.",
+            "Set pending_records and blocked_records to zero, add the named reviewer, role and timestamp, set every check to passed, and set status to complete.",
+            "Validate this redacted artifact strictly and add it to data/launch-evidence.json with its exact SHA-256 digest."
+          ]
+        }
+      },
+      "unprepared_evidence_types": [],
+      "suggested_filenames": {
+        "review_ledger": "docs/launch/evidence/gps-readiness-review-ledger-pending-2026-07-16.json"
+      },
+      "evidence_templates": {}
+    },
+    {
+      "gate": "MED250_GATE_WHATSAPP_READY",
+      "title": "Pharmacy WhatsApp readiness",
+      "owner": "MED+250 operations",
+      "acceptance": "The approved operating pharmacy set has current, pharmacy-authorised login-enabled WhatsApp contacts and the strict operational-health check passes.",
+      "current_status": "pending",
+      "approval_required": {
+        "approved_by": null,
+        "approved_role": null,
+        "approved_at": null
+      },
+      "missing_evidence_types": [
+        "review_ledger"
+      ],
+      "prepared_pending_evidence": {
+        "review_ledger": {
+          "reference": "docs/launch/evidence/whatsapp-readiness-review-ledger-pending-2026-07-16.json",
+          "sha256": "7afabcf594627b49633d24cab9f8a4c9a1325965273c8b8ffddde29aeed6edf1",
+          "byte_length": 4581,
+          "status": "pending",
+          "recorded_at": "2026-07-16T13:55:39+02:00",
+          "template_valid": true,
+          "template_errors": [],
+          "check_status_counts": {
+            "passed": 3,
+            "blocked": 1,
+            "pending": 1
+          },
+          "unresolved_checks": [
+            {
+              "name": "Full active-registry review",
+              "status": "blocked",
+              "detail": "Four hundred sixty-nine active pharmacy records do not yet have governed WhatsApp coverage. The operations owner must verify an authorized business identity or explicitly exclude each unresolved record from the intended responder scope."
+            },
+            {
+              "name": "Record-level owner decisions",
+              "status": "pending",
+              "detail": "A controlled private ledger must record one decision per active pharmacy with the evidence source, authority result, reviewer identity and timezone-qualified review timestamp."
+            }
+          ],
+          "completion_instructions": [
+            "Keep the row-level ledger in the controlled operations location because it contains pharmacy contact values.",
+            "Decide every active pharmacy record and make the intended WhatsApp responder scope match actual routing and portal access.",
+            "Do not infer WhatsApp authority from a public phone, Google Maps listing, shared number or unverified browser observation.",
+            "Quarantine conflicting contacts and require direct pharmacy or authoritative-source verification before enabling login.",
+            "Regenerate the aggregate production health snapshot after applying every approved or excluded decision.",
+            "Set pending_records and blocked_records to zero, add the named reviewer, role and timestamp, set every check to passed, and set status to complete.",
+            "Validate this redacted artifact strictly and add it to data/launch-evidence.json with its exact SHA-256 digest."
+          ]
+        }
+      },
+      "unprepared_evidence_types": [],
+      "suggested_filenames": {
+        "review_ledger": "docs/launch/evidence/whatsapp-readiness-review-ledger-pending-2026-07-16.json"
+      },
+      "evidence_templates": {}
+    },
+    {
+      "gate": "MED250_GATE_DUPLICATE_REGISTER_REVIEWED",
+      "title": "Duplicate-register review",
+      "owner": "MED+250 register data reviewer",
+      "acceptance": "The strict duplicate-register verifier passes with named, timestamped decisions for every synchronized product and pharmacy duplicate group.",
+      "current_status": "pending",
+      "approval_required": {
+        "approved_by": null,
+        "approved_role": null,
+        "approved_at": null
+      },
+      "missing_evidence_types": [
+        "review_ledger"
+      ],
+      "prepared_pending_evidence": {
+        "review_ledger": {
+          "reference": "docs/launch/evidence/duplicate-register-review-ledger-pending-2026-07-16.json",
+          "sha256": "c4caaff554d7846ba1db7c45426687bee265b82e3547be4cbc5e30bbbab4c205",
+          "byte_length": 3975,
+          "status": "pending",
+          "recorded_at": "2026-07-16T13:43:37Z",
+          "template_valid": true,
+          "template_errors": [],
+          "check_status_counts": {
+            "passed": 3,
+            "blocked": 1,
+            "pending": 1
+          },
+          "unresolved_checks": [
+            {
+              "name": "Strict duplicate review",
+              "status": "blocked",
+              "detail": "All 51 rows remain pending. The strict verifier will fail until every row records either accepted_source_duplicate or blocked_source_correction with a named reviewer, timezone-qualified timestamp and substantive rationale."
+            },
+            {
+              "name": "Named reviewer completion",
+              "status": "pending",
+              "detail": "The accountable register data reviewer must complete all row decisions, rerun the strict verifier and sign this redacted ledger."
+            }
+          ],
+          "completion_instructions": [
+            "Review every group in desktop-output/goal-progress-2026-07-20/duplicate-register-review-packet-2026-07-20.json against the authoritative Rwanda FDA source.",
+            "Record exactly one governed decision, named reviewer, timezone-qualified reviewed_at value and substantive note for every row in data/imports/duplicate-register-review.csv.",
+            "Use blocked_source_correction when an authoritative correction is still required; do not change or remove source rows merely to satisfy the verifier.",
+            "Run npm run data:duplicates:verify -- --strict and retain its redacted passing result.",
+            "Update the review CSV and packet digests, set pending_records to zero, reconcile decision_counts, add reviewer metadata, set every check to passed and set status to complete.",
+            "Validate this artifact strictly, add its exact SHA-256 to data/launch-evidence.json and confirm the gate only with named gate approval metadata."
+          ]
+        }
+      },
+      "unprepared_evidence_types": [],
+      "suggested_filenames": {
+        "review_ledger": "docs/launch/evidence/duplicate-register-review-ledger-pending-2026-07-16.json"
+      },
+      "evidence_templates": {}
+    },
+    {
+      "gate": "MED250_GATE_SECURITY_HARDENING_DEPLOYED",
+      "title": "Security-hardening migration deployment",
+      "owner": "MED+250 backend owner",
+      "acceptance": "The 2026-07-23.1 marketplace hardening migration is deployed first to controlled staging and then to production using approved credentials. Negative authorization, locking, public-description privilege, media-hold, rollback, aggregate backend-contract, and operational-health checks pass for the exact immutable application release.",
+      "current_status": "pending",
+      "approval_required": {
+        "approved_by": null,
+        "approved_role": null,
+        "approved_at": null
+      },
+      "missing_evidence_types": [
+        "deployment_receipt",
+        "test_record"
+      ],
+      "prepared_pending_evidence": {
+        "deployment_receipt": {
+          "reference": "docs/launch/evidence/security-hardening-deployment-pending-2026-07-24.json",
+          "sha256": "b1c330e93c223bcd660e32690eb728967291989c36b61de852a416d35c03d7c1",
+          "byte_length": 2264,
+          "status": "pending",
+          "recorded_at": "2026-07-24T11:20:00+02:00",
+          "template_valid": true,
+          "template_errors": [],
+          "check_status_counts": {
+            "passed": 1,
+            "blocked": 1,
+            "pending": 2
+          },
+          "unresolved_checks": [
+            {
+              "name": "Controlled staging deployment",
+              "status": "blocked",
+              "detail": "The authenticated Supabase account cannot access a MED+250 staging project."
+            },
+            {
+              "name": "Staging rollback",
+              "status": "pending",
+              "detail": "The backend owner must execute and approve rollback against the controlled staging snapshot."
+            },
+            {
+              "name": "Approved production deployment",
+              "status": "pending",
+              "detail": "Production deployment must occur only after staging, negative tests, owner review, and the other release gates are ready."
+            }
+          ],
+          "completion_instructions": [
+            "Grant the release operator access to an isolated MED+250 staging project without storing credentials in the repository.",
+            "Dry-run and deploy the exact migration whose SHA-256 is recorded above.",
+            "Execute all negative authorization, privilege, locking, image-hold, backend-contract, operational-health, and rollback checks.",
+            "After accountable staging approval, repeat on production for the exact immutable release and retain redacted provider receipts.",
+            "Set every check to passed, complete the named deployer metadata and timezone-qualified timestamps, and set status to complete."
+          ]
+        },
+        "test_record": {
+          "reference": "docs/launch/evidence/security-hardening-test-pending-2026-07-24.json",
+          "sha256": "0da8f88be92c7ecac0629b884f63b320b2c0883df5c1ebd5097b8cf00e2a59cd",
+          "byte_length": 2102,
+          "status": "pending",
+          "recorded_at": "2026-07-24T11:20:00+02:00",
+          "template_valid": true,
+          "template_errors": [],
+          "check_status_counts": {
+            "passed": 1,
+            "pending": 3
+          },
+          "unresolved_checks": [
+            {
+              "name": "Deployed tenant and authority tests",
+              "status": "pending",
+              "detail": "Duplicate phone binding, cross-tenant membership, revoked and suspended authority, concurrent binding, and offer-item ownership must pass against staging and production."
+            },
+            {
+              "name": "Deployed description and media tests",
+              "status": "pending",
+              "detail": "Public description privileges, governed projection, and the rwanda-fda-hm-1594 media hold must pass against the deployed schema."
+            },
+            {
+              "name": "Deployed contract and health tests",
+              "status": "pending",
+              "detail": "The protected backend contract, operational health, provider advisors, and rollback verification must pass."
+            }
+          ],
+          "completion_instructions": [
+            "Execute the checks against controlled staging after the exact migration is deployed.",
+            "Retain only redacted aggregate output and body-free receipts.",
+            "Repeat the approved checks against production after promotion.",
+            "Set every check to passed, complete named executor metadata and timezone-qualified timestamps, and set status to complete."
+          ]
+        }
+      },
+      "unprepared_evidence_types": [],
+      "suggested_filenames": {
+        "deployment_receipt": "docs/launch/evidence/security-hardening-deployment-pending-2026-07-24.json",
+        "test_record": "docs/launch/evidence/security-hardening-test-pending-2026-07-24.json"
+      },
+      "evidence_templates": {}
+    },
+    {
+      "gate": "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED",
+      "title": "Revised Edge Function deployment",
+      "owner": "MED+250 backend owner",
+      "acceptance": "The revised dawanear-pharmacy-verify-otp function bound to the 2026-07-23.1 reviewed phone-to-tenant RPC is deployed first to controlled staging and then to production. Created-user cleanup, duplicate-phone rejection, revoked and suspended authority, cross-tenant isolation, concurrency locking, origin validation, and the protected boundaries of all other production Edge Functions pass for the exact immutable release.",
+      "current_status": "pending",
+      "approval_required": {
+        "approved_by": null,
+        "approved_role": null,
+        "approved_at": null
+      },
+      "missing_evidence_types": [
+        "deployment_receipt",
+        "test_record"
+      ],
+      "prepared_pending_evidence": {
+        "deployment_receipt": {
+          "reference": "docs/launch/evidence/edge-functions-deployment-pending-2026-07-24.json",
+          "sha256": "04a58366774528d8033219aad14fbac563130886d63514fc8a428d5e35b34d78",
+          "byte_length": 1854,
+          "status": "pending",
+          "recorded_at": "2026-07-24T11:20:00+02:00",
+          "template_valid": true,
+          "template_errors": [],
+          "check_status_counts": {
+            "passed": 1,
+            "blocked": 1,
+            "pending": 1
+          },
+          "unresolved_checks": [
+            {
+              "name": "Controlled staging deployment",
+              "status": "blocked",
+              "detail": "The authenticated Supabase account cannot access a MED+250 staging project."
+            },
+            {
+              "name": "Approved production deployment",
+              "status": "pending",
+              "detail": "Production deployment requires staging verification, accountable backend-owner approval, and the exact immutable release."
+            }
+          ],
+          "completion_instructions": [
+            "Deploy the exact reviewed source to an isolated MED+250 staging project.",
+            "Retrieve or otherwise verify the deployed source digest and function version.",
+            "Complete the staging negative-test record and obtain accountable backend-owner approval.",
+            "Promote the same source to production, retain a redacted provider receipt, complete deployer metadata, and set status to complete."
+          ]
+        },
+        "test_record": {
+          "reference": "docs/launch/evidence/edge-functions-test-pending-2026-07-24.json",
+          "sha256": "3ec125296412774852c7803665237733c5577d6bcd236e8e05859aacd6ebf541",
+          "byte_length": 2074,
+          "status": "pending",
+          "recorded_at": "2026-07-24T11:20:00+02:00",
+          "template_valid": true,
+          "template_errors": [],
+          "check_status_counts": {
+            "passed": 1,
+            "pending": 3
+          },
+          "unresolved_checks": [
+            {
+              "name": "Staging origin and eligibility probes",
+              "status": "pending",
+              "detail": "Allowed and rejected origins, duplicate phone eligibility, and no-side-effect rejection must be proven in staging."
+            },
+            {
+              "name": "Staging authority and concurrency probes",
+              "status": "pending",
+              "detail": "Revoked, suspended, concurrent bind, concurrent revoke, and cross-tenant paths must fail closed in staging."
+            },
+            {
+              "name": "Production protected-boundary probes",
+              "status": "pending",
+              "detail": "The approved redacted probe set must pass after promotion without retaining OTPs, phone numbers, user identifiers, tokens, or response bodies."
+            }
+          ],
+          "completion_instructions": [
+            "Execute the complete redacted probe set against the staged function and verify no unintended Auth or marketplace side effect.",
+            "After backend-owner staging approval and production promotion, repeat the approved body-free probes.",
+            "Set every check to passed, complete named executor metadata and timezone-qualified timestamps, and set status to complete."
+          ]
+        }
+      },
+      "unprepared_evidence_types": [],
+      "suggested_filenames": {
+        "deployment_receipt": "docs/launch/evidence/edge-functions-deployment-pending-2026-07-24.json",
+        "test_record": "docs/launch/evidence/edge-functions-test-pending-2026-07-24.json"
+      },
+      "evidence_templates": {}
+    },
+    {
+      "gate": "MED250_GATE_TURNSTILE_SERVER_VERIFIED",
+      "title": "Turnstile server verification",
+      "owner": "MED+250 security owner",
+      "acceptance": "Supabase Auth validates production Turnstile tokens and controlled tests prove invalid or missing tokens cannot create new customer identities.",
+      "current_status": "pending",
+      "approval_required": {
+        "approved_by": null,
+        "approved_role": null,
+        "approved_at": null
+      },
+      "missing_evidence_types": [
+        "test_record"
+      ],
+      "prepared_pending_evidence": {
+        "test_record": {
+          "reference": "docs/launch/evidence/turnstile-positive-path-test-pending-2026-07-16.json",
+          "sha256": "5e4d07c89f7df5ba2a42dff2d741832b1f9b1386b17475c4849d155d0dad6dc0",
+          "byte_length": 3654,
+          "status": "pending",
+          "recorded_at": "2026-07-16T14:08:21+02:00",
+          "template_valid": true,
+          "template_errors": [],
+          "check_status_counts": {
+            "passed": 2,
+            "pending": 5
+          },
+          "unresolved_checks": [
+            {
+              "name": "Real production widget completed",
+              "status": "pending",
+              "detail": "An approved browser operator has not yet completed the real production widget and supplied its short-lived response only to the protected verifier process."
+            },
+            {
+              "name": "Disposable anonymous identity created",
+              "status": "pending",
+              "detail": "The protected verifier has not yet proven that one valid production widget response creates exactly one disposable anonymous customer session."
+            },
+            {
+              "name": "Disposable identity completely removed",
+              "status": "pending",
+              "detail": "The valid-path session revocation, Auth identity deletion and restoration of the aggregate pre-test user count remain unexecuted."
+            },
+            {
+              "name": "No marketplace side effect",
+              "status": "pending",
+              "detail": "The operator must confirm that the controlled Auth test created no cart, availability request, pharmacy message, prescription or marketplace data row."
+            },
+            {
+              "name": "Redacted verifier output retained",
+              "status": "pending",
+              "detail": "The final evidence must contain only the privacy-safe verifier result and must not contain the widget response, identity, session material or raw provider response."
+            }
+          ],
+          "completion_instructions": [
+            "Complete the real production widget in a controlled browser without adding products or submitting an availability request.",
+            "Run npm run security:turnstile:verify -- --require-valid with the short-lived widget response and protected Supabase values supplied only through the operator process environment.",
+            "Confirm one disposable identity is created, its session is revoked, its Auth record is deleted, the aggregate user count is restored and no marketplace row or pharmacy contact is created.",
+            "Retain only the redacted verifier output, set every check to passed, add the executor, role and timezone-qualified start and completion timestamps, and set status to complete.",
+            "Validate the completed test strictly and add it to the launch registry only with its exact SHA-256 digest."
+          ]
+        }
+      },
+      "unprepared_evidence_types": [],
+      "suggested_filenames": {
+        "test_record": "docs/launch/evidence/turnstile-positive-path-test-pending-2026-07-16.json"
+      },
+      "evidence_templates": {}
+    },
+    {
+      "gate": "MED250_GATE_AUTH_RATE_LIMITS_APPROVED",
+      "title": "Anonymous-auth rate-limit approval",
+      "owner": "MED+250 security owner",
+      "acceptance": "Project-wide anonymous-auth limits are approved after impact review and controlled tests prove intended customers can order without weakening abuse controls.",
+      "current_status": "pending",
+      "approval_required": {
+        "approved_by": null,
+        "approved_role": null,
+        "approved_at": null
+      },
+      "missing_evidence_types": [
+        "signed_approval",
+        "test_record"
+      ],
+      "prepared_pending_evidence": {
+        "signed_approval": {
+          "reference": "docs/launch/evidence/auth-rate-limit-approval-pending-2026-07-16.json",
+          "sha256": "d12a2ba58394168c0b49304d1626e6199672fffdd0c8915126769a2fede14145",
+          "byte_length": 3365,
+          "status": "pending",
+          "recorded_at": "2026-07-16T14:08:21+02:00",
+          "template_valid": true,
+          "template_errors": [],
+          "check_status_counts": {
+            "blocked": 1,
+            "pending": 5
+          },
+          "unresolved_checks": [
+            {
+              "name": "Controlled rate-limit test complete",
+              "status": "blocked",
+              "detail": "The paired intended-use and abuse-limit test remains pending and therefore cannot yet support accountable approval of the project-wide setting."
+            },
+            {
+              "name": "Shared-project impact accepted",
+              "status": "pending",
+              "detail": "The security owner must record that the selected limit is acceptable for MED+250 and every other application using the same Supabase Auth project."
+            },
+            {
+              "name": "Legitimate demand and abuse risk balanced",
+              "status": "pending",
+              "detail": "The approval must document the expected peak customer-session profile, abuse threat, selected threshold, time window and evidence supporting the decision."
+            },
+            {
+              "name": "Monitoring and rollback conditions approved",
+              "status": "pending",
+              "detail": "Named alert thresholds, change authority, incident response, rollback criteria and next review date have not yet been approved."
+            },
+            {
+              "name": "Turnstile dependency accepted",
+              "status": "pending",
+              "detail": "The security owner must confirm the approved limit assumes production server-side Turnstile remains enabled and that weakening CAPTCHA is not an allowed capacity response."
+            },
+            {
+              "name": "Named security-owner signature",
+              "status": "pending",
+              "detail": "The accountable security owner has not yet recorded the final decision, conditions, named approver, role and timezone-qualified approval timestamp."
+            }
+          ],
+          "completion_instructions": [
+            "Complete and strictly validate the paired controlled test.",
+            "Review the shared-project impact, legitimate peak profile, abuse risk, selected threshold, time window, monitoring, rollback and change-authority decisions.",
+            "Record the selected limit, time window and timezone-qualified next review date without including identities or provider secrets.",
+            "Confirm the review digest still matches, set every check to passed, set decision to approved, add the named approver, role and timestamp, and set status to complete.",
+            "Validate the completed approval strictly and add it to the launch registry only with its exact SHA-256 digest."
+          ]
+        },
+        "test_record": {
+          "reference": "docs/launch/evidence/auth-rate-limit-test-pending-2026-07-16.json",
+          "sha256": "a097f876ddadcd3f802091170cc47198e819c80cbfbfe4cd04573e0b923da2ef",
+          "byte_length": 3936,
+          "status": "pending",
+          "recorded_at": "2026-07-16T14:08:21+02:00",
+          "template_valid": true,
+          "template_errors": [],
+          "check_status_counts": {
+            "passed": 1,
+            "blocked": 1,
+            "pending": 6
+          },
+          "unresolved_checks": [
+            {
+              "name": "Shared-project test window approved",
+              "status": "blocked",
+              "detail": "Owners of applications sharing the Supabase Auth project have not yet approved the test window, disposable identity volume, monitoring plan and rollback contact."
+            },
+            {
+              "name": "Intended customer session succeeds",
+              "status": "pending",
+              "detail": "The controlled test has not yet proven that an intended customer with a fresh real Turnstile response can obtain and use one anonymous session."
+            },
+            {
+              "name": "Approved threshold permits expected demand",
+              "status": "pending",
+              "detail": "The selected threshold has not yet been exercised against the approved legitimate-use profile for MED+250 and the other shared applications."
+            },
+            {
+              "name": "Excess creation attempts are rate limited",
+              "status": "pending",
+              "detail": "The controlled test has not yet proven that attempts beyond the approved threshold receive the expected rate-limit rejection without weakening CAPTCHA enforcement."
+            },
+            {
+              "name": "Disposable identities and sessions removed",
+              "status": "pending",
+              "detail": "The operator must revoke and delete every disposable test identity and prove the aggregate Auth user count returns to its pre-test value."
+            },
+            {
+              "name": "No marketplace or shared-application harm",
+              "status": "pending",
+              "detail": "The test must confirm no availability request, pharmacy notification, prescription, contact change, unresolved outage or shared-application regression occurred."
+            },
+            {
+              "name": "Privacy-safe monitoring reviewed",
+              "status": "pending",
+              "detail": "The security owner must inspect redacted provider and aggregate operational signals and confirm the repository artifact contains no identity, network, widget or session data."
+            }
+          ],
+          "completion_instructions": [
+            "Obtain shared-project owner approval for the exact test window, disposable identity volume, monitoring and rollback plan.",
+            "Record the aggregate Auth user count, prove intended access with fresh real widget responses, exercise the approved threshold and prove excess attempts are rate limited.",
+            "Keep CAPTCHA rejection and rate-limit rejection distinct, remove every disposable identity and session, and restore the aggregate pre-test count.",
+            "Confirm no marketplace request or shared-application regression occurred and retain only privacy-safe aggregate output.",
+            "Set every check to passed, add the executor, role and timezone-qualified start and completion timestamps, and set status to complete.",
+            "Validate the completed test strictly and add it to the launch registry only with its exact SHA-256 digest."
+          ]
+        }
+      },
+      "unprepared_evidence_types": [],
+      "suggested_filenames": {
+        "signed_approval": "docs/launch/evidence/auth-rate-limit-approval-pending-2026-07-16.json",
+        "test_record": "docs/launch/evidence/auth-rate-limit-test-pending-2026-07-16.json"
+      },
+      "evidence_templates": {}
+    },
+    {
+      "gate": "MED250_GATE_PRESCRIPTION_RETENTION_APPROVED",
+      "title": "Prescription-retention approval",
+      "owner": "MED+250 privacy owner",
+      "acceptance": "The privacy owner approves the implemented retention periods and cleanup schedule, and a controlled cleanup run produces a healthy, non-stale aggregate signal.",
+      "current_status": "pending",
+      "approval_required": {
+        "approved_by": null,
+        "approved_role": null,
+        "approved_at": null
+      },
+      "missing_evidence_types": [
+        "signed_approval"
+      ],
+      "prepared_pending_evidence": {
+        "signed_approval": {
+          "reference": "docs/launch/evidence/prescription-retention-approval-pending-2026-07-16.json",
+          "sha256": "ac1d8a085a4248f88d1e9de180d296cd368cc9a483d4292149d3ce87e2e6c8be",
+          "byte_length": 3397,
+          "status": "pending",
+          "recorded_at": "2026-07-16T13:57:59+02:00",
+          "template_valid": true,
+          "template_errors": [],
+          "check_status_counts": {
+            "passed": 4,
+            "blocked": 1,
+            "pending": 1
+          },
+          "unresolved_checks": [
+            {
+              "name": "Privacy and legal acceptance",
+              "status": "blocked",
+              "detail": "The privacy owner has not yet recorded the applicable legal basis, controller and processor roles, transfer conditions, notification obligations or any required policy conditions."
+            },
+            {
+              "name": "Named incident roles and signature",
+              "status": "pending",
+              "detail": "The privacy owner must assign the accountable privacy and security incident contacts, approve the periods and safeguards, and sign this artifact."
+            }
+          ],
+          "completion_instructions": [
+            "Review the policy with the applicable Rwanda privacy, health-data and pharmaceutical obligations.",
+            "Assign the accountable privacy and security incident contacts in the controlled staff register.",
+            "Record any legal-basis, controller, processor, transfer, notification or retention conditions in the redacted decision.",
+            "Confirm both recorded SHA-256 values still match their files.",
+            "Set every check to passed, set decision to approved, add the approver, role and timezone-qualified timestamp, and set status to complete.",
+            "Validate the artifact strictly and add it to data/launch-evidence.json with its exact SHA-256 digest."
+          ]
+        }
+      },
+      "unprepared_evidence_types": [],
+      "suggested_filenames": {
+        "signed_approval": "docs/launch/evidence/prescription-retention-approval-pending-2026-07-16.json"
+      },
+      "evidence_templates": {}
+    },
+    {
+      "gate": "MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED",
+      "title": "Cloudflare account verification",
+      "owner": "MED+250 infrastructure owner",
+      "acceptance": "The intended Cloudflare account, least-privilege deploy token, Worker names, protected environments and route ownership are verified with a redacted account record.",
+      "current_status": "pending",
+      "approval_required": {
+        "approved_by": null,
+        "approved_role": null,
+        "approved_at": null
+      },
+      "missing_evidence_types": [
+        "account_verification",
+        "signed_approval"
+      ],
+      "prepared_pending_evidence": {
+        "account_verification": {
+          "reference": "docs/launch/evidence/cloudflare-account-verification-pending-2026-07-16.json",
+          "sha256": "acab00848593ff22ca094bc934151b63f91bf2737607183133b744493d4dcb62",
+          "byte_length": 2172,
+          "status": "pending",
+          "recorded_at": "2026-07-16T11:42:36Z",
+          "template_valid": true,
+          "template_errors": [],
+          "check_status_counts": {
+            "passed": 3,
+            "blocked": 1,
+            "pending": 1
+          },
+          "unresolved_checks": [
+            {
+              "name": "Least-privilege credential",
+              "status": "blocked",
+              "detail": "The current OAuth session reports 29 permissions, including multiple unrelated account-wide write capabilities. Replace it with a credential limited to the MED+250 Worker, required route and assets, and read-only zone inspection."
+            },
+            {
+              "name": "Infrastructure-owner approval",
+              "status": "pending",
+              "detail": "The named infrastructure owner must verify the replacement credential, confirm old access is revoked, and sign the completed account record."
+            }
+          ],
+          "completion_instructions": []
+        },
+        "signed_approval": {
+          "reference": "docs/launch/evidence/cloudflare-account-approval-pending-2026-07-16.json",
+          "sha256": "a98fb0e9eda526e4efb9ffb24bb71130291a0c4a46b2e638d0e5c9dbcfe92307",
+          "byte_length": 3731,
+          "status": "pending",
+          "recorded_at": "2026-07-16T14:08:21+02:00",
+          "template_valid": true,
+          "template_errors": [],
+          "check_status_counts": {
+            "blocked": 2,
+            "pending": 5
+          },
+          "unresolved_checks": [
+            {
+              "name": "Completed account verification",
+              "status": "blocked",
+              "detail": "The paired account-verification artifact remains pending because the current interactive OAuth session has broad unrelated write permissions."
+            },
+            {
+              "name": "Intended account and Worker ownership",
+              "status": "pending",
+              "detail": "The named infrastructure owner must confirm the redacted production account, production Worker, preview Worker, custom domain and protected deployment environments are the intended assets."
+            },
+            {
+              "name": "Least-privilege deployment credential",
+              "status": "blocked",
+              "detail": "A replacement credential limited to the MED+250 Worker, required route and assets, and read-only zone inspection has not yet been verified."
+            },
+            {
+              "name": "Old broad access revoked",
+              "status": "pending",
+              "detail": "The infrastructure owner has not yet retained redacted proof that the broad interactive credential is removed from the release path and no longer authorises deployment."
+            },
+            {
+              "name": "Protected environment ownership",
+              "status": "pending",
+              "detail": "Named ownership and change authority for preview and production environments, secrets, variables, approval rules and rollback access have not yet been approved."
+            },
+            {
+              "name": "Routing-owner and domain boundary",
+              "status": "pending",
+              "detail": "The owner must confirm the direct production Worker is the sole routing owner for the active hostname and that no Sites project or second Worker competes for it."
+            },
+            {
+              "name": "Named infrastructure-owner signature",
+              "status": "pending",
+              "detail": "The accountable infrastructure owner has not yet recorded the final decision, conditions, named approver, role and timezone-qualified approval timestamp."
+            }
+          ],
+          "completion_instructions": [
+            "Create and install the least-privilege MED+250 deployment credential and remove the broad interactive credential from the release path.",
+            "Complete and strictly validate the paired account-verification artifact with named verification and least_privilege_confirmed set to true.",
+            "Confirm account, Worker, environment, secret, variable, route, custom-domain, approval and rollback ownership.",
+            "Confirm the completed account-verification digest and update this artifact if that record changed.",
+            "Set every check to passed, set decision to approved, add the named approver, role and timezone-qualified timestamp, and set status to complete.",
+            "Validate both completed artifacts strictly and add them to the launch registry only with their exact SHA-256 digests."
+          ]
+        }
+      },
+      "unprepared_evidence_types": [],
+      "suggested_filenames": {
+        "account_verification": "docs/launch/evidence/cloudflare-account-verification-pending-2026-07-16.json",
+        "signed_approval": "docs/launch/evidence/cloudflare-account-approval-pending-2026-07-16.json"
+      },
+      "evidence_templates": {}
+    },
+    {
+      "gate": "MED250_GATE_DOMAIN_DNS_VERIFIED",
+      "title": "Production domain and DNS verification",
+      "owner": "MED+250 infrastructure owner",
+      "acceptance": "med250.gikundiro.com resolves through the intended Cloudflare account, TLS is healthy, the Worker custom-domain route is attached and the deployment verifier passes in live mode.",
+      "current_status": "pending",
+      "approval_required": {
+        "approved_by": null,
+        "approved_role": null,
+        "approved_at": null
+      },
+      "missing_evidence_types": [],
+      "prepared_pending_evidence": {},
+      "unprepared_evidence_types": [],
+      "suggested_filenames": {},
+      "evidence_templates": {}
+    },
+    {
+      "gate": "MED250_GATE_PHYSICAL_UAT_PASSED",
+      "title": "Controlled physical-device UAT",
+      "owner": "MED+250 QA owner",
+      "acceptance": "Named test identities pass GPS consent, WhatsApp OTP, dispatch, realtime confirmation, selection, WhatsApp, MoMo, expiry, cancellation and prescription-access scenarios without contacting unintended pharmacies.",
+      "current_status": "pending",
+      "approval_required": {
+        "approved_by": null,
+        "approved_role": null,
+        "approved_at": null
+      },
+      "missing_evidence_types": [
+        "signed_approval",
+        "test_record"
+      ],
+      "prepared_pending_evidence": {
+        "signed_approval": {
+          "reference": "docs/launch/evidence/physical-device-uat-approval-pending-2026-07-16.json",
+          "sha256": "4f7ff02776f27b3b00af4607bb3aadc06d5ae66d01dd4404e94825270fa87f6c",
+          "byte_length": 3395,
+          "status": "pending",
+          "recorded_at": "2026-07-16T14:08:21+02:00",
+          "template_valid": true,
+          "template_errors": [],
+          "check_status_counts": {
+            "blocked": 2,
+            "pending": 5
+          },
+          "unresolved_checks": [
+            {
+              "name": "Strict UAT ledger passes",
+              "status": "blocked",
+              "detail": "The governed 12-scenario ledger remains pending and the strict UAT verifier cannot pass until every scenario has evidence and named execution and approval."
+            },
+            {
+              "name": "Completed paired test record",
+              "status": "blocked",
+              "detail": "The paired physical-device test artifact remains pending and therefore cannot yet support accountable QA approval."
+            },
+            {
+              "name": "Approved opaque test identities",
+              "status": "pending",
+              "detail": "The QA owner must confirm the customer, pharmacy and unrelated-pharmacy labels refer only to pre-authorised controlled test identities."
+            },
+            {
+              "name": "No unintended pharmacy contacted",
+              "status": "pending",
+              "detail": "The QA owner must explicitly confirm that no real request, OTP, prescription or message reached a pharmacy outside the approved test scope."
+            },
+            {
+              "name": "All lifecycle and privacy boundaries accepted",
+              "status": "pending",
+              "detail": "The final approval must cover location, dispatch, OTP, offer, substitute, selection, handoff, cancellation, expiry, prescription and privacy-safe logging behavior."
+            },
+            {
+              "name": "Residual test data removed",
+              "status": "pending",
+              "detail": "The QA owner must confirm disposable Auth sessions, identities, requests, notifications, prescriptions and any other controlled test data were removed or expired as designed."
+            },
+            {
+              "name": "Named QA-owner signature",
+              "status": "pending",
+              "detail": "The accountable QA owner has not yet recorded the final decision, conditions, named approver, role and timezone-qualified approval timestamp."
+            }
+          ],
+          "completion_instructions": [
+            "Complete the governed UAT ledger and paired test artifact and make npm run uat:verify:live pass.",
+            "Review every redacted scenario result and confirm the approved identity scope, no unintended contact, lifecycle behavior, privacy boundaries and cleanup.",
+            "Update the ledger and test digests if either file changed.",
+            "Set every check to passed, set decision to approved, add the named approver, role and timezone-qualified timestamp, and set status to complete.",
+            "Validate the completed approval strictly and add it to the launch registry only with its exact SHA-256 digest."
+          ]
+        },
+        "test_record": {
+          "reference": "docs/launch/evidence/physical-device-uat-test-pending-2026-07-16.json",
+          "sha256": "764ea78ae4c63eae68fc6a180fcf31c5826ffcd3d75c8e2202d702b4656d0f01",
+          "byte_length": 4743,
+          "status": "pending",
+          "recorded_at": "2026-07-16T14:08:21+02:00",
+          "template_valid": true,
+          "template_errors": [],
+          "check_status_counts": {
+            "pending": 12
+          },
+          "unresolved_checks": [
+            {
+              "name": "Preview fail-closed behavior",
+              "status": "pending",
+              "detail": "Verify ordering and indexing remain disabled in preview before the controlled production test path is intentionally enabled."
+            },
+            {
+              "name": "GPS denial recovery",
+              "status": "pending",
+              "detail": "Deny browser location and verify useful recovery guidance appears without dispatching an availability request."
+            },
+            {
+              "name": "GPS consent and bounded dispatch",
+              "status": "pending",
+              "detail": "Grant location and verify real-distance priority, national fallback labeling, eligibility controls and the maximum recipient boundary."
+            },
+            {
+              "name": "Prescription enforcement",
+              "status": "pending",
+              "detail": "Verify a prescription-classified product rejects a missing file and uses the private upload path without exposing content to unrelated recipients."
+            },
+            {
+              "name": "Recipient isolation",
+              "status": "pending",
+              "detail": "Verify only eligible recipient pharmacies receive the request and the approved unrelated-pharmacy test identity cannot read it."
+            },
+            {
+              "name": "WhatsApp OTP lifecycle",
+              "status": "pending",
+              "detail": "Verify one real approved pharmacy OTP succeeds once while wrong, expired and reused codes fail without recording the code."
+            },
+            {
+              "name": "Offer and substitute controls",
+              "status": "pending",
+              "detail": "Verify complete item responses, optional non-final price, fulfilment selection, compatible substitute acceptance and incompatible substitute rejection."
+            },
+            {
+              "name": "Contact privacy and pharmacy selection",
+              "status": "pending",
+              "detail": "Verify pharmacy contact remains private before selection and only the selected pharmacy's governed contact becomes available afterward."
+            },
+            {
+              "name": "Explicit WhatsApp and MoMo handoffs",
+              "status": "pending",
+              "detail": "Verify every external handoff requires explicit customer action and the marketplace makes no claim of payment custody."
+            },
+            {
+              "name": "Cancellation completion and expiry",
+              "status": "pending",
+              "detail": "Verify cancellation, selected-request completion, time-based expiry and closure notifications remove stale actionable requests."
+            },
+            {
+              "name": "Prescription access and retention lifecycle",
+              "status": "pending",
+              "detail": "Verify selected-pharmacy prescription access, unrelated access denial, short-lived links and approved cleanup boundaries through the lifecycle."
+            },
+            {
+              "name": "Privacy-safe health and logs",
+              "status": "pending",
+              "detail": "Verify aggregate operational health and Worker logs contain no prohibited customer, pharmacy, product, request, prescription or precise-location identifier."
+            }
+          ],
+          "completion_instructions": [
+            "Use only the approved opaque customer, pharmacy and unrelated-pharmacy test identities and confirm the intended pharmacy before any real message is sent.",
+            "Execute every scenario in data/physical-device-uat.json on approved physical devices and retain only redacted evidence references and useful notes.",
+            "Do not record phone numbers, OTPs, Auth identities, order identifiers, prescription contents, exact coordinates or provider secrets.",
+            "Set every ledger scenario to passed with evidence, executor and approval metadata, then run npm run uat:verify:live.",
+            "Update the recorded ledger digest, set passed_scenarios to 12 and pending_scenarios to 0, set every check to passed, add executor metadata and set status to complete.",
+            "Validate the completed test strictly and add it to the launch registry only with its exact SHA-256 digest."
+          ]
+        }
+      },
+      "unprepared_evidence_types": [],
+      "suggested_filenames": {
+        "signed_approval": "docs/launch/evidence/physical-device-uat-approval-pending-2026-07-16.json",
+        "test_record": "docs/launch/evidence/physical-device-uat-test-pending-2026-07-16.json"
+      },
+      "evidence_templates": {}
+    }
+  ]
+}

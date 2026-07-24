@@ -57,23 +57,8 @@
       "owner": "MED+250 backend owner",
       "required_evidence_types": ["deployment_receipt", "test_record"],
       "status": "pending",
-      "acceptance": "The forward security migrations and contract refresh are deployed using rotated credentials, and the privileged backend verifier returns contract 2026-07-18.3 with the runtime and DDL product-image governance guards, aggregate public trust-metric boundary, fail-closed product-description workflow, and all invariants passing.",
-      "evidence": [
-        {
-          "type": "deployment_receipt",
-          "reference": "docs/launch/evidence/security-hardening-deployment-2026-07-18.json",
-          "sha256": "dcfdeac982b75a11240db1bfd4a2150ff9c15833055eb1f9485cf0938896b3a3",
-          "recorded_at": "2026-07-18T17:24:14Z",
-          "summary": "Current production receipt for backend contract 2026-07-18.3 reconciliation, description governance, trust controls, catalogue corrections, and notification-outbox index deployment."
-        },
-        {
-          "type": "test_record",
-          "reference": "docs/launch/evidence/security-hardening-test-2026-07-18.json",
-          "sha256": "9d01de4bc5949cb5024ae159192c0c1abb429132c902a688d4dbba8b597d784b",
-          "recorded_at": "2026-07-18T17:28:30Z",
-          "summary": "Current production governance queries, post-deploy advisors, lint, targeted database tests, and the complete 302-test application suite passed."
-        }
-      ],
+      "acceptance": "The 2026-07-23.1 marketplace hardening migration is deployed first to controlled staging and then to production using approved credentials. Negative authorization, locking, public-description privilege, media-hold, rollback, aggregate backend-contract, and operational-health checks pass for the exact immutable application release.",
+      "evidence": [],
       "approved_by": null,
       "approved_role": null,
       "approved_at": null
@@ -83,23 +68,8 @@
       "owner": "MED+250 backend owner",
       "required_evidence_types": ["deployment_receipt", "test_record"],
       "status": "pending",
-      "acceptance": "The reviewed OTP, cleanup, geocoding, marketplace-review, contact-review and product-description-review Edge Function versions are deployed and their protected-access boundaries pass.",
-      "evidence": [
-        {
-          "type": "deployment_receipt",
-          "reference": "docs/launch/evidence/edge-functions-deployment-2026-07-18.json",
-          "sha256": "2fec968b290b47c6d1f1390f327f9a57ce6b3f49db4eb93712b6d67dd8a8c74c",
-          "recorded_at": "2026-07-18T17:19:45Z",
-          "summary": "Current production receipt for the newly deployed product-description reviewer, exact deployed source retrieval, custom authentication boundary, and contract headers."
-        },
-        {
-          "type": "test_record",
-          "reference": "docs/launch/evidence/edge-functions-test-2026-07-18.json",
-          "sha256": "ebfd598a100390952c29fb09c99a11c1e7035b4b7b5591aad1731548da1dc7c8",
-          "recorded_at": "2026-07-18T17:19:45Z",
-          "summary": "Current product-description reviewer denial probe, response hardening, one-product workflow review, and complete reviewer regression tests passed."
-        }
-      ],
+      "acceptance": "The revised dawanear-pharmacy-verify-otp function bound to the 2026-07-23.1 reviewed phone-to-tenant RPC is deployed first to controlled staging and then to production. Created-user cleanup, duplicate-phone rejection, revoked and suspended authority, cross-tenant isolation, concurrency locking, origin validation, and the protected boundaries of all other production Edge Functions pass for the exact immutable release.",
+      "evidence": [],
       "approved_by": null,
       "approved_role": null,
       "approved_at": null
