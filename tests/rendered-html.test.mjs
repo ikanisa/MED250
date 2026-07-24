@@ -271,6 +271,47 @@ test("blocks releases when frontend and Worker modes diverge", () => {
   assert.match(result.stdout, /Frontend and Worker release modes do not match/);
 });
 
+test("uses committed public preview defaults without weakening live configuration", () => {
+  const cleanEnvironment = Object.fromEntries(Object.entries(process.env).filter(([name]) => ![
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+    "NEXT_PUBLIC_MARKETPLACE_MODE",
+    "NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY",
+  ].includes(name)));
+  const preview = spawnSync(process.execPath, ["scripts/validate-release-config.mjs"], {
+    cwd: new URL("..", import.meta.url),
+    encoding: "utf8",
+    env: cleanEnvironment,
+  });
+  assert.equal(preview.status, 0, preview.stdout);
+  assert.match(preview.stdout, /"envFileSource": "\.env\.example"/);
+  assert.match(preview.stdout, /Using committed public preview defaults/);
+
+  const publicBrowserKey = spawnSync(process.execPath, ["scripts/validate-release-config.mjs"], {
+    cwd: new URL("..", import.meta.url),
+    encoding: "utf8",
+    env: { ...cleanEnvironment, NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY: "browser-key-with-referrer-restrictions" },
+  });
+  assert.equal(publicBrowserKey.status, 0, publicBrowserKey.stdout);
+
+  const disguisedServerKey = spawnSync(process.execPath, ["scripts/validate-release-config.mjs"], {
+    cwd: new URL("..", import.meta.url),
+    encoding: "utf8",
+    env: { ...cleanEnvironment, NEXT_PUBLIC_PRIVATE_API_KEY: "must-not-be-public" },
+  });
+  assert.equal(disguisedServerKey.status, 1);
+  assert.match(disguisedServerKey.stdout, /Server credentials use public variable names: NEXT_PUBLIC_PRIVATE_API_KEY/);
+
+  const live = spawnSync(process.execPath, ["scripts/validate-release-config.mjs", "--live"], {
+    cwd: new URL("..", import.meta.url),
+    encoding: "utf8",
+    env: cleanEnvironment,
+  });
+  assert.equal(live.status, 1);
+  assert.match(live.stdout, /NEXT_PUBLIC_SUPABASE_URL is missing/);
+  assert.match(live.stdout, /"envFileSource": null/);
+});
+
 test("server-renders every dedicated marketplace route", async () => {
   const routes = [
     ["/categories", /Explore products/],

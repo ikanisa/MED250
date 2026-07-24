@@ -3,7 +3,13 @@ import { resolve } from "node:path";
 import { publicContactChannelErrors } from "../lib/public-contact-channels.mjs";
 
 const liveRequired = process.argv.includes("--live");
-const envPath = [".env.local", ".env"].map((path) => resolve(path)).find(existsSync);
+const envCandidates = liveRequired
+  ? [".env.local", ".env"]
+  : [".env.local", ".env", ".env.example"];
+const envPath = envCandidates.map((path) => resolve(path)).find(existsSync);
+const envFileSource = envPath
+  ? envCandidates.find((candidate) => resolve(candidate) === envPath) ?? null
+  : null;
 const wranglerPath = resolve("wrangler.jsonc");
 const source = envPath ? readFileSync(envPath, "utf8") : "";
 const fileEnv = Object.fromEntries(source
@@ -100,16 +106,25 @@ if (!new Set(["preview", "catalog", "live"]).has(workerMode)) {
   errors.push("Frontend and Worker release modes do not match.");
 }
 
-const unsafePublicKeys = Object.keys(env).filter((name) => (
+const approvedPublicCredentialNames = new Set([
+  "NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY",
+  "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+  "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
+]);
+const unsafePublicKeys = Object.entries(env).filter(([name, value]) => (
   name.startsWith("NEXT_PUBLIC_")
-  && name !== "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"
+  && String(value).trim()
+  && !approvedPublicCredentialNames.has(name)
   && /(SECRET|SERVICE_ROLE|PASSWORD|ACCESS_TOKEN|PRIVATE_KEY|ADMIN_TOKEN|API_KEY)/i.test(name)
-));
+)).map(([name]) => name);
 if (unsafePublicKeys.length) {
   errors.push(`Server credentials use public variable names: ${unsafePublicKeys.join(", ")}.`);
 }
 
-if (!envPath) warnings.push("No .env.local or .env file was found; only process environment values were checked.");
+if (!envPath) warnings.push("No governed environment file was found; only process environment values were checked.");
+if (envFileSource === ".env.example") {
+  warnings.push("Using committed public preview defaults from .env.example; process environment values take precedence.");
+}
 if (mode !== "live") warnings.push(`Marketplace mode is ${mode || "preview"}, so customer ordering remains disabled.`);
 if (!siteUrl) warnings.push("NEXT_PUBLIC_SITE_URL is not explicitly configured; metadata uses the med-250.com default.");
 
@@ -142,6 +157,7 @@ const result = {
   status: errors.length ? "failed" : "passed",
   target: liveRequired ? "live" : mode || "unknown",
   envFileDetected: Boolean(envPath),
+  envFileSource,
   workerReleaseMode: workerMode || "missing",
   workerName: workerName || "missing",
   workerEnvironment,
