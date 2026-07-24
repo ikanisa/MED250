@@ -2,8 +2,8 @@
   "schema_version": "1",
   "classification": "automated_execution_record_not_approval",
   "status": "passed",
-  "candidate_revision": "8ca3f6dc79f57f89c7e3d4b221a357b4fba7c49f",
-  "executed_at": "2026-07-24T12:38:35+02:00",
+  "candidate_revision": "e074059bf731c7d799a8c738c0ee363e6bb17e48",
+  "executed_at": "2026-07-24T12:49:47+02:00",
   "executed_by": "Codex local validation executor",
   "execution_environment": "local controlled MED250 checkout",
   "github_policy": {
@@ -16,7 +16,7 @@
       "command": "npm run release:check",
       "status": "passed",
       "coverage": {
-        "node_tests": "373/373 passed",
+        "node_tests": "378/378 passed",
         "python_tests": "171 passed, 1 intentionally skipped",
         "eslint": "passed",
         "catalogue_validation": "passed",
@@ -26,8 +26,8 @@
         "performance_budget": "passed",
         "preview_worker_dry_run": "passed"
       },
-      "ephemeral_log_sha256": "02718ade71e062b181876effb903eb84029694ce240bfad1c723fc3b3b010d45",
-      "ephemeral_log_bytes": 104361
+      "ephemeral_log_sha256": "29a3ef8aade45995aab5ab17843f048fa70574a9df7632fe11f22be23d478812",
+      "ephemeral_log_bytes": 105346
     },
     {
       "command": "npm run localization:verify",
@@ -66,6 +66,17 @@
         "canonical_origin": "https://med-250.com",
         "production_worker_dry_run": "passed"
       }
+    },
+    {
+      "command": "npm run domain:legacy-redirect:verify",
+      "status": "failed_expected",
+      "coverage": {
+        "historical_origin": "https://med250.gikundiro.com",
+        "canonical_destination": "https://med-250.com",
+        "probes": "0/5 passed",
+        "failure": "dns_unresolved",
+        "release_behavior": "production remains fail-closed"
+      }
     }
   ],
   "known_non_strict_warnings": {
@@ -81,16 +92,18 @@
     "physical_uat_total": 12,
     "rendered_audit_current_and_approved": false,
     "live_origin": "https://med-250.com",
-    "expected_release_revision": "8ca3f6dc79f57f89c7e3d4b221a357b4fba7c49f",
+    "expected_release_revision": "e074059bf731c7d799a8c738c0ee363e6bb17e48",
     "observed_live_release_revision": "468a3003e3b27c0f42a4ee089c8dae38028c1740",
-    "exact_revision_live_check": "failed_correctly"
+    "exact_revision_live_check": "failed_correctly",
+    "legacy_hostname_redirect": "failed_correctly_dns_unresolved",
+    "legacy_hostname_redirect_probes": "0/5 passed"
   },
   "limitations": [
     "This record is automated technical evidence and is not human approval.",
     "It does not prove physical-device UAT, assistive-technology UAT, or a rendered audit on the candidate revision.",
     "It does not prove that the hardening migration or Edge Function is deployed.",
     "It does not prove production backend contract or operational health.",
-    "It does not prove that candidate revision 8ca3f6dc79f57f89c7e3d4b221a357b4fba7c49f is live.",
+    "It does not prove that candidate revision e074059bf731c7d799a8c738c0ee363e6bb17e48 is live.",
     "The direct production Worker was separately observed serving older revision 468a3003e3b27c0f42a4ee089c8dae38028c1740."
   ]
 }

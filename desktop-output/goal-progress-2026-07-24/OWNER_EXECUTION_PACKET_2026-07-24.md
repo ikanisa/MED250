@@ -2,7 +2,7 @@
 
 - Classification: execution aid only; not evidence, approval, or production authorization
 - Prepared: 24 July 2026
-- Validated application-code revision: `8ca3f6dc79f57f89c7e3d4b221a357b4fba7c49f`
+- Validated application-code revision: `e074059bf731c7d799a8c738c0ee363e6bb17e48`
 - Production origin: `https://med-250.com`
 - Public catalogue: Sites version 15 in `catalog` mode
 
@@ -14,7 +14,7 @@ regression suites pass. The direct production Worker still exposes revision
 `468a3003e3b27c0f42a4ee089c8dae38028c1740`, not the candidate.
 
 The current technical receipt is
-`automated-release-validation-2026-07-24.json`. It records 373/373 Node tests,
+`automated-release-validation-2026-07-24.json`. It records 378/378 Node tests,
 171 Python tests with one intentional skip, 58/58 Sites tests, localization,
 dependency audits, performance, production build checks, the ten-route live
 catalogue check, and Cloudflare dry runs. It is not owner approval and does not
@@ -35,6 +35,7 @@ billing is not part of this release path.
 | Security | Named MED+250 security owner | Production Turnstile and rate-limit controlled tests and approval | `launch-evidence-handoff-2026-07-24.json` |
 | Privacy | Named MED+250 privacy owner | Signed prescription-retention decision | `launch-evidence-handoff-2026-07-24.json` |
 | Infrastructure | Named infrastructure owner | Least-privilege Cloudflare review and later exact-revision approval | `go-live-closure-board-2026-07-24.json` |
+| Historical hostname | Named infrastructure owner with Gikundiro Cloudflare zone authority | Authorize DNS/TLS and a redirect-only rule from `med250.gikundiro.com` to `med-250.com`; current probe is 0/5 because DNS is unresolved | `LEGACY_DOMAIN_REDIRECT_OWNER_PACKET_2026-07-24.md` and `legacy-domain-redirect-probe-2026-07-24.json` |
 | Rendered production audit | Named QA executor and QA owner | Rerun 16 desktop/mobile scenarios on `med-250.com` for the exact candidate revision and approve the privacy-safe evidence | `data/audit-browser-evidence.json` |
 | QA | Named QA executor and QA owner | 12 physical-device executions and approval | `physical-device-uat-packet-2026-07-24.json` |
 
@@ -327,7 +328,7 @@ disabled and use the local release commands. Verify the repository guard with
 npm run deployment:verify -- \
   --url https://med-250.com \
   --mode live \
-  --expected-revision 8ca3f6dc79f57f89c7e3d4b221a357b4fba7c49f \
+  --expected-revision e074059bf731c7d799a8c738c0ee363e6bb17e48 \
   --evidence-output desktop-output/goal-progress-2026-07-24/domain-deployment-receipt.json
 ```
 

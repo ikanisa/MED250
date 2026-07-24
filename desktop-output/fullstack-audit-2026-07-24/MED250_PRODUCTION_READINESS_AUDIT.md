@@ -3,7 +3,7 @@
 Audit date: 24 July 2026  
 Repository: `https://github.com/ikanisa/MED250`  
 Candidate branch: `codex/med250-go-live-hardening`  
-Validated application revision: `8ca3f6dc79f57f89c7e3d4b221a357b4fba7c49f`
+Validated application revision: `e074059bf731c7d799a8c738c0ee363e6bb17e48`
 Canonical production origin: `https://med-250.com`  
 Public catalogue origin: `https://med250-rwanda.ikanisa.chatgpt.site`  
 Release decision: **NO-GO**
@@ -13,7 +13,7 @@ Release decision: **NO-GO**
 The application code, catalogue-mode build, production-mode build, dependency
 set, localization inventory, performance budget, SEO implementation, responsive
 navigation, and core marketplace interactions are technically release-capable.
-The hardening candidate passes 373 Node tests, 171 Python tests with one
+The hardening candidate passes 378 Node tests, 171 Python tests with one
 intentional skip, 58 Sites catalogue/rendering tests, three production build
 tests, lint, catalogue validation, localization validation, two dependency
 audits, and the Cloudflare production dry run.
@@ -38,7 +38,11 @@ blockers**:
 7. the completed 16-scenario rendered audit is historical evidence from the
    retired `med250.gikundiro.com` origin and revision `5ef50a296941056bd17e614dff7b35290742f50a`;
    it requires a fresh run on `med-250.com` for the exact candidate revision
-   and named QA approval.
+   and named QA approval;
+8. `med250.gikundiro.com` currently has no DNS answer. If the infrastructure
+   owner retains it, it must be configured as redirect-only and pass all five
+   path-and-query-preservation probes without cookies; it must never become a
+   second ordering origin.
 
 GitHub Actions billing is deliberately outside the release path. GitHub is
 used only as a free source repository and the local release gate is
@@ -57,7 +61,7 @@ revision, so production must not be represented as running the fix.
 The separate public Sites catalogue remains version 15 in `catalog` mode.
 Requests and pharmacy fulfilment remain disabled there, and its ten-route live
 verification passes. The Sites response does not expose a Git revision header,
-so this check does not claim that application revision `8ca3f6d…` is deployed
+so this check does not claim that application revision `e074059…` is deployed
 there. Its live product page has been visually verified to omit the held
 mismatched Paracetamol image.
 
@@ -74,6 +78,7 @@ mismatched Paracetamol image.
 | Supabase hardening | **BLOCKED** | Read-only access reaches the shared project; migration `20260723120000` is absent, deployed OTP version 12 is pre-hardening, and no isolated staging target is verified | Approve an isolated staging target, deploy and negatively test the exact candidate there, approve rollback, then explicitly authorize production promotion |
 | GitHub source hosting | **PASS / FREE-ONLY** | Candidate branch is pushed; paid hosted CI is not a release dependency | Keep automatic workflows disabled and use the local immutable release evidence |
 | Production DNS/TLS | **RESOLVED** | Cloudflare A answers, HTTPS route checks, robots, sitemap, and security headers respond | Refresh immutable deployment evidence after the audited revision is deployed |
+| Historical hostname redirect | **BLOCKED / DNS UNRESOLVED** | Privacy-safe redirect probe passes 0/5 because `med250.gikundiro.com` has no DNS answer | Named Gikundiro zone owner authorizes DNS/TLS and a redirect-only rule; rerun 5/5 exact path-and-query probes with no cookies |
 | Application build | **PASS** | Production build and Wrangler strict dry run pass | Preserve exact source and environment mode through deployment |
 | Dependency security | **PASS** | npm and PyPI audits report zero known vulnerable packages | Re-run on the immutable release revision |
 
@@ -125,7 +130,7 @@ mismatched Paracetamol image.
 
 | Gate | Result |
 |---|---:|
-| Node application and integration suite | **373/373 passed** |
+| Node application and integration suite | **378/378 passed** |
 | Python suite | **171 passed, 1 intentionally skipped** |
 | Source-authority preview verification | **Passed; pending owner decision remains visible** |
 | Source-authority strict verification | **Failed correctly before credentials or deployment: owner authority pending** |
@@ -138,6 +143,7 @@ mismatched Paracetamol image.
 | Python OSV audit | **10 packages checked, 0 vulnerable** |
 | Cloudflare production strict dry run | **Passed** |
 | DNS verification | **Passed** |
+| Historical hostname redirect | **Failed correctly: 0/5, DNS unresolved** |
 | Full live exact-revision verification | **Failed correctly: live revision is older than the candidate** |
 | Deno Edge type-check | **Environment-blocked: jsr.io package manifest could not be fetched** |
 
