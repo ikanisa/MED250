@@ -1,5 +1,11 @@
 begin;
 
+-- Production protects product-image governance behind a database-wide DDL
+-- event trigger. This reviewed transaction changes adjacent catalogue and
+-- authorization surfaces while leaving the guard enabled, so use only its
+-- documented transaction-local override.
+set local med250.allow_product_image_governance_ddl = 'on';
+
 -- A public directory phone number is not sufficient evidence for portal
 -- authority. Login remains disabled until a named Supabase reviewer approves
 -- exactly one WhatsApp contact for exactly one pharmacy.

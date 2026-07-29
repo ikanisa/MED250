@@ -60,6 +60,7 @@ test("closes offer-item, pharmacy-login, description, and image publication gaps
   ]);
 
   assert.match(migration, /dawanear_pharmacy_contacts_one_login_authority_idx/);
+  assert.match(migration, /set local med250\.allow_product_image_governance_ddl = 'on'/);
   assert.match(migration, /verified_by is not null/);
   assert.match(migration, /dawanear_bind_pharmacy_identity/);
   assert.match(migration, /pg_advisory_xact_lock/);
