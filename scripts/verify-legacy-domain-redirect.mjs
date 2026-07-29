@@ -1,5 +1,7 @@
 import { createHash } from "node:crypto";
+import { Resolver } from "node:dns/promises";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { request as httpsRequest } from "node:https";
 import { dirname, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -126,6 +128,52 @@ function errorCode(error) {
   return "network_or_tls_failure";
 }
 
+async function resolveWithPublicDns(hostname) {
+  const resolver = new Resolver();
+  resolver.setServers(["1.1.1.1", "8.8.8.8"]);
+  const addresses = await resolver.resolve4(hostname);
+  if (!addresses.length) {
+    const error = new Error(`No public A record found for ${hostname}`);
+    error.code = "ENODATA";
+    throw error;
+  }
+  return addresses[0];
+}
+
+function captureProbeWithPinnedAddress(path, address) {
+  const target = new URL(path, `${legacyOrigin}/`);
+  return new Promise((resolveProbe, rejectProbe) => {
+    const request = httpsRequest(target, {
+      method: "HEAD",
+      headers: { "User-Agent": "MED250LegacyRedirectVerifier/1.0" },
+      lookup: (_hostname, options, callback) => {
+        if (typeof options === "object" && options.all) {
+          callback(null, [{ address, family: 4 }]);
+          return;
+        }
+        callback(null, address, 4);
+      },
+    }, (response) => {
+      response.resume();
+      resolveProbe({
+        path,
+        status: response.statusCode ?? null,
+        location: response.headers.location ?? null,
+        set_cookie_present: Array.isArray(response.headers["set-cookie"]),
+        error_code: null,
+        dns_resolution: "public_resolver_fallback",
+      });
+    });
+    request.setTimeout(15_000, () => {
+      const error = new Error("Legacy redirect probe timed out");
+      error.name = "TimeoutError";
+      request.destroy(error);
+    });
+    request.on("error", rejectProbe);
+    request.end();
+  });
+}
+
 async function captureProbe(path) {
   try {
     const response = await fetch(new URL(path, `${legacyOrigin}/`), {
@@ -141,6 +189,21 @@ async function captureProbe(path) {
       error_code: null,
     };
   } catch (error) {
+    if (errorCode(error) === "dns_unresolved") {
+      try {
+        const address = await resolveWithPublicDns(new URL(legacyOrigin).hostname);
+        return await captureProbeWithPinnedAddress(path, address);
+      } catch (fallbackError) {
+        return {
+          path,
+          status: null,
+          location: null,
+          set_cookie_present: false,
+          error_code: errorCode(fallbackError),
+          dns_resolution: "public_resolver_fallback_failed",
+        };
+      }
+    }
     return {
       path,
       status: null,

@@ -17,6 +17,8 @@
     "cloudflare:prepare:gikundiro": "node --env-file-if-exists=.env.local scripts/prepare-gikundiro-worker.mjs --revision git",
     "cloudflare:check:gikundiro": "npm run build:gikundiro && NEXT_PUBLIC_SITE_URL=https://med-250.com node --test tests/*.test.mjs && npm run cloudflare:prepare:gikundiro && wrangler deploy --config dist/server/wrangler.gikundiro.json --keep-vars --dry-run --strict",
     "cloudflare:check:production": "NEXT_PUBLIC_MARKETPLACE_MODE=live NEXT_PUBLIC_SITE_URL=https://med-250.com NEXT_PUBLIC_MED250_OBSERVABILITY=cloud npm run build:production && node --test tests/production-build.check.mjs && wrangler deploy --env production --dry-run --strict",
+    "cloudflare:legacy-redirect:check": "node --test tests/legacy-redirect-worker.test.mjs && wrangler deploy --config cloudflare/legacy-redirect/wrangler.jsonc --dry-run --strict",
+    "cloudflare:legacy-redirect:deploy": "npm run cloudflare:legacy-redirect:check && wrangler deploy --config cloudflare/legacy-redirect/wrangler.jsonc --strict",
     "deploy": "vinext deploy",
     "deploy:gikundiro": "npm run cloudflare:check:gikundiro && wrangler deploy --config dist/server/wrangler.gikundiro.json --keep-vars --strict",
     "test": "npm run build && node --test --test-concurrency=1 tests/*.test.mjs",
@@ -120,9 +122,9 @@
     "drizzle-orm": "0.45.2",
     "libphonenumber-js": "1.13.8",
     "lucide-react": "0.468.0",
-    "next": "16.2.11",
-    "react": "19.2.6",
-    "react-dom": "19.2.6"
+    "next": "16.2.12",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "1.44.0",
@@ -135,8 +137,8 @@
     "@vitejs/plugin-rsc": "0.5.26",
     "drizzle-kit": "0.31.10",
     "eslint": "9.39.4",
-    "eslint-config-next": "16.2.11",
-    "react-server-dom-webpack": "19.2.6",
+    "eslint-config-next": "16.2.12",
+    "react-server-dom-webpack": "19.2.8",
     "tailwindcss": "4.2.1",
     "typescript": "5.9.3",
     "vinext": "0.0.50",
@@ -147,15 +149,11 @@
     "@esbuild-kit/core-utils": {
       "esbuild": "0.25.12"
     },
-    "postcss": "8.5.14",
+    "postcss": "8.5.24",
     "sharp": "0.35.0",
     "fast-uri": "3.1.4",
-    "minimatch@3.1.5": {
-      "brace-expansion": "1.1.16"
-    },
-    "minimatch@10.2.5": {
-      "brace-expansion": "5.0.8"
-    }
+    "minimatch": "10.2.5",
+    "brace-expansion": "5.0.8"
   },
   "type": "module"
 }

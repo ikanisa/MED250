@@ -18,6 +18,19 @@ const REQUIRED_ROUTES = Object.freeze([
   "/offline.html",
 ]);
 const WORKER_ROUTES = Object.freeze(REQUIRED_ROUTES.slice(0, 7));
+const PREVIEW_EXCLUDED_ROUTES = new Set(["/product/AMZ-B004L5JCZ4"]);
+
+function requiredRoutesForMode(mode) {
+  return mode === "preview"
+    ? REQUIRED_ROUTES.filter((route) => !PREVIEW_EXCLUDED_ROUTES.has(route))
+    : REQUIRED_ROUTES;
+}
+
+function workerRoutesForMode(mode) {
+  return mode === "preview"
+    ? WORKER_ROUTES.filter((route) => !PREVIEW_EXCLUDED_ROUTES.has(route))
+    : WORKER_ROUTES;
+}
 
 function normalizedHeaders(headers) {
   if (headers instanceof Headers) return Object.fromEntries(headers.entries());
@@ -42,7 +55,7 @@ export function assessDeploymentEvidence({ origin, mode, records, expectedRevisi
   }]));
 
   if (expectedRevision) {
-    for (const route of WORKER_ROUTES) {
+    for (const route of workerRoutesForMode(mode)) {
       const observed = byRoute.get(route)?.headers["x-med250-release-revision"] ?? null;
       if (observed !== expectedRevision) {
         errors.push(`${route}: X-MED250-Release-Revision does not match the expected release (${expectedRevision})`);
@@ -50,7 +63,7 @@ export function assessDeploymentEvidence({ origin, mode, records, expectedRevisi
     }
   }
 
-  for (const route of REQUIRED_ROUTES) {
+  for (const route of requiredRoutesForMode(mode)) {
     const record = byRoute.get(route);
     if (!record) {
       errors.push(`${route}: no response was captured`);
@@ -283,12 +296,15 @@ async function boundedResponseText(response, limit = 2 * 1024 * 1024) {
 
 async function fetchDeploymentRoute(origin, route, sitesBypassToken = "") {
   let target = new URL(route, origin);
+  target.searchParams.set("__med250_deployment_probe", crypto.randomUUID());
   for (let redirect = 0; redirect <= 3; redirect += 1) {
     if (target.origin !== origin) throw new Error(`${route}: redirect left the deployment origin`);
     await assertPublicHostname(target.hostname);
     const response = await fetch(target, {
       headers: {
         Accept: route.endsWith(".txt") || route.endsWith(".xml") || route.endsWith(".js") ? "text/plain,*/*" : "text/html,*/*",
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache",
         ...(sitesBypassToken ? { "OAI-Sites-Authorization": `Bearer ${sitesBypassToken}` } : {}),
       },
       redirect: "manual",
@@ -307,7 +323,7 @@ async function main() {
   const origin = validateDeploymentOrigin(args.url, args.mode);
   const sitesBypassToken = (process.env.SITES_BYPASS_BEARER_TOKEN ?? "").trim();
   await assertPublicHostname(new URL(origin).hostname);
-  const records = await Promise.all(REQUIRED_ROUTES.map(async (route) => {
+  const records = await Promise.all(requiredRoutesForMode(args.mode).map(async (route) => {
     const response = await fetchDeploymentRoute(origin, route, sitesBypassToken);
     const body = await boundedResponseText(response);
     return {

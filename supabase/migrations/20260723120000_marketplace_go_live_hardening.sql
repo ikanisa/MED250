@@ -113,7 +113,7 @@ declare
   v_existing_phone text;
   v_target_status text;
 begin
-  if p_phone !~ '^2507[2389][0-9]{7}$' or p_user_id is null then
+  if p_phone !~ '^[1-9][0-9]{7,14}$' or p_user_id is null then
     raise exception 'Invalid pharmacy identity binding input' using errcode = '22023';
   end if;
 

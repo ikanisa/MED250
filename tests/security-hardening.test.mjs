@@ -64,7 +64,7 @@ test("normalises multilingual catalogue queries before the live RPC", async () =
 
   assert.match(client, /normalizeCatalogueText\(rawQuery\)/);
   assert.match(client, /rawQuery\.length > 160/);
-  assert.match(marketplace, /const serverCatalogueActive = backendConfigured && serverCatalogueAvailable && !initialProductId/);
+  assert.match(marketplace, /const serverCatalogueActive = backendConfigured\s+&& serverCatalogueAvailable\s+&& serverCatalogueDemanded\s+&& !initialProductId/);
 });
 
 test("enforces pharmacy identity and order lifecycle invariants in the database", async () => {

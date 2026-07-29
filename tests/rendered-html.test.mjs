@@ -422,14 +422,17 @@ test("server-renders an immediate catalogue and keeps connected previews on pagi
   assert.match(page, /initialProducts=\{getInitialMarketplaceProducts\(\)\}/);
   assert.match(productSeo, /export function getInitialMarketplaceProducts/);
   assert.match(marketplace, /if \(!backendConfigured\) \{[\s\S]*fetch\("\/data\/rwanda-fda-products-july-2026\.csv"\)/);
-  assert.match(marketplace, /if \(!backendConfigured \|\| !serverCatalogueAvailable \|\| initialProductId\) return undefined/);
+  assert.match(marketplace, /if \(!backendConfigured \|\| !serverCatalogueAvailable \|\| !serverCatalogueDemanded \|\| initialProductId\) return undefined/);
+  assert.match(marketplace, /setServerCatalogueRequested\(true\)/);
+  assert.match(marketplace, /startTransition\(\(\) => \{[\s\S]*setCatalogue\(products\)/);
+  assert.match(marketplace, /!backendConfigured \|\| !serverCatalogueDemanded \|\| initialProductId \|\| !hierarchyRepresentativeKey/);
   assert.match(marketplace, /hero-pharmacy-still-life\.webp/);
   assert.doesNotMatch(marketplace, /(?:hero-pharmacy-still-life|category-[^"']+|product-pack-[^"']+)\.png/);
   assert.doesNotMatch(marketplace, /product-pack-[^"']+\.webp/);
   assert.match(marketplace, /if \(!resolvedImageUrl\) return null/);
   assert.match(marketplace, /if \(approvedImages\.length !== 3\) return null/);
   assert.match(marketplace, /cardImageUrl \? <Link className="product-image-wrap"/);
-  assert.match(brandLogo, /med-plus-250-wordmark-transparent\.png/);
+  assert.match(brandLogo, /med-plus-250-wordmark-transparent\.webp/);
   assert.doesNotMatch(brandLogo, /med-plus-250-wordmark\.png/);
 });
 
@@ -841,6 +844,7 @@ test("opens the basket after add and provides a rotating product gallery", async
   assertCataloguedMessage(marketplace, "inventory.bd6967f40b86", "Pause automatic gallery rotation");
   assertCataloguedMessage(marketplace, "inventory.b4d7ceb54bd8", "Resume automatic gallery rotation");
   assert.match(marketplace, /aria-roledescription="carousel"/);
+  assert.match(marketplace, /function HeroArtworkCarousel\(\)[\s\S]*useState\(false\)/);
   assert.match(marketplace, /product-gallery-dots/);
   assert.match(marketplace, /function HeroArtworkCarousel/);
   assert.equal((marketplace.match(/src: "\/marketplace\/category-[^"]+\.webp"/g) ?? []).length, 4);
@@ -1163,7 +1167,7 @@ test("supports international pharmacy WhatsApp numbers and transparent logos", a
     readFile(new URL("../supabase/migrations/20260718134000_expand_pharmacy_whatsapp_e164.sql", import.meta.url), "utf8"),
     readFile(new URL("../app/brand-logo.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
-    readFile(new URL("../public/brand/med-plus-250-wordmark-transparent.png", import.meta.url)),
+    readFile(new URL("../public/brand/med-plus-250-wordmark-transparent.webp", import.meta.url)),
   ]);
 
   assert.match(marketplace, /function InternationalPhoneInput/);
@@ -1178,9 +1182,10 @@ test("supports international pharmacy WhatsApp numbers and transparent logos", a
   assert.match(migration, /dawanear_issue_pharmacy_otp/);
   assert.match(migration, /dawanear_consume_pharmacy_otp/);
   assert.match(migration, /dawanear_request_pharmacy_contact_edit/);
-  assert.match(brandLogo, /med-plus-250-wordmark-transparent\.png/);
+  assert.match(brandLogo, /med-plus-250-wordmark-transparent\.webp/);
   assert.match(css, /\.official-brand-logo\s*\{[\s\S]*?background:transparent;/);
-  assert.deepEqual([...transparentLogo.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
+  assert.equal(transparentLogo.subarray(0, 4).toString("ascii"), "RIFF");
+  assert.equal(transparentLogo.subarray(8, 12).toString("ascii"), "WEBP");
 });
 
 test("validates pharmacy OTP origins before any authentication side effect", async () => {

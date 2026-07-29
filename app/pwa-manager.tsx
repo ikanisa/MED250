@@ -115,13 +115,18 @@ export default function PwaManager() {
       requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
       cancelIdleCallback?: (handle: number) => void;
     };
-    const idleHandle = idleWindow.requestIdleCallback
-      ? idleWindow.requestIdleCallback(register, { timeout: 2_000 })
-      : window.setTimeout(register, 1_000);
+    let idleHandle: number | undefined;
+    const registrationDelay = window.setTimeout(() => {
+      idleHandle = idleWindow.requestIdleCallback
+        ? idleWindow.requestIdleCallback(register, { timeout: 2_000 })
+        : window.setTimeout(register, 1_000);
+    }, 8_000);
     return () => {
       cancelled = true;
       registrationCleanup?.();
       navigator.serviceWorker.removeEventListener("controllerchange", onControllerChange);
+      window.clearTimeout(registrationDelay);
+      if (idleHandle == null) return;
       if (idleWindow.cancelIdleCallback && idleWindow.requestIdleCallback) idleWindow.cancelIdleCallback(idleHandle);
       else window.clearTimeout(idleHandle);
     };

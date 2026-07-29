@@ -1,6 +1,6 @@
 "use client";
 
-import { lazy, Suspense, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, startTransition, Suspense, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -172,7 +172,7 @@ const CUSTOMER_PREFERENCES_STORAGE_KEY = "med250-customer-preferences-v2";
 const LEGACY_CUSTOMER_PREFERENCES_STORAGE_KEY = "med250-customer-preferences-v1";
 const CART_STORAGE_TTL_MS = 24 * 60 * 60 * 1000;
 const CUSTOMER_PREFERENCES_TTL_MS = 30 * 60 * 1000;
-const INITIAL_PRODUCT_COUNT = 24;
+const INITIAL_PRODUCT_COUNT = 12;
 const PRODUCT_BATCH_SIZE = 48;
 const PORTAL_PRODUCT_BATCH_SIZE = 20;
 const MAX_RESTORED_PRODUCT_COUNT = 5000;
@@ -397,7 +397,7 @@ const heroArtworkSlides = [
 
 function HeroArtworkCarousel() {
   const [activeSlide, setActiveSlide] = useState(0);
-  const [autoRotate, setAutoRotate] = useState(true);
+  const [autoRotate, setAutoRotate] = useState(false);
   const touchStartX = useRef<number | null>(null);
 
   useEffect(() => {
@@ -770,13 +770,13 @@ function CatalogueHierarchy({
       </div>
     </section> : null}
 
-    {groups.slice(0, 3).map((group, groupIndex) => <section className="catalogue-product-group" aria-labelledby={`catalogue-group-${groupIndex}`} key={group.value}>
+    {groups.slice(0, 2).map((group, groupIndex) => <section className="catalogue-product-group" aria-labelledby={`catalogue-group-${groupIndex}`} key={group.value}>
       <div className="catalogue-group-heading">
         <div><h3 id={`catalogue-group-${groupIndex}`}>{group.label}</h3><p>{marketplaceMessage("inventory.99f8683caef6")}</p></div>
         <button type="button" onClick={() => onSelectCategory(group.value)}>{marketplaceMessage("inventory.30a64216eaea")} <ArrowRight size={16} /></button>
       </div>
       <div className="catalogue-product-rail" role="list">
-        {group.products.slice(0, 8).map((product, index) => <ProductCard
+        {group.products.slice(0, 4).map((product, index) => <ProductCard
           key={product.id}
           product={product}
           index={index}
@@ -832,6 +832,7 @@ function ProductCard({
 
   return <article
     className={`product-card product-card-${product.accent ?? "mint"}${cardImageUrl ? "" : " without-image"}`}
+    role="listitem"
     aria-posinset={index + 1}
     aria-setsize={catalogueSize}
     data-card-variant={(index % 4) + 1}
@@ -1082,6 +1083,7 @@ export default function Marketplace({
   const [serverCatalogueTotal, setServerCatalogueTotal] = useState(0);
   const [serverExplanations, setServerExplanations] = useState<Map<string, string>>(() => new Map());
   const [serverCatalogueAvailable, setServerCatalogueAvailable] = useState(true);
+  const [serverCatalogueRequested, setServerCatalogueRequested] = useState(!initialProducts.length);
   const [catalogueInitialising, setCatalogueInitialising] = useState(!initialProduct && !initialProducts.length);
   const [catalogueLoading, setCatalogueLoading] = useState(false);
   const [catalogueError, setCatalogueError] = useState("");
@@ -1099,6 +1101,13 @@ export default function Marketplace({
     ? "Checking verified Rwanda FDA catalogue…"
     : "Loading verified Rwanda FDA catalogue…");
   const [visibleCount, setVisibleCount] = useState(INITIAL_PRODUCT_COUNT);
+  const serverCatalogueDemanded = serverCatalogueRequested
+    || Boolean(remoteQuery.trim())
+    || category !== initialCategory
+    || prescriptionFilter !== "all"
+    || formFilter !== "all"
+    || availabilityFilter !== "all"
+    || sort !== "relevance";
   const productLoadSentinelRef = useRef<HTMLDivElement>(null);
   const orderWizardBodyRef = useRef<HTMLDivElement>(null);
   const productLoadPendingRef = useRef(false);
@@ -1592,7 +1601,7 @@ export default function Marketplace({
   }, [initialTaxonomy.length]);
 
   useEffect(() => {
-    if (!backendConfigured || !serverCatalogueAvailable || initialProductId) return undefined;
+    if (!backendConfigured || !serverCatalogueAvailable || !serverCatalogueDemanded || initialProductId) return undefined;
     let cancelled = false;
     queueMicrotask(() => { if (!cancelled) setCatalogueLoading(true); });
 
@@ -1618,11 +1627,13 @@ export default function Marketplace({
         if (!result.products.length || products.length >= total) break;
       }
       if (cancelled) return;
-      setCatalogue(products);
-      setServerCatalogueTotal(total);
-      setServerExplanations(explanations);
-      setCatalogueError("");
-      setDataSource(`${marketplaceNumber(total)} live catalogue matches · Supabase ranked search`);
+      startTransition(() => {
+        setCatalogue(products);
+        setServerCatalogueTotal(total);
+        setServerExplanations(explanations);
+        setCatalogueError("");
+        setDataSource(`${marketplaceNumber(total)} live catalogue matches · Supabase ranked search`);
+      });
       trackMarketplaceEvent("catalogue_search", {
         source: "supabase",
         queryLength: remoteQuery.trim().length,
@@ -1668,6 +1679,7 @@ export default function Marketplace({
     prescriptionFilter,
     previewMode,
     serverCatalogueAvailable,
+    serverCatalogueDemanded,
     sort,
     visibleCount,
   ]);
@@ -1763,11 +1775,13 @@ export default function Marketplace({
     return () => { cancelled = true; };
   }, [portalCatalogue.length, portalOpen, portalStage]);
 
-  // A connected preview uses the same aggregate, privacy-safe catalogue RPC as
-  // live. Treat its ranked page as authoritative in both modes; re-scoring only
-  // a server page locally can hide valid alias matches and make preview UAT
-  // diverge from production.
-  const serverCatalogueActive = backendConfigured && serverCatalogueAvailable && !initialProductId;
+  // Server-ranked data becomes authoritative after an explicit search,
+  // filter, or progressive-load request. The server-rendered first page stays
+  // interactive without an immediate duplicate client render.
+  const serverCatalogueActive = backendConfigured
+    && serverCatalogueAvailable
+    && serverCatalogueDemanded
+    && !initialProductId;
   const fallbackTaxonomy = useMemo<CatalogueTaxonomyRow[]>(() => {
     const counts = new Map<string, number>();
     catalogue.forEach((product) => {
@@ -1853,7 +1867,9 @@ export default function Marketplace({
   const visibleProducts = serverCatalogueActive ? filtered : filtered.slice(0, visibleCount);
   const accessibleCatalogueSize = Math.max(catalogueMatchCount, visibleProducts.length);
   const catalogueBusy = catalogueInitialising || catalogueLoading;
-  const hasMoreProducts = serverCatalogueActive
+  const hasMoreProducts = backendConfigured && serverCatalogueAvailable && !serverCatalogueDemanded && !initialProductId
+    ? true
+    : serverCatalogueActive
     ? serverCatalogueTotal > catalogue.length
     : filtered.length > visibleCount;
 
@@ -1863,15 +1879,31 @@ export default function Marketplace({
 
   useEffect(() => {
     const sentinel = productLoadSentinelRef.current;
-    if (!sentinel || !hasMoreProducts || initialProductId || typeof IntersectionObserver === "undefined") return undefined;
+    if (
+      !sentinel
+      || !hasMoreProducts
+      || !serverCatalogueDemanded
+      || initialProductId
+      || typeof IntersectionObserver === "undefined"
+    ) return undefined;
     const observer = new IntersectionObserver(([entry]) => {
       if (!entry.isIntersecting || catalogueBusy || productLoadPendingRef.current) return;
       productLoadPendingRef.current = true;
+      if (!serverCatalogueDemanded && backendConfigured && serverCatalogueAvailable) {
+        setServerCatalogueRequested(true);
+        return;
+      }
       setVisibleCount((count) => count + PRODUCT_BATCH_SIZE);
     }, { rootMargin: "800px 0px", threshold: 0.01 });
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [catalogueBusy, hasMoreProducts, initialProductId]);
+  }, [
+    catalogueBusy,
+    hasMoreProducts,
+    initialProductId,
+    serverCatalogueAvailable,
+    serverCatalogueDemanded,
+  ]);
 
   useEffect(() => {
     if (!returnPosition || restoredPositionRef.current === returnPosition || catalogueBusy || initialProductId) return undefined;
@@ -1929,7 +1961,7 @@ export default function Marketplace({
   }, [visibleProducts]);
 
   useEffect(() => {
-    if (!backendConfigured || initialProductId || !hierarchyRepresentativeKey) return undefined;
+    if (!backendConfigured || !serverCatalogueDemanded || initialProductId || !hierarchyRepresentativeKey) return undefined;
     const missingItems = hierarchyItems.filter((item) => (
       !localSubcategoryRepresentativeImages.has(item.value)
       && !subcategoryRepresentativeImages.has(item.value)
@@ -1960,7 +1992,14 @@ export default function Marketplace({
       });
     });
     return () => { cancelled = true; };
-  }, [hierarchyItems, hierarchyRepresentativeKey, initialProductId, localSubcategoryRepresentativeImages, subcategoryRepresentativeImages]);
+  }, [
+    hierarchyItems,
+    hierarchyRepresentativeKey,
+    initialProductId,
+    localSubcategoryRepresentativeImages,
+    serverCatalogueDemanded,
+    subcategoryRepresentativeImages,
+  ]);
 
   const hierarchyItemsWithImages = useMemo(() => hierarchyItems.map((item) => {
     const departmentImage = departmentPresentation.find((presentation) => presentation.department === item.department)?.image;
@@ -2066,6 +2105,7 @@ export default function Marketplace({
   );
 
   const basketCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const basketCountLabel = basketCount === 1 ? "item" : "items";
   const basketIndicativeFrom = cart.reduce((sum, item) => sum + item.indicativePriceRwf * item.quantity, 0);
   const displayedCartItems = showAllCartItems ? cart : cart.slice(0, 3);
   const customerWhatsapp = useMemo(
@@ -2889,7 +2929,7 @@ export default function Marketplace({
       <a className="skip-link" href="#marketplace-content">{marketplaceMessage("accessibility.skip_marketplace")}</a>
       <header className="site-header">
         <Link className="brand" href="/" aria-label={marketplaceMessage("inventory.b579c24fb600")}><BrandLogo /></Link>
-        <button type="button" className={`delivery-location ${coordinates ? "location-ready" : ""}`} onClick={() => requestNativeLocation(true)} disabled={publicCatalogMode || locationLoading} aria-busy={locationLoading} aria-label={publicCatalogMode ? marketplaceMessage("inventory.4212610a19fc") : locationLoading ? marketplaceMessage("inventory.ed958ab3964c") : marketplaceMessage("inventory.109576c476ff")}><MapPin size={18} /><span><small>{publicCatalogMode ? marketplaceMessage("inventory.da7020dfe2b6") : coordinates ? marketplaceMessage("inventory.cf8c8078d8db") : marketplaceMessage("inventory.ab808511ed53")}</small><b>{publicCatalogMode ? marketplaceMessage("inventory.398c15b85be1") : locationLoading ? marketplaceMessage("inventory.a7ab96ca6fa6") : coordinates ? marketplaceMessage("inventory.9d58f0cdd494") : location === "Location needed" ? marketplaceMessage("inventory.a6ab4552d436") : location}</b></span>{locationLoading ? <LoaderCircle className="button-spinner" size={14} aria-hidden="true" /> : coordinates ? <Check size={14} /> : <ChevronDown size={13} />}</button>
+        <button type="button" className={`delivery-location ${coordinates ? "location-ready" : ""}`} onClick={() => requestNativeLocation(true)} disabled={publicCatalogMode || locationLoading} aria-busy={locationLoading} aria-label={publicCatalogMode ? marketplaceMessage("inventory.4212610a19fc") : undefined}><MapPin size={18} /><span><small>{publicCatalogMode ? marketplaceMessage("inventory.da7020dfe2b6") : coordinates ? marketplaceMessage("inventory.cf8c8078d8db") : marketplaceMessage("inventory.ab808511ed53")}</small><b>{publicCatalogMode ? marketplaceMessage("inventory.398c15b85be1") : locationLoading ? marketplaceMessage("inventory.a7ab96ca6fa6") : coordinates ? marketplaceMessage("inventory.9d58f0cdd494") : location === "Location needed" ? marketplaceMessage("inventory.a6ab4552d436") : location}</b></span>{locationLoading ? <LoaderCircle className="button-spinner" size={14} aria-hidden="true" /> : coordinates ? <Check size={14} /> : <ChevronDown size={13} />}</button>
         <div
           className="header-search-shell"
           onFocusCapture={() => setSuggestionsOpen(true)}
@@ -2906,9 +2946,9 @@ export default function Marketplace({
           </div> : null}
         </div>
         <div className="header-actions">
-          <button type="button" className="header-utility" onClick={() => setOffersOpen(true)} disabled={publicCatalogMode} aria-label={publicCatalogMode ? marketplaceMessage("inventory.8671efa83e95") : marketplaceMessage("inventory.4b5289f8b69a")}><PackageCheck size={19} /><span><small>{marketplaceMessage("inventory.8ed6791bdf3d")}</small><b>{marketplaceMessage("inventory.ada27592c957")}</b></span></button>
+          <button type="button" className="header-utility" onClick={() => setOffersOpen(true)} disabled={publicCatalogMode} aria-label={publicCatalogMode ? marketplaceMessage("inventory.8671efa83e95") : undefined}><PackageCheck size={19} /><span><small>{marketplaceMessage("inventory.8ed6791bdf3d")}</small><b>{marketplaceMessage("inventory.ada27592c957")}</b></span></button>
           <button type="button" className="header-utility" onClick={openPortal} aria-label={marketplaceMessage("inventory.1a816c36d638")}><Store size={19} /><span><b>{marketplaceMessage("navigation.pharmacies")}</b></span></button>
-          <button className="bag-button" disabled={publicCatalogMode} onClick={() => { setCheckoutStep(1); setShowAllCartItems(false); setRecentlyAddedBrand(""); setCartOpen(true); }} aria-label={publicCatalogMode ? marketplaceMessage("inventory.48a1691ef7ec") : marketplaceFormatMessage("inventory.1be54895e74f", [basketCount, basketCount === 1 ? "item" : "items"])}><ShoppingCart size={22} /><span>{publicCatalogMode ? marketplaceMessage("inventory.b671001e229a") : marketplaceMessage("request.basket_label")}</span><b>{basketCount}</b></button>
+          <button className="bag-button" disabled={publicCatalogMode} onClick={() => { setCheckoutStep(1); setShowAllCartItems(false); setRecentlyAddedBrand(""); setCartOpen(true); }} aria-label={publicCatalogMode ? marketplaceMessage("inventory.48a1691ef7ec") : undefined}><ShoppingCart size={22} /><span>{publicCatalogMode ? marketplaceMessage("inventory.b671001e229a") : marketplaceMessage("request.basket_label")}</span><b>{basketCount}</b>{!publicCatalogMode ? <span className="sr-only">{basketCountLabel}</span> : null}</button>
           <button className="mobile-toggle" onClick={() => setMobileMenu(!mobileMenu)} aria-label={marketplaceMessage("inventory.dfc1e6d16ba5")} aria-expanded={mobileMenu} aria-controls="mobile-marketplace-menu"><Menu size={22} /></button>
         </div>
       </header>
@@ -2964,7 +3004,7 @@ export default function Marketplace({
           </div>
           {relatedProducts.length ? <section className="marketplace-section related-products" aria-labelledby="related-products-title">
             <div className="related-products-heading"><div><h2 id="related-products-title">{marketplaceMessage("inventory.ddd8bdb51f77")}</h2><p>{marketplaceMessage("inventory.17978f8ee51a")}</p></div><Link href={selectedProductDepartment?.href ?? "/categories"}>{marketplaceMessage("inventory.437e30a10be2")} <ArrowRight size={16} /></Link></div>
-            <div className="product-grid">{relatedProducts.map((product, index) => <ProductCard key={product.id} product={product} onAdd={add} index={index} catalogueSize={relatedProducts.length} publicCatalogMode={publicCatalogMode} previewMode={previewMode} />)}</div>
+            <div className="product-grid" role="list">{relatedProducts.map((product, index) => <ProductCard key={product.id} product={product} onAdd={add} index={index} catalogueSize={relatedProducts.length} publicCatalogMode={publicCatalogMode} previewMode={previewMode} />)}</div>
             <p className="related-products-note"><ShieldCheck size={14} /> {marketplaceMessage("inventory.ec2e25a05e2d")}</p>
           </section> : null}
         </> : <div className="catalogue-empty"><Clock3 size={28} /><h1>{marketplaceMessage("inventory.8420d06d605c")}</h1><p>{marketplaceMessage("inventory.1745fc536368")}</p><Link href="/categories">{marketplaceMessage("inventory.aab5f657216a")}</Link></div>}
@@ -3020,7 +3060,7 @@ export default function Marketplace({
             {query || hasActiveFilters ? <button className="clear-filters" onClick={clearCatalogueFilters}><SlidersHorizontal size={14} /> {marketplaceMessage("inventory.daee7606b339")}</button> : null}
           </div>
           {catalogueBusy && visibleProducts.length ? <p className="catalogue-refresh-status" role="status" aria-live="polite"><LoaderCircle className="button-spinner" size={14} aria-hidden="true" /> {marketplaceMessage("inventory.fd42ef839d25")}</p> : null}
-          {catalogueBusy && !visibleProducts.length ? <CatalogueSkeleton /> : visibleProducts.length ? <div className={`product-grid ${viewMode === "list" ? "list-view" : ""}`} aria-busy={catalogueBusy} data-testid="product-grid">
+          {catalogueBusy && !visibleProducts.length ? <CatalogueSkeleton /> : visibleProducts.length ? <div className={`product-grid ${viewMode === "list" ? "list-view" : ""}`} role="list" aria-busy={catalogueBusy} data-testid="product-grid">
             {visibleProducts.map((product, index) => <ProductCard
               product={product}
               index={index}
@@ -3033,7 +3073,7 @@ export default function Marketplace({
             />)}
           </div> : <div className="catalogue-empty"><Search size={28} /><h3>{marketplaceMessage("inventory.ca602ed1950d")}</h3><p>{marketplaceMessage("inventory.1f0d418afe7e")}</p><button onClick={clearCatalogueFilters}>{marketplaceMessage("inventory.fd2b359b4763")}</button></div>}
           {visibleProducts.length ? <div ref={productLoadSentinelRef} className={`infinite-scroll-sentinel${catalogueBusy && hasMoreProducts ? " is-loading" : ""}`} role="status" aria-live="polite" aria-atomic="true" data-testid="product-scroll-sentinel">
-            {hasMoreProducts ? <><span className="infinite-scroll-spinner" aria-hidden="true" /><span>{catalogueBusy ? marketplaceMessage("inventory.97b72d67281c") : marketplaceMessage("inventory.6795683ef969")}</span><button type="button" onClick={() => { if (!catalogueBusy) { productLoadPendingRef.current = true; setVisibleCount((count) => count + PRODUCT_BATCH_SIZE); } }} disabled={catalogueBusy}>{catalogueBusy ? marketplaceMessage("inventory.ba3bbbe10d8b") : marketplaceMessage("catalogue.load_more")}</button></> : <span>{marketplaceFormatMessage("inventory.da287b007270", [marketplaceNumber(accessibleCatalogueSize)])}</span>}
+              {hasMoreProducts ? <><span className="infinite-scroll-spinner" aria-hidden="true" /><span>{catalogueBusy ? marketplaceMessage("inventory.97b72d67281c") : marketplaceMessage("inventory.6795683ef969")}</span><button type="button" onClick={() => { if (!catalogueBusy) { productLoadPendingRef.current = true; if (!serverCatalogueDemanded && backendConfigured && serverCatalogueAvailable) setServerCatalogueRequested(true); else setVisibleCount((count) => count + PRODUCT_BATCH_SIZE); } }} disabled={catalogueBusy}>{catalogueBusy ? marketplaceMessage("inventory.ba3bbbe10d8b") : marketplaceMessage("catalogue.load_more")}</button></> : <span>{marketplaceFormatMessage("inventory.da287b007270", [marketplaceNumber(accessibleCatalogueSize)])}</span>}
           </div> : null}
         </section>
       </>}

@@ -69,6 +69,12 @@ test("accepts a protected preview deployment", () => {
   assert.deepEqual(assessDeploymentEvidence({ origin, mode: "preview", records: records(origin, "preview") }).errors, []);
 });
 
+test("does not require the production consumer catalogue in the medicine-only protected preview", () => {
+  const origin = "https://med250-marketplace-preview.example.workers.dev";
+  const previewRecords = records(origin, "preview").filter((record) => record.route !== "/product/AMZ-B004L5JCZ4");
+  assert.deepEqual(assessDeploymentEvidence({ origin, mode: "preview", records: previewRecords }).errors, []);
+});
+
 test("accepts an indexable live custom domain", () => {
   const origin = "https://med-250.com";
   const result = assessDeploymentEvidence({

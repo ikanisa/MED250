@@ -67,7 +67,7 @@ export function toMarketplaceProduct(product: ProductSeoRecord): Product {
   };
 }
 
-export function getInitialMarketplaceProducts(category = "All products", limit = 24) {
+export function getInitialMarketplaceProducts(category = "All products", limit = 12) {
   return productSeoIndex
     .filter((product) => (
       category === "All products"

@@ -63,6 +63,8 @@ test("closes offer-item, pharmacy-login, description, and image publication gaps
   assert.match(migration, /verified_by is not null/);
   assert.match(migration, /dawanear_bind_pharmacy_identity/);
   assert.match(migration, /pg_advisory_xact_lock/);
+  assert.match(migration, /\^\[1-9\]\[0-9\]\{7,14\}\$/);
+  assert.doesNotMatch(migration, /\^2507\[2389\]\[0-9\]\{7\}\$/);
   assert.match(migration, /customer_order\.user_id = \(select auth\.uid\(\)\)/);
   assert.match(migration, /membership\.status = 'active'/);
   assert.match(migration, /null::text as description/);
