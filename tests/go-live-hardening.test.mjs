@@ -88,3 +88,19 @@ test("closes offer-item, pharmacy-login, description, and image publication gaps
   assert.doesNotMatch(verifyOtp, /\.from\("dawanear_pharmacy_memberships"\)/);
   assert.doesNotMatch(verifyOtp, /\.from\("dawanear_pharmacy_identities"\)\.insert/);
 });
+
+test("keeps the aggregate image contract bounded to materialized rollups", async () => {
+  const migration = await read(
+    "../supabase/migrations/20260729143000_optimize_backend_contract_image_rollup.sql",
+  );
+
+  assert.match(migration, /create or replace function dawanear_private\.dawanear_backend_contract_v19/);
+  assert.match(migration, /base as materialized/);
+  assert.match(migration, /catalogue as materialized/);
+  assert.match(migration, /image_totals as materialized/);
+  assert.match(migration, /product_rollup as materialized/);
+  assert.match(migration, /set local med250\.allow_product_image_governance_ddl = 'on'/);
+  assert.equal((migration.match(/from public\.dawanear_all_product_catalog/g) ?? []).length, 1);
+  assert.equal((migration.match(/from public\.dawanear_product_images/g) ?? []).length, 2);
+  assert.match(migration, /'"2026-07-16\.11"'::jsonb/);
+});

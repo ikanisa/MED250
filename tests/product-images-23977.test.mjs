@@ -12,6 +12,7 @@ const migrationFiles = [
   "20260716175000_protect_product_image_governance_ddl.sql",
   "20260716190000_reassert_verified_product_image_governance.sql",
   "20260716201536_support_23977_automated_product_images.sql",
+  "20260729143000_optimize_backend_contract_image_rollup.sql",
 ];
 const migrations = await Promise.all(
   migrationFiles.map((filename) =>
@@ -135,6 +136,14 @@ test("publishes five or six unverified-provenance images without manual approval
   );
   assert.equal(contract.rows[0].value.product_images.target_image_count, 23977);
   assert.equal(contract.rows[0].value.product_images.approved_image_count, 6);
+
+  const optimizedContract = await db.query(
+    "select dawanear_private.dawanear_backend_contract_v19() as value",
+  );
+  assert.deepEqual(
+    optimizedContract.rows[0].value.product_images,
+    contract.rows[0].value.product_images,
+  );
 });
 
 test("rejects galleries outside the three-to-six range", async () => {
