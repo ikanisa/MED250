@@ -229,6 +229,9 @@ test("keeps preview and production Workers isolated behind manual protected depl
   assert.equal(wrangler.env.production.vars.NEXT_PUBLIC_MARKETPLACE_MODE, "live");
   assert.equal(wrangler.env.production.vars.NEXT_PUBLIC_SITE_URL, "https://med-250.com");
   assert.equal(wrangler.env.production.vars.NEXT_PUBLIC_MED250_OBSERVABILITY, "cloud");
+  assert.match(wrangler.env.production.vars.NEXT_PUBLIC_SUPABASE_URL, /^https:\/\/[a-z]+\.supabase\.co$/);
+  assert.match(wrangler.env.production.vars.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, /^sb_publishable_/);
+  assert.match(wrangler.env.production.vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY, /^0x4/);
   assert.deepEqual(wrangler.env.production.routes.map((route) => route.pattern), [
     "med-250.com",
   ]);
@@ -251,7 +254,7 @@ test("keeps preview and production Workers isolated behind manual protected depl
   assert.match(packageJson.scripts["release:check:live"], /npm run test:sites:catalog/);
   assert.match(packageJson.scripts["release:check:live"], /npm run sites:verify:catalog/);
   assert.match(packageJson.scripts["release:check:live"], /wrangler deploy --env production --dry-run --strict/);
-  assert.match(packageJson.scripts["deploy:live"], /wrangler deploy --env production --keep-vars --strict/);
+  assert.match(packageJson.scripts["deploy:live"], /npx wrangler deploy --env production --strict --var MED250_RELEASE_REVISION:\$\(git rev-parse HEAD\)/);
   assert.match(packageJson.scripts["cloudflare:check:production"], /wrangler deploy --env production --dry-run --strict/);
   assert.match(packageJson.scripts["cloudflare:check:gikundiro"], /prepare:gikundiro/);
   assert.match(packageJson.scripts["cloudflare:check:gikundiro"], /wrangler\.gikundiro\.json --keep-vars --dry-run --strict/);

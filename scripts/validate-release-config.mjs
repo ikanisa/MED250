@@ -166,7 +166,7 @@ if (liveRequired) {
   const publicContactErrors = publicContactChannelErrors(env, { requireAll: true });
   if (runtimeManaged) warnings.push(...publicContactErrors.map((error) => `Non-blocking public contact follow-up: ${error}`));
   else errors.push(...publicContactErrors);
-  if (runtimeManaged) warnings.push("Runtime-managed public bindings are preserved with --keep-vars and require exact live verification after deployment.");
+  if (runtimeManaged) warnings.push("Committed production public bindings require exact live verification after deployment.");
 }
 
 const result = {

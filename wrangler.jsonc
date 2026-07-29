@@ -37,7 +37,10 @@
         "NEXT_PUBLIC_MED250_DEPLOYMENT_ORIGIN": "https://med-250.com",
         "NEXT_PUBLIC_MARKETPLACE_MODE": "live",
         "NEXT_PUBLIC_SITE_URL": "https://med-250.com",
-        "NEXT_PUBLIC_MED250_OBSERVABILITY": "cloud"
+        "NEXT_PUBLIC_MED250_OBSERVABILITY": "cloud",
+        "NEXT_PUBLIC_SUPABASE_URL": "https://uskfnszcdqpcfrhjxitl.supabase.co",
+        "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_EUrmxGdkqrwed7Vd06Bl5g_Cu2DXmRK",
+        "NEXT_PUBLIC_TURNSTILE_SITE_KEY": "0x4AAAAAAD2nncV3uS0uwQDE"
       },
       "assets": {
         "directory": "dist/client",
@@ -59,7 +62,10 @@
         "NEXT_PUBLIC_MED250_DEPLOYMENT_ORIGIN": "https://med-250.com",
         "NEXT_PUBLIC_MARKETPLACE_MODE": "live",
         "NEXT_PUBLIC_SITE_URL": "https://med-250.com",
-        "NEXT_PUBLIC_MED250_OBSERVABILITY": "cloud"
+        "NEXT_PUBLIC_MED250_OBSERVABILITY": "cloud",
+        "NEXT_PUBLIC_SUPABASE_URL": "https://uskfnszcdqpcfrhjxitl.supabase.co",
+        "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_EUrmxGdkqrwed7Vd06Bl5g_Cu2DXmRK",
+        "NEXT_PUBLIC_TURNSTILE_SITE_KEY": "0x4AAAAAAD2nncV3uS0uwQDE"
       },
       "assets": {
         "directory": "dist/client",

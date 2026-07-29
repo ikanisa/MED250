@@ -308,7 +308,7 @@ test("uses committed public preview defaults without weakening live configuratio
     env: cleanEnvironment,
   });
   assert.equal(live.status, 1);
-  assert.match(live.stdout, /NEXT_PUBLIC_SUPABASE_URL is missing/);
+  assert.match(live.stdout, /NEXT_PUBLIC_MED250_CONTACT_EMAIL is required for live public contact readiness/);
   assert.match(live.stdout, /"envFileSource": null/);
 });
 

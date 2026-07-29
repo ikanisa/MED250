@@ -115,7 +115,7 @@
     "release:check": "npm run release:preflight && npm run security:audit && npm run lint && npm run data:validate && npm run data:quality && npm run python:test && npm test && npm run performance:budget && wrangler deploy --dry-run --strict",
     "release:check:live": "npm run release:preflight:live && npm run launch:go-live:status && npm run domain:legacy-redirect:verify && npm run backend:verify && npm run backend:verify:description-reviewer -- --product-id \"$MED250_DESCRIPTION_REVIEWER_PROBE_PRODUCT_ID\" --expected-updated-at \"$MED250_DESCRIPTION_REVIEWER_PROBE_EXPECTED_UPDATED_AT\" && npm run ops:health && npm run security:audit && npm run lint && npm run data:validate && npm run data:quality && npm run localization:verify && npm run python:test && npm run test:sites:catalog && npm run sites:verify:catalog && npm run test:preview && npm run test:production && npm run performance:budget && wrangler deploy --env production --dry-run --strict",
     "deploy:preview": "npm run release:check && wrangler deploy --strict",
-    "deploy:live": "npm run release:check:live && wrangler deploy --env production --keep-vars --strict"
+    "deploy:live": "npm run release:check:live && npx wrangler deploy --env production --strict --var MED250_RELEASE_REVISION:$(git rev-parse HEAD)"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.57.4",
