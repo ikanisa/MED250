@@ -210,15 +210,15 @@ export function assessBackendContract(contract) {
   requireInvariant(contract?.realtime?.offers === true, "Offers are missing from Realtime publication.");
   requireInvariant(contract?.realtime?.notifications === true, "Pharmacy notifications are missing from Realtime publication.");
   requireInvariant(contract?.api_surface?.function_count === contract?.api_surface?.expected_function_count, "MED+250 function count drifted.");
-  requireInvariant(contract?.api_surface?.expected_function_count === 32, "MED+250 function allowlist count drifted.");
+  requireInvariant(contract?.api_surface?.expected_function_count === 41, "MED+250 function allowlist count drifted.");
   requireInvariant(contract?.api_surface?.public_execute_count === 0, "PUBLIC can execute a MED+250 function.");
   requireInvariant(contract?.api_surface?.anonymous_security_definer_count === 1, "Anonymous privileged-function surface drifted beyond the aggregate trust-metrics RPC.");
   requireInvariant(contract?.api_surface?.mutable_security_definer_path_count === 0, "A privileged MED+250 function has a mutable search path.");
-  requireInvariant(contract?.api_surface?.expected_authenticated_security_definer_count === 14, "Authenticated privileged-function allowlist drifted.");
+  requireInvariant(contract?.api_surface?.expected_authenticated_security_definer_count === 15, "Authenticated privileged-function allowlist drifted.");
   requireInvariant(contract?.api_surface?.missing_authenticated_security_definer_count === 0, "An expected authenticated MED+250 workflow function is missing or unavailable.");
   requireInvariant(contract?.api_surface?.unexpected_authenticated_security_definer_count === 0, "An unexpected privileged function is exposed to authenticated clients.");
   requireInvariant(contract?.table_surface?.table_count === contract?.table_surface?.expected_table_count, "MED+250 table count drifted.");
-  requireInvariant(contract?.table_surface?.expected_table_count === 24, "MED+250 table allowlist count drifted.");
+  requireInvariant(contract?.table_surface?.expected_table_count === 27, "MED+250 table allowlist count drifted.");
   requireInvariant(contract?.table_surface?.rls_disabled_count === 0, "A MED+250 table does not have RLS enabled.");
   requireInvariant(contract?.table_surface?.anonymous_select_count === 0, "Unauthenticated clients can select from a MED+250 table.");
   requireInvariant(contract?.table_surface?.expected_deny_by_default_count === 11, "Deny-by-default table allowlist drifted.");
