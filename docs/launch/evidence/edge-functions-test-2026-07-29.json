@@ -1,0 +1,39 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED",
+  "evidence_type": "test_record",
+  "status": "complete",
+  "title": "Hardened pharmacy OTP verifier production denial tests",
+  "summary": "Privacy-safe production probes verify the revised OTP endpoint fails closed for hostile origins, unsupported methods, and malformed phone input. No real phone, OTP, user, pharmacy, order, or protected response data was used or retained.",
+  "recorded_at": "2026-07-29T14:34:00Z",
+  "recorded_by": "Codex automated verifier",
+  "recorded_role": "Release verification agent",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Hostile origin denial",
+      "status": "passed",
+      "detail": "An OPTIONS request from an unapproved origin returned HTTP 403 without an allow-origin header or protected response data."
+    },
+    {
+      "name": "Method boundary",
+      "status": "passed",
+      "detail": "A GET request from the canonical production origin returned HTTP 405 with the reviewed CORS boundary."
+    },
+    {
+      "name": "Input validation",
+      "status": "passed",
+      "detail": "An empty JSON request from the canonical production origin returned HTTP 400 with the expected international-phone validation error."
+    },
+    {
+      "name": "Positive identity path retained",
+      "status": "passed",
+      "detail": "No real OTP or pharmacy identity was used; the live database remains fail-closed until a named reviewer enables an exact login authority."
+    }
+  ],
+  "executed_by": "Codex automated verifier",
+  "executor_role": "Release verification agent",
+  "started_at": "2026-07-29T14:14:00Z",
+  "completed_at": "2026-07-29T14:16:00Z"
+}

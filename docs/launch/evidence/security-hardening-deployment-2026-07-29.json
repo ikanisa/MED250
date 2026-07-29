@@ -1,0 +1,40 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_SECURITY_HARDENING_DEPLOYED",
+  "evidence_type": "deployment_receipt",
+  "status": "complete",
+  "title": "MED+250 production backend hardening deployment",
+  "summary": "The reviewed MED+250 hardening, contract-performance, and allowlist-reconciliation migrations were applied directly to the linked production database under the product owner's no-staging instruction. The provider migration history and aggregate contract were verified after deployment without retaining row data or credentials.",
+  "recorded_at": "2026-07-29T14:32:30Z",
+  "recorded_by": "Codex automated verifier",
+  "recorded_role": "Release verification agent",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Migration history",
+      "status": "passed",
+      "detail": "Production records marketplace_go_live_hardening, optimize_backend_contract_image_rollup, materialize_backend_contract_layers, and reconcile_backend_contract_allowlists."
+    },
+    {
+      "name": "Identity authority reconciliation",
+      "status": "passed",
+      "detail": "Unsafe enabled login authorities and duplicate enabled phone authorities both reconcile to zero; the named-review binding RPC and one-authority index are active."
+    },
+    {
+      "name": "Catalogue governance reconciliation",
+      "status": "passed",
+      "detail": "Direct public governed-description grants and known mismatched published images both reconcile to zero while incomplete image galleries remain fail-closed."
+    },
+    {
+      "name": "Aggregate contract deployment",
+      "status": "passed",
+      "detail": "The service-only 2026-07-23.1 contract reports the complete 41-function and 27-table MED+250 production surface."
+    }
+  ],
+  "deployed_by": "Codex release operator",
+  "deployer_role": "Automated backend release operator",
+  "deployed_at": "2026-07-29T14:31:30Z",
+  "environment": "MED+250 production database",
+  "release_identifier": "med250-backend-2026-07-23.1-844bd68"
+}
