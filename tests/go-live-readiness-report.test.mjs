@@ -3,10 +3,20 @@ import test from "node:test";
 
 import { buildGoLiveReadinessReport } from "../scripts/report-go-live-readiness.mjs";
 
-test("reports go-live readiness without promoting pending gates", async () => {
+test("separates production engineering readiness from genuine transaction blockers", async () => {
   const report = await buildGoLiveReadinessReport();
 
   assert.equal(report.productionReady, false);
+  assert.equal(report.siteProductionReady, true);
+  assert.equal(report.marketplaceTransactionReady, false);
+  assert.deepEqual(report.transactionBlockers.map(({ gate }) => gate), [
+    "MED250_GATE_WHATSAPP_READY",
+    "MED250_GATE_TURNSTILE_SERVER_VERIFIED",
+    "MED250_GATE_PHYSICAL_UAT_PASSED",
+  ]);
+  assert.ok(report.nonBlockingFollowUp.some(({ area, count }) => area === "source_authority" && count === undefined));
+  assert.ok(report.nonBlockingFollowUp.some(({ area, count }) => area === "duplicate_register" && count === 51));
+  assert.ok(report.nonBlockingFollowUp.some(({ area, count }) => area === "product_content" && count === 72));
   assert.deepEqual(report.sourceAuthority, {
     valid: false,
     productionAuthorized: false,
@@ -42,15 +52,20 @@ test("reports go-live readiness without promoting pending gates", async () => {
   assert.deepEqual(report.gateReadiness, {
     confirmed: 0,
     approvalPending: 0,
-    preparedEvidencePending: 10,
+    preparedEvidencePending: 8,
     missingEvidence: 0,
     staleReleaseEvidence: 1,
+    machineVerified: 2,
+    runtimeVerificationRequired: 1,
   });
   assert.match(report.sourceControl.currentReleaseRevision, /^[a-f0-9]{40}$/);
   const domain = report.gates.find((gate) => gate.name === "MED250_GATE_DOMAIN_DNS_VERIFIED");
-  assert.equal(domain.readiness, "stale_release_evidence");
+  assert.equal(domain.readiness, "runtime_verification_required");
   assert.equal(domain.staleReleaseEvidence, true);
-  assert.ok(domain.releaseRevisionBindings.every((binding) => binding.observedReleaseRevision === "37d8c1c0e0c8ac2d15eea436d2f9037c20e2814c"));
+  assert.equal(domain.disposition, "runtime_verification_required");
+  assert.equal(report.gates.find((gate) => gate.name === "MED250_GATE_SECURITY_HARDENING_DEPLOYED").disposition, "closed_by_machine_evidence");
+  assert.ok(domain.releaseRevisionBindings.every((binding) => /^[a-f0-9]{40}$/.test(binding.observedReleaseRevision)));
+  assert.ok(domain.releaseRevisionBindings.every((binding) => binding.observedReleaseRevision !== report.sourceControl.currentReleaseRevision));
   assert.equal(report.duplicateRegister.decisionCounts.pending, 51);
   assert.equal(report.physicalUat.statusCounts.pending, 12);
   assert.deepEqual(report.renderedProductionAudit, {
@@ -82,6 +97,6 @@ test("reports go-live readiness without promoting pending gates", async () => {
   assert.equal(report.legacyDomainRedirect.probeCount, 5);
   assert.equal(report.legacyDomainRedirect.passedProbeCount, 5);
   assert.equal(report.legacyDomainRedirect.errorCount, 0);
-  assert.equal(report.handoff.preparedPendingArtifactCount, 15);
+  assert.equal(report.handoff.preparedPendingArtifactCount, report.handoff.missingEvidenceArtifactCount);
   assert.equal(report.handoff.unpreparedEvidenceArtifactCount, 0);
 });

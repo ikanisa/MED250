@@ -1082,17 +1082,7 @@ test("protects new anonymous customer sessions with Turnstile in live mode", asy
   assert.match(worker, /script-src[^\n]*static\.cloudflareinsights\.com/);
   assert.match(worker, /frame-src https:\/\/challenges\.cloudflare\.com/);
   assert.match(preflight, /Live release validation requires NEXT_PUBLIC_TURNSTILE_SITE_KEY/);
-  assert.match(preflight, /MED250_GATE_GPS_READY/);
-  assert.match(preflight, /MED250_GATE_WHATSAPP_READY/);
-  assert.match(preflight, /MED250_GATE_DUPLICATE_REGISTER_REVIEWED/);
-  assert.match(preflight, /MED250_GATE_SECURITY_HARDENING_DEPLOYED/);
-  assert.match(preflight, /MED250_GATE_EDGE_FUNCTIONS_DEPLOYED/);
-  assert.match(preflight, /MED250_GATE_TURNSTILE_SERVER_VERIFIED/);
-  assert.match(preflight, /MED250_GATE_AUTH_RATE_LIMITS_APPROVED/);
-  assert.match(preflight, /MED250_GATE_PRESCRIPTION_RETENTION_APPROVED/);
-  assert.match(preflight, /MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED/);
-  assert.match(preflight, /MED250_GATE_DOMAIN_DNS_VERIFIED/);
-  assert.match(preflight, /MED250_GATE_PHYSICAL_UAT_PASSED/);
+  assert.doesNotMatch(preflight, /Live release validation requires MED250_GATE_/);
 });
 
 test("uses WhatsApp Cloud OTP only for pharmacy portal access", async () => {

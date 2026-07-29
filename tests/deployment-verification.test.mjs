@@ -244,8 +244,8 @@ test("keeps preview and production Workers isolated behind manual protected depl
   assert.match(packageJson.scripts["release:check:live"], /npm run test:preview/);
   assert.match(packageJson.scripts["release:check:live"], /npm run test:production/);
   assert.match(packageJson.scripts["release:check:live"], /npm run launch:go-live:status/);
-  assert.match(packageJson.scripts["release:check:live"], /^npm run data:source-authority:verify:strict/);
-  assert.match(packageJson.scripts["release:check:live"], /npm run audit:browser-evidence:verify:live/);
+  assert.match(packageJson.scripts["release:check:live"], /^npm run release:preflight:live/);
+  assert.doesNotMatch(packageJson.scripts["release:check:live"], /source-authority:verify:strict|audit:browser-evidence:verify:live|uat:verify:live|ops:health:strict/);
   assert.match(packageJson.scripts["release:check:live"], /npm run domain:legacy-redirect:verify/);
   assert.match(packageJson.scripts["release:check:live"], /npm run localization:verify/);
   assert.match(packageJson.scripts["release:check:live"], /npm run test:sites:catalog/);

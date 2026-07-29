@@ -65,7 +65,7 @@ test("binds every audit finding and strategic decision to an owner-ready closure
     auditedSurfaceCount: 12,
   });
   assert.equal(report.releaseGateQueue.length, 11);
-  assert.equal(report.releaseGateQueue.find(({ name }) => name === "MED250_GATE_DOMAIN_DNS_VERIFIED").approvalRequired, true);
+  assert.equal(report.releaseGateQueue.find(({ name }) => name === "MED250_GATE_DOMAIN_DNS_VERIFIED").approvalRequired, false);
   assert.equal(report.releaseGateQueue.find(({ name }) => name === "MED250_GATE_SECURITY_HARDENING_DEPLOYED").approvalRequired, false);
   assert.equal(report.releaseGateQueue.find(({ name }) => name === "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED").approvalRequired, false);
   assert.equal(report.ownerQueues.reduce((total, queue) => total + queue.itemCount, 0), 19);

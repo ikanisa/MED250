@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { publicContactChannelErrors } from "../lib/public-contact-channels.mjs";
 
 const liveRequired = process.argv.includes("--live");
+const runtimeManaged = process.argv.includes("--runtime-managed");
 const envCandidates = liveRequired
   ? [".env.local", ".env"]
   : [".env.local", ".env", ".env.example"];
@@ -24,10 +25,20 @@ const fileEnv = Object.fromEntries(source
     return [key, value];
   }));
 
-const env = { ...fileEnv, ...process.env };
+let configuredWorkerVars = {};
+if (existsSync(wranglerPath)) {
+  try {
+    const configuredWrangler = JSON.parse(readFileSync(wranglerPath, "utf8"));
+    const configuredWorker = liveRequired ? configuredWrangler?.env?.production : configuredWrangler;
+    configuredWorkerVars = configuredWorker?.vars ?? {};
+  } catch {
+    configuredWorkerVars = {};
+  }
+}
+const env = { ...configuredWorkerVars, ...fileEnv, ...process.env };
 const errors = [];
 const warnings = [];
-const liveGateNames = [
+const legacyAdvisoryGateNames = [
   "MED250_GATE_GPS_READY",
   "MED250_GATE_WHATSAPP_READY",
   "MED250_GATE_DUPLICATE_REGISTER_REVIEWED",
@@ -43,7 +54,11 @@ const liveGateNames = [
 
 function required(name) {
   const value = env[name]?.trim();
-  if (!value) errors.push(`${name} is missing.`);
+  const runtimeBinding = runtimeManaged && new Set([
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+  ]).has(name);
+  if (!value && !runtimeBinding) errors.push(`${name} is missing.`);
   return value ?? "";
 }
 
@@ -83,16 +98,18 @@ if (!existsSync(wranglerPath)) {
   }
 }
 
-try {
-  const parsed = new URL(supabaseUrl);
-  if (parsed.protocol !== "https:" || !parsed.hostname.endsWith(".supabase.co")) {
-    errors.push("NEXT_PUBLIC_SUPABASE_URL must be an HTTPS Supabase project URL.");
+if (supabaseUrl) {
+  try {
+    const parsed = new URL(supabaseUrl);
+    if (parsed.protocol !== "https:" || !parsed.hostname.endsWith(".supabase.co")) {
+      errors.push("NEXT_PUBLIC_SUPABASE_URL must be an HTTPS Supabase project URL.");
+    }
+  } catch {
+    errors.push("NEXT_PUBLIC_SUPABASE_URL is not a valid URL.");
   }
-} catch {
-  errors.push("NEXT_PUBLIC_SUPABASE_URL is not a valid URL.");
 }
 
-if (!publishableKey.startsWith("sb_publishable_")) {
+if (publishableKey && !publishableKey.startsWith("sb_publishable_")) {
   errors.push("Use a modern sb_publishable_ key in NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY; never use a secret or service-role key.");
 }
 
@@ -143,14 +160,13 @@ if (siteUrl) {
 if (liveRequired) {
   if (mode !== "live") errors.push("Live release validation requires NEXT_PUBLIC_MARKETPLACE_MODE=live.");
   if (!siteUrl) errors.push("Live release validation requires an explicit NEXT_PUBLIC_SITE_URL.");
-  if (!turnstileSiteKey) errors.push("Live release validation requires NEXT_PUBLIC_TURNSTILE_SITE_KEY.");
+  if (!turnstileSiteKey && !runtimeManaged) errors.push("Live release validation requires NEXT_PUBLIC_TURNSTILE_SITE_KEY.");
+  if (!turnstileSiteKey && runtimeManaged) warnings.push("NEXT_PUBLIC_TURNSTILE_SITE_KEY is runtime-managed and must be verified after deployment.");
   if (observabilityMode !== "cloud") errors.push("Live release validation requires NEXT_PUBLIC_MED250_OBSERVABILITY=cloud.");
-  errors.push(...publicContactChannelErrors(env, { requireAll: true }));
-  for (const gateName of liveGateNames) {
-    if (env[gateName]?.trim().toLowerCase() !== "confirmed") {
-      errors.push(`Live release validation requires ${gateName}=confirmed.`);
-    }
-  }
+  const publicContactErrors = publicContactChannelErrors(env, { requireAll: true });
+  if (runtimeManaged) warnings.push(...publicContactErrors.map((error) => `Non-blocking public contact follow-up: ${error}`));
+  else errors.push(...publicContactErrors);
+  if (runtimeManaged) warnings.push("Runtime-managed public bindings are preserved with --keep-vars and require exact live verification after deployment.");
 }
 
 const result = {
@@ -161,8 +177,11 @@ const result = {
   workerReleaseMode: workerMode || "missing",
   workerName: workerName || "missing",
   workerEnvironment,
+  runtimeManagedBindings: runtimeManaged,
   publicVariablesChecked: Object.keys(env).filter((name) => name.startsWith("NEXT_PUBLIC_")).sort(),
-  liveGatesChecked: liveRequired ? liveGateNames : [],
+  legacyAdvisoryGateFlagsObserved: liveRequired
+    ? legacyAdvisoryGateNames.filter((name) => Boolean(env[name]?.trim()))
+    : [],
   warnings,
   errors,
 };

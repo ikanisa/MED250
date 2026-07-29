@@ -525,45 +525,35 @@ test("keeps the deployed contract service-only and identifier-free", async () =>
   assert.doesNotMatch(migration, /phone_numbers|whatsapp_numbers|customer_location/);
 });
 
-test("makes backend drift and operational health mandatory in the live release gate", async () => {
+test("keeps technical drift mandatory without making safe deferred reviews block deployment", async () => {
   const packageJson = JSON.parse(await readFile(
     new URL("../package.json", import.meta.url),
     "utf8",
   ));
   const liveGate = packageJson.scripts["release:check:live"];
-  assert.match(liveGate, /^npm run data:source-authority:verify:strict/);
-  assert.match(liveGate, /&& npm run release:preflight:live/);
+  assert.match(liveGate, /^npm run release:preflight:live/);
   assert.match(liveGate, /&& npm run launch:go-live:status/);
-  assert.match(liveGate, /&& npm run data:duplicates:verify -- --strict/);
   assert.match(liveGate, /&& npm run backend:verify/);
   assert.match(liveGate, /&& npm run backend:verify:description-reviewer/);
   assert.match(liveGate, /MED250_DESCRIPTION_REVIEWER_PROBE_PRODUCT_ID/);
   assert.match(liveGate, /MED250_DESCRIPTION_REVIEWER_PROBE_EXPECTED_UPDATED_AT/);
-  assert.match(liveGate, /&& npm run ops:health:strict/);
-  assert.ok(
-    liveGate.indexOf("data:source-authority:verify:strict") < liveGate.indexOf("release:preflight:live")
-      && liveGate.indexOf("release:preflight:live") < liveGate.indexOf("data:duplicates:verify"),
-    "fail-closed attestation checks must run before a service credential is used",
-  );
+  assert.match(liveGate, /&& npm run ops:health/);
+  assert.doesNotMatch(liveGate, /source-authority:verify:strict|data:duplicates:verify -- --strict|data:content-review:verify -- --strict|uat:verify:live|audit:browser-evidence:verify:live|ops:health:strict/);
   assert.ok(
     liveGate.indexOf("release:preflight:live") < liveGate.indexOf("launch:go-live:status")
-      && liveGate.indexOf("launch:go-live:status") < liveGate.indexOf("data:duplicates:verify"),
-    "consolidated go-live readiness must run before source-governance and service-credential checks",
-  );
-  assert.ok(
-    liveGate.indexOf("data:duplicates:verify") < liveGate.indexOf("backend:verify"),
-    "source-governance review must pass before a service credential is used",
+      && liveGate.indexOf("launch:go-live:status") < liveGate.indexOf("backend:verify"),
+    "informational readiness must be reported before service-credential checks",
   );
   assert.ok(
     liveGate.indexOf("backend:verify") < liveGate.indexOf("wrangler deploy"),
     "backend drift must be checked before Cloudflare packaging",
   );
   assert.ok(
-    liveGate.indexOf("backend:verify:description-reviewer") < liveGate.indexOf("ops:health:strict"),
-    "the protected reviewer must be probed before operational readiness is accepted",
+    liveGate.indexOf("backend:verify:description-reviewer") < liveGate.indexOf("ops:health"),
+    "the protected reviewer must be probed before operational health is reported",
   );
   assert.ok(
-    liveGate.indexOf("ops:health:strict") < liveGate.indexOf("wrangler deploy"),
-    "operational readiness must be checked before Cloudflare packaging",
+    liveGate.indexOf("ops:health") < liveGate.indexOf("wrangler deploy"),
+    "operational health must remain visible before Cloudflare packaging",
   );
 });

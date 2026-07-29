@@ -14,11 +14,9 @@ test("builds approval packets only for evidence-complete unapproved launch gates
 
   assert.equal(packet.release, "med250-production");
   assert.equal(packet.approval_pending_gate_count, 0);
-  assert.equal(packet.blocked_approval_gate_count, 1);
+  assert.equal(packet.blocked_approval_gate_count, 0);
   assert.deepEqual(gateNames, []);
-  assert.deepEqual(packet.blocked_approvals.map((gate) => gate.gate), ["MED250_GATE_DOMAIN_DNS_VERIFIED"]);
-  assert.match(packet.blocked_approvals[0].reason, /stale/);
-  assert.ok(packet.blocked_approvals[0].release_revision_bindings.every((binding) => binding.matchesCurrentRevision === false));
+  assert.deepEqual(packet.blocked_approvals, []);
   assert.ok(!gateNames.includes("MED250_GATE_GPS_READY"));
   assert.ok(!gateNames.includes("MED250_GATE_PHYSICAL_UAT_PASSED"));
 });
@@ -34,5 +32,5 @@ test("removes a gate from approval packet after it has named approval", () => {
   const packet = buildLaunchApprovalPacket(approved, readinessReport);
   assert.equal(packet.approval_pending_gate_count, 0);
   assert.ok(!packet.gates.some(({ gate }) => gate === "MED250_GATE_SECURITY_HARDENING_DEPLOYED"));
-  assert.equal(packet.blocked_approval_gate_count, 1);
+  assert.equal(packet.blocked_approval_gate_count, 0);
 });

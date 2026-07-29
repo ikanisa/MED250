@@ -8,6 +8,8 @@ import { validateLaunchEvidence } from "../scripts/validate-launch-evidence.mjs"
 
 const manifest = JSON.parse(await readFile(new URL("../data/launch-evidence.json", import.meta.url), "utf8"));
 const rootDir = new URL("..", import.meta.url).pathname;
+const testNow = new Date("2026-07-30T12:00:00+02:00");
+const testApprovalAt = "2026-07-30T11:00:00+02:00";
 
 async function withCompleteFixtureEvidence(gateName, filenames) {
   const fixture = structuredClone(manifest);
@@ -35,9 +37,9 @@ test("approves an evidence-complete backend gate with named owner metadata", asy
     gateName: "MED250_GATE_SECURITY_HARDENING_DEPLOYED",
     approvedBy: "Named backend owner",
     approvedRole: "Backend owner",
-    approvedAt: "2026-07-22T11:00:00+02:00",
+    approvedAt: testApprovalAt,
     rootDir,
-    now: new Date("2026-07-22T12:00:00+02:00"),
+    now: testNow,
   });
 
   const gate = result.manifest.gates.MED250_GATE_SECURITY_HARDENING_DEPLOYED;
@@ -46,7 +48,7 @@ test("approves an evidence-complete backend gate with named owner metadata", asy
   assert.deepEqual(result.approved.evidenceTypes, ["deployment_receipt", "test_record"]);
   const validation = validateLaunchEvidence(result.manifest, {
     rootDir,
-    now: new Date("2026-07-22T12:00:00+02:00"),
+    now: testNow,
   });
   assert.equal(validation.valid, true, validation.errors.join("; "));
 });
@@ -58,9 +60,9 @@ test("rejects launch gate approval when evidence is incomplete", async () => {
       gateName: "MED250_GATE_GPS_READY",
       approvedBy: "Named operations owner",
       approvedRole: "Operations owner",
-      approvedAt: "2026-07-22T11:00:00+02:00",
+      approvedAt: testApprovalAt,
       rootDir,
-      now: new Date("2026-07-22T12:00:00+02:00"),
+      now: testNow,
     }),
     /missing evidence: review_ledger/,
   );
@@ -73,9 +75,9 @@ test("rejects launch gate approval when release-bound evidence is stale", async 
       gateName: "MED250_GATE_DOMAIN_DNS_VERIFIED",
       approvedBy: "Named infrastructure owner",
       approvedRole: "Infrastructure owner",
-      approvedAt: "2026-07-22T11:00:00+02:00",
+      approvedAt: testApprovalAt,
       rootDir,
-      now: new Date("2026-07-22T12:00:00+02:00"),
+      now: testNow,
     }),
     /release-bound evidence is stale/,
   );
@@ -92,9 +94,9 @@ test("rejects launch gate approval with unsafe or incomplete metadata", async ()
       gateName: "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED",
       approvedBy: "",
       approvedRole: "Backend owner",
-      approvedAt: "2026-07-22T11:00:00+02:00",
+      approvedAt: testApprovalAt,
       rootDir,
-      now: new Date("2026-07-22T12:00:00+02:00"),
+      now: testNow,
     }),
     /approved_by is required/,
   );
@@ -106,7 +108,7 @@ test("rejects launch gate approval with unsafe or incomplete metadata", async ()
       approvedRole: "Backend owner",
       approvedAt: "2026-07-22T11:00:00",
       rootDir,
-      now: new Date("2026-07-22T12:00:00+02:00"),
+      now: testNow,
     }),
     /timezone-qualified/,
   );

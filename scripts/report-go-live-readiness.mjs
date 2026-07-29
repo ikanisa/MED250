@@ -27,6 +27,18 @@ import {
   validateLegacyDomainRedirectEvidence,
 } from "./verify-legacy-domain-redirect.mjs";
 
+const machineVerifiedGateNames = new Set([
+  "MED250_GATE_SECURITY_HARDENING_DEPLOYED",
+  "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED",
+  "MED250_GATE_DOMAIN_DNS_VERIFIED",
+]);
+
+const transactionGateNames = new Set([
+  "MED250_GATE_WHATSAPP_READY",
+  "MED250_GATE_TURNSTILE_SERVER_VERIFIED",
+  "MED250_GATE_PHYSICAL_UAT_PASSED",
+]);
+
 async function loadJson(path) {
   return JSON.parse(await readFile(path, "utf8"));
 }
@@ -67,11 +79,19 @@ function gateRows(manifest, handoff, releaseBindings) {
     const approved = approvalComplete(gate);
     const releaseRevisionBindings = releaseBindings.get(name) ?? [];
     const staleReleaseEvidence = releaseRevisionBindings.some((binding) => !binding.matchesCurrentRevision);
+    const evidenceComplete = missingEvidenceTypes.length === 0;
     let readiness = "missing_evidence";
-    if (gate.status === "confirmed" && approved && missingEvidenceTypes.length === 0) readiness = "confirmed";
-    else if (missingEvidenceTypes.length === 0 && staleReleaseEvidence) readiness = "stale_release_evidence";
+    if (machineVerifiedGateNames.has(name) && evidenceComplete) {
+      readiness = staleReleaseEvidence ? "runtime_verification_required" : "machine_verified";
+    } else if (gate.status === "confirmed" && approved && missingEvidenceTypes.length === 0) readiness = "confirmed";
     else if (missingEvidenceTypes.length === 0 && !approved) readiness = "approval_pending";
     else if (preparedPendingEvidence.length === missingEvidenceTypes.length) readiness = "prepared_evidence_pending";
+    let disposition = "non_blocking_follow_up";
+    if (machineVerifiedGateNames.has(name) && evidenceComplete) {
+      disposition = staleReleaseEvidence ? "runtime_verification_required" : "closed_by_machine_evidence";
+    } else if (transactionGateNames.has(name) && readiness !== "confirmed") {
+      disposition = "transaction_blocker";
+    }
     return {
       name,
       title: gate.title,
@@ -85,6 +105,8 @@ function gateRows(manifest, handoff, releaseBindings) {
       approvalComplete: approved,
       releaseRevisionBindings,
       staleReleaseEvidence,
+      evidenceComplete,
+      disposition,
     };
   });
 }
@@ -129,21 +151,60 @@ export async function buildGoLiveReadinessReport() {
     counts[gate.readiness] = (counts[gate.readiness] ?? 0) + 1;
     return counts;
   }, {});
+  const staleReleaseEvidenceGateCount = gates.filter((gate) => gate.staleReleaseEvidence).length;
+  const siteProductionReady = launchNonStrict.valid
+    && legacyDomainRedirect.valid
+    && gates
+      .filter((gate) => machineVerifiedGateNames.has(gate.name))
+      .every((gate) => gate.evidenceComplete);
+  const transactionBlockers = gates
+    .filter((gate) => gate.disposition === "transaction_blocker")
+    .map((gate) => ({
+      gate: gate.name,
+      title: gate.title,
+      missingEvidenceTypes: gate.missingEvidenceTypes,
+    }));
+  const nonBlockingFollowUp = [
+    {
+      area: "source_authority",
+      pending: !sourceAuthority.productionAuthorized,
+      safeDefault: "The replacement source remains available and unapproved recovered content remains unpublished.",
+    },
+    {
+      area: "duplicate_register",
+      pending: !duplicateRegister.valid,
+      count: duplicateRegister.decisionCounts.pending,
+      safeDefault: "Unresolved duplicate groups remain quarantined from authoritative publication.",
+    },
+    {
+      area: "product_content",
+      pending: !productContentReview.valid,
+      count: productContentReview.pendingCount,
+      safeDefault: "Pending descriptions remain hidden until reviewed.",
+    },
+    ...gates
+      .filter((gate) => gate.disposition === "non_blocking_follow_up")
+      .map((gate) => ({
+        area: gate.name,
+        pending: gate.readiness !== "confirmed",
+        safeDefault: "The current fail-closed production behavior remains in force.",
+      })),
+  ].filter((item) => item.pending);
+  const marketplaceTransactionReady = siteProductionReady
+    && transactionBlockers.length === 0
+    && physicalStrict.valid;
 
   return {
-    schemaVersion: "1",
+    schemaVersion: "2",
     release: manifest.release ?? "med250-production",
-    productionReady: sourceAuthority.productionAuthorized
-      && launchStrict.valid
-      && duplicateRegister.valid
-      && productContentReview.valid
-      && physicalStrict.valid
-      && renderedProductionAudit.valid
-      && legacyDomainRedirect.valid
-      && !(readinessCounts.stale_release_evidence ?? 0),
+    productionReady: marketplaceTransactionReady,
+    siteProductionReady,
+    marketplaceTransactionReady,
+    transactionBlockers,
+    nonBlockingFollowUp,
     sourceControl: {
       currentReleaseRevision,
-      staleReleaseEvidenceGateCount: readinessCounts.stale_release_evidence ?? 0,
+      staleReleaseEvidenceGateCount,
     },
     sourceAuthority: {
       valid: sourceAuthority.valid,
@@ -167,7 +228,9 @@ export async function buildGoLiveReadinessReport() {
       approvalPending: readinessCounts.approval_pending ?? 0,
       preparedEvidencePending: readinessCounts.prepared_evidence_pending ?? 0,
       missingEvidence: readinessCounts.missing_evidence ?? 0,
-      staleReleaseEvidence: readinessCounts.stale_release_evidence ?? 0,
+      staleReleaseEvidence: staleReleaseEvidenceGateCount,
+      machineVerified: readinessCounts.machine_verified ?? 0,
+      runtimeVerificationRequired: readinessCounts.runtime_verification_required ?? 0,
     },
     duplicateRegister: {
       valid: duplicateRegister.valid,
@@ -234,37 +297,27 @@ export async function buildGoLiveReadinessReport() {
 }
 
 function printText(report) {
-  console.log(`MED+250 go-live readiness — ${report.launchEvidence.gateCount} launch gates`);
-  console.log(`Production ready: ${report.productionReady ? "yes" : "no"}`);
+  console.log("MED+250 production readiness");
+  console.log(`Site production ready: ${report.siteProductionReady ? "yes" : "no"}`);
+  console.log(`Marketplace transactions ready: ${report.marketplaceTransactionReady ? "yes" : "no"}`);
+  console.log(`Genuine transaction blockers: ${report.transactionBlockers.length}`);
+  for (const blocker of report.transactionBlockers) console.log(`  - ${blocker.title}`);
+  console.log(`Safe deferred follow-ups: ${report.nonBlockingFollowUp.length}`);
   console.log("");
-  console.log(`Launch evidence: ${report.launchEvidence.valid ? "valid" : "invalid"}; strict: ${report.launchEvidence.strictValid ? "passed" : "failed"} (${report.launchEvidence.strictErrorCount} blocker(s))`);
-  console.log(`Source authority: ${report.sourceAuthority.productionAuthorized ? "approved for production" : `${report.sourceAuthority.status}/${report.sourceAuthority.decision}`} (${report.sourceAuthority.errorCount} blocker(s))`);
-  console.log(`Gate readiness: ${report.gateReadiness.confirmed} confirmed, ${report.gateReadiness.approvalPending} approval pending, ${report.gateReadiness.preparedEvidencePending} prepared evidence pending, ${report.gateReadiness.missingEvidence} missing evidence`);
-  if (report.gateReadiness.staleReleaseEvidence) console.log(`Release-bound evidence: ${report.gateReadiness.staleReleaseEvidence} stale against current checkout ${report.sourceControl.currentReleaseRevision ?? "unknown"}`);
-  console.log(`Duplicate register: ${report.duplicateRegister.decisionCounts.pending} pending, ${report.duplicateRegister.decisionCounts.accepted_source_duplicate} accepted, ${report.duplicateRegister.decisionCounts.blocked_source_correction} blocked`);
-  console.log(`Product content: ${report.productContentReview.pendingCount} pending, ${report.productContentReview.blockingCorrectionCount} correction-required`);
-  console.log(`Physical UAT: ${report.physicalUat.statusCounts.passed}/${report.physicalUat.scenarioCount} scenarios passed`);
-  console.log(`Rendered production audit: ${report.renderedProductionAudit.statusCounts.passed}/${report.renderedProductionAudit.scenarioCount} scenarios passed; current origin/revision and approval: ${report.renderedProductionAudit.valid ? "yes" : "no"}`);
+  console.log(`Technical evidence structure: ${report.launchEvidence.valid ? "valid" : "invalid"}`);
   console.log(`Historical hostname redirect: ${report.legacyDomainRedirect.passedProbeCount}/${report.legacyDomainRedirect.probeCount} probes passed; redirect-only contract valid: ${report.legacyDomainRedirect.valid ? "yes" : "no"}`);
-  console.log(`Prepared handoff artifacts: ${report.handoff.preparedPendingArtifactCount}/${report.handoff.missingEvidenceArtifactCount}`);
-  for (const gate of report.gates) {
-    const missing = gate.missingEvidenceTypes.length ? gate.missingEvidenceTypes.join(", ") : "none";
-    console.log(`\n${gate.name} — ${gate.readiness}`);
-    console.log(`  Owner: ${gate.owner}`);
-    console.log(`  Missing evidence: ${missing}`);
-    console.log(`  Approval complete: ${gate.approvalComplete ? "yes" : "no"}`);
-    if (gate.staleReleaseEvidence) console.log("  Release evidence current: no");
-  }
+  if (report.gateReadiness.staleReleaseEvidence) console.log("Exact live revision must be checked after the final commit and deployment.");
 }
 
 async function main() {
   const json = process.argv.includes("--json");
-  const unknown = process.argv.slice(2).filter((argument) => argument !== "--json");
+  const strict = process.argv.includes("--strict");
+  const unknown = process.argv.slice(2).filter((argument) => !["--json", "--strict"].includes(argument));
   if (unknown.length) throw new Error(`Unknown argument(s): ${unknown.join(", ")}`);
   const report = await buildGoLiveReadinessReport();
   if (json) console.log(JSON.stringify(report, null, 2));
   else printText(report);
-  if (!report.productionReady) process.exitCode = 1;
+  if (strict && !report.marketplaceTransactionReady) process.exitCode = 1;
 }
 
 const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;

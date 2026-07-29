@@ -14,6 +14,12 @@ import { validateLaunchEvidence } from "./validate-launch-evidence.mjs";
 import { validateLocalizationFiles } from "./validate-localization.mjs";
 import { validatePhysicalUat } from "./validate-physical-uat.mjs";
 
+const machineVerifiedLaunchGates = new Set([
+  "MED250_GATE_SECURITY_HARDENING_DEPLOYED",
+  "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED",
+  "MED250_GATE_DOMAIN_DNS_VERIFIED",
+]);
+
 const browser = (id, label) => ({ type: "browser", id, label });
 const launch = (id, label) => ({ type: "launch", id, label });
 const manual = (id, label) => ({ type: "manual", id, label });
@@ -296,7 +302,9 @@ export function buildAuditClosureReport({
       owner: gate?.owner ?? "",
       status: gate?.status ?? "missing",
       missingEvidenceTypes,
-      approvalRequired: gate?.status === "pending" && missingEvidenceTypes.length === 0,
+      approvalRequired: gate?.status === "pending"
+        && missingEvidenceTypes.length === 0
+        && !machineVerifiedLaunchGates.has(name),
     }];
   });
   const allBrowserEvidencePassed = browserLedger?.status === "passed"

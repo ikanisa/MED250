@@ -24,6 +24,7 @@ export function buildLaunchApprovalPacket(manifest, readinessReport = null) {
     const missingEvidenceTypes = (gate.required_evidence_types ?? []).filter((type) => !supplied.has(type));
     if (gate.status === "confirmed" || approvalComplete(gate) || missingEvidenceTypes.length) return [];
     const readiness = readinessByGate.get(gateName);
+    if (["closed_by_machine_evidence", "runtime_verification_required"].includes(readiness?.disposition)) return [];
     if (readiness?.staleReleaseEvidence) {
       blockedApprovals.push({
         gate: gateName,

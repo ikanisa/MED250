@@ -33,9 +33,11 @@ test("builds an owner closure board without promoting pending gates", () => {
   assert.ok(board.prerequisites.product_content_review.commands.includes("npm run data:content-review:verify -- --strict"));
   assert.equal(board.summary.confirmed_gates, 0);
   assert.equal(board.summary.approval_pending_gates, 0);
-  assert.equal(board.summary.prepared_evidence_pending_gates, 10);
+  assert.equal(board.summary.prepared_evidence_pending_gates, 8);
   assert.equal(board.summary.missing_evidence_gates, 0);
   assert.equal(board.summary.stale_release_evidence_gates, 1);
+  assert.equal(board.summary.machine_verified_gates, 2);
+  assert.equal(board.summary.runtime_verification_required_gates, 1);
   assert.equal(board.summary.duplicate_register_pending_groups, 51);
   assert.equal(board.summary.physical_uat_pending_scenarios, 12);
   assert.equal(board.summary.rendered_audit_passed_scenarios, 16);
@@ -56,11 +58,11 @@ test("builds an owner closure board without promoting pending gates", () => {
   assert.equal(board.prerequisites.legacy_domain_redirect.blocker, null);
   assert.ok(board.prerequisites.legacy_domain_redirect.commands.includes("npm run domain:legacy-redirect:verify"));
   assert.ok(board.prerequisites.legacy_domain_redirect.safety_rules.some((rule) => /second ordering origin/.test(rule)));
-  assert.equal(board.summary.prepared_handoff_artifacts, 15);
-  assert.equal(board.summary.required_handoff_artifacts, 15);
+  assert.equal(board.summary.prepared_handoff_artifacts, 11);
+  assert.equal(board.summary.required_handoff_artifacts, 11);
   assert.equal(board.gates.length, 11);
   assert.ok(board.gates.every((gate) => gate.current_status === "pending"));
-  assert.ok(board.gates.every((gate) => gate.approval.required));
+  assert.equal(board.gates.filter((gate) => gate.approval.required).length, 8);
   assert.ok(board.gates.every((gate) => gate.approval.complete === false));
 });
 
@@ -100,15 +102,15 @@ test("binds every gate to actionable owner commands and prepared evidence", () =
   assert.match(duplicate.blockers.join("\n"), /51 duplicate-register group/);
   assert.ok(duplicate.commands.includes("npm run data:duplicates:verify -- --strict"));
 
-  assert.equal(security.readiness, "prepared_evidence_pending");
-  assert.deepEqual(security.evidence.missing_types, ["deployment_receipt", "test_record"]);
-  assert.match(security.blockers.join("\n"), /Missing required evidence type\(s\): deployment_receipt, test_record/);
-  assert.ok(security.commands.some((command) => /launch:evidence:handoff/.test(command)));
+  assert.equal(security.readiness, "machine_verified");
+  assert.deepEqual(security.evidence.missing_types, []);
+  assert.deepEqual(security.blockers, []);
+  assert.equal(security.approval.required, false);
 
-  assert.equal(domain.readiness, "stale_release_evidence");
+  assert.equal(domain.readiness, "runtime_verification_required");
   assert.match(domain.blockers.join("\n"), /Release-bound evidence is stale/);
   assert.ok(domain.commands.some((command) => /domain:evidence:refresh/.test(command)));
-  assert.ok(domain.commands.some((command) => /launch:gate:approve -- --gate MED250_GATE_DOMAIN_DNS_VERIFIED/.test(command)));
+  assert.ok(!domain.commands.some((command) => /launch:gate:approve/.test(command)));
 
   assert.equal(uat.workstream, "qa");
   assert.match(uat.blockers.join("\n"), /12 physical-device UAT scenario/);

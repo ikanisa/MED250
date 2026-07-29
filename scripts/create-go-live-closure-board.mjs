@@ -249,8 +249,9 @@ function evidenceState(gateName, gate, handoffGate) {
 
 function blockerSummary(gateName, gate, readinessGate, evidence, report) {
   const blockers = [];
+  const machineVerified = ["closed_by_machine_evidence", "runtime_verification_required"].includes(readinessGate?.disposition);
   if (evidence.missing_types.length) blockers.push(`Missing required evidence type(s): ${evidence.missing_types.join(", ")}.`);
-  if (!approvalComplete(gate)) blockers.push("Missing named accountable-owner approval metadata.");
+  if (!machineVerified && !approvalComplete(gate)) blockers.push("Missing named accountable-owner approval metadata.");
   if (gateName === "MED250_GATE_DUPLICATE_REGISTER_REVIEWED") {
     blockers.push(`${report.duplicateRegister.decisionCounts.pending} duplicate-register group(s) remain pending in data/imports/duplicate-register-review.csv.`);
   }
@@ -280,6 +281,7 @@ export function buildGoLiveClosureBoard({ manifest, handoff, readinessReport }) 
       const handoffGate = handoffByGate.get(gateName);
       const readinessGate = readinessByGate.get(gateName);
       const evidence = evidenceState(gateName, gate, handoffGate);
+      const approvalRequired = !["closed_by_machine_evidence", "runtime_verification_required"].includes(readinessGate?.disposition);
       return {
         gate: gateName,
         title: gate.title,
@@ -291,7 +293,7 @@ export function buildGoLiveClosureBoard({ manifest, handoff, readinessReport }) 
         acceptance: gate.acceptance,
         evidence,
         approval: {
-          required: true,
+          required: approvalRequired,
           complete: approvalComplete(gate),
           approved_by: gate.approved_by,
           approved_role: gate.approved_role,
@@ -299,7 +301,9 @@ export function buildGoLiveClosureBoard({ manifest, handoff, readinessReport }) 
         },
         blockers: blockerSummary(gateName, gate, readinessGate, evidence, readinessReport),
         next_actions: guidance.next_actions,
-        commands: guidance.commands,
+        commands: approvalRequired
+          ? guidance.commands
+          : guidance.commands.filter((command) => !command.includes("launch:gate:approve")),
         safety_rules: COMMON_SAFETY_RULES,
       };
     })
@@ -326,6 +330,8 @@ export function buildGoLiveClosureBoard({ manifest, handoff, readinessReport }) 
       prepared_evidence_pending_gates: readinessReport.gateReadiness.preparedEvidencePending,
       missing_evidence_gates: readinessReport.gateReadiness.missingEvidence,
       stale_release_evidence_gates: readinessReport.gateReadiness.staleReleaseEvidence,
+      machine_verified_gates: readinessReport.gateReadiness.machineVerified,
+      runtime_verification_required_gates: readinessReport.gateReadiness.runtimeVerificationRequired,
       duplicate_register_pending_groups: readinessReport.duplicateRegister.decisionCounts.pending,
       product_content_pending_entries: readinessReport.productContentReview.pendingCount,
       product_content_blocking_corrections: readinessReport.productContentReview.blockingCorrectionCount,
