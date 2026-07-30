@@ -132,6 +132,9 @@ test("provides a repeat-visit PWA install path without implying offline requests
   assert.match(serviceWorker, /request\.mode === "navigate"/);
   assert.match(serviceWorker, /url\.pathname\.startsWith\("\/api\/"\)/);
   assert.match(serviceWorker, /caches\.match\(OFFLINE_URL\)/);
+  assert.match(serviceWorker, /med250-static-v2/);
+  assert.match(serviceWorker, /\["script", "style"\]\.includes\(request\.destination\)/);
+  assert.match(serviceWorker, /event\.respondWith\(fetch\(request\)\.then/);
   assert.match(offlinePage, /MED\+250 will never show a request as sent while you are offline\./);
   assert.doesNotMatch(offlinePage, /onclick=/);
   assert.equal(parsedManifest.id, "/");

@@ -128,6 +128,13 @@ export function assessDeploymentEvidence({ origin, mode, records, expectedRevisi
   if (!serviceWorker.includes('const OFFLINE_URL = "/offline.html"') || !serviceWorker.includes('url.pathname.startsWith("/api/")')) {
     errors.push("/sw.js: safe offline navigation or API exclusion is missing");
   }
+  if (
+    !serviceWorker.includes('const CACHE_NAME = "med250-static-v2"')
+    || !serviceWorker.includes('["script", "style"].includes(request.destination)')
+    || !serviceWorker.includes("event.respondWith(fetch(request).then")
+  ) {
+    errors.push("/sw.js: release assets are not protected from stale cache-first delivery");
+  }
   if (!offlinePage.includes("You are offline") || !offlinePage.includes("never show a request as sent while you are offline")) {
     errors.push("/offline.html: explicit non-transactional offline state is missing");
   }

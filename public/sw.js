@@ -1,4 +1,4 @@
-const CACHE_NAME = "med250-static-v1";
+const CACHE_NAME = "med250-static-v2";
 const OFFLINE_URL = "/offline.html";
 const STATIC_SHELL = [
   OFFLINE_URL,
@@ -9,7 +9,11 @@ const STATIC_SHELL = [
 ];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_SHELL)));
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(STATIC_SHELL))
+      .then(() => self.skipWaiting()),
+  );
 });
 
 self.addEventListener("activate", (event) => {
@@ -34,7 +38,18 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  if (!["font", "image", "script", "style"].includes(request.destination)) return;
+  if (["script", "style"].includes(request.destination)) {
+    event.respondWith(fetch(request).then((response) => {
+      if (response.ok && response.type === "basic") {
+        const copy = response.clone();
+        event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.put(request, copy)));
+      }
+      return response;
+    }).catch(() => caches.match(request)));
+    return;
+  }
+
+  if (!["font", "image"].includes(request.destination)) return;
   event.respondWith(caches.match(request).then((cached) => cached || fetch(request).then((response) => {
     if (response.ok && response.type === "basic") {
       const copy = response.clone();

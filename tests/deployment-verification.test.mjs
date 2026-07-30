@@ -57,7 +57,7 @@ function records(origin, mode) {
           : route === "/manifest.webmanifest"
             ? JSON.stringify({ id: "/", scope: "/", display: "standalone", description: "Send availability requests to eligible pharmacies." })
             : route === "/sw.js"
-              ? 'const OFFLINE_URL = "/offline.html"; url.pathname.startsWith("/api/");'
+              ? 'const CACHE_NAME = "med250-static-v2"; const OFFLINE_URL = "/offline.html"; url.pathname.startsWith("/api/"); ["script", "style"].includes(request.destination); event.respondWith(fetch(request).then'
               : route === "/offline.html"
                 ? "<h1>You are offline</h1><p>MED+250 will never show a request as sent while you are offline.</p>"
                 : "ok",
