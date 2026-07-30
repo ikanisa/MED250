@@ -11,6 +11,7 @@ import { buildGoLiveClosureBoard } from "../scripts/create-go-live-closure-board
 import { buildGoLiveReadinessReport } from "../scripts/report-go-live-readiness.mjs";
 
 const manifest = JSON.parse(await readFile(new URL("../data/launch-evidence.json", import.meta.url), "utf8"));
+const closureBoardSource = await readFile(new URL("../scripts/create-go-live-closure-board.mjs", import.meta.url), "utf8");
 const handoff = createLaunchEvidenceHandoff(manifest, await discoverPreparedLaunchEvidence());
 const readinessReport = await buildGoLiveReadinessReport({
   runtimeReceiptPath: ".wrangler/test-missing-live-domain-receipt.json",
@@ -98,6 +99,7 @@ test("orders genuine transaction proof before non-blocking fail-closed follow-up
     "MED250_GATE_WHATSAPP_READY",
   ]);
   assert.deepEqual(board.gates.map((gate) => gate.gate), board.closure_order);
+  assert.doesNotMatch(closureBoardSource, /controlled staging|staging approval|promote the same .* to production/i);
 });
 
 test("binds every gate to actionable owner commands and prepared evidence", () => {

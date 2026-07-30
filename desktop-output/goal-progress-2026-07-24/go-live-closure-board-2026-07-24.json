@@ -379,7 +379,7 @@
       "disposition": "closed_by_machine_evidence",
       "blocking": false,
       "blocking_scope": "none",
-      "closure_focus": "Deploy the exact reviewed hardening migration through controlled staging and production, retain redacted evidence, then record real backend-owner approval.",
+      "closure_focus": "Verify the exact reviewed hardening migration directly in production, retain redacted evidence, and preserve the tested rollback path.",
       "acceptance": "The 2026-07-23.1 marketplace hardening migration is deployed first to controlled staging and then to production using approved credentials. Negative authorization, locking, public-description privilege, media-hold, rollback, aggregate backend-contract, and operational-health checks pass for the exact immutable application release.",
       "evidence": {
         "required_types": [
@@ -437,7 +437,7 @@
       "disposition": "closed_by_machine_evidence",
       "blocking": false,
       "blocking_scope": "none",
-      "closure_focus": "Deploy the exact revised OTP Edge Function through controlled staging and production, retain redacted evidence, then record real backend-owner approval.",
+      "closure_focus": "Verify the exact revised OTP Edge Function directly in production, retain redacted evidence, and preserve the tested rollback path.",
       "acceptance": "The revised dawanear-pharmacy-verify-otp function bound to the 2026-07-23.1 reviewed phone-to-tenant RPC is deployed first to controlled staging and then to production. Created-user cleanup, duplicate-phone rejection, revoked and suspended authority, cross-tenant isolation, concurrency locking, origin validation, and the protected boundaries of all other production Edge Functions pass for the exact immutable release.",
       "evidence": {
         "required_types": [

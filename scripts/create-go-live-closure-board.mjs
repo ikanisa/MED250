@@ -73,12 +73,12 @@ const GATE_GUIDANCE = {
   },
   MED250_GATE_SECURITY_HARDENING_DEPLOYED: {
     workstream: "backend",
-    closure_focus: "Deploy the exact reviewed hardening migration through controlled staging and production, retain redacted evidence, then record real backend-owner approval.",
+    closure_focus: "Verify the exact reviewed hardening migration directly in production, retain redacted evidence, and preserve the tested rollback path.",
     next_actions: [
-      "Regenerate the launch evidence handoff and complete both prepared security-hardening workbooks.",
-      "Deploy the exact reviewed migration to controlled staging and pass the negative authorization, locking, privilege, media-hold, contract, health, and rollback checks.",
-      "After backend-owner staging approval, promote the same migration to production and retain only redacted deployment and test evidence.",
-      "Record both validated artifacts, rerun backend verification, and only then record named backend-owner approval.",
+      "Verify the deployed production migration against the reviewed migration digest and aggregate backend contract.",
+      "Pass the negative authorization, locking, privilege, media-hold, operational-health, and transaction-rollback checks directly against the authorised production target.",
+      "Retain only redacted deployment and test evidence, with no row data, identifiers, or credentials.",
+      "Redeploy only when a verified production defect or contract drift requires a change.",
     ],
     commands: [
       "npm run launch:evidence:handoff",
@@ -90,12 +90,12 @@ const GATE_GUIDANCE = {
   },
   MED250_GATE_EDGE_FUNCTIONS_DEPLOYED: {
     workstream: "backend",
-    closure_focus: "Deploy the exact revised OTP Edge Function through controlled staging and production, retain redacted evidence, then record real backend-owner approval.",
+    closure_focus: "Verify the exact revised OTP Edge Function directly in production, retain redacted evidence, and preserve the tested rollback path.",
     next_actions: [
-      "Regenerate the launch evidence handoff and complete both prepared Edge Function workbooks.",
-      "Deploy the exact revised function to controlled staging and pass origin, eligibility, authority, isolation, concurrency, and side-effect probes.",
-      "After backend-owner staging approval, promote the same source to production and retain only redacted deployment and test evidence.",
-      "Record both validated artifacts, verify the protected backend boundaries, and only then record named backend-owner approval.",
+      "Verify the active production function version against the reviewed source digest.",
+      "Pass origin, eligibility, authority, isolation, concurrency, and no-side-effect probes directly against the authorised production target.",
+      "Retain only redacted deployment and test evidence, with no phone numbers, OTPs, identifiers, or credentials.",
+      "Redeploy only when a verified production defect or contract drift requires a change.",
     ],
     commands: [
       "npm run launch:evidence:handoff",
