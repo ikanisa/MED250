@@ -1,0 +1,32 @@
+{
+  "status": "passed",
+  "supabaseHost": "uskfnszcdqpcfrhjxitl.supabase.co",
+  "checks": {
+    "missingToken": {
+      "status": "passed",
+      "rejection": {
+        "status": 400,
+        "code": "captcha_failed",
+        "captchaRelated": true
+      },
+      "userCountUnchanged": true
+    },
+    "invalidToken": {
+      "status": "passed",
+      "rejection": {
+        "status": 400,
+        "code": "captcha_failed",
+        "captchaRelated": true
+      },
+      "userCountUnchanged": true
+    },
+    "validToken": {
+      "status": "passed",
+      "disposableAnonymousUserCreated": true,
+      "disposableSessionRevoked": true,
+      "disposableUserDeleted": true
+    }
+  },
+  "identifiersEmitted": false,
+  "tokensEmitted": false
+}
