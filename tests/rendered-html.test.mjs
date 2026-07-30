@@ -127,7 +127,9 @@ test("provides a repeat-visit PWA install path without implying offline requests
   assertCataloguedMessage(manager, "inventory.c0a9658a1655", "In Safari, tap Share, then Add to Home Screen.");
   assert.match(manager, /registration\.waiting/);
   assert.match(manager, /SKIP_WAITING/);
-  assert.match(manager, /if \(!reloadingForUpdate\.current\) return/);
+  assert.match(manager, /const hadController = Boolean\(navigator\.serviceWorker\.controller\)/);
+  assert.match(manager, /if \(!hadController && !reloadingForUpdate\.current\) return/);
+  assert.match(manager, /void registration\.update\(\)/);
   assert.match(manager, /reloadingForUpdate\.current = true;[\s\S]*waitingWorker\.postMessage/);
   assert.match(serviceWorker, /request\.mode === "navigate"/);
   assert.match(serviceWorker, /url\.pathname\.startsWith\("\/api\/"\)/);

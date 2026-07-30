@@ -89,8 +89,10 @@ export default function PwaManager() {
     if (process.env.NODE_ENV !== "production" || !("serviceWorker" in navigator) || !window.isSecureContext) return undefined;
     let cancelled = false;
     let registrationCleanup: (() => void) | undefined;
+    const hadController = Boolean(navigator.serviceWorker.controller);
     const onControllerChange = () => {
-      if (!reloadingForUpdate.current) return;
+      if (!hadController && !reloadingForUpdate.current) return;
+      reloadingForUpdate.current = true;
       window.location.reload();
     };
     navigator.serviceWorker.addEventListener("controllerchange", onControllerChange);
@@ -107,6 +109,7 @@ export default function PwaManager() {
         };
         registration.addEventListener("updatefound", onUpdateFound);
         registrationCleanup = () => registration.removeEventListener("updatefound", onUpdateFound);
+        void registration.update();
       }).catch(() => {
         // The marketplace remains fully usable when service-worker registration is unavailable.
       });
@@ -118,9 +121,9 @@ export default function PwaManager() {
     let idleHandle: number | undefined;
     const registrationDelay = window.setTimeout(() => {
       idleHandle = idleWindow.requestIdleCallback
-        ? idleWindow.requestIdleCallback(register, { timeout: 2_000 })
+        ? idleWindow.requestIdleCallback(register, { timeout: 1_000 })
         : window.setTimeout(register, 1_000);
-    }, 8_000);
+    }, 1_000);
     return () => {
       cancelled = true;
       registrationCleanup?.();
