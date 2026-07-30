@@ -1,0 +1,51 @@
+{
+  "schema_version": "1",
+  "captured_at": "2026-07-30T13:16:22.096Z",
+  "verifier_sha256": "97868e9c281f698a2da3f7ad2fe98a964d91593c292450fc228f64da495de234",
+  "status": "passed",
+  "productionReady": false,
+  "classification": "redirect_only_external_probe_not_launch_approval",
+  "legacyOrigin": "https://med250.gikundiro.com",
+  "canonicalOrigin": "https://med-250.com",
+  "probeCount": 5,
+  "passedProbeCount": 5,
+  "errors": [],
+  "records": [
+    {
+      "path": "/",
+      "status": 308,
+      "location": "https://med-250.com/",
+      "set_cookie_present": false,
+      "error_code": null
+    },
+    {
+      "path": "/categories?search=paracetamol&view=list",
+      "status": 308,
+      "location": "https://med-250.com/categories?search=paracetamol&view=list",
+      "set_cookie_present": false,
+      "error_code": null
+    },
+    {
+      "path": "/product/rwanda-fda-hm-0734",
+      "status": 308,
+      "location": "https://med-250.com/product/rwanda-fda-hm-0734",
+      "set_cookie_present": false,
+      "error_code": null
+    },
+    {
+      "path": "/privacy",
+      "status": 308,
+      "location": "https://med-250.com/privacy",
+      "set_cookie_present": false,
+      "error_code": null
+    },
+    {
+      "path": "/terms?source=legacy-domain",
+      "status": 308,
+      "location": "https://med-250.com/terms?source=legacy-domain",
+      "set_cookie_present": false,
+      "error_code": null
+    }
+  ],
+  "note": "A passing redirect probe is necessary infrastructure evidence only; it does not approve launch or prove the candidate revision is live."
+}

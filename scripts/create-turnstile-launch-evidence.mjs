@@ -67,12 +67,18 @@ function assertPassedVerifierResult(result) {
   if (result?.checks?.invalidToken?.status !== "passed" || result.checks.invalidToken.userCountUnchanged !== true) {
     throw new Error("Invalid-token rejection check must pass without changing the aggregate user count.");
   }
+  if (result?.checks?.expiredToken?.status !== "passed" || result.checks.expiredToken.userCountUnchanged !== true) {
+    throw new Error("Expired-token rejection check must pass without changing the aggregate user count.");
+  }
   const valid = result?.checks?.validToken;
   if (valid?.status !== "passed"
     || valid.disposableAnonymousUserCreated !== true
     || valid.disposableSessionRevoked !== true
     || valid.disposableUserDeleted !== true) {
     throw new Error("Valid-token positive path must create, revoke and delete exactly one disposable anonymous identity.");
+  }
+  if (result?.checks?.replayedToken?.status !== "passed" || result.checks.replayedToken.userCountUnchanged !== true) {
+    throw new Error("Replayed-token rejection check must pass without changing the aggregate user count.");
   }
 }
 
@@ -107,7 +113,7 @@ export function buildTurnstileLaunchEvidence({
     evidence_type: "test_record",
     status: "complete",
     title: "MED+250 production Turnstile positive-path completed test record",
-    summary: "The controlled production Turnstile verifier rejected missing and invalid responses, accepted one real widget response, created exactly one disposable anonymous identity, revoked and deleted it, and retained no tokens or identifiers.",
+    summary: "The controlled production Turnstile verifier rejected missing, invalid, expired and replayed responses, accepted one real widget response, created exactly one disposable anonymous identity, revoked and deleted it, and retained no tokens or identifiers.",
     recorded_at: completed,
     recorded_by: named(executedBy, "executed_by"),
     recorded_role: named(executorRole, "executor_role"),
@@ -124,6 +130,11 @@ export function buildTurnstileLaunchEvidence({
         detail: "The protected verifier rejected an invalid Turnstile response without changing the aggregate Auth user count.",
       },
       {
+        name: "Expired Turnstile evidence rejected",
+        status: "passed",
+        detail: "The protected verifier rejected a real production response after its validity window elapsed without changing the aggregate Auth user count.",
+      },
+      {
         name: "Real production widget completed",
         status: "passed",
         detail: "The verifier received a short-lived real widget response only through the protected operator process environment.",
@@ -132,6 +143,11 @@ export function buildTurnstileLaunchEvidence({
         name: "Disposable anonymous identity created",
         status: "passed",
         detail: "The valid response created exactly one disposable anonymous customer identity for the controlled Auth test.",
+      },
+      {
+        name: "Replayed Turnstile evidence rejected",
+        status: "passed",
+        detail: "The same valid response could not be reused to create a second anonymous identity.",
       },
       {
         name: "Disposable identity completely removed",

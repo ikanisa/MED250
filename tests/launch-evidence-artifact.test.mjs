@@ -18,7 +18,13 @@ const manifest = JSON.parse(await readFile(new URL("../data/launch-evidence.json
 
 function cleanManifest() {
   const localManifest = structuredClone(manifest);
-  for (const gate of Object.values(localManifest.gates)) gate.evidence = [];
+  for (const gate of Object.values(localManifest.gates)) {
+    gate.status = "pending";
+    gate.evidence = [];
+    gate.approved_by = null;
+    gate.approved_role = null;
+    gate.approved_at = null;
+  }
   return localManifest;
 }
 
@@ -100,9 +106,9 @@ test("builds one owner-ready handoff using every prepared pending artifact", asy
   const prepared = await discoverPreparedLaunchEvidence(new URL("../docs/launch/evidence", import.meta.url));
   const handoff = createLaunchEvidenceHandoff(manifest, prepared);
   assert.equal(handoff.release, "med250-production");
-  assert.equal(handoff.gate_count, 11);
-  assert.equal(handoff.missing_evidence_artifact_count, 11);
-  assert.equal(handoff.prepared_pending_artifact_count, 11);
+  assert.equal(handoff.gate_count, 10);
+  assert.equal(handoff.missing_evidence_artifact_count, 10);
+  assert.equal(handoff.prepared_pending_artifact_count, 10);
   assert.equal(handoff.unprepared_evidence_artifact_count, 0);
   const security = handoff.gates.find((gate) => gate.gate === "MED250_GATE_SECURITY_HARDENING_DEPLOYED");
   assert.deepEqual(security.missing_evidence_types, []);
@@ -127,7 +133,13 @@ test("registry validates hashed local JSON artifacts and rejects artifact metada
   const evidenceDir = join(root, "docs", "launch", "evidence");
   await mkdir(evidenceDir, { recursive: true });
   const localManifest = structuredClone(manifest);
-  for (const candidate of Object.values(localManifest.gates)) candidate.evidence = [];
+  for (const candidate of Object.values(localManifest.gates)) {
+    candidate.status = "pending";
+    candidate.evidence = [];
+    candidate.approved_by = null;
+    candidate.approved_role = null;
+    candidate.approved_at = null;
+  }
   const gateName = "MED250_GATE_GPS_READY";
   const gate = localManifest.gates[gateName];
   gate.status = "confirmed";
@@ -148,7 +160,7 @@ test("registry validates hashed local JSON artifacts and rejects artifact metada
       summary: "Controlled gate-specific local evidence retained with an exact digest.",
     });
   }
-  const accepted = validateLaunchEvidence(localManifest, { rootDir: root, now: new Date("2026-07-29T15:00:00Z") });
+  const accepted = validateLaunchEvidence(localManifest, { rootDir: root, now: new Date("2026-07-30T23:00:00Z") });
   assert.equal(accepted.valid, true, accepted.errors.join("; "));
   const artifactPath = join(root, gate.evidence[0].reference);
   const drifted = JSON.parse(await readFile(artifactPath, "utf8"));
@@ -156,7 +168,7 @@ test("registry validates hashed local JSON artifacts and rejects artifact metada
   const driftedSource = `${JSON.stringify(drifted, null, 2)}\n`;
   await writeFile(artifactPath, driftedSource);
   gate.evidence[0].sha256 = createHash("sha256").update(driftedSource).digest("hex");
-  const rejected = validateLaunchEvidence(localManifest, { rootDir: root, now: new Date("2026-07-29T15:00:00Z") });
+  const rejected = validateLaunchEvidence(localManifest, { rootDir: root, now: new Date("2026-07-30T23:00:00Z") });
   assert.equal(rejected.valid, false);
   assert.ok(rejected.errors.some((error) => /artifact gate must be MED250_GATE_GPS_READY/.test(error)));
   await rm(root, { recursive: true, force: true });
@@ -176,7 +188,7 @@ test("records completed launch evidence without inventing gate approval", async 
     manifest: localManifest,
     artifactPath: reference,
     rootDir: root,
-    now: new Date("2026-07-29T15:00:00Z"),
+    now: new Date("2026-07-30T23:00:00Z"),
   });
 
   const gate = result.manifest.gates[gateName];
@@ -210,7 +222,7 @@ test("confirms a gate only after all required evidence and owner approval are pr
       approvedBy: type === "signed_approval" ? "Named infrastructure owner" : "",
       approvedRole: type === "signed_approval" ? "Infrastructure owner" : "",
       approvedAt: type === "signed_approval" ? "2026-07-17T10:00:00Z" : "",
-      now: new Date("2026-07-29T15:00:00Z"),
+      now: new Date("2026-07-30T23:00:00Z"),
     });
     nextManifest = result.manifest;
   }
@@ -219,7 +231,7 @@ test("confirms a gate only after all required evidence and owner approval are pr
   assert.equal(gate.status, "confirmed");
   assert.equal(gate.approved_by, "Named infrastructure owner");
   assert.equal(gate.evidence.length, 2);
-  const accepted = validateLaunchEvidence(nextManifest, { rootDir: root, now: new Date("2026-07-29T15:00:00Z") });
+  const accepted = validateLaunchEvidence(nextManifest, { rootDir: root, now: new Date("2026-07-30T23:00:00Z") });
   assert.equal(accepted.valid, true, accepted.errors.join("; "));
   await rm(root, { recursive: true, force: true });
 });
@@ -235,7 +247,7 @@ test("rejects confirmation when domain evidence targets the retired hostname", a
       approvedBy: "Named infrastructure owner",
       approvedRole: "Infrastructure owner",
       approvedAt: "2026-07-20T18:00:00Z",
-      now: new Date("2026-07-29T15:00:00Z"),
+      now: new Date("2026-07-30T23:00:00Z"),
     }),
     /domain verification must include med-250\.com/,
   );
@@ -254,14 +266,14 @@ test("rejects incomplete artifacts, duplicate evidence and approval metadata wit
     manifest: cleanManifest(),
     artifactPath: reference,
     rootDir: root,
-    now: new Date("2026-07-29T15:00:00Z"),
+    now: new Date("2026-07-30T23:00:00Z"),
   });
   await assert.rejects(
     () => recordLaunchEvidence({
       manifest: first.manifest,
       artifactPath: reference,
       rootDir: root,
-      now: new Date("2026-07-29T15:00:00Z"),
+      now: new Date("2026-07-30T23:00:00Z"),
     }),
     /already has test_record evidence/,
   );
@@ -271,7 +283,7 @@ test("rejects incomplete artifacts, duplicate evidence and approval metadata wit
       artifactPath: reference,
       rootDir: root,
       approvedBy: "Named owner",
-      now: new Date("2026-07-29T15:00:00Z"),
+      now: new Date("2026-07-30T23:00:00Z"),
     }),
     /Approval metadata may be recorded only with --confirm/,
   );
@@ -285,7 +297,7 @@ test("rejects incomplete artifacts, duplicate evidence and approval metadata wit
       manifest: cleanManifest(),
       artifactPath: incompleteReference,
       rootDir: root,
-      now: new Date("2026-07-29T15:00:00Z"),
+      now: new Date("2026-07-30T23:00:00Z"),
     }),
     /Evidence artifact is not complete/,
   );

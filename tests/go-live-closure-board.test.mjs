@@ -24,7 +24,7 @@ test("builds an owner closure board without promoting pending gates", () => {
   assert.equal(board.production_ready, false);
   assert.equal(board.summary.site_production_ready, true);
   assert.equal(board.summary.marketplace_transaction_ready, false);
-  assert.equal(board.summary.transaction_blocker_count, 2);
+  assert.equal(board.summary.transaction_blocker_count, 1);
   assert.equal(board.summary.non_blocking_follow_up_count, 8);
   assert.equal(board.summary.gate_count, 11);
   assert.equal(board.summary.source_authority_production_authorized, false);
@@ -40,16 +40,16 @@ test("builds an owner closure board without promoting pending gates", () => {
   assert.equal(board.prerequisites.product_content_review.blocker, null);
   assert.match(board.prerequisites.product_content_review.follow_up, /72 product-content decision/);
   assert.ok(board.prerequisites.product_content_review.commands.includes("npm run data:content-review:verify -- --strict"));
-  assert.equal(board.summary.confirmed_gates, 0);
+  assert.equal(board.summary.confirmed_gates, 1);
   assert.equal(board.summary.approval_pending_gates, 0);
-  assert.equal(board.summary.prepared_evidence_pending_gates, 7);
+  assert.equal(board.summary.prepared_evidence_pending_gates, 6);
   assert.equal(board.summary.missing_evidence_gates, 0);
   assert.equal(board.summary.stale_release_evidence_gates, 1);
   assert.equal(board.summary.machine_verified_gates, 2);
   assert.equal(board.summary.runtime_verification_required_gates, 1);
   assert.equal(board.summary.superseded_gates, 1);
   assert.equal(board.summary.duplicate_register_pending_groups, 51);
-  assert.equal(board.summary.physical_uat_pending_scenarios, 12);
+  assert.equal(board.summary.physical_uat_pending_scenarios, 4);
   assert.equal(board.summary.rendered_audit_passed_scenarios, 16);
   assert.equal(board.summary.rendered_audit_current_revision, false);
   assert.equal(board.summary.rendered_audit_strict_valid, false);
@@ -65,21 +65,22 @@ test("builds an owner closure board without promoting pending gates", () => {
   assert.match(board.prerequisites.rendered_production_audit.follow_up, /prior 16-scenario rendered audit is historical/i);
   assert.ok(board.prerequisites.rendered_production_audit.commands.includes("npm run audit:browser-evidence:verify:live"));
   assert.equal(board.prerequisites.legacy_domain_redirect.valid, true);
-  assert.equal(board.prerequisites.legacy_domain_redirect.artifact, "docs/launch/evidence/legacy-domain-redirect-2026-07-29.json");
+  assert.equal(board.prerequisites.legacy_domain_redirect.artifact, "docs/launch/evidence/legacy-domain-redirect-2026-07-30.json");
   assert.equal(board.prerequisites.legacy_domain_redirect.legacy_origin, "https://med250.gikundiro.com");
   assert.equal(board.prerequisites.legacy_domain_redirect.canonical_origin, "https://med-250.com");
   assert.equal(board.prerequisites.legacy_domain_redirect.blocker, null);
   assert.ok(board.prerequisites.legacy_domain_redirect.commands.includes("npm run domain:legacy-redirect:verify"));
   assert.ok(board.prerequisites.legacy_domain_redirect.safety_rules.some((rule) => /second ordering origin/.test(rule)));
-  assert.equal(board.summary.prepared_handoff_artifacts, 11);
-  assert.equal(board.summary.required_handoff_artifacts, 11);
+  assert.equal(board.summary.prepared_handoff_artifacts, 10);
+  assert.equal(board.summary.required_handoff_artifacts, 10);
   assert.equal(board.gates.length, 11);
-  assert.ok(board.gates.every((gate) => gate.current_status === "pending"));
+  assert.equal(board.gates.filter((gate) => gate.current_status === "confirmed").length, 1);
+  assert.equal(board.gates.filter((gate) => gate.current_status === "pending").length, 10);
   assert.equal(board.gates.filter((gate) => gate.approval.required).length, 7);
-  assert.ok(board.gates.every((gate) => gate.approval.complete === false));
+  assert.equal(board.gates.filter((gate) => gate.approval.complete).length, 1);
   assert.deepEqual(
     board.gates.filter((gate) => gate.blocking).map((gate) => gate.gate),
-    ["MED250_GATE_TURNSTILE_SERVER_VERIFIED", "MED250_GATE_PHYSICAL_UAT_PASSED"],
+    ["MED250_GATE_PHYSICAL_UAT_PASSED"],
   );
   assert.ok(board.gates.filter((gate) => !gate.blocking).every((gate) => gate.blockers.length === 0));
 });
@@ -135,7 +136,7 @@ test("binds every gate to actionable owner commands and prepared evidence", () =
   assert.ok(!domain.commands.some((command) => /launch:gate:approve/.test(command)));
 
   assert.equal(uat.workstream, "qa");
-  assert.match(uat.blockers.join("\n"), /12 physical-device UAT scenario/);
+  assert.match(uat.blockers.join("\n"), /4 physical-device UAT scenario/);
   assert.ok(uat.commands.includes("npm run uat:verify:live"));
 });
 

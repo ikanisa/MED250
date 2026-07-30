@@ -94,7 +94,9 @@ export async function verifyTurnstileAuth({
   publishableKey,
   secretKey,
   validToken = "",
+  expiredToken = "",
   requireValid = false,
+  requireExpired = false,
   clientFactory = authClient,
 } = {}) {
   const url = verifiedSupabaseOrigin(supabaseUrl);
@@ -115,6 +117,24 @@ export async function verifyTurnstileAuth({
     expectedCount: initialUserCount,
   });
 
+  const cleanedExpiredToken = expiredToken.trim();
+  if (requireExpired && !cleanedExpiredToken) {
+    throw new Error("TURNSTILE_EXPIRED_TEST_TOKEN is required for the controlled expired-token test");
+  }
+  let expiredTokenResult = {
+    status: "not_run",
+    userCountUnchanged: true,
+  };
+  if (cleanedExpiredToken) {
+    expiredTokenResult = await rejectedAttempt({
+      label: "Expired Turnstile token",
+      publicClient: clientFactory(url, publishableKey),
+      adminClient,
+      captchaToken: cleanedExpiredToken,
+      expectedCount: initialUserCount,
+    });
+  }
+
   const cleanedValidToken = validToken.trim();
   if (requireValid && !cleanedValidToken) {
     throw new Error("TURNSTILE_TEST_TOKEN is required for the controlled positive-path test");
@@ -126,6 +146,10 @@ export async function verifyTurnstileAuth({
     disposableSessionRevoked: false,
     disposableUserDeleted: false,
   };
+  let replayedTokenResult = {
+    status: "not_run",
+    userCountUnchanged: true,
+  };
   if (cleanedValidToken) {
     const publicClient = clientFactory(url, publishableKey);
     const { data, error } = await publicClient.auth.signInAnonymously({
@@ -134,11 +158,24 @@ export async function verifyTurnstileAuth({
     if (error || !data?.user?.id || !data?.session || data.user.is_anonymous !== true) {
       throw new Error(`Valid Turnstile token did not create the disposable anonymous session: ${error?.code || error?.status || "invalid response"}`);
     }
+    let replayError;
+    try {
+      replayedTokenResult = await rejectedAttempt({
+        label: "Replayed Turnstile token",
+        publicClient: clientFactory(url, publishableKey),
+        adminClient,
+        captchaToken: cleanedValidToken,
+        expectedCount: initialUserCount + 1,
+      });
+    } catch (error) {
+      replayError = error;
+    }
     await removeDisposableUser(publicClient, adminClient, data.user.id);
     const finalUserCount = await userCount(adminClient);
     if (finalUserCount !== initialUserCount) {
       throw new Error("Disposable Turnstile test identity cleanup did not restore the aggregate Auth user count");
     }
+    if (replayError) throw replayError;
     validTokenResult = {
       status: "passed",
       disposableAnonymousUserCreated: true,
@@ -148,12 +185,17 @@ export async function verifyTurnstileAuth({
   }
 
   return {
-    status: requireValid && validTokenResult.status !== "passed" ? "failed" : "passed",
+    status: (
+      (requireValid && validTokenResult.status !== "passed")
+      || (requireExpired && expiredTokenResult.status !== "passed")
+    ) ? "failed" : "passed",
     supabaseHost: new URL(url).hostname,
     checks: {
       missingToken,
       invalidToken,
+      expiredToken: expiredTokenResult,
       validToken: validTokenResult,
+      replayedToken: replayedTokenResult,
     },
     identifiersEmitted: false,
     tokensEmitted: false,
@@ -169,7 +211,9 @@ async function main() {
     ]),
     secretKey: requiredEnvironment("SUPABASE_SECRET_KEY", ["SUPABASE_SERVICE_ROLE_KEY"]),
     validToken: process.env.TURNSTILE_TEST_TOKEN ?? "",
+    expiredToken: process.env.TURNSTILE_EXPIRED_TEST_TOKEN ?? "",
     requireValid: process.argv.includes("--require-valid"),
+    requireExpired: process.argv.includes("--require-expired"),
   });
   console.log(JSON.stringify(result, null, 2));
   if (result.status !== "passed") process.exitCode = 1;

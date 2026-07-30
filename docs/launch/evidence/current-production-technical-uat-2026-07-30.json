@@ -1,0 +1,135 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "release_revision": "98cb40a25985b25cf0312b46d2cbd1042d852b35",
+  "origin": "https://med-250.com",
+  "captured_at": "2026-07-30T15:16:00+02:00",
+  "executed_by": "Codex production verifier",
+  "executor_role": "Automated browser and backend test executor",
+  "status": "passed_with_physical_follow_up",
+  "classification": "privacy-safe current-production technical UAT; not physical-device or message-delivery approval",
+  "device_availability": {
+    "desktop_browser": "Chrome-compatible browser at 1280x720",
+    "mobile_emulation": "Chrome responsive viewport at 390x844",
+    "physical_ios_connected": false,
+    "physical_android_connected": false
+  },
+  "rendered_checks": {
+    "desktop_accessibility": {
+      "status": "passed",
+      "single_h1": true,
+      "main_landmark": true,
+      "accessible_button_names": true,
+      "live_regions_present": true,
+      "horizontal_overflow": false,
+      "console_errors": 0
+    },
+    "desktop_one_shot_checkout": {
+      "status": "passed",
+      "single_primary_action": "Send availability request",
+      "customer_otp_absent": true,
+      "turnstile_present": true,
+      "consent_copy_current": true,
+      "request_not_submitted": true
+    },
+    "location_denial_and_fallback": {
+      "status": "passed",
+      "denial_or_unavailable_guidance_present": true,
+      "district_fallback_applied": true,
+      "request_not_submitted": true
+    },
+    "pharmacy_portal_boundary": {
+      "status": "passed",
+      "pharmacy_whatsapp_input_present": true,
+      "send_code_action_present": true,
+      "send_code_disabled_without_contact": true,
+      "customer_order_action_absent": true,
+      "message_not_sent": true
+    },
+    "mobile_responsive_checkout": {
+      "status": "passed",
+      "viewport_width": 390,
+      "viewport_height": 844,
+      "dialog_fits_viewport": true,
+      "horizontal_overflow": false,
+      "customer_otp_absent": true,
+      "single_primary_action_present": true,
+      "console_errors": 0
+    }
+  },
+  "rollback_checks": {
+    "marketplace": {
+      "status": "passed",
+      "source": "tests/live-marketplace-rollback.sql",
+      "persistence": "rolled_back",
+      "exact_recipient_count_asserted": 10,
+      "workflows": [
+        "automatic_marketplace_approval",
+        "eligibility_fail_closed",
+        "dispatch",
+        "idempotent_retry",
+        "membership_isolation",
+        "central_price_boundary",
+        "optional_confirmation_price",
+        "customer_cancellation",
+        "no_response_recovery",
+        "selected_timeout_recovery",
+        "complete_confirmation",
+        "preselection_privacy",
+        "ownership_isolation",
+        "selection_contact_release",
+        "completion",
+        "notification_lifecycle"
+      ]
+    },
+    "pharmacy_otp": {
+      "status": "passed",
+      "source": "tests/live-pharmacy-otp-rollback.sql",
+      "persistence": "rolled_back",
+      "workflows": [
+        "service_only_access",
+        "correct_code",
+        "single_use",
+        "wrong_code_retry",
+        "expired_code",
+        "malformed_input"
+      ]
+    }
+  },
+  "runtime_checks": {
+    "backend_contract": "passed",
+    "operational_health": "healthy",
+    "critical_conditions": 0,
+    "warning_conditions": 0,
+    "orders_created_during_test": 0,
+    "active_pharmacies": 773,
+    "dispatch_ready_pharmacies": 346,
+    "portal_enabled_contacts": 3
+  },
+  "scenario_outcomes": {
+    "PREVIEW_FAIL_CLOSED": "passed",
+    "GPS_DENIAL_RECOVERY": "passed",
+    "PRESCRIPTION_ENFORCEMENT": "passed",
+    "RECIPIENT_ISOLATION": "passed",
+    "CONTACT_PRIVACY_AND_SELECTION": "passed",
+    "CANCELLATION_COMPLETION_EXPIRY": "passed",
+    "PRESCRIPTION_ACCESS_RETENTION": "passed",
+    "PRIVACY_SAFE_OPERATIONS": "passed"
+  },
+  "remaining_physical_scenarios": [
+    "GPS_CONSENT_BOUNDED_DISPATCH",
+    "WHATSAPP_OTP_LIFECYCLE",
+    "COMPLETE_OFFER_AND_SUBSTITUTE",
+    "EXPLICIT_HANDOFFS"
+  ],
+  "safety": {
+    "phone_numbers_recorded": false,
+    "otp_values_recorded": false,
+    "order_identifiers_recorded": false,
+    "prescription_contents_recorded": false,
+    "exact_coordinates_recorded": false,
+    "credentials_or_tokens_recorded": false,
+    "whatsapp_messages_sent": false,
+    "orders_persisted": false
+  }
+}

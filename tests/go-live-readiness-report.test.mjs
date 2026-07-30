@@ -16,7 +16,6 @@ test("separates production engineering readiness from genuine transaction blocke
   assert.equal(report.siteProductionReady, true);
   assert.equal(report.marketplaceTransactionReady, false);
   assert.deepEqual(report.transactionBlockers.map(({ gate }) => gate), [
-    "MED250_GATE_TURNSTILE_SERVER_VERIFIED",
     "MED250_GATE_PHYSICAL_UAT_PASSED",
   ]);
   assert.ok(report.nonBlockingFollowUp.some(({ area, count }) => area === "source_authority" && count === undefined));
@@ -49,15 +48,15 @@ test("separates production engineering readiness from genuine transaction blocke
   assert.equal(report.launchEvidence.strictValid, false);
   assert.equal(report.launchEvidence.gateCount, 11);
   assert.deepEqual(report.launchEvidence.statusCounts, {
-    pending: 11,
-    confirmed: 0,
+    pending: 10,
+    confirmed: 1,
     rejected: 0,
     invalid: 0,
   });
   assert.deepEqual(report.gateReadiness, {
-    confirmed: 0,
+    confirmed: 1,
     approvalPending: 0,
-    preparedEvidencePending: 7,
+    preparedEvidencePending: 6,
     missingEvidence: 0,
     staleReleaseEvidence: 1,
     machineVerified: 2,
@@ -74,7 +73,8 @@ test("separates production engineering readiness from genuine transaction blocke
   assert.ok(domain.releaseRevisionBindings.every((binding) => /^[a-f0-9]{40}$/.test(binding.observedReleaseRevision)));
   assert.ok(domain.releaseRevisionBindings.every((binding) => binding.observedReleaseRevision !== report.sourceControl.currentReleaseRevision));
   assert.equal(report.duplicateRegister.decisionCounts.pending, 51);
-  assert.equal(report.physicalUat.statusCounts.pending, 12);
+  assert.equal(report.physicalUat.statusCounts.pending, 4);
+  assert.equal(report.physicalUat.statusCounts.passed, 8);
   assert.deepEqual(report.renderedProductionAudit, {
     valid: false,
     status: "pending",
@@ -99,7 +99,7 @@ test("separates production engineering readiness from genuine transaction blocke
   assert.equal(report.legacyDomainRedirect.status, "passed");
   assert.equal(report.legacyDomainRedirect.legacyOrigin, "https://med250.gikundiro.com");
   assert.equal(report.legacyDomainRedirect.canonicalOrigin, "https://med-250.com");
-  assert.match(report.legacyDomainRedirect.capturedAt, /^2026-07-29T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+  assert.match(report.legacyDomainRedirect.capturedAt, /^2026-07-30T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
   assert.equal(report.legacyDomainRedirect.verifierCurrent, true);
   assert.equal(report.legacyDomainRedirect.probeCount, 5);
   assert.equal(report.legacyDomainRedirect.passedProbeCount, 5);

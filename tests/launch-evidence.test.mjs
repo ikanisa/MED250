@@ -15,12 +15,12 @@ const manifest = JSON.parse(await readFile(
 test("keeps all eleven production gates in a structurally valid evidence registry", () => {
   const result = validateLaunchEvidence(manifest, {
     rootDir: new URL("..", import.meta.url).pathname,
-    now: new Date("2026-07-29T15:00:00Z"),
+    now: new Date("2026-07-30T23:00:00Z"),
   });
   assert.equal(result.valid, true);
   assert.equal(result.gateCount, 11);
   assert.deepEqual(Object.keys(manifest.gates).sort(), [...expectedLaunchGateNames].sort());
-  assert.deepEqual(result.statusCounts, { pending: 11, confirmed: 0, rejected: 0, invalid: 0 });
+  assert.deepEqual(result.statusCounts, { pending: 10, confirmed: 1, rejected: 0, invalid: 0 });
   assert.match(manifest.gates.MED250_GATE_DOMAIN_DNS_VERIFIED.acceptance, /med-250\.com/);
   assert.doesNotMatch(manifest.gates.MED250_GATE_DOMAIN_DNS_VERIFIED.acceptance, /med250\.gikundiro\.com/);
 });
@@ -29,10 +29,10 @@ test("blocks production while any launch evidence remains pending", () => {
   const result = validateLaunchEvidence(manifest, {
     strict: true,
     rootDir: new URL("..", import.meta.url).pathname,
-    now: new Date("2026-07-29T15:00:00Z"),
+    now: new Date("2026-07-30T23:00:00Z"),
   });
   assert.equal(result.valid, false);
-  assert.equal(result.errors.filter((error) => /production requires confirmed evidence/.test(error)).length, 11);
+  assert.equal(result.errors.filter((error) => /production requires confirmed evidence/.test(error)).length, 10);
 });
 
 test("accepts confirmed gates only with durable evidence and named approval", () => {

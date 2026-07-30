@@ -8,7 +8,7 @@ import { validateLaunchEvidence } from "../scripts/validate-launch-evidence.mjs"
 
 const manifest = JSON.parse(await readFile(new URL("../data/launch-evidence.json", import.meta.url), "utf8"));
 const rootDir = new URL("..", import.meta.url).pathname;
-const testNow = new Date("2026-07-30T12:00:00+02:00");
+const testNow = new Date("2026-07-30T23:00:00+02:00");
 const testApprovalAt = "2026-07-30T11:00:00+02:00";
 
 async function withCompleteFixtureEvidence(gateName, filenames) {

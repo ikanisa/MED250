@@ -4,11 +4,11 @@
   "classification": "controlled physical-device UAT execution packet; contains no phone numbers, OTPs, order identifiers, prescription contents or exact coordinates",
   "source_ledger": {
     "path": "data/physical-device-uat.json",
-    "sha256": "489330c2db1ec7400a459bacf216ac7b0bb719893ad8deaee588ed9d69d7ae11",
+    "sha256": "982c8a40d6e0c648f3fb277509d8405d7f2a057a45ad51dda623a6406998e8cd",
     "scenario_count": 12,
     "status_counts": {
-      "pending": 12,
-      "passed": 0,
+      "pending": 4,
+      "passed": 8,
       "failed": 0,
       "blocked": 0,
       "invalid": 0
@@ -39,7 +39,7 @@
       "sequence": 1,
       "id": "PREVIEW_FAIL_CLOSED",
       "title": "Preview ordering and indexing remain disabled before controlled enablement",
-      "current_status": "pending",
+      "current_status": "passed",
       "required_completion_fields": [
         "status=passed",
         "evidence_reference",
@@ -58,7 +58,7 @@
       "sequence": 2,
       "id": "GPS_DENIAL_RECOVERY",
       "title": "GPS denial shows recovery guidance without dispatch",
-      "current_status": "pending",
+      "current_status": "passed",
       "required_completion_fields": [
         "status=passed",
         "evidence_reference",
@@ -96,7 +96,7 @@
       "sequence": 4,
       "id": "PRESCRIPTION_ENFORCEMENT",
       "title": "Prescription-required products enforce private upload and missing-file rejection",
-      "current_status": "pending",
+      "current_status": "passed",
       "required_completion_fields": [
         "status=passed",
         "evidence_reference",
@@ -115,7 +115,7 @@
       "sequence": 5,
       "id": "RECIPIENT_ISOLATION",
       "title": "Only eligible recipient pharmacies receive and read the request",
-      "current_status": "pending",
+      "current_status": "passed",
       "required_completion_fields": [
         "status=passed",
         "evidence_reference",
@@ -172,7 +172,7 @@
       "sequence": 8,
       "id": "CONTACT_PRIVACY_AND_SELECTION",
       "title": "Pharmacy contact remains private before selection and is limited after selection",
-      "current_status": "pending",
+      "current_status": "passed",
       "required_completion_fields": [
         "status=passed",
         "evidence_reference",
@@ -210,7 +210,7 @@
       "sequence": 10,
       "id": "CANCELLATION_COMPLETION_EXPIRY",
       "title": "Cancellation, completion, expiry and closure notifications behave correctly",
-      "current_status": "pending",
+      "current_status": "passed",
       "required_completion_fields": [
         "status=passed",
         "evidence_reference",
@@ -229,7 +229,7 @@
       "sequence": 11,
       "id": "PRESCRIPTION_ACCESS_RETENTION",
       "title": "Prescription access boundaries and approved retention behavior hold through lifecycle",
-      "current_status": "pending",
+      "current_status": "passed",
       "required_completion_fields": [
         "status=passed",
         "evidence_reference",
@@ -248,7 +248,7 @@
       "sequence": 12,
       "id": "PRIVACY_SAFE_OPERATIONS",
       "title": "Operational health and Worker logs contain no prohibited identifiers",
-      "current_status": "pending",
+      "current_status": "passed",
       "required_completion_fields": [
         "status=passed",
         "evidence_reference",

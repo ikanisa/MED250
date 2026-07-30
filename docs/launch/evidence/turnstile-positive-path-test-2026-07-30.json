@@ -5,8 +5,8 @@
   "evidence_type": "test_record",
   "status": "complete",
   "title": "MED+250 production Turnstile positive-path completed test record",
-  "summary": "The controlled production Turnstile verifier rejected missing and invalid responses, accepted one real widget response, created exactly one disposable anonymous identity, revoked and deleted it, and retained no tokens or identifiers.",
-  "recorded_at": "2026-07-30T12:58:24+02:00",
+  "summary": "The controlled production Turnstile verifier rejected missing, invalid, expired and replayed responses, accepted one real widget response, created exactly one disposable anonymous identity, revoked and deleted it, and retained no tokens or identifiers.",
+  "recorded_at": "2026-07-30T13:26:00Z",
   "recorded_by": "Codex production verifier",
   "recorded_role": "Automated security test executor",
   "redactions_confirmed": true,
@@ -22,6 +22,11 @@
       "detail": "The protected verifier rejected an invalid Turnstile response without changing the aggregate Auth user count."
     },
     {
+      "name": "Expired Turnstile evidence rejected",
+      "status": "passed",
+      "detail": "The protected verifier rejected a real production response after its validity window elapsed without changing the aggregate Auth user count."
+    },
+    {
       "name": "Real production widget completed",
       "status": "passed",
       "detail": "The verifier received a short-lived real widget response only through the protected operator process environment."
@@ -30,6 +35,11 @@
       "name": "Disposable anonymous identity created",
       "status": "passed",
       "detail": "The valid response created exactly one disposable anonymous customer identity for the controlled Auth test."
+    },
+    {
+      "name": "Replayed Turnstile evidence rejected",
+      "status": "passed",
+      "detail": "The same valid response could not be reused to create a second anonymous identity."
     },
     {
       "name": "Disposable identity completely removed",
@@ -49,10 +59,10 @@
   ],
   "executed_by": "Codex production verifier",
   "executor_role": "Automated security test executor",
-  "started_at": "2026-07-30T12:58:00+02:00",
-  "completed_at": "2026-07-30T12:58:24+02:00",
+  "started_at": "2026-07-30T13:15:00Z",
+  "completed_at": "2026-07-30T13:26:00Z",
   "verifier_result_reference": "desktop-output/goal-progress-2026-07-30/turnstile-verifier-result.json",
-  "verifier_result_sha256": "eb02a35f55c7b9650156630bcc93d25845884b1a3e93e268857d1a6fb24903f5",
+  "verifier_result_sha256": "bd68994ffbeaf47ff458e91d5db2fa7a2fef6cddb401324e079839b2855819da",
   "supabase_host": "uskfnszcdqpcfrhjxitl.supabase.co",
   "no_marketplace_side_effect_confirmed": true
 }

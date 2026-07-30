@@ -9,12 +9,13 @@ const manifest = JSON.parse(await readFile(
   "utf8",
 ));
 
-test("reports every pending gate and its exact missing evidence categories", () => {
+test("reports pending and confirmed gates with exact missing evidence categories", () => {
   const report = buildLaunchEvidenceReport(manifest);
   assert.equal(report.gateCount, 11);
   assert.equal(report.productionReady, false);
-  assert.equal(report.statusCounts.pending, 11);
-  assert.ok(report.gates.every((gate) => gate.approvalComplete === false));
+  assert.equal(report.statusCounts.pending, 10);
+  assert.equal(report.statusCounts.confirmed, 1);
+  assert.equal(report.gates.filter((gate) => gate.approvalComplete).length, 1);
   assert.deepEqual(
     report.gates.find((gate) => gate.name === "MED250_GATE_DOMAIN_DNS_VERIFIED").missingEvidenceTypes,
     [],

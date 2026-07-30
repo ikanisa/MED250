@@ -96,7 +96,7 @@ test("binds every audit finding and strategic decision to an owner-ready closure
     verificationLimitCount: 4,
     auditedSurfaceCount: 12,
   });
-  assert.equal(report.releaseGateQueue.length, 11);
+  assert.equal(report.releaseGateQueue.length, 10);
   assert.equal(report.releaseGateQueue.find(({ name }) => name === "MED250_GATE_DOMAIN_DNS_VERIFIED").approvalRequired, false);
   assert.equal(report.releaseGateQueue.find(({ name }) => name === "MED250_GATE_SECURITY_HARDENING_DEPLOYED").approvalRequired, false);
   assert.equal(report.releaseGateQueue.find(({ name }) => name === "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED").approvalRequired, false);
@@ -120,13 +120,13 @@ test("reports the exact current cross-system state without promoting partial wor
   });
   assert.deepEqual(report.systems.launchEvidence, {
     gateCount: 11,
-    confirmedGateCount: 0,
-    pendingGateCount: 11,
+    confirmedGateCount: 1,
+    pendingGateCount: 10,
   });
   assert.deepEqual(report.systems.physicalUat, {
     status: "pending",
     scenarioCount: 12,
-    passedScenarioCount: 0,
+    passedScenarioCount: 8,
   });
   assert.equal(report.systems.localization.status, "awaiting_qualified_translation");
   assert.equal(report.systems.productContentReview.pendingCount, 72);

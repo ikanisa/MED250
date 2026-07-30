@@ -20,11 +20,29 @@
       },
       "userCountUnchanged": true
     },
+    "expiredToken": {
+      "status": "passed",
+      "rejection": {
+        "status": 400,
+        "code": "captcha_failed",
+        "captchaRelated": true
+      },
+      "userCountUnchanged": true
+    },
     "validToken": {
       "status": "passed",
       "disposableAnonymousUserCreated": true,
       "disposableSessionRevoked": true,
       "disposableUserDeleted": true
+    },
+    "replayedToken": {
+      "status": "passed",
+      "rejection": {
+        "status": 400,
+        "code": "captcha_failed",
+        "captchaRelated": true
+      },
+      "userCountUnchanged": true
     }
   },
   "identifiersEmitted": false,

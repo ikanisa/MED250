@@ -14,14 +14,14 @@
     "approval_pending_gates": 0,
     "prepared_evidence_pending_gates": 6,
     "missing_evidence_gates": 0,
-    "stale_release_evidence_gates": 1,
-    "machine_verified_gates": 2,
-    "runtime_verification_required_gates": 1,
+    "stale_release_evidence_gates": 0,
+    "machine_verified_gates": 3,
+    "runtime_verification_required_gates": 0,
     "superseded_gates": 1,
     "duplicate_register_pending_groups": 51,
     "product_content_pending_entries": 72,
     "product_content_blocking_corrections": 0,
-    "physical_uat_pending_scenarios": 12,
+    "physical_uat_pending_scenarios": 4,
     "rendered_audit_passed_scenarios": 16,
     "rendered_audit_current_revision": false,
     "rendered_audit_strict_valid": false,
@@ -86,7 +86,7 @@
         "MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED"
       ],
       "blocker_count": 0,
-      "follow_up_item_count": 3
+      "follow_up_item_count": 2
     },
     "operations": {
       "owners": [
@@ -195,12 +195,12 @@
     },
     "legacy_domain_redirect": {
       "owner": "Named MED+250 infrastructure owner with Gikundiro Cloudflare zone authority",
-      "artifact": "docs/launch/evidence/legacy-domain-redirect-2026-07-29.json",
+      "artifact": "docs/launch/evidence/legacy-domain-redirect-2026-07-30.json",
       "valid": true,
       "status": "passed",
       "legacy_origin": "https://med250.gikundiro.com",
       "canonical_origin": "https://med-250.com",
-      "captured_at": "2026-07-29T13:09:08.005Z",
+      "captured_at": "2026-07-30T13:16:22.096Z",
       "verifier_current": true,
       "passed_probes": 5,
       "required_probes": 5,
@@ -248,8 +248,8 @@
           {
             "type": "test_record",
             "reference": "docs/launch/evidence/turnstile-positive-path-test-2026-07-30.json",
-            "recorded_at": "2026-07-30T12:58:24+02:00",
-            "sha256": "c0d746313d746296e14ce7984e01436699d04259671872cfaf738cefb21652c2"
+            "recorded_at": "2026-07-30T13:26:00Z",
+            "sha256": "e5b5ba9ad2c79abedcf72a6fa20ddea2333852f8761ba85be2b91a4981c6ce62"
           }
         ],
         "missing_types": [],
@@ -262,7 +262,7 @@
         "complete": true,
         "approved_by": "Codex production verifier",
         "approved_role": "Automated security verification",
-        "approved_at": "2026-07-30T12:58:24+02:00"
+        "approved_at": "2026-07-30T13:26:00Z"
       },
       "blockers": [],
       "follow_up_items": [],
@@ -338,7 +338,7 @@
       "blockers": [
         "Missing required evidence type(s): signed_approval, test_record.",
         "Missing named accountable-owner approval metadata.",
-        "12 physical-device UAT scenario(s) remain pending in data/physical-device-uat.json."
+        "4 physical-device UAT scenario(s) remain pending in data/physical-device-uat.json."
       ],
       "follow_up_items": [],
       "next_actions": [
@@ -483,8 +483,8 @@
       "owner": "MED+250 infrastructure owner",
       "workstream": "infrastructure",
       "current_status": "pending",
-      "readiness": "runtime_verification_required",
-      "disposition": "runtime_verification_required",
+      "readiness": "machine_verified",
+      "disposition": "closed_by_machine_evidence",
       "blocking": false,
       "blocking_scope": "none",
       "closure_focus": "Review the fresh live domain evidence and record infrastructure-owner approval.",
@@ -521,18 +521,13 @@
         "approved_at": null
       },
       "blockers": [],
-      "follow_up_items": [
-        "Release-bound evidence is stale against the current repository checkout; rerun the exact-revision live verifier before approval."
-      ],
+      "follow_up_items": [],
       "next_actions": [
-        "Rerun DNS and live deployment verification if any Worker, route, DNS or repository revision changed.",
-        "Confirm med-250.com is attached only to the intended Cloudflare Worker route.",
-        "Record named infrastructure-owner approval against the current domain and deployment evidence."
+        "Preserve the current machine evidence and rerun the relevant verifier only after a backend, Edge Function, DNS, routing, or release-contract change."
       ],
       "commands": [
         "npm run domain:dns:verify",
-        "npm run deployment:verify -- --url https://med-250.com --mode live --expected-revision <exact-lowercase-40-character-git-sha> --evidence-output desktop-output/goal-progress-YYYY-MM-DD/domain-deployment-receipt.json",
-        "npm run domain:evidence:refresh -- --deployment-evidence desktop-output/goal-progress-YYYY-MM-DD/domain-deployment-receipt.json --expected-revision git --date YYYY-MM-DD"
+        "npm run deployment:verify -- --url https://med-250.com --mode live --expected-revision <exact-lowercase-40-character-git-sha> --evidence-output desktop-output/goal-progress-YYYY-MM-DD/domain-deployment-receipt.json"
       ],
       "safety_rules": [
         "Do not mark a gate confirmed until every required evidence type is recorded and the accountable owner has approved it.",

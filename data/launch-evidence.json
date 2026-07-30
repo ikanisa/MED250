@@ -130,14 +130,14 @@
         {
           "type": "test_record",
           "reference": "docs/launch/evidence/turnstile-positive-path-test-2026-07-30.json",
-          "sha256": "c0d746313d746296e14ce7984e01436699d04259671872cfaf738cefb21652c2",
-          "recorded_at": "2026-07-30T12:58:24+02:00",
-          "summary": "The controlled production Turnstile verifier rejected missing and invalid responses, accepted one real widget response, created exactly one disposable anonymous identity, revoked and deleted it, and retained no tokens or identifiers."
+          "sha256": "e5b5ba9ad2c79abedcf72a6fa20ddea2333852f8761ba85be2b91a4981c6ce62",
+          "recorded_at": "2026-07-30T13:26:00Z",
+          "summary": "The controlled production Turnstile verifier rejected missing, invalid, expired and replayed responses, accepted one real widget response, created exactly one disposable anonymous identity, revoked and deleted it, and retained no tokens or identifiers."
         }
       ],
       "approved_by": "Codex production verifier",
       "approved_role": "Automated security verification",
-      "approved_at": "2026-07-30T12:58:24+02:00"
+      "approved_at": "2026-07-30T13:26:00Z"
     },
     "MED250_GATE_AUTH_RATE_LIMITS_APPROVED": {
       "title": "Anonymous-auth rate-limit approval",
