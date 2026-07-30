@@ -79,7 +79,7 @@ export async function loadSourceAuthorityContext({ rootDir = repoRoot } = {}) {
   const replacementCandidate = {
     classification: "reconstructed_public_catalogue_evidence",
     path: defaultReplacementPath,
-    sha256: "5cad7067c8d904454f66f7e8a2d7bc276d72ac645bc2acdb30fc8a52642a6395",
+    sha256: "fc0ccba57fd198c7404bd3ae6a2e3c7f5fe79d9d153f38d9c6112a3afda82c33",
     original_corrected_dataset_sha256: originalCorrectedDatasetSha256,
     is_original: false,
   };

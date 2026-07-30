@@ -1,6 +1,7 @@
 import { cache } from "react";
 import type { CatalogueTaxonomyRow, Product } from "./dawanear-client";
 import { governPublicProductMedia, isPublicProductMediaHeld } from "./product-media-governance";
+import { getMed250RuntimeEnvironment } from "./runtime-environment";
 
 type CatalogueRow = Record<string, unknown>;
 const PUBLIC_FETCH_TIMEOUT_MS = 8_000;
@@ -41,8 +42,13 @@ function httpsUrl(row: CatalogueRow, field: string) {
 }
 
 function publicSupabaseEndpoint(path: string): { endpoint: URL; publishableKey: string } | null {
-  const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ?? "";
-  const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim() ?? "";
+  const runtimeEnvironment = getMed250RuntimeEnvironment();
+  const baseUrl = (runtimeEnvironment
+    ? runtimeEnvironment.NEXT_PUBLIC_SUPABASE_URL
+    : process.env.NEXT_PUBLIC_SUPABASE_URL)?.trim() ?? "";
+  const publishableKey = (runtimeEnvironment
+    ? runtimeEnvironment.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    : process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY)?.trim() ?? "";
   if (!baseUrl || !publishableKey) return null;
   try {
     const endpoint = new URL(path, baseUrl);

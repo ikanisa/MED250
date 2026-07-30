@@ -40,7 +40,13 @@ next-env.d.ts
 *.tsbuildinfo
 /dist/
 /.wrangler/
-/outputs/
+/outputs/*
+!/outputs/recovered-evidence/
+/outputs/recovered-evidence/*
+!/outputs/recovered-evidence/med250-marketplace-public-recovery-2026-07-23/
+/outputs/recovered-evidence/med250-marketplace-public-recovery-2026-07-23/*
+!/outputs/recovered-evidence/med250-marketplace-public-recovery-2026-07-23/recovered-public-marketplace-catalogue.json
+!/outputs/recovered-evidence/med250-marketplace-public-recovery-2026-07-23/recovery-manifest.json
 /work/
 /tmp/
 /archive/

@@ -267,7 +267,7 @@ const manifest = {
   classification: "recovery_manifest_not_source_retention_approval",
   generated_at: generatedAt,
   artifact: {
-    path: path.join(outputDir, "recovered-public-marketplace-catalogue.json"),
+    path: "outputs/recovered-evidence/med250-marketplace-public-recovery-2026-07-23/recovered-public-marketplace-catalogue.json",
     bytes: Buffer.byteLength(recoveryText),
     sha256: sha256(recoveryText),
   },

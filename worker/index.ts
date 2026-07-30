@@ -1,11 +1,14 @@
 /** Cloudflare Worker entry point for the vinext-starter template. */
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
+import { setMed250RuntimeEnvironment } from "../lib/runtime-environment";
 
 interface Env {
   ASSETS: Fetcher;
   MED250_RELEASE_MODE?: "preview" | "catalog" | "live";
   MED250_RELEASE_REVISION?: string;
+  NEXT_PUBLIC_SUPABASE_URL?: string;
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?: string;
   IMAGES: {
     input(stream: ReadableStream): {
       transform(options: Record<string, unknown>): {
@@ -86,6 +89,7 @@ const worker = {
     let response: Response;
 
     try {
+      setMed250RuntimeEnvironment(env);
       if (url.pathname === "/_vinext/image" && env?.ASSETS && env.IMAGES) {
         const allowedWidths = [...DEFAULT_DEVICE_SIZES, ...DEFAULT_IMAGE_SIZES];
         const imageResponse = await handleImageOptimization(request, {
