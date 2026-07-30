@@ -292,6 +292,17 @@ function catalogueText(value: string | undefined) {
   return !text || /^(?:—+|-+|n\/?a|null)$/i.test(text) ? "" : text;
 }
 
+function productIllustrationUrl(product: Pick<Product, "category" | "department" | "productType">) {
+  const classification = [product.department, product.category, product.productType]
+    .filter(Boolean)
+    .join(" ")
+    .toLocaleLowerCase();
+  if (/baby|family|pregnancy|maternity|nursery/.test(classification)) return "/marketplace/category-baby-family.webp";
+  if (/beauty|personal|skin|hair|fragrance/.test(classification)) return "/marketplace/category-personal-care.webp";
+  if (/wellness|household|health|device/.test(classification)) return "/marketplace/category-wellness-devices.webp";
+  return "/marketplace/category-medicines.webp";
+}
+
 function parseCsv(text: string) {
   const rows: string[][] = [];
   let row: string[] = [];
@@ -368,7 +379,7 @@ function ProductVisual({ product, small = false, eager = false, imageUrl }: { pr
           object URLs unchanged: the Supabase image-transform endpoint is not
           enabled for this project and returns 403 for every transformed URL. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={resolvedImageUrl} alt="" width={small ? 54 : 170} height={small ? 44 : 128} loading={eager ? "eager" : "lazy"} decoding="async" />
+      <img src={resolvedImageUrl} alt="" width={small ? 54 : 170} height={small ? 44 : 128} loading={eager ? "eager" : "lazy"} fetchPriority={eager ? "high" : "low"} decoding="async" />
       {!small && product.form ? <span>{product.form.split(" · ")[0]}</span> : null}
     </div>
   );
@@ -427,7 +438,7 @@ function HeroArtworkCarousel() {
   >
     <div className="hero-art-track" style={{ transform: `translate3d(-${activeSlide * 25}%, 0, 0)` }}>
       {heroArtworkSlides.map((slide, index) => <figure className="hero-art-slide" aria-hidden={index !== activeSlide} key={slide.src}>
-        <Image src={slide.src} alt={slide.alt} width={760} height={340} priority={index === 0} unoptimized />
+        <Image src={slide.src} alt={slide.alt} width={760} height={340} sizes="(max-width: 760px) 100vw, 50vw" priority={index === 0} unoptimized />
       </figure>)}
     </div>
     <div className="hero-art-controls" role="group" aria-label={marketplaceMessage("inventory.166857765512")}>
@@ -818,12 +829,13 @@ function ProductCard({
     });
   const priced = hasPriceData(product);
   const displayTitle = customerProductTitle(product.brand);
-  const cardImageUrl = product.imageUrl ?? product.imageUrls?.[0] ?? null;
+  const approvedImageUrl = product.imageUrl ?? product.imageUrls?.[0] ?? null;
+  const cardImageUrl = approvedImageUrl ?? productIllustrationUrl(product);
   const productHref = `/product/${encodeURIComponent(product.id)}`;
   const preloadProduct = () => router.prefetch(productHref);
 
   return <article
-    className={`product-card product-card-${product.accent ?? "mint"}${cardImageUrl ? "" : " without-image"}`}
+    className={`product-card product-card-${product.accent ?? "mint"}${approvedImageUrl ? "" : " illustrative-image"}`}
     role="listitem"
     aria-posinset={index + 1}
     aria-setsize={catalogueSize}
@@ -833,7 +845,7 @@ function ProductCard({
     {cardImageUrl ? <Link className="product-image-wrap" href={productHref} aria-label={marketplaceFormatMessage("inventory.a51b44650fe3", [displayTitle])} onClick={() => onOpen?.(product)} onMouseEnter={preloadProduct} onFocus={preloadProduct} onTouchStart={preloadProduct}>
       <span className="product-card-category">{displayCategory(product)}</span>
       <PrescriptionStatusIcon status={product.prescriptionStatus} />
-      <ProductVisual product={product} imageUrl={cardImageUrl} />
+      <ProductVisual product={product} imageUrl={cardImageUrl} eager={index < 4} />
       <span className="product-image-action" aria-hidden="true"><ArrowRight size={17} /></span>
     </Link> : null}
     <div className="product-card-content">
@@ -1064,7 +1076,9 @@ export default function Marketplace({
   const [serverCatalogueTotal, setServerCatalogueTotal] = useState(0);
   const [serverExplanations, setServerExplanations] = useState<Map<string, string>>(() => new Map());
   const [serverCatalogueAvailable, setServerCatalogueAvailable] = useState(true);
-  const [serverCatalogueRequested, setServerCatalogueRequested] = useState(!initialProducts.length);
+  const [serverCatalogueRequested, setServerCatalogueRequested] = useState(
+    backendConfigured && !previewMode && !initialProductId,
+  );
   const [catalogueInitialising, setCatalogueInitialising] = useState(!initialProduct && !initialProducts.length);
   const [catalogueLoading, setCatalogueLoading] = useState(false);
   const [catalogueError, setCatalogueError] = useState("");
@@ -1923,11 +1937,11 @@ export default function Marketplace({
     const missingItems = hierarchyItems.filter((item) => (
       !localSubcategoryRepresentativeImages.has(item.value)
       && !subcategoryRepresentativeImages.has(item.value)
-    ));
+    )).slice(0, 3);
     if (!missingItems.length) return undefined;
     let cancelled = false;
 
-    void Promise.allSettled(missingItems.map(async (item) => {
+    const loadRepresentatives = () => Promise.allSettled(missingItems.map(async (item) => {
       const result = await searchCatalogue({
         category: backendCategoryFor(item.value),
         limit: 8,
@@ -1949,7 +1963,14 @@ export default function Marketplace({
         return next;
       });
     });
-    return () => { cancelled = true; };
+    const idleHandle = "requestIdleCallback" in window
+      ? window.requestIdleCallback(loadRepresentatives, { timeout: 1200 })
+      : window.setTimeout(loadRepresentatives, 180);
+    return () => {
+      cancelled = true;
+      if ("cancelIdleCallback" in window && typeof idleHandle === "number") window.cancelIdleCallback(idleHandle);
+      else window.clearTimeout(idleHandle);
+    };
   }, [
     hierarchyItems,
     hierarchyRepresentativeKey,
