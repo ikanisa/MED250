@@ -6,17 +6,17 @@
   "summary": {
     "site_production_ready": true,
     "marketplace_transaction_ready": false,
-    "transaction_blocker_count": 2,
+    "transaction_blocker_count": 1,
     "non_blocking_follow_up_count": 8,
     "gate_count": 11,
     "source_authority_production_authorized": false,
-    "confirmed_gates": 0,
+    "confirmed_gates": 1,
     "approval_pending_gates": 0,
-    "prepared_evidence_pending_gates": 7,
+    "prepared_evidence_pending_gates": 6,
     "missing_evidence_gates": 0,
-    "stale_release_evidence_gates": 0,
-    "machine_verified_gates": 3,
-    "runtime_verification_required_gates": 0,
+    "stale_release_evidence_gates": 1,
+    "machine_verified_gates": 2,
+    "runtime_verification_required_gates": 1,
     "superseded_gates": 1,
     "duplicate_register_pending_groups": 51,
     "product_content_pending_entries": 72,
@@ -28,8 +28,8 @@
     "legacy_redirect_passed_probes": 5,
     "legacy_redirect_required_probes": 5,
     "legacy_redirect_valid": true,
-    "prepared_handoff_artifacts": 11,
-    "required_handoff_artifacts": 11
+    "prepared_handoff_artifacts": 10,
+    "required_handoff_artifacts": 10
   },
   "closure_order": [
     "MED250_GATE_TURNSTILE_SERVER_VERIFIED",
@@ -53,7 +53,7 @@
         "MED250_GATE_TURNSTILE_SERVER_VERIFIED",
         "MED250_GATE_AUTH_RATE_LIMITS_APPROVED"
       ],
-      "blocker_count": 1,
+      "blocker_count": 0,
       "follow_up_item_count": 2
     },
     "qa": {
@@ -86,7 +86,7 @@
         "MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED"
       ],
       "blocker_count": 0,
-      "follow_up_item_count": 2
+      "follow_up_item_count": 3
     },
     "operations": {
       "owners": [
@@ -233,46 +233,38 @@
       "title": "Turnstile server verification",
       "owner": "MED+250 security owner",
       "workstream": "security",
-      "current_status": "pending",
-      "readiness": "prepared_evidence_pending",
-      "disposition": "transaction_blocker",
-      "blocking": true,
-      "blocking_scope": "marketplace_transaction",
+      "current_status": "confirmed",
+      "readiness": "confirmed",
+      "disposition": "non_blocking_follow_up",
+      "blocking": false,
+      "blocking_scope": "none",
       "closure_focus": "Prove the production widget positive path while keeping invalid/missing-token rejection intact.",
       "acceptance": "Supabase Auth validates production Turnstile tokens and controlled tests prove invalid or missing tokens cannot create new customer identities.",
       "evidence": {
         "required_types": [
           "test_record"
         ],
-        "supplied": [],
-        "missing_types": [
-          "test_record"
-        ],
-        "prepared_pending": [
+        "supplied": [
           {
             "type": "test_record",
-            "reference": "docs/launch/evidence/turnstile-positive-path-test-pending-2026-07-16.json",
-            "sha256": "5e4d07c89f7df5ba2a42dff2d741832b1f9b1386b17475c4849d155d0dad6dc0",
-            "byte_length": 3654,
-            "template_valid": true,
-            "unresolved_check_count": 5,
-            "completion_instruction_count": 5
+            "reference": "docs/launch/evidence/turnstile-positive-path-test-2026-07-30.json",
+            "recorded_at": "2026-07-30T12:58:24+02:00",
+            "sha256": "c0d746313d746296e14ce7984e01436699d04259671872cfaf738cefb21652c2"
           }
         ],
+        "missing_types": [],
+        "prepared_pending": [],
         "unprepared_types": [],
         "ci_launch_gate_variable": "MED250_GATE_TURNSTILE_SERVER_VERIFIED"
       },
       "approval": {
         "required": true,
-        "complete": false,
-        "approved_by": null,
-        "approved_role": null,
-        "approved_at": null
+        "complete": true,
+        "approved_by": "Codex production verifier",
+        "approved_role": "Automated security verification",
+        "approved_at": "2026-07-30T12:58:24+02:00"
       },
-      "blockers": [
-        "Missing required evidence type(s): test_record.",
-        "Missing named accountable-owner approval metadata."
-      ],
+      "blockers": [],
       "follow_up_items": [],
       "next_actions": [
         "Run the real production Turnstile widget positive-path test with one disposable anonymous identity.",
@@ -491,8 +483,8 @@
       "owner": "MED+250 infrastructure owner",
       "workstream": "infrastructure",
       "current_status": "pending",
-      "readiness": "machine_verified",
-      "disposition": "closed_by_machine_evidence",
+      "readiness": "runtime_verification_required",
+      "disposition": "runtime_verification_required",
       "blocking": false,
       "blocking_scope": "none",
       "closure_focus": "Review the fresh live domain evidence and record infrastructure-owner approval.",
@@ -529,13 +521,18 @@
         "approved_at": null
       },
       "blockers": [],
-      "follow_up_items": [],
+      "follow_up_items": [
+        "Release-bound evidence is stale against the current repository checkout; rerun the exact-revision live verifier before approval."
+      ],
       "next_actions": [
-        "Preserve the current machine evidence and rerun the relevant verifier only after a backend, Edge Function, DNS, routing, or release-contract change."
+        "Rerun DNS and live deployment verification if any Worker, route, DNS or repository revision changed.",
+        "Confirm med-250.com is attached only to the intended Cloudflare Worker route.",
+        "Record named infrastructure-owner approval against the current domain and deployment evidence."
       ],
       "commands": [
         "npm run domain:dns:verify",
-        "npm run deployment:verify -- --url https://med-250.com --mode live --expected-revision <exact-lowercase-40-character-git-sha> --evidence-output desktop-output/goal-progress-YYYY-MM-DD/domain-deployment-receipt.json"
+        "npm run deployment:verify -- --url https://med-250.com --mode live --expected-revision <exact-lowercase-40-character-git-sha> --evidence-output desktop-output/goal-progress-YYYY-MM-DD/domain-deployment-receipt.json",
+        "npm run domain:evidence:refresh -- --deployment-evidence desktop-output/goal-progress-YYYY-MM-DD/domain-deployment-receipt.json --expected-revision git --date YYYY-MM-DD"
       ],
       "safety_rules": [
         "Do not mark a gate confirmed until every required evidence type is recorded and the accountable owner has approved it.",

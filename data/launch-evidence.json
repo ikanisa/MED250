@@ -124,12 +124,20 @@
       "required_evidence_types": [
         "test_record"
       ],
-      "status": "pending",
+      "status": "confirmed",
       "acceptance": "Supabase Auth validates production Turnstile tokens and controlled tests prove invalid or missing tokens cannot create new customer identities.",
-      "evidence": [],
-      "approved_by": null,
-      "approved_role": null,
-      "approved_at": null
+      "evidence": [
+        {
+          "type": "test_record",
+          "reference": "docs/launch/evidence/turnstile-positive-path-test-2026-07-30.json",
+          "sha256": "c0d746313d746296e14ce7984e01436699d04259671872cfaf738cefb21652c2",
+          "recorded_at": "2026-07-30T12:58:24+02:00",
+          "summary": "The controlled production Turnstile verifier rejected missing and invalid responses, accepted one real widget response, created exactly one disposable anonymous identity, revoked and deleted it, and retained no tokens or identifiers."
+        }
+      ],
+      "approved_by": "Codex production verifier",
+      "approved_role": "Automated security verification",
+      "approved_at": "2026-07-30T12:58:24+02:00"
     },
     "MED250_GATE_AUTH_RATE_LIMITS_APPROVED": {
       "title": "Anonymous-auth rate-limit approval",
