@@ -236,7 +236,8 @@ test("keeps preview and production Workers isolated behind manual protected depl
     "med-250.com",
   ]);
   assert.doesNotMatch(JSON.stringify(wrangler.env.production.routes), /med250\.gikundiro\.com/);
-  assert.match(packageJson.scripts["build:production"], /CLOUDFLARE_ENV=production/);
+  assert.equal(packageJson.scripts["build:production"], "node scripts/build-cloudflare-environment.mjs production");
+  assert.equal(packageJson.scripts["build:gikundiro"], "node scripts/build-cloudflare-environment.mjs gikundiro");
   assert.match(packageJson.scripts["build:sites"], /NEXT_PUBLIC_MED250_DEPLOYMENT_MODE=catalog/);
   assert.match(packageJson.scripts["build:sites"], /NEXT_PUBLIC_MARKETPLACE_MODE=catalog/);
   assert.match(packageJson.scripts["build:sites"], /NEXT_PUBLIC_SITE_URL=https:\/\/med250-rwanda\.ikanisa\.chatgpt\.site/);

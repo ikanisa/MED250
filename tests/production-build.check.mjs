@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import test from "node:test";
 
 // Kept outside the default *.test.mjs glob because it requires a production build.
@@ -39,6 +39,22 @@ test("renders live indexable metadata and security headers", async () => {
   assert.match(html, /<title>MED\+250/);
   assert.match(html, /name="robots" content="index, follow/);
   assert.doesNotMatch(html, /name="robots" content="noindex/);
+});
+
+test("compiles the production Supabase and Turnstile integrations into browser assets", async () => {
+  const assetsDirectory = new URL("../dist/client/assets/", import.meta.url);
+  const assetNames = await readdir(assetsDirectory);
+  const javascript = (
+    await Promise.all(
+      assetNames
+        .filter((name) => name.endsWith(".js"))
+        .map((name) => readFile(new URL(name, assetsDirectory), "utf8")),
+    )
+  ).join("\n");
+
+  assert.match(javascript, /https:\/\/uskfnszcdqpcfrhjxitl\.supabase\.co/);
+  assert.match(javascript, /sb_publishable_EUrmxGdkqrwed7Vd06Bl5g_Cu2DXmRK/);
+  assert.match(javascript, /0x4AAAAAAD2nncV3uS0uwQDE/);
 });
 
 test("publishes live robots directives and the complete source-backed sitemap", async () => {
