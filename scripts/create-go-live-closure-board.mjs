@@ -441,7 +441,7 @@ export function buildGoLiveClosureBoard({ manifest, handoff, readinessReport }) 
         origin: readinessReport.renderedProductionAudit.origin,
         required_origin: readinessReport.renderedProductionAudit.canonicalOrigin,
         evidence_release_revision: readinessReport.renderedProductionAudit.releaseRevision,
-        current_release_revision: readinessReport.renderedProductionAudit.currentReleaseRevision,
+        current_release_revision_source: "Resolve from git rev-parse HEAD at execution time and verify it against the live X-MED250-Release-Revision header.",
         release_revision_current: readinessReport.renderedProductionAudit.releaseRevisionCurrent,
         passed_scenarios: readinessReport.renderedProductionAudit.statusCounts.passed,
         required_scenarios: readinessReport.renderedProductionAudit.scenarioCount,
@@ -449,7 +449,7 @@ export function buildGoLiveClosureBoard({ manifest, handoff, readinessReport }) 
         blocker: null,
         follow_up: readinessReport.renderedProductionAudit.valid
           ? null
-          : "The prior 16-scenario rendered audit is historical. Current rendered and physical-device evidence is completed through MED250_GATE_PHYSICAL_UAT_PASSED.",
+          : "The prior 16-scenario rendered audit is historical. Record current rendered and physical-device evidence through MED250_GATE_PHYSICAL_UAT_PASSED.",
         commands: [
           "npm run deployment:verify -- --url https://med-250.com --mode live --expected-revision <exact-lowercase-40-character-git-sha>",
           "npm run catalogue:verify:live",

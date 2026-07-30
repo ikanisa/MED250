@@ -57,6 +57,8 @@ test("builds an owner closure board without promoting pending gates", () => {
   assert.equal(board.summary.legacy_redirect_valid, true);
   assert.equal(board.prerequisites.rendered_production_audit.valid, false);
   assert.equal(board.prerequisites.rendered_production_audit.required_origin, "https://med-250.com");
+  assert.match(board.prerequisites.rendered_production_audit.current_release_revision_source, /git rev-parse HEAD/);
+  assert.equal("current_release_revision" in board.prerequisites.rendered_production_audit, false);
   assert.equal(board.prerequisites.rendered_production_audit.release_revision_current, false);
   assert.equal(board.prerequisites.rendered_production_audit.blocker, null);
   assert.match(board.prerequisites.rendered_production_audit.follow_up, /prior 16-scenario rendered audit is historical/i);
