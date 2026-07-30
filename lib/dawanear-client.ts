@@ -1168,16 +1168,28 @@ export function subscribeToOffers(
       },
       refresh,
     )
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "dawanear_orders",
+        filter: `id=eq.${cleanedOrderId}`,
+      },
+      refresh,
+    )
     .subscribe((status) => {
       if (status === "SUBSCRIBED") refresh();
       if (!closed && (status === "CHANNEL_ERROR" || status === "TIMED_OUT")) {
         onError?.(new Error("Live pharmacy offers disconnected. Check your connection and refresh."));
       }
     });
+  const refreshTimer = globalThis.setInterval(refresh, 15_000);
 
   return () => {
     closed = true;
     refreshSequence += 1;
+    globalThis.clearInterval(refreshTimer);
     void client.removeChannel(channel);
   };
 }

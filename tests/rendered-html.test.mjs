@@ -950,6 +950,8 @@ test("keeps the launch candidate honest, connected, and free of simulated fulfil
   assert.match(client, /dawanear_close_order/);
   assert.match(client, /dawanear-prescriptions/);
   assert.match(client, /postgres_changes/);
+  assert.match(client, /table: "dawanear_orders"/);
+  assert.match(client, /setInterval\(refresh, 15_000\)/);
   assert.match(client, /dawanear_my_active_orders/);
   assert.match(client, /dawanear_pharmacy_selected_orders/);
   assert.match(client, /dawanear_pharmacy_notifications/);
