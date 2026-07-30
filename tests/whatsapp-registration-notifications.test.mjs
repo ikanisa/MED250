@@ -55,19 +55,19 @@ test("the notification outbox indexes both foreign-key references", async () => 
   assert.match(sql, /create index if not exists dawanear_whatsapp_outbox_pharmacy_id_idx[\s\S]*\(pharmacy_id\)/);
 });
 
-test("checkout includes a blocking WhatsApp verification step", async () => {
+test("one-shot checkout keeps WhatsApp verification blocking without step navigation", async () => {
   const [source, runtimeCatalogJson] = await Promise.all([
     readFile(marketplacePath, "utf8"),
     readFile(new URL("../data/localization/runtime-messages.en-RW.json", import.meta.url), "utf8"),
   ]);
   const runtimeMessages = JSON.parse(runtimeCatalogJson).messages;
-  assert.match(source, /type CheckoutStep = 1 \| 2 \| 3 \| 4/);
-  assert.match(source, /label: marketplaceMessage\("request\.verify_step"\)/);
+  assert.doesNotMatch(source, /CheckoutStep|checkoutStep|setCheckoutStep|order-wizard-progress/);
+  assert.match(source, /className="one-shot-checkout-feedback"/);
   assert.match(source, /requestCustomerWhatsappOtp/);
   assert.match(source, /verifyCustomerWhatsappOtp/);
   assert.match(source, /if \(!customerWhatsappVerified\)/);
+  assert.match(source, /disabled=\{!cart\.length \|\| ordering \|\| Boolean\(prescriptionError\) \|\| !customerWhatsappVerified \|\| !coordinates\}/);
   assert.equal(runtimeMessages["inventory.bcdf0f413028"], "Up to 10 closest pharmacies");
-  assert.match(source, /marketplaceMessage\("inventory\.bcdf0f413028"\)/);
 });
 
 test("notification functions are configured with the intended public and private boundaries", async () => {

@@ -556,18 +556,10 @@ test("provides accessible feedback, mobile filters, wizard progress, and resilie
   assert.doesNotMatch(marketplace, /className="wizard-progress"/);
   assert.match(marketplace, /className="portal-auth-status"/);
   assert.match(marketplace, /aria-describedby="pharmacy-signin-context"/);
-  assert.match(marketplace, /className="order-wizard-progress"/);
-  assert.match(marketplace, /CHECKOUT_STEPS\.filter\(\(item\) => item\.id !== 3\)/);
-  assert.match(marketplace, /--order-step-count/);
-  assert.match(marketplace, /previousCheckoutStepRef/);
-  assert.ok(marketplace.indexOf("const [checkoutStep") < marketplace.indexOf("const previousCheckoutStepRef"));
-  assert.match(marketplace, /querySelector<HTMLElement>\("\[data-checkout-step-focus\]"\)/);
-  assert.match(marketplace, /data-checkout-step-focus tabIndex=\{-1\}/);
-  assertCataloguedMessage(marketplace, "inventory.4ed9052cf4be", "Review and send your availability request");
-  assertCataloguedMessage(marketplace, "inventory.acbb998d8243", "Continue to details");
-  assertCataloguedMessage(marketplace, "inventory.dcea8abbdff0", "Review request");
-  assert.match(marketplace, /setCheckoutStep\(customerWhatsappVerified \? 4 : 3\)/);
-  assert.match(marketplace, /setCheckoutStep\(4\)/);
+  assert.doesNotMatch(marketplace, /order-wizard-progress|CHECKOUT_STEPS|checkoutStep|setCheckoutStep/);
+  assert.match(marketplace, /className="one-shot-checkout-feedback"/);
+  assert.match(marketplace, /disabled=\{!cart\.length \|\| ordering \|\| Boolean\(prescriptionError\) \|\| !customerWhatsappVerified \|\| !coordinates\}/);
+  assert.equal((marketplace.match(/className="order-wizard-actions"/g) ?? []).length, 1);
   assert.match(marketplace, /className="catalogue-skeleton"/);
   assert.match(marketplace, /aria-busy=\{ordering\}/);
   assert.match(navigationFeedback, /navigator\.onLine/);
@@ -693,7 +685,7 @@ test("requires international customer WhatsApp and restores on-device order pref
   assert.match(marketplace, /aria-label=\{marketplaceMessage\("inventory\.36ca78914773"\)\}/);
   assertCataloguedMessage(marketplace, "inventory.dd0285bfd9b4", "Verified once and remembered");
   assert.match(marketplace, /customerWhatsappVerified && !editingCustomerWhatsapp/);
-  assert.match(marketplace, /setCheckoutStep\(customerWhatsappVerified \? 4 : 3\)/);
+  assert.doesNotMatch(marketplace, /checkoutStep|setCheckoutStep/);
   assert.match(marketplace, /CUSTOMER_PREFERENCES_STORAGE_KEY/);
   assert.match(marketplace, /coordinates: coordinates/);
   assert.match(marketplace, /applyMapLocation/);
@@ -707,9 +699,10 @@ test("requires international customer WhatsApp and restores on-device order pref
 });
 
 test("uses device detection or an embedded Google Maps pin instead of raw coordinates", async () => {
-  const [marketplace, mapPicker, css, environment] = await Promise.all([
+  const [marketplace, mapPicker, districtCentroids, css, environment] = await Promise.all([
     readFile(new URL("../app/marketplace.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/google-map-location-picker.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../lib/rwanda-district-centroids.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../.env.example", import.meta.url), "utf8"),
   ]);
@@ -718,13 +711,23 @@ test("uses device detection or an embedded Google Maps pin instead of raw coordi
   assertCataloguedMessage(marketplace, "inventory.964c5724503c", "Choose on map");
   assert.match(marketplace, /GoogleMapLocationPicker/);
   assert.match(marketplace, /NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY/);
+  assert.match(marketplace, /RWANDA_DISTRICT_GROUPS/);
+  assert.match(marketplace, /applyDistrictLocation/);
+  assertCataloguedMessage(marketplace, "location.choose_district_title", "Choose district search area");
+  assertCataloguedMessage(marketplace, "location.approximate_district_notice", "This approximate district centre is used only to match nearby pharmacies. Confirm the exact pickup or delivery point directly with the pharmacy.");
   assert.doesNotMatch(marketplace, /Use coordinates instead|manualLatitude|manualLongitude|applyManualLocation/);
+  assert.equal((districtCentroids.match(/^\s+\["[A-Za-z]+", -/gm) ?? []).length, 30);
+  assert.match(districtCentroids, /gh\.space\.gov\.rw\/server\/rest\/services\/Admin_Boundaries\/FeatureServer\/1/);
+  assert.match(districtCentroids, /\["Musanze", -/);
+  assert.match(districtCentroids, /\["Gicumbi", -/);
+  assert.match(districtCentroids, /not presented as exact customer[\s\S]*addresses/);
   assert.match(mapPicker, /maps\.googleapis\.com\/maps\/api\/js/);
   assert.match(mapPicker, /draggable: true/);
   assert.match(mapPicker, /map\.addListener\("click"/);
   assert.match(mapPicker, /new maps\.Geocoder\(\)/);
   assert.match(mapPicker, /componentRestrictions: \{ country: "RW" \}/);
   assert.match(css, /\.map-location-picker/);
+  assert.match(css, /\.district-location-picker/);
   assert.match(css, /\.location-choice-row/);
   assert.doesNotMatch(css, /manual-location/);
   assert.match(environment, /NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY=/);
@@ -959,6 +962,10 @@ test("keeps the launch candidate honest, connected, and free of simulated fulfil
   assertCataloguedMessage(marketplace, "inventory.1287db5ab987", "This request may already have been saved. Retry the same secure request; local reset is disabled.");
   assertCataloguedMessage(marketplace, "inventory.9d2a9c58f97e", "This request may already have been saved. Retry the same secure request so MED+250 can recover its receipt; resetting is disabled.");
   assert.match(marketplace, /detectNativeLocation/);
+  assert.match(marketplace, /RWANDA_DISTRICT_GROUPS/);
+  assert.match(marketplace, /applyDistrictLocation/);
+  assert.match(marketplace, /district-location-picker/);
+  assert.match(marketplace, /location\.approximate_district_notice/);
   assert.doesNotMatch(marketplace, /locationConsent|broadcastConsent/);
   assert.match(marketplace, /pendingOrderAttempt\?\.rpcAttempted/);
   assert.match(marketplace, /isCompatibleSubstitute/);
