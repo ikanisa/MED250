@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 
@@ -42,8 +43,47 @@ const supersededGateNames = new Set([
   "MED250_GATE_WHATSAPP_READY",
 ]);
 
+const runtimeDomainReceiptPath = ".wrangler/live-domain-receipt.json";
+
 async function loadJson(path) {
   return JSON.parse(await readFile(path, "utf8"));
+}
+
+async function assessRuntimeDomainReceipt(path, currentReleaseRevision) {
+  let receipt;
+  try {
+    receipt = await loadJson(path);
+  } catch {
+    return {
+      valid: false,
+      path,
+      status: "missing",
+      capturedAt: null,
+      observedReleaseRevision: null,
+      errorCount: 1,
+    };
+  }
+  const verifierSource = await readFile("scripts/verify-deployed-site.mjs");
+  const verifierSha256 = createHash("sha256").update(verifierSource).digest("hex");
+  const errors = [];
+  if (receipt.status !== "passed") errors.push("Runtime domain receipt did not pass.");
+  if (receipt.origin !== canonicalProductionOrigin) errors.push("Runtime domain receipt used a non-canonical origin.");
+  if (receipt.mode !== "live") errors.push("Runtime domain receipt did not verify live mode.");
+  if (receipt.expectedReleaseRevision !== currentReleaseRevision) errors.push("Runtime receipt expected revision is stale.");
+  if (receipt.observedReleaseRevision !== currentReleaseRevision) errors.push("Runtime receipt observed revision is stale.");
+  if (receipt.releaseRevisionExpectation !== "matched") errors.push("Runtime receipt did not match the expected revision.");
+  if (receipt.routeCount !== 10) errors.push("Runtime receipt did not cover all ten required routes.");
+  if (receipt.verifier?.path !== "scripts/verify-deployed-site.mjs") errors.push("Runtime receipt used an unexpected verifier.");
+  if (receipt.verifier?.sha256 !== verifierSha256) errors.push("Runtime receipt verifier digest is stale.");
+  if (!Number.isFinite(Date.parse(receipt.capturedAt ?? ""))) errors.push("Runtime receipt capture time is invalid.");
+  return {
+    valid: errors.length === 0,
+    path,
+    status: receipt.status ?? null,
+    capturedAt: receipt.capturedAt ?? null,
+    observedReleaseRevision: receipt.observedReleaseRevision ?? null,
+    errorCount: errors.length,
+  };
 }
 
 async function assessDuplicateRegister() {
@@ -73,7 +113,7 @@ function approvalComplete(gate) {
   );
 }
 
-function gateRows(manifest, handoff, releaseBindings) {
+function gateRows(manifest, handoff, releaseBindings, runtimeDomainReceipt) {
   const handoffByGate = new Map((handoff.gates ?? []).map((gate) => [gate.gate, gate]));
   return Object.entries(manifest.gates ?? {}).map(([name, gate]) => {
     const suppliedTypes = new Set((gate.evidence ?? []).map((entry) => entry.type));
@@ -81,7 +121,10 @@ function gateRows(manifest, handoff, releaseBindings) {
     const preparedPendingEvidence = Object.keys(handoffByGate.get(name)?.prepared_pending_evidence ?? {});
     const approved = approvalComplete(gate);
     const releaseRevisionBindings = releaseBindings.get(name) ?? [];
-    const staleReleaseEvidence = releaseRevisionBindings.some((binding) => !binding.matchesCurrentRevision);
+    const currentRuntimeEvidence = name === "MED250_GATE_DOMAIN_DNS_VERIFIED"
+      && runtimeDomainReceipt.valid;
+    const staleReleaseEvidence = !currentRuntimeEvidence
+      && releaseRevisionBindings.some((binding) => !binding.matchesCurrentRevision);
     const evidenceComplete = missingEvidenceTypes.length === 0;
     let readiness = "missing_evidence";
     if (supersededGateNames.has(name)) {
@@ -114,11 +157,15 @@ function gateRows(manifest, handoff, releaseBindings) {
       staleReleaseEvidence,
       evidenceComplete,
       disposition,
+      currentRuntimeEvidence,
     };
   });
 }
 
-export async function buildGoLiveReadinessReport() {
+export async function buildGoLiveReadinessReport({
+  runtimeReceiptPath = runtimeDomainReceiptPath,
+} = {}) {
+  const currentReleaseRevision = currentGitRevision();
   const [
     manifest,
     prepared,
@@ -143,7 +190,10 @@ export async function buildGoLiveReadinessReport() {
   const launchNonStrict = validateLaunchEvidence(manifest);
   const launchStrict = validateLaunchEvidence(manifest, { strict: true });
   const physicalStrict = validatePhysicalUat(physicalUat, { strict: true });
-  const currentReleaseRevision = currentGitRevision();
+  const runtimeDomainReceipt = await assessRuntimeDomainReceipt(
+    runtimeReceiptPath,
+    currentReleaseRevision,
+  );
   const renderedProductionAudit = validateAuditBrowserEvidence(auditBrowserEvidence, {
     strict: true,
     currentReleaseRevision,
@@ -153,7 +203,7 @@ export async function buildGoLiveReadinessReport() {
     expectedVerifierSha256: expectedLegacyRedirectVerifierSha256,
   });
   const releaseBindings = await releaseBindingsForManifest(manifest, { currentRevision: currentReleaseRevision });
-  const gates = gateRows(manifest, handoff, releaseBindings);
+  const gates = gateRows(manifest, handoff, releaseBindings, runtimeDomainReceipt);
   const readinessCounts = gates.reduce((counts, gate) => {
     counts[gate.readiness] = (counts[gate.readiness] ?? 0) + 1;
     return counts;
@@ -294,6 +344,7 @@ export async function buildGoLiveReadinessReport() {
       passedProbeCount: legacyDomainRedirect.assessment.passedProbeCount,
       errorCount: legacyDomainRedirect.errors.length,
     },
+    runtimeDomainReceipt,
     handoff: {
       gateCount: handoff.gate_count,
       missingEvidenceArtifactCount: handoff.missing_evidence_artifact_count,

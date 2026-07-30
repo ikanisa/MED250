@@ -12,7 +12,9 @@ import { buildGoLiveReadinessReport } from "../scripts/report-go-live-readiness.
 
 const manifest = JSON.parse(await readFile(new URL("../data/launch-evidence.json", import.meta.url), "utf8"));
 const handoff = createLaunchEvidenceHandoff(manifest, await discoverPreparedLaunchEvidence());
-const readinessReport = await buildGoLiveReadinessReport();
+const readinessReport = await buildGoLiveReadinessReport({
+  runtimeReceiptPath: ".wrangler/test-missing-live-domain-receipt.json",
+});
 const board = buildGoLiveClosureBoard({ manifest, handoff, readinessReport });
 
 test("builds an owner closure board without promoting pending gates", () => {

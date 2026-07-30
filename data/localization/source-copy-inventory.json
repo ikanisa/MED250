@@ -41,7 +41,7 @@
     },
     {
       "file": "app/pwa-manager.tsx",
-      "sha256": "91c52b97d0c357176877e6b57366ef2f21ec2895f605aa5dc6e7bdd65f38c9f5"
+      "sha256": "07b4e1f94ac5f0d359c51487017663b815e71521834266167b871e34cc1acea9"
     },
     {
       "file": "app/terms/page.tsx",
@@ -700,7 +700,7 @@
       "occurrences": [
         {
           "file": "app/pwa-manager.tsx",
-          "line": 173,
+          "line": 176,
           "kind": "catalog_reference",
           "context": "PwaManager",
           "surface": "pwa",
@@ -4388,7 +4388,7 @@
       "occurrences": [
         {
           "file": "app/pwa-manager.tsx",
-          "line": 175,
+          "line": 178,
           "kind": "catalog_reference",
           "context": "PwaManager",
           "surface": "pwa",
@@ -4660,7 +4660,7 @@
       "occurrences": [
         {
           "file": "app/pwa-manager.tsx",
-          "line": 174,
+          "line": 177,
           "kind": "catalog_reference",
           "context": "PwaManager",
           "surface": "pwa",
@@ -5944,7 +5944,7 @@
       "occurrences": [
         {
           "file": "app/pwa-manager.tsx",
-          "line": 166,
+          "line": 169,
           "kind": "catalog_reference",
           "context": "PwaManager",
           "surface": "pwa",
@@ -7237,7 +7237,7 @@
       "occurrences": [
         {
           "file": "app/pwa-manager.tsx",
-          "line": 164,
+          "line": 167,
           "kind": "catalog_reference",
           "context": "PwaManager",
           "surface": "pwa",
@@ -8454,7 +8454,7 @@
       "occurrences": [
         {
           "file": "app/pwa-manager.tsx",
-          "line": 175,
+          "line": 178,
           "kind": "catalog_reference",
           "context": "PwaManager",
           "surface": "pwa",
@@ -10535,7 +10535,7 @@
       "occurrences": [
         {
           "file": "app/pwa-manager.tsx",
-          "line": 173,
+          "line": 176,
           "kind": "catalog_reference",
           "context": "PwaManager",
           "surface": "pwa",
@@ -10627,7 +10627,7 @@
       "occurrences": [
         {
           "file": "app/pwa-manager.tsx",
-          "line": 165,
+          "line": 168,
           "kind": "catalog_reference",
           "context": "PwaManager",
           "surface": "pwa",
@@ -10996,7 +10996,7 @@
       "occurrences": [
         {
           "file": "app/pwa-manager.tsx",
-          "line": 174,
+          "line": 177,
           "kind": "catalog_reference",
           "context": "PwaManager",
           "surface": "pwa",
@@ -12807,7 +12807,7 @@
       "occurrences": [
         {
           "file": "app/pwa-manager.tsx",
-          "line": 173,
+          "line": 176,
           "kind": "catalog_reference",
           "context": "PwaManager",
           "surface": "pwa",
@@ -12934,7 +12934,7 @@
       "occurrences": [
         {
           "file": "app/pwa-manager.tsx",
-          "line": 164,
+          "line": 167,
           "kind": "catalog_reference",
           "context": "PwaManager",
           "surface": "pwa",

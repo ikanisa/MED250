@@ -1,10 +1,16 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import test from "node:test";
 
 import { buildGoLiveReadinessReport } from "../scripts/report-go-live-readiness.mjs";
 
 test("separates production engineering readiness from genuine transaction blockers", async () => {
-  const report = await buildGoLiveReadinessReport();
+  const report = await buildGoLiveReadinessReport({
+    runtimeReceiptPath: ".wrangler/test-missing-live-domain-receipt.json",
+  });
 
   assert.equal(report.productionReady, false);
   assert.equal(report.siteProductionReady, true);
@@ -100,4 +106,41 @@ test("separates production engineering readiness from genuine transaction blocke
   assert.equal(report.legacyDomainRedirect.errorCount, 0);
   assert.equal(report.handoff.preparedPendingArtifactCount, report.handoff.missingEvidenceArtifactCount);
   assert.equal(report.handoff.unpreparedEvidenceArtifactCount, 0);
+});
+
+test("closes stale tracked domain evidence with a current ignored runtime receipt", async () => {
+  const baseline = await buildGoLiveReadinessReport({
+    runtimeReceiptPath: ".wrangler/test-missing-live-domain-receipt.json",
+  });
+  const directory = await mkdtemp(join(tmpdir(), "med250-runtime-domain-"));
+  const receiptPath = join(directory, "live-domain-receipt.json");
+  const verifier = await readFile("scripts/verify-deployed-site.mjs");
+  await writeFile(receiptPath, JSON.stringify({
+    schemaVersion: "1.0",
+    capturedAt: new Date().toISOString(),
+    status: "passed",
+    origin: "https://med-250.com",
+    mode: "live",
+    observedReleaseRevision: baseline.sourceControl.currentReleaseRevision,
+    expectedReleaseRevision: baseline.sourceControl.currentReleaseRevision,
+    releaseRevisionExpectation: "matched",
+    routeCount: 10,
+    verifier: {
+      path: "scripts/verify-deployed-site.mjs",
+      sha256: createHash("sha256").update(verifier).digest("hex"),
+    },
+  }));
+  try {
+    const report = await buildGoLiveReadinessReport({ runtimeReceiptPath: receiptPath });
+    const domain = report.gates.find((gate) => gate.name === "MED250_GATE_DOMAIN_DNS_VERIFIED");
+    assert.equal(report.runtimeDomainReceipt.valid, true);
+    assert.equal(report.gateReadiness.staleReleaseEvidence, 0);
+    assert.equal(report.gateReadiness.runtimeVerificationRequired, 0);
+    assert.equal(report.gateReadiness.machineVerified, 3);
+    assert.equal(domain.currentRuntimeEvidence, true);
+    assert.equal(domain.staleReleaseEvidence, false);
+    assert.equal(domain.disposition, "closed_by_machine_evidence");
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
 });
