@@ -833,7 +833,7 @@
     },
     {
       "id": "inventory.042afa1ab83e",
-      "source": "By verifying, you agree that MED+250 may send request and pharmacy-response notifications to this WhatsApp number. Your number is not shared until you choose a pharmacy.",
+      "source": "By sending this request, you agree that MED+250 may send request and pharmacy-response notifications to this WhatsApp number. Your number is not shared until you choose a pharmacy.",
       "risk": "high",
       "catalog_ids": [
         "inventory.042afa1ab83e"
@@ -856,7 +856,7 @@
     },
     {
       "id": "inventory.0701629aef82",
-      "source": "Attach a valid prescription before verifying this request.",
+      "source": "Attach a valid prescription before sending this request.",
       "risk": "high",
       "catalog_ids": [
         "inventory.0701629aef82"
@@ -1173,7 +1173,7 @@
     },
     {
       "id": "inventory.0f91ad22b6e6",
-      "source": "MED+250 uses your selected products, quantities, fulfilment preference, location, verified WhatsApp number, and any prescription you choose to attach. Anonymous sign-in identifies a browser session; it does not make request or health data anonymous. A short-lived one-time code confirms that you control the WhatsApp number before a request can be sent.",
+      "source": "MED+250 uses your selected products, quantities, fulfilment preference, location, WhatsApp contact number, and any prescription you choose to attach. Anonymous sign-in identifies a browser session; it does not make request or health data anonymous. Customer WhatsApp is used for request and response notifications; one-time-code access is reserved for the pharmacy portal.",
       "risk": "high",
       "catalog_ids": [
         "inventory.0f91ad22b6e6"
