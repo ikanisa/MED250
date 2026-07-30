@@ -6,7 +6,7 @@ import { PGlite } from "@electric-sql/pglite";
 const migrationPath = new URL("../supabase/migrations/20260718064237_whatsapp_customer_verification_and_notifications.sql", import.meta.url);
 const customerContactOnlyMigrationPath = new URL("../supabase/migrations/20260730131500_make_customer_whatsapp_contact_only.sql", import.meta.url);
 const outboxIndexMigrationPath = new URL("../supabase/migrations/20260718172000_index_whatsapp_outbox_foreign_keys.sql", import.meta.url);
-const repairMigrationPath = new URL("../supabase/migrations/20260730101500_repair_offer_realtime_and_whatsapp_dispatch.sql", import.meta.url);
+const repairMigrationPath = new URL("../supabase/migrations/20260730143000_repair_offer_realtime_and_whatsapp_dispatch.sql", import.meta.url);
 const marketplacePath = new URL("../app/marketplace.tsx", import.meta.url);
 const configPath = new URL("../supabase/config.toml", import.meta.url);
 const dispatchPath = new URL("../supabase/functions/dispatch-whatsapp-notifications/index.ts", import.meta.url);
@@ -107,8 +107,8 @@ test("the effective migrations accept customer contact and enqueue price-free co
     readFile(customerContactOnlyMigrationPath, "utf8"),
   ]);
   await db.exec(legacySql.slice(0, legacySql.indexOf("\ncommit;") + "\ncommit;".length));
-  await db.exec(repairSql);
   await db.exec(contactOnlySql);
+  await db.exec(repairSql);
 
   const userId = "00000000-0000-4000-8000-000000000001";
   const pharmacyId = "00000000-0000-4000-8000-000000000002";
@@ -127,12 +127,19 @@ test("the effective migrations accept customer contact and enqueue price-free co
     insert into public.dawanear_offers(id,order_id,pharmacy_id,status,total_rwf,complete,submitted_at,ready_in_minutes,fulfilment_method) values ('${offerId}','${orderId}','${pharmacyId}','draft',0,false,null,20,'either');
     insert into public.dawanear_offer_items(id,offer_id,available,is_substitute,offered_product_id,quantity,unit_price_rwf) values ('00000000-0000-4000-8000-000000000009','${offerId}',true,false,'${productId}',2,null);
     update public.dawanear_offers set status='submitted', complete=true, submitted_at=now() where id='${offerId}';
+    update public.dawanear_offers set fulfilment_method='delivery' where id='${offerId}';
   `);
-  const queued = await db.query("select kind, recipient_e164 from public.dawanear_whatsapp_outbox order by kind");
-  assert.deepEqual(queued.rows, [
-    { kind: "customer_offer", recipient_e164: "250780000000" },
-    { kind: "pharmacy_request", recipient_e164: "250788000000" },
-  ]);
+  const queued = await db.query("select kind, recipient_e164, payload from public.dawanear_whatsapp_outbox order by kind");
+  assert.equal(queued.rows.length, 2);
+  const customerOffer = queued.rows.find((row) => row.kind === "customer_offer");
+  const pharmacyRequest = queued.rows.find((row) => row.kind === "pharmacy_request");
+  assert.equal(customerOffer.recipient_e164, "250780000000");
+  assert.equal(customerOffer.payload.fulfilment_method, "delivery");
+  assert.equal(customerOffer.payload.ready_in_minutes, 20);
+  assert.equal(customerOffer.payload.portal_path, `request=${orderId}`);
+  assert.equal(pharmacyRequest.recipient_e164, "250788000000");
+  assert.equal(pharmacyRequest.payload.distance_m, 1250);
+  assert.equal(pharmacyRequest.payload.portal_path, `pharmacy-portal=open&request=${orderId}`);
 });
 
 test("pharmacy WhatsApp fan-out is capped to the nearest ten verified WhatsApp recipients", async () => {
@@ -141,6 +148,8 @@ test("pharmacy WhatsApp fan-out is capped to the nearest ten verified WhatsApp r
   const sql = await readFile(migrationPath, "utf8");
   const repairSql = await readFile(repairMigrationPath, "utf8");
   await db.exec(sql.slice(0, sql.indexOf("\ncommit;") + "\ncommit;".length));
+  const contactOnlySql = await readFile(customerContactOnlyMigrationPath, "utf8");
+  await db.exec(contactOnlySql);
   await db.exec(repairSql);
 
   const userId = "00000000-0000-4000-8000-000000000101";

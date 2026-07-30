@@ -27,10 +27,7 @@ begin
 
   select orders.whatsapp into v_phone
   from public.dawanear_orders as orders
-  join public.dawanear_customer_profiles as profile on profile.user_id = orders.user_id
-  where orders.id = new.order_id
-    and profile.whatsapp = orders.whatsapp
-    and profile.whatsapp_verified_at is not null;
+  where orders.id = new.order_id;
   if v_phone is null then return new; end if;
 
   select jsonb_build_object(
@@ -126,8 +123,8 @@ begin
       from public.dawanear_pharmacy_contacts as pharmacy_contact
       where pharmacy_contact.pharmacy_id = recipient.pharmacy_id
         and pharmacy_contact.contact_type = 'whatsapp'
-        and pharmacy_contact.is_login_enabled
         and pharmacy_contact.verification_status in ('source_verified', 'admin_verified')
+        and pharmacy_contact.verified_at is not null
       order by pharmacy_contact.is_primary desc, pharmacy_contact.verified_at desc nulls last, pharmacy_contact.id
       limit 1
     ) as contact on true
@@ -217,8 +214,8 @@ with ranked_recipients as (
     from public.dawanear_pharmacy_contacts as pharmacy_contact
     where pharmacy_contact.pharmacy_id = recipient.pharmacy_id
       and pharmacy_contact.contact_type = 'whatsapp'
-      and pharmacy_contact.is_login_enabled
       and pharmacy_contact.verification_status in ('source_verified', 'admin_verified')
+      and pharmacy_contact.verified_at is not null
     order by pharmacy_contact.is_primary desc, pharmacy_contact.verified_at desc nulls last, pharmacy_contact.id
     limit 1
   ) as contact on true
