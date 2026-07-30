@@ -9,17 +9,17 @@ import {
 import { buildGoLiveReadinessReport } from "./report-go-live-readiness.mjs";
 
 const CLOSURE_ORDER = [
-  "MED250_GATE_DUPLICATE_REGISTER_REVIEWED",
-  "MED250_GATE_GPS_READY",
-  "MED250_GATE_WHATSAPP_READY",
+  "MED250_GATE_TURNSTILE_SERVER_VERIFIED",
+  "MED250_GATE_PHYSICAL_UAT_PASSED",
   "MED250_GATE_SECURITY_HARDENING_DEPLOYED",
   "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED",
-  "MED250_GATE_TURNSTILE_SERVER_VERIFIED",
+  "MED250_GATE_DOMAIN_DNS_VERIFIED",
+  "MED250_GATE_GPS_READY",
+  "MED250_GATE_DUPLICATE_REGISTER_REVIEWED",
   "MED250_GATE_AUTH_RATE_LIMITS_APPROVED",
   "MED250_GATE_PRESCRIPTION_RETENTION_APPROVED",
   "MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED",
-  "MED250_GATE_DOMAIN_DNS_VERIFIED",
-  "MED250_GATE_PHYSICAL_UAT_PASSED",
+  "MED250_GATE_WHATSAPP_READY",
 ];
 
 const GATE_GUIDANCE = {
@@ -247,24 +247,34 @@ function evidenceState(gateName, gate, handoffGate) {
   };
 }
 
-function blockerSummary(gateName, gate, readinessGate, evidence, report) {
-  const blockers = [];
+function outstandingItems(gateName, gate, readinessGate, evidence, report) {
+  const items = [];
   const machineVerified = ["closed_by_machine_evidence", "runtime_verification_required"].includes(readinessGate?.disposition);
-  if (evidence.missing_types.length) blockers.push(`Missing required evidence type(s): ${evidence.missing_types.join(", ")}.`);
-  if (!machineVerified && !approvalComplete(gate)) blockers.push("Missing named accountable-owner approval metadata.");
+  if (evidence.missing_types.length) items.push(`Missing required evidence type(s): ${evidence.missing_types.join(", ")}.`);
+  if (!machineVerified && !approvalComplete(gate)) items.push("Missing named accountable-owner approval metadata.");
   if (gateName === "MED250_GATE_DUPLICATE_REGISTER_REVIEWED") {
-    blockers.push(`${report.duplicateRegister.decisionCounts.pending} duplicate-register group(s) remain pending in data/imports/duplicate-register-review.csv.`);
+    items.push(`${report.duplicateRegister.decisionCounts.pending} duplicate-register group(s) remain pending in data/imports/duplicate-register-review.csv.`);
   }
   if (gateName === "MED250_GATE_PHYSICAL_UAT_PASSED") {
-    blockers.push(`${report.physicalUat.statusCounts.pending} physical-device UAT scenario(s) remain pending in data/physical-device-uat.json.`);
+    items.push(`${report.physicalUat.statusCounts.pending} physical-device UAT scenario(s) remain pending in data/physical-device-uat.json.`);
   }
   if (readinessGate?.readiness === "approval_pending") {
-    blockers.push("Machine evidence is present; owner review and approval remain deliberately separate.");
+    items.push("Machine evidence is present; owner review and approval remain deliberately separate.");
   }
   if (readinessGate?.staleReleaseEvidence) {
-    blockers.push("Release-bound evidence is stale against the current repository checkout; rerun the exact-revision live verifier before approval.");
+    items.push("Release-bound evidence is stale against the current repository checkout; rerun the exact-revision live verifier before approval.");
   }
-  return [...new Set(blockers)];
+  return [...new Set(items)];
+}
+
+function blockerSummary(gateName, gate, readinessGate, evidence, report) {
+  if (readinessGate?.disposition !== "transaction_blocker") return [];
+  return outstandingItems(gateName, gate, readinessGate, evidence, report);
+}
+
+function followUpSummary(gateName, gate, readinessGate, evidence, report) {
+  if (!["non_blocking_follow_up", "runtime_verification_required"].includes(readinessGate?.disposition)) return [];
+  return outstandingItems(gateName, gate, readinessGate, evidence, report);
 }
 
 export function buildGoLiveClosureBoard({ manifest, handoff, readinessReport }) {
@@ -281,11 +291,26 @@ export function buildGoLiveClosureBoard({ manifest, handoff, readinessReport }) 
       const handoffGate = handoffByGate.get(gateName);
       const readinessGate = readinessByGate.get(gateName);
       const evidence = evidenceState(gateName, gate, handoffGate);
+      const disposition = readinessGate?.disposition ?? "unknown";
       const approvalRequired = ![
         "closed_by_machine_evidence",
         "runtime_verification_required",
         "superseded_by_dispatch_portal_separation",
-      ].includes(readinessGate?.disposition);
+      ].includes(disposition);
+      const closedByMachine = disposition === "closed_by_machine_evidence";
+      const superseded = disposition === "superseded_by_dispatch_portal_separation";
+      const nextActions = closedByMachine
+        ? ["Preserve the current machine evidence and rerun the relevant verifier only after a backend, Edge Function, DNS, routing, or release-contract change."]
+        : superseded
+          ? ["No closure action is required. Dispatch eligibility and pharmacy-portal authority are governed separately."]
+          : guidance.next_actions;
+      const commands = closedByMachine
+        ? guidance.commands.filter((command) => /backend:verify|domain:dns:verify|deployment:verify/.test(command))
+        : superseded
+          ? []
+          : approvalRequired
+            ? guidance.commands
+            : guidance.commands.filter((command) => !command.includes("launch:gate:approve"));
       return {
         gate: gateName,
         title: gate.title,
@@ -293,6 +318,9 @@ export function buildGoLiveClosureBoard({ manifest, handoff, readinessReport }) 
         workstream: guidance.workstream,
         current_status: gate.status,
         readiness: readinessGate?.readiness ?? "unknown",
+        disposition,
+        blocking: disposition === "transaction_blocker",
+        blocking_scope: disposition === "transaction_blocker" ? "marketplace_transaction" : "none",
         closure_focus: guidance.closure_focus,
         acceptance: gate.acceptance,
         evidence,
@@ -304,20 +332,20 @@ export function buildGoLiveClosureBoard({ manifest, handoff, readinessReport }) 
           approved_at: gate.approved_at,
         },
         blockers: blockerSummary(gateName, gate, readinessGate, evidence, readinessReport),
-        next_actions: guidance.next_actions,
-        commands: approvalRequired
-          ? guidance.commands
-          : guidance.commands.filter((command) => !command.includes("launch:gate:approve")),
+        follow_up_items: followUpSummary(gateName, gate, readinessGate, evidence, readinessReport),
+        next_actions: nextActions,
+        commands,
         safety_rules: COMMON_SAFETY_RULES,
       };
     })
     .sort(byGateOrder);
 
   const ownerWorkstreams = gates.reduce((workstreams, gate) => {
-    workstreams[gate.workstream] ??= { owners: [], gates: [], blocker_count: 0 };
+    workstreams[gate.workstream] ??= { owners: [], gates: [], blocker_count: 0, follow_up_item_count: 0 };
     if (!workstreams[gate.workstream].owners.includes(gate.owner)) workstreams[gate.workstream].owners.push(gate.owner);
     workstreams[gate.workstream].gates.push(gate.gate);
-    workstreams[gate.workstream].blocker_count += gate.blockers.length;
+    workstreams[gate.workstream].blocker_count += gate.blocking ? 1 : 0;
+    workstreams[gate.workstream].follow_up_item_count += gate.follow_up_items.length;
     return workstreams;
   }, {});
 
@@ -327,6 +355,10 @@ export function buildGoLiveClosureBoard({ manifest, handoff, readinessReport }) 
     classification: "go-live closure board; execution aid only, not evidence or approval",
     production_ready: readinessReport.productionReady,
     summary: {
+      site_production_ready: readinessReport.siteProductionReady,
+      marketplace_transaction_ready: readinessReport.marketplaceTransactionReady,
+      transaction_blocker_count: readinessReport.transactionBlockers.length,
+      non_blocking_follow_up_count: readinessReport.nonBlockingFollowUp.length,
       gate_count: readinessReport.launchEvidence.gateCount,
       source_authority_production_authorized: readinessReport.sourceAuthority.productionAuthorized,
       confirmed_gates: readinessReport.gateReadiness.confirmed,
@@ -356,12 +388,14 @@ export function buildGoLiveClosureBoard({ manifest, handoff, readinessReport }) 
       source_authority: {
         owner: "Named MED+250 data owner",
         artifact: "data/source-authority-decision.json",
+        disposition: "non_blocking_fail_closed_follow_up",
         status: readinessReport.sourceAuthority.status,
         decision: readinessReport.sourceAuthority.decision,
         production_authorized: readinessReport.sourceAuthority.productionAuthorized,
-        blocker: readinessReport.sourceAuthority.productionAuthorized
+        blocker: null,
+        follow_up: readinessReport.sourceAuthority.productionAuthorized
           ? null
-          : "Restore and verify the exact original controlled bundle, or record an explicitly bounded replacement decision with named owner authority and approved durable storage.",
+          : "Restore and verify the exact original controlled bundle, or record an explicitly bounded replacement decision with named owner authority and approved durable storage. Recovered or unapproved content remains unpublished.",
         commands: [
           "npm run data:source-authority:verify",
           "npm run data:source-authority:record -- --decision <restore_original|approve_replacement|reject> <owner-and-scope-fields> --confirm",
@@ -376,14 +410,16 @@ export function buildGoLiveClosureBoard({ manifest, handoff, readinessReport }) 
       product_content_review: {
         owner: "Named regulatory or clinical data reviewer",
         artifact: "data/imports/product-content-review-pending-2026-07-18.json",
+        disposition: "non_blocking_fail_closed_follow_up",
         valid: readinessReport.productContentReview.valid,
         pending_entries: readinessReport.productContentReview.pendingCount,
         blocking_corrections: readinessReport.productContentReview.blockingCorrectionCount,
         review_source_path: readinessReport.productContentReview.reviewSourcePath,
         review_source_sha256: readinessReport.productContentReview.reviewSourceSha256,
-        blocker: readinessReport.productContentReview.valid
+        blocker: null,
+        follow_up: readinessReport.productContentReview.valid
           ? null
-          : `${readinessReport.productContentReview.pendingCount} product-content decision(s) remain pending and ${readinessReport.productContentReview.blockingCorrectionCount} correction-required decision(s) remain open.`,
+          : `${readinessReport.productContentReview.pendingCount} product-content decision(s) remain pending and ${readinessReport.productContentReview.blockingCorrectionCount} correction-required decision(s) remain open. Pending descriptions remain hidden.`,
         commands: [
           "npm run data:content-review:next",
           "npm run data:content-review:decide -- --dataset <approved-source-dataset-path> <one-accountable-decision>",
@@ -398,6 +434,7 @@ export function buildGoLiveClosureBoard({ manifest, handoff, readinessReport }) 
       rendered_production_audit: {
         owner: "Named MED+250 QA owner",
         artifact: "data/audit-browser-evidence.json",
+        disposition: "historical_evidence_replaced_by_current_physical_uat_gate",
         valid: readinessReport.renderedProductionAudit.valid,
         status: readinessReport.renderedProductionAudit.status,
         execution_status: readinessReport.renderedProductionAudit.executionStatus,
@@ -409,9 +446,10 @@ export function buildGoLiveClosureBoard({ manifest, handoff, readinessReport }) 
         passed_scenarios: readinessReport.renderedProductionAudit.statusCounts.passed,
         required_scenarios: readinessReport.renderedProductionAudit.scenarioCount,
         capture_count: readinessReport.renderedProductionAudit.captureCount,
-        blocker: readinessReport.renderedProductionAudit.valid
+        blocker: null,
+        follow_up: readinessReport.renderedProductionAudit.valid
           ? null
-          : "The prior 16-scenario rendered audit is historical. Rerun every governed desktop/mobile scenario on med-250.com against the exact candidate revision, bind fresh deployment and catalogue receipts, and obtain named QA approval.",
+          : "The prior 16-scenario rendered audit is historical. Current rendered and physical-device evidence is completed through MED250_GATE_PHYSICAL_UAT_PASSED.",
         commands: [
           "npm run deployment:verify -- --url https://med-250.com --mode live --expected-revision <exact-lowercase-40-character-git-sha>",
           "npm run catalogue:verify:live",
@@ -453,14 +491,13 @@ export function buildGoLiveClosureBoard({ manifest, handoff, readinessReport }) 
       },
     },
     instructions: [
-      "Close source authority before production approval; it is a release prerequisite even though it is not one of the eleven operational launch gates.",
-      "Complete all source-bound product-content decisions and corrections before production approval.",
-      "Rerun and approve the complete rendered production audit on med-250.com for the exact candidate revision; historical-domain evidence cannot close this prerequisite.",
-      "Configure med250.gikundiro.com as redirect-only and require the five-probe verifier to pass before launch; it must never become a second ordering origin.",
-      "Work through gates in closure_order unless an accountable owner explicitly changes the sequence.",
-      "Complete row-level reviews and physical UAT before attempting final live release approval.",
+      "Close only the genuine transaction blockers first: production Turnstile proof and owner-observed physical-device transaction UAT.",
+      "Keep source authority, duplicate-register, product-content, privacy, account and other owner reviews in the non-blocking fail-closed follow-up queue.",
+      "Never expose unresolved duplicate records, unapproved descriptions, or recovered content while those follow-ups remain pending.",
+      "Keep med250.gikundiro.com redirect-only; it must never become a second ordering origin.",
+      "Machine-verified backend, Edge Function and domain gates need no additional approval unless their deployed contract changes.",
       "After every completed artifact, run npm run launch:evidence:verify and npm run launch:go-live:status.",
-      "Run npm run launch:evidence:verify:live only when every gate is ready for strict release.",
+      "Do not treat legacy strict launch evidence as a blanket blocker under the direct-live fail-closed production contract.",
     ],
     gates,
   };
@@ -494,7 +531,8 @@ async function main() {
       output: outputPath,
       gate_count: board.summary.gate_count,
       production_ready: board.production_ready,
-      blocker_count: board.gates.reduce((total, gate) => total + gate.blockers.length, 0),
+      blocker_count: board.summary.transaction_blocker_count,
+      non_blocking_follow_up_count: board.summary.non_blocking_follow_up_count,
     }, null, 2));
   } else {
     process.stdout.write(serialized);
