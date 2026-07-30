@@ -1,5 +1,7 @@
 begin;
 
+set local med250.allow_product_image_governance_ddl = 'on';
+
 -- Customer offer delivery is a two-step transaction: the private submitter
 -- writes the submitted offer, then the public wrapper records the pharmacy's
 -- final fulfilment method. Keep the durable WhatsApp/customer signal aligned
