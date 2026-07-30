@@ -281,7 +281,11 @@ export function buildGoLiveClosureBoard({ manifest, handoff, readinessReport }) 
       const handoffGate = handoffByGate.get(gateName);
       const readinessGate = readinessByGate.get(gateName);
       const evidence = evidenceState(gateName, gate, handoffGate);
-      const approvalRequired = !["closed_by_machine_evidence", "runtime_verification_required"].includes(readinessGate?.disposition);
+      const approvalRequired = ![
+        "closed_by_machine_evidence",
+        "runtime_verification_required",
+        "superseded_by_dispatch_portal_separation",
+      ].includes(readinessGate?.disposition);
       return {
         gate: gateName,
         title: gate.title,
@@ -332,6 +336,7 @@ export function buildGoLiveClosureBoard({ manifest, handoff, readinessReport }) 
       stale_release_evidence_gates: readinessReport.gateReadiness.staleReleaseEvidence,
       machine_verified_gates: readinessReport.gateReadiness.machineVerified,
       runtime_verification_required_gates: readinessReport.gateReadiness.runtimeVerificationRequired,
+      superseded_gates: readinessReport.gateReadiness.superseded,
       duplicate_register_pending_groups: readinessReport.duplicateRegister.decisionCounts.pending,
       product_content_pending_entries: readinessReport.productContentReview.pendingCount,
       product_content_blocking_corrections: readinessReport.productContentReview.blockingCorrectionCount,

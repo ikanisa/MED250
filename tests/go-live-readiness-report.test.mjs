@@ -10,7 +10,6 @@ test("separates production engineering readiness from genuine transaction blocke
   assert.equal(report.siteProductionReady, true);
   assert.equal(report.marketplaceTransactionReady, false);
   assert.deepEqual(report.transactionBlockers.map(({ gate }) => gate), [
-    "MED250_GATE_WHATSAPP_READY",
     "MED250_GATE_TURNSTILE_SERVER_VERIFIED",
     "MED250_GATE_PHYSICAL_UAT_PASSED",
   ]);
@@ -52,11 +51,12 @@ test("separates production engineering readiness from genuine transaction blocke
   assert.deepEqual(report.gateReadiness, {
     confirmed: 0,
     approvalPending: 0,
-    preparedEvidencePending: 8,
+    preparedEvidencePending: 7,
     missingEvidence: 0,
     staleReleaseEvidence: 1,
     machineVerified: 2,
     runtimeVerificationRequired: 1,
+    superseded: 1,
   });
   assert.match(report.sourceControl.currentReleaseRevision, /^[a-f0-9]{40}$/);
   const domain = report.gates.find((gate) => gate.name === "MED250_GATE_DOMAIN_DNS_VERIFIED");
@@ -64,6 +64,7 @@ test("separates production engineering readiness from genuine transaction blocke
   assert.equal(domain.staleReleaseEvidence, true);
   assert.equal(domain.disposition, "runtime_verification_required");
   assert.equal(report.gates.find((gate) => gate.name === "MED250_GATE_SECURITY_HARDENING_DEPLOYED").disposition, "closed_by_machine_evidence");
+  assert.equal(report.gates.find((gate) => gate.name === "MED250_GATE_WHATSAPP_READY").disposition, "superseded_by_dispatch_portal_separation");
   assert.ok(domain.releaseRevisionBindings.every((binding) => /^[a-f0-9]{40}$/.test(binding.observedReleaseRevision)));
   assert.ok(domain.releaseRevisionBindings.every((binding) => binding.observedReleaseRevision !== report.sourceControl.currentReleaseRevision));
   assert.equal(report.duplicateRegister.decisionCounts.pending, 51);

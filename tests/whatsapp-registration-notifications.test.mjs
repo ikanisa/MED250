@@ -66,7 +66,7 @@ test("checkout includes a blocking WhatsApp verification step", async () => {
   assert.match(source, /requestCustomerWhatsappOtp/);
   assert.match(source, /verifyCustomerWhatsappOtp/);
   assert.match(source, /if \(!customerWhatsappVerified\)/);
-  assert.equal(runtimeMessages["inventory.bcdf0f413028"], "Up to 20 closest pharmacies");
+  assert.equal(runtimeMessages["inventory.bcdf0f413028"], "Up to 10 closest pharmacies");
   assert.match(source, /marketplaceMessage\("inventory\.bcdf0f413028"\)/);
 });
 

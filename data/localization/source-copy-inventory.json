@@ -10048,7 +10048,7 @@
     },
     {
       "id": "inventory.b610143dd4e0",
-      "source": "Your browser asks before sharing location. MED+250 prioritises and assigns up to 20 verified pharmacies closest to the request location, with a verified responder fallback when approved premises coordinates are unavailable. Assigned pharmacies initially receive only an approximate distance—or a national-service label—and the product information and available catalogue images needed to decide whether they can fulfil it.",
+      "source": "Your browser asks before sharing location. MED+250 prioritises and assigns up to 10 verified pharmacies closest to the request location, with a verified WhatsApp fallback when approved premises coordinates are unavailable. Assigned pharmacies initially receive only an approximate distance—or a national-service label—and the product information and available catalogue images needed to decide whether they can fulfil it.",
       "risk": "high",
       "catalog_ids": [
         "inventory.b610143dd4e0"
@@ -10523,7 +10523,7 @@
     },
     {
       "id": "inventory.bcdf0f413028",
-      "source": "Up to 20 closest pharmacies",
+      "source": "Up to 10 closest pharmacies",
       "risk": "standard",
       "catalog_ids": [
         "inventory.bcdf0f413028"

@@ -33,11 +33,12 @@ test("builds an owner closure board without promoting pending gates", () => {
   assert.ok(board.prerequisites.product_content_review.commands.includes("npm run data:content-review:verify -- --strict"));
   assert.equal(board.summary.confirmed_gates, 0);
   assert.equal(board.summary.approval_pending_gates, 0);
-  assert.equal(board.summary.prepared_evidence_pending_gates, 8);
+  assert.equal(board.summary.prepared_evidence_pending_gates, 7);
   assert.equal(board.summary.missing_evidence_gates, 0);
   assert.equal(board.summary.stale_release_evidence_gates, 1);
   assert.equal(board.summary.machine_verified_gates, 2);
   assert.equal(board.summary.runtime_verification_required_gates, 1);
+  assert.equal(board.summary.superseded_gates, 1);
   assert.equal(board.summary.duplicate_register_pending_groups, 51);
   assert.equal(board.summary.physical_uat_pending_scenarios, 12);
   assert.equal(board.summary.rendered_audit_passed_scenarios, 16);
@@ -62,7 +63,7 @@ test("builds an owner closure board without promoting pending gates", () => {
   assert.equal(board.summary.required_handoff_artifacts, 11);
   assert.equal(board.gates.length, 11);
   assert.ok(board.gates.every((gate) => gate.current_status === "pending"));
-  assert.equal(board.gates.filter((gate) => gate.approval.required).length, 8);
+  assert.equal(board.gates.filter((gate) => gate.approval.required).length, 7);
   assert.ok(board.gates.every((gate) => gate.approval.complete === false));
 });
 

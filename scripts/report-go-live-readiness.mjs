@@ -34,9 +34,12 @@ const machineVerifiedGateNames = new Set([
 ]);
 
 const transactionGateNames = new Set([
-  "MED250_GATE_WHATSAPP_READY",
   "MED250_GATE_TURNSTILE_SERVER_VERIFIED",
   "MED250_GATE_PHYSICAL_UAT_PASSED",
+]);
+
+const supersededGateNames = new Set([
+  "MED250_GATE_WHATSAPP_READY",
 ]);
 
 async function loadJson(path) {
@@ -81,13 +84,17 @@ function gateRows(manifest, handoff, releaseBindings) {
     const staleReleaseEvidence = releaseRevisionBindings.some((binding) => !binding.matchesCurrentRevision);
     const evidenceComplete = missingEvidenceTypes.length === 0;
     let readiness = "missing_evidence";
-    if (machineVerifiedGateNames.has(name) && evidenceComplete) {
+    if (supersededGateNames.has(name)) {
+      readiness = "superseded";
+    } else if (machineVerifiedGateNames.has(name) && evidenceComplete) {
       readiness = staleReleaseEvidence ? "runtime_verification_required" : "machine_verified";
     } else if (gate.status === "confirmed" && approved && missingEvidenceTypes.length === 0) readiness = "confirmed";
     else if (missingEvidenceTypes.length === 0 && !approved) readiness = "approval_pending";
     else if (preparedPendingEvidence.length === missingEvidenceTypes.length) readiness = "prepared_evidence_pending";
     let disposition = "non_blocking_follow_up";
-    if (machineVerifiedGateNames.has(name) && evidenceComplete) {
+    if (supersededGateNames.has(name)) {
+      disposition = "superseded_by_dispatch_portal_separation";
+    } else if (machineVerifiedGateNames.has(name) && evidenceComplete) {
       disposition = staleReleaseEvidence ? "runtime_verification_required" : "closed_by_machine_evidence";
     } else if (transactionGateNames.has(name) && readiness !== "confirmed") {
       disposition = "transaction_blocker";
@@ -231,6 +238,7 @@ export async function buildGoLiveReadinessReport() {
       staleReleaseEvidence: staleReleaseEvidenceGateCount,
       machineVerified: readinessCounts.machine_verified ?? 0,
       runtimeVerificationRequired: readinessCounts.runtime_verification_required ?? 0,
+      superseded: readinessCounts.superseded ?? 0,
     },
     duplicateRegister: {
       valid: duplicateRegister.valid,
