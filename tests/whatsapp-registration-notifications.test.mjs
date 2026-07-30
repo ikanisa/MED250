@@ -4,6 +4,7 @@ import test from "node:test";
 import { PGlite } from "@electric-sql/pglite";
 
 const migrationPath = new URL("../supabase/migrations/20260718064237_whatsapp_customer_verification_and_notifications.sql", import.meta.url);
+const customerContactOnlyMigrationPath = new URL("../supabase/migrations/20260730131500_make_customer_whatsapp_contact_only.sql", import.meta.url);
 const outboxIndexMigrationPath = new URL("../supabase/migrations/20260718172000_index_whatsapp_outbox_foreign_keys.sql", import.meta.url);
 const marketplacePath = new URL("../app/marketplace.tsx", import.meta.url);
 const configPath = new URL("../supabase/config.toml", import.meta.url);
@@ -26,13 +27,17 @@ const prerequisiteSchema = `
   create table public.dawanear_offer_items(id uuid primary key, offer_id uuid references public.dawanear_offers(id), available bool, is_substitute bool, offered_product_id uuid references public.dawanear_products(id), quantity int, unit_price_rwf bigint);
 `;
 
-test("customer orders require a verified matching WhatsApp profile", async () => {
-  const sql = await readFile(migrationPath, "utf8");
-  assert.match(sql, /whatsapp_verified_at timestamptz/);
-  assert.match(sql, /dawanear_orders_verified_customer_whatsapp/);
-  assert.match(sql, /profile\.whatsapp = new\.whatsapp/);
-  assert.match(sql, /profile\.whatsapp_verified_at is not null/);
-  assert.match(sql, /revoke all on table public\.dawanear_customer_otp_challenges from public, anon, authenticated/);
+test("customer WhatsApp is contact-only while pharmacy OTP authority stays separate", async () => {
+  const [legacySql, contactOnlySql] = await Promise.all([
+    readFile(migrationPath, "utf8"),
+    readFile(customerContactOnlyMigrationPath, "utf8"),
+  ]);
+  assert.match(legacySql, /revoke all on table public\.dawanear_customer_otp_challenges from public, anon, authenticated/);
+  assert.match(contactOnlySql, /drop trigger if exists dawanear_orders_verified_customer_whatsapp/);
+  assert.match(contactOnlySql, /drop function if exists[\s\S]*dawanear_require_verified_customer_whatsapp/);
+  assert.match(contactOnlySql, /Customer WhatsApp is a delivery\/contact destination, not a portal identity/);
+  assert.match(contactOnlySql, /select orders\.whatsapp into v_phone[\s\S]*where orders\.id = new\.order_id/);
+  assert.doesNotMatch(contactOnlySql, /profile\.whatsapp_verified_at/);
 });
 
 test("pharmacy and customer WhatsApp deliveries use a durable private outbox", async () => {
@@ -55,7 +60,7 @@ test("the notification outbox indexes both foreign-key references", async () => 
   assert.match(sql, /create index if not exists dawanear_whatsapp_outbox_pharmacy_id_idx[\s\S]*\(pharmacy_id\)/);
 });
 
-test("one-shot checkout keeps WhatsApp verification blocking without step navigation", async () => {
+test("one-shot checkout accepts a valid contact number without customer OTP", async () => {
   const [source, runtimeCatalogJson] = await Promise.all([
     readFile(marketplacePath, "utf8"),
     readFile(new URL("../data/localization/runtime-messages.en-RW.json", import.meta.url), "utf8"),
@@ -63,10 +68,9 @@ test("one-shot checkout keeps WhatsApp verification blocking without step naviga
   const runtimeMessages = JSON.parse(runtimeCatalogJson).messages;
   assert.doesNotMatch(source, /CheckoutStep|checkoutStep|setCheckoutStep|order-wizard-progress/);
   assert.match(source, /className="one-shot-checkout-feedback"/);
-  assert.match(source, /requestCustomerWhatsappOtp/);
-  assert.match(source, /verifyCustomerWhatsappOtp/);
-  assert.match(source, /if \(!customerWhatsappVerified\)/);
-  assert.match(source, /disabled=\{!cart\.length \|\| ordering \|\| Boolean\(prescriptionError\) \|\| !customerWhatsappVerified \|\| !coordinates\}/);
+  assert.doesNotMatch(source, /requestCustomerWhatsappOtp|verifyCustomerWhatsappOtp|customerWhatsappVerified|customer-otp-card/);
+  assert.match(source, /disabled=\{!cart\.length \|\| ordering \|\| Boolean\(prescriptionError\) \|\| !customerWhatsapp \|\| !coordinates\}/);
+  assert.match(source, /await ensureAnonymousCustomer\(captchaToken \|\| undefined\)/);
   assert.equal(runtimeMessages["inventory.bcdf0f413028"], "Up to 10 closest pharmacies");
 });
 
@@ -87,11 +91,15 @@ test("notification functions are configured with the intended public and private
   assert.match(webhook, /HMAC/);
 });
 
-test("the migration blocks unverified orders and enqueues price-free complete responses", async () => {
+test("the effective migrations accept customer contact and enqueue price-free complete responses", async () => {
   const db = new PGlite();
   await db.exec(prerequisiteSchema);
-  const sql = await readFile(migrationPath, "utf8");
-  await db.exec(sql.slice(0, sql.indexOf("\ncommit;") + "\ncommit;".length));
+  const [legacySql, contactOnlySql] = await Promise.all([
+    readFile(migrationPath, "utf8"),
+    readFile(customerContactOnlyMigrationPath, "utf8"),
+  ]);
+  await db.exec(legacySql.slice(0, legacySql.indexOf("\ncommit;") + "\ncommit;".length));
+  await db.exec(contactOnlySql);
 
   const userId = "00000000-0000-4000-8000-000000000001";
   const pharmacyId = "00000000-0000-4000-8000-000000000002";
@@ -99,12 +107,7 @@ test("the migration blocks unverified orders and enqueues price-free complete re
   const orderId = "00000000-0000-4000-8000-000000000004";
   const offerId = "00000000-0000-4000-8000-000000000005";
   await db.exec(`insert into auth.users(id) values ('${userId}');`);
-  await assert.rejects(
-    db.exec(`insert into public.dawanear_orders(id,user_id,whatsapp,reference,delivery_preference) values ('${orderId}','${userId}','250780000000','TEST-1','either');`),
-    /Verify this WhatsApp number/,
-  );
   await db.exec(`
-    select public.dawanear_mark_customer_whatsapp_verified('${userId}','250780000000');
     insert into public.dawanear_pharmacies(id,name) values ('${pharmacyId}','Test Pharmacy');
     insert into public.dawanear_products(id,brand_name,generic_name,strength,dosage_form,pack_size,image_url) values ('${productId}','Test Medicine','Ingredient','10 mg','Tablet','20','https://example.test/product.webp');
     insert into public.dawanear_orders(id,user_id,whatsapp,reference,delivery_preference) values ('${orderId}','${userId}','250780000000','TEST-1','either');

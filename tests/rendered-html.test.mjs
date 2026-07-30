@@ -563,7 +563,7 @@ test("provides accessible feedback, mobile filters, wizard progress, and resilie
   assert.match(marketplace, /aria-describedby="pharmacy-signin-context"/);
   assert.doesNotMatch(marketplace, /order-wizard-progress|CHECKOUT_STEPS|checkoutStep|setCheckoutStep/);
   assert.match(marketplace, /className="one-shot-checkout-feedback"/);
-  assert.match(marketplace, /disabled=\{!cart\.length \|\| ordering \|\| Boolean\(prescriptionError\) \|\| !customerWhatsappVerified \|\| !coordinates\}/);
+  assert.match(marketplace, /disabled=\{!cart\.length \|\| ordering \|\| Boolean\(prescriptionError\) \|\| !customerWhatsapp \|\| !coordinates\}/);
   assert.equal((marketplace.match(/className="order-wizard-actions"/g) ?? []).length, 1);
   assert.match(marketplace, /className="catalogue-skeleton"/);
   assert.match(marketplace, /aria-busy=\{ordering\}/);
@@ -585,7 +585,7 @@ test("provides accessible feedback, mobile filters, wizard progress, and resilie
   assert.match(css, /MED\+250 soft-gradient claymorphism system/);
   assert.match(css, /\.order-review-item[\s\S]*background:var\(--clay-surface\)/);
   assert.match(marketplace, /className="sr-only" role="status">\{recentlyAddedBrand\}/);
-  assert.match(css, /\.saved-whatsapp-row/);
+  assert.doesNotMatch(css, /\.saved-whatsapp-row|\.customer-otp-card|\.verification-number-card/);
   assert.match(css, /\.order-review-item>\.cart-item-copy>b \{[^}]*-webkit-line-clamp:2/);
   assert.match(css, /footer\.order-wizard-actions[\s\S]*background:linear-gradient/);
   assert.match(css, /env\(safe-area-inset-bottom\)/);
@@ -677,7 +677,7 @@ test("gives immediate route feedback and keeps product navigation work responsiv
   assert.match(css, /@media \(max-width:760px\)[\s\S]*\.product-route-loading-shell \{ grid-template-columns:1fr/);
 });
 
-test("requires international customer WhatsApp and restores on-device order preferences", async () => {
+test("accepts international customer WhatsApp as contact and restores on-device order preferences", async () => {
   const [marketplace, client, migration] = await Promise.all([
     readFile(new URL("../app/marketplace.tsx", import.meta.url), "utf8"),
     readFile(new URL("../lib/dawanear-client.ts", import.meta.url), "utf8"),
@@ -688,8 +688,7 @@ test("requires international customer WhatsApp and restores on-device order pref
   assert.match(marketplace, /getCountryCallingCode/);
   assertCataloguedMessage(marketplace, "inventory.36ca78914773", "WhatsApp country code");
   assert.match(marketplace, /aria-label=\{marketplaceMessage\("inventory\.36ca78914773"\)\}/);
-  assertCataloguedMessage(marketplace, "inventory.dd0285bfd9b4", "Verified once and remembered");
-  assert.match(marketplace, /customerWhatsappVerified && !editingCustomerWhatsapp/);
+  assert.doesNotMatch(marketplace, /customerWhatsappVerified|editingCustomerWhatsapp|requestCustomerWhatsappOtp|verifyCustomerWhatsappOtp/);
   assert.doesNotMatch(marketplace, /checkoutStep|setCheckoutStep/);
   assert.match(marketplace, /CUSTOMER_PREFERENCES_STORAGE_KEY/);
   assert.match(marketplace, /coordinates: coordinates/);

@@ -73,7 +73,6 @@ import {
   loadPharmacySelectedOrders,
   loadSelectedContact,
   normalizeDawaNearError,
-  requestCustomerWhatsappOtp,
   requestPharmacyWhatsappOtp,
   requestPharmacyContactEdit,
   searchCatalogue,
@@ -82,7 +81,6 @@ import {
   submitOffer,
   subscribeToOffers,
   subscribeToPharmacyNotifications,
-  verifyCustomerWhatsappOtp,
   verifyPharmacyWhatsappOtp,
   uploadPrescription,
   type ActiveOrder,
@@ -1114,13 +1112,6 @@ export default function Marketplace({
   const [whatsappCountry, setWhatsappCountry] = useState<CountryCode>("RW");
   const [whatsapp, setWhatsapp] = useState("");
   const [whatsappTouched, setWhatsappTouched] = useState(false);
-  const [verifiedCustomerWhatsapp, setVerifiedCustomerWhatsapp] = useState<string | null>(null);
-  const [editingCustomerWhatsapp, setEditingCustomerWhatsapp] = useState(false);
-  const [customerOtp, setCustomerOtp] = useState("");
-  const [customerOtpChallengeId, setCustomerOtpChallengeId] = useState("");
-  const [customerOtpExpiresAt, setCustomerOtpExpiresAt] = useState<string | null>(null);
-  const [customerOtpLoading, setCustomerOtpLoading] = useState(false);
-  const [customerOtpMessage, setCustomerOtpMessage] = useState("");
   const [preferencesHydrated, setPreferencesHydrated] = useState(false);
   const [deliveryPreference, setDeliveryPreference] = useState<"pickup" | "delivery" | "either">("either");
   const [prescription, setPrescription] = useState<File | null>(null);
@@ -1523,7 +1514,6 @@ export default function Marketplace({
           if (savedWhatsapp) {
             setWhatsappCountry(savedWhatsapp.country);
             setWhatsapp(savedWhatsapp.nationalNumber);
-            setVerifiedCustomerWhatsapp(profile.whatsappVerifiedAt ? profile.whatsapp : null);
           }
         }
         if (!cancelled) setRestoredActiveOrders(activeOrders);
@@ -2080,7 +2070,6 @@ export default function Marketplace({
     () => parseCustomerWhatsapp(whatsappCountry, whatsapp),
     [whatsapp, whatsappCountry],
   );
-  const customerWhatsappVerified = Boolean(customerWhatsapp && customerWhatsapp === verifiedCustomerWhatsapp);
   const cartRequiresPrescription = cart.some((item) => item.prescriptionStatus === "prescription");
   const selectionLocked = activeOrderSelected || selectedContact !== null || offers.some((offer) => offer.status === "selected");
   const requestLocked = pendingOrderAttempt !== null;
@@ -2171,81 +2160,6 @@ export default function Marketplace({
     setRecentlyAddedBrand(product.brand);
     setCartOpen(true);
     trackMarketplaceEvent("product_added", { category: product.category, hasPrice: product.min > 0 });
-  }
-
-  function resetCustomerWhatsappVerification() {
-    setCustomerOtp("");
-    setCustomerOtpChallengeId("");
-    setCustomerOtpExpiresAt(null);
-    setCustomerOtpMessage("");
-    setCheckoutError("");
-  }
-
-  async function sendCustomerWhatsappCode() {
-    setCheckoutError("");
-    setCustomerOtpMessage("");
-    setWhatsappTouched(true);
-    if (!customerWhatsapp) {
-      setCheckoutError(marketplaceMessage("inventory.69678acd5a24"));
-      return;
-    }
-    if (!orderingEnabled) {
-      setCheckoutError(marketplaceMessage("inventory.ce386ef928f9"));
-      return;
-    }
-    if (turnstileSiteKey && customerSessionAvailable !== true && !captchaToken) {
-      setCheckoutError(marketplaceMessage("inventory.807b2c5968b6"));
-      return;
-    }
-    setCustomerOtpLoading(true);
-    try {
-      await ensureAnonymousCustomer(captchaToken || undefined);
-      setCustomerSessionAvailable(true);
-      setCaptchaToken("");
-      setCaptchaError("");
-      const challenge = await requestCustomerWhatsappOtp(customerWhatsapp);
-      setCustomerOtpChallengeId(challenge.challengeId);
-      setCustomerOtpExpiresAt(challenge.expiresAt);
-      setCustomerOtp("");
-      setCustomerOtpMessage(marketplaceMessage("inventory.b348db72c0aa"));
-      announce(marketplaceMessage("inventory.917beeea5811"));
-    } catch (error) {
-      setCheckoutError(errorMessage(error));
-      if (customerSessionAvailable !== true) {
-        setCaptchaToken("");
-        setCaptchaVersion((version) => version + 1);
-      }
-    } finally {
-      setCustomerOtpLoading(false);
-    }
-  }
-
-  async function verifyCustomerWhatsappCode() {
-    setCheckoutError("");
-    setCustomerOtpMessage("");
-    if (!customerWhatsapp || !customerOtpChallengeId) {
-      setCheckoutError(marketplaceMessage("inventory.d74fd6f09b2c"));
-      return;
-    }
-    if (!/^\d{6}$/.test(customerOtp)) {
-      setCheckoutError(marketplaceMessage("inventory.3f7f1adb0f31"));
-      return;
-    }
-    setCustomerOtpLoading(true);
-    try {
-      const result = await verifyCustomerWhatsappOtp(customerWhatsapp, customerOtpChallengeId, customerOtp);
-      setVerifiedCustomerWhatsapp(result.phone);
-      setCustomerOtpChallengeId("");
-      setCustomerOtpExpiresAt(null);
-      setCustomerOtp("");
-      setEditingCustomerWhatsapp(false);
-      setCustomerOtpMessage(marketplaceMessage("inventory.2d2998157f40"));
-      announce(marketplaceMessage("inventory.6346fd7ca382"));
-    } catch (error) {
-      setCheckoutError(errorMessage(error));
-    } finally {
-      setCustomerOtpLoading(false);
-    }
   }
 
   function adjust(id: string, delta: number) {
@@ -2427,10 +2341,6 @@ export default function Marketplace({
     setWhatsappTouched(true);
     if (!customerWhatsapp) {
       setCheckoutError(marketplaceMessage("inventory.94b5cd21062a"));
-      return;
-    }
-    if (!customerWhatsappVerified) {
-      setCheckoutError(marketplaceMessage("inventory.c819aed32b7f"));
       return;
     }
     if (cartRequiresPrescription && !prescription && !pendingOrderAttempt?.prescriptionPath) {
@@ -3062,7 +2972,7 @@ export default function Marketplace({
 
             {!orderSent ? <section className="order-step-panel order-details-panel" aria-labelledby="order-details-heading">
               <div className="order-step-heading"><h3 id="order-details-heading">{marketplaceMessage("inventory.67c60c78f48a")}</h3></div>
-              {customerWhatsappVerified && !editingCustomerWhatsapp ? <div className="saved-whatsapp-row"><span><CircleCheck size={20} /></span><div><small>{marketplaceMessage("inventory.dd0285bfd9b4")}</small><b>+{customerWhatsapp}</b></div><button type="button" onClick={() => setEditingCustomerWhatsapp(true)} disabled={requestLocked}>{marketplaceMessage("inventory.d9a6909304b4")}</button></div> : <div className="whatsapp-field"><label htmlFor="customer-whatsapp">{marketplaceMessage("inventory.ec21453f9cd8")}</label><div><select value={whatsappCountry} disabled={requestLocked} onChange={(event) => { setWhatsappCountry(event.target.value as CountryCode); setWhatsappTouched(false); resetCustomerWhatsappVerification(); }} aria-label={marketplaceMessage("inventory.36ca78914773")}>{whatsappCountries.map((item) => <option value={item.country} key={item.country}>{item.name} (+{item.callingCode})</option>)}</select><input id="customer-whatsapp" value={whatsapp} required disabled={requestLocked} onBlur={() => setWhatsappTouched(true)} onChange={(event) => { setWhatsapp(event.target.value.replace(/\D/g, "").slice(0, 15)); setWhatsappTouched(false); resetCustomerWhatsappVerification(); }} placeholder="78 000 000" inputMode="tel" autoComplete="tel-national" aria-invalid={whatsappTouched && !customerWhatsapp} aria-describedby={whatsappTouched && !customerWhatsapp ? "customer-whatsapp-error" : undefined} /></div></div>}
+              <div className="whatsapp-field"><label htmlFor="customer-whatsapp">{marketplaceMessage("inventory.ec21453f9cd8")}</label><div><select value={whatsappCountry} disabled={requestLocked} onChange={(event) => { setWhatsappCountry(event.target.value as CountryCode); setWhatsappTouched(false); setCheckoutError(""); }} aria-label={marketplaceMessage("inventory.36ca78914773")}>{whatsappCountries.map((item) => <option value={item.country} key={item.country}>{item.name} (+{item.callingCode})</option>)}</select><input id="customer-whatsapp" value={whatsapp} required disabled={requestLocked} onBlur={() => setWhatsappTouched(true)} onChange={(event) => { setWhatsapp(event.target.value.replace(/\D/g, "").slice(0, 15)); setWhatsappTouched(false); setCheckoutError(""); }} placeholder="78 000 000" inputMode="tel" autoComplete="tel-national" aria-invalid={whatsappTouched && !customerWhatsapp} aria-describedby={whatsappTouched && !customerWhatsapp ? "customer-whatsapp-error" : undefined} /></div></div>
               {whatsappTouched && !customerWhatsapp ? <p id="customer-whatsapp-error" className="form-error" role="alert"><CircleAlert size={15} /> {marketplaceMessage("inventory.e9f1e76b48e6")}</p> : null}
               <fieldset className="fulfilment-choice"><legend>{marketplaceMessage("inventory.a150b49c47b7")}</legend><div role="radiogroup" aria-label={marketplaceMessage("inventory.5fbfda7c58b3")}>
                 <button type="button" role="radio" aria-checked={deliveryPreference === "either"} className={deliveryPreference === "either" ? "selected" : ""} onClick={() => setDeliveryPreference("either")} disabled={requestLocked}><PackageCheck size={23} /><span>{marketplaceMessage("inventory.0748a7c0654b")}</span>{deliveryPreference === "either" ? <Check size={15} /> : null}</button>
@@ -3088,26 +2998,12 @@ export default function Marketplace({
               {mapLocationOpen ? <Suspense fallback={<FeatureLoading label={marketplaceMessage("inventory.4e279b7170a2")} />}><GoogleMapLocationPicker apiKey={googleMapsBrowserKey} initialCoordinates={coordinates} onCancel={() => setMapLocationOpen(false)} onChoose={applyMapLocation} /></Suspense> : null}
             </section> : null}
 
-            {!orderSent ? <section className="order-step-panel order-verification-panel" aria-labelledby="order-verification-heading">
-              <div className="order-step-heading"><h3 id="order-verification-heading">{marketplaceMessage("inventory.1fae65eb2e71")}</h3>{customerWhatsappVerified ? <span className="verification-badge"><CircleCheck size={14} /> {marketplaceMessage("inventory.4f7838402f37")}</span> : null}</div>
-              <p className="verification-intro">{marketplaceMessage("inventory.62ea0a9256ba")}</p>
-              <div className={`verification-number-card${customerWhatsappVerified ? " is-verified" : ""}`}>
-                <span><MessageCircle size={22} /></span>
-                <div><small>{marketplaceMessage("inventory.21b3520828dd")}</small><b>{customerWhatsapp ? `+${customerWhatsapp}` : marketplaceMessage("inventory.a9c7a31d1995")}</b></div>
-                {customerWhatsappVerified ? <CircleCheck size={24} /> : <ShieldCheck size={24} />}
-              </div>
-              {customerWhatsappVerified ? null : <div className="customer-otp-card">
-                {!customerOtpChallengeId ? <><b>{marketplaceMessage("inventory.25ed9fbdb48e")}</b><p>{marketplaceMessage("inventory.151f9a4a276e")}</p><button type="button" className="customer-otp-action" onClick={sendCustomerWhatsappCode} disabled={customerOtpLoading || !customerWhatsapp || previewMode}>{customerOtpLoading ? <LoaderCircle className="button-spinner" size={17} /> : <MessageCircle size={17} />}{customerOtpLoading ? marketplaceMessage("inventory.e6ddec3d9dee") : marketplaceMessage("whatsapp.send_code")}</button></> : <><label htmlFor="customer-whatsapp-otp">{marketplaceMessage("inventory.ac7622f7aa54")}<input id="customer-whatsapp-otp" value={customerOtp} onChange={(event) => setCustomerOtp(event.target.value.replace(/\D/g, "").slice(0, 6))} inputMode="numeric" autoComplete="one-time-code" placeholder="000000" maxLength={6} /></label><button type="button" className="customer-otp-action" onClick={verifyCustomerWhatsappCode} disabled={customerOtpLoading || customerOtp.length !== 6}>{customerOtpLoading ? <LoaderCircle className="button-spinner" size={17} /> : <ShieldCheck size={17} />}{customerOtpLoading ? marketplaceMessage("inventory.63bbd08c916b") : marketplaceMessage("whatsapp.verify_number")}</button><div className="customer-otp-meta"><button type="button" onClick={sendCustomerWhatsappCode} disabled={customerOtpLoading}>{marketplaceMessage("inventory.9200fc2f31ae")}</button>{customerOtpExpiresAt ? <small>{marketplaceFormatMessage("inventory.0b3888782faa", [marketplaceDate(customerOtpExpiresAt, undefined, { hour: "numeric", minute: "2-digit" })])}</small> : null}</div></>}
-              </div>}
+            {!orderSent ? <div className="one-shot-checkout-feedback">
               {!previewMode && customerSessionAvailable !== true ? turnstileSiteKey ? <><Suspense fallback={<FeatureLoading label={marketplaceMessage("inventory.3ff1ca03805e")} />}><Turnstile key={captchaVersion} siteKey={turnstileSiteKey} onToken={(token) => { setCaptchaToken(token); if (token) setCaptchaError(""); }} onError={setCaptchaError} /></Suspense>{captchaError ? <p className="form-error" role="alert"><CircleAlert size={15} /> {captchaError}</p> : null}</> : <p className="privacy-note"><ShieldCheck size={14} /> {marketplaceMessage("inventory.aeef9da4a358")}</p> : null}
               <p className="whatsapp-consent-note"><ShieldCheck size={15} /> {marketplaceMessage("inventory.042afa1ab83e")}</p>
-            </section> : null}
-
-            {!orderSent ? <div className="one-shot-checkout-feedback">
               {basketIndicativeFrom > 0 ? <div className="estimate"><span>{marketplaceMessage("inventory.01220e872896")}</span><b>{marketplaceMessage("product.indicative_price_prefix")} {marketplaceNumber(basketIndicativeFrom)}</b><small>{marketplaceMessage("inventory.10123e3563e7")}</small></div> : null}
               <p className="privacy-note"><MessageCircle size={14} /> {marketplaceMessage("inventory.f50f39df1262")}</p>
               {customerMessage ? <p className="form-success" role="status" aria-live="polite"><CircleCheck size={15} /> {customerMessage}</p> : null}
-              {customerOtpMessage ? <p className="form-success" role="status" aria-live="polite"><CircleCheck size={15} /> {customerOtpMessage}</p> : null}
               {checkoutError ? <p className="form-error" role="alert"><CircleAlert size={15} /> {checkoutError}</p> : null}
               {pendingOrderAttempt?.rpcAttempted ? <p className="privacy-note"><ShieldCheck size={14} /> {marketplaceMessage("inventory.e408675f5fbc")}</p> : null}
               {cart.length || requestLocked ? <button className="text-action" onClick={resetRequest} disabled={ordering}>{requestLocked ? marketplaceMessage("inventory.190304bb034e") : marketplaceMessage("inventory.594e3c8701b9")}</button> : null}
@@ -3118,7 +3014,7 @@ export default function Marketplace({
           </div>
           {!orderSent ? <footer className="order-wizard-actions">
             <button type="button" className="order-secondary-action" onClick={() => setCartOpen(false)}>{marketplaceMessage("inventory.264a224fd18a")}</button>
-            <button type="button" className="order-primary-action" aria-busy={ordering} disabled={!cart.length || ordering || Boolean(prescriptionError) || !customerWhatsappVerified || !coordinates} onClick={submitOrder}>{ordering ? <LoaderCircle className="button-spinner" size={18} aria-hidden="true" /> : null}{ordering ? marketplaceMessage("inventory.94b1ce97199d") : previewMode ? marketplaceMessage("inventory.35c070ac7d98") : requestLocked ? marketplaceMessage("inventory.a7ce60b30ee0") : marketplaceMessage("inventory.2db32b4e0ab8")}{!ordering ? <ArrowRight size={18} /> : null}</button>
+            <button type="button" className="order-primary-action" aria-busy={ordering} disabled={!cart.length || ordering || Boolean(prescriptionError) || !customerWhatsapp || !coordinates} onClick={submitOrder}>{ordering ? <LoaderCircle className="button-spinner" size={18} aria-hidden="true" /> : null}{ordering ? marketplaceMessage("inventory.94b1ce97199d") : previewMode ? marketplaceMessage("inventory.35c070ac7d98") : requestLocked ? marketplaceMessage("inventory.a7ce60b30ee0") : marketplaceMessage("inventory.2db32b4e0ab8")}{!ordering ? <ArrowRight size={18} /> : null}</button>
           </footer> : null}
         </aside>
       </div> : null}

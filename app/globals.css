@@ -1927,12 +1927,6 @@ footer {
 .order-details-panel .whatsapp-field>div { height:58px; border-color:var(--clay-border); border-radius:11px; }
 .order-details-panel .whatsapp-field select { width:220px; padding-left:14px; font-size:12px; background:linear-gradient(120deg,var(--surface-lavender-soft),var(--surface-warm)); }
 .order-details-panel .whatsapp-field input { padding:0 16px; font-size:14px; }
-.saved-whatsapp-row { min-height:68px; padding:11px 12px; display:grid; grid-template-columns:42px minmax(0,1fr) auto; align-items:center; gap:12px; border:1px solid var(--clay-border); border-radius:13px; background:linear-gradient(120deg,var(--surface-mint),var(--surface-page)); box-shadow:var(--clay-shadow-soft); }
-.saved-whatsapp-row>span { width:42px; height:42px; display:grid; place-items:center; border-radius:12px; color:var(--color-success); background:linear-gradient(135deg,var(--color-white),var(--surface-mint)); }
-.saved-whatsapp-row>div { min-width:0; display:flex; flex-direction:column; gap:3px; }
-.saved-whatsapp-row small { color:var(--color-success); font-size:9px; font-weight:850; }
-.saved-whatsapp-row b { overflow-wrap:anywhere; font-size:14px; font-variant-numeric:tabular-nums; }
-.saved-whatsapp-row button { min-height:40px; padding:0 12px; border:1px solid var(--clay-border); border-radius:10px; color:var(--color-violet); background:linear-gradient(135deg,var(--color-white),var(--surface-lavender-soft)); font-size:9px; font-weight:850; cursor:pointer; }
 .fulfilment-choice { margin:22px 0 0; padding:0; border:0; }
 .fulfilment-choice legend { margin-bottom:10px; font:800 18px/1.2 var(--font-display); letter-spacing:-.35px; }
 .fulfilment-choice>div { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
@@ -1959,30 +1953,6 @@ footer {
 .district-location-picker>div button:last-child { border-color:transparent; color:var(--color-white); background:var(--clay-action); }
 .district-location-picker>div button:disabled { cursor:not-allowed; opacity:.5; }
 .order-prescription { margin-top:12px; min-height:64px; border-style:solid; }
-.verification-intro { margin:0 0 18px; color:var(--color-muted); font-size:12px; line-height:1.6; }
-.verification-badge { display:inline-flex!important; align-items:center; gap:5px; color:var(--color-success)!important; }
-.verification-number-card { min-height:86px; padding:16px; display:grid; grid-template-columns:44px 1fr auto; align-items:center; gap:13px; border:1px solid var(--clay-border); border-radius:13px; background:linear-gradient(125deg,var(--clay-surface-lavender),var(--clay-surface)); box-shadow:var(--clay-shadow-soft); }
-.verification-number-card>span { width:44px; height:44px; display:grid; place-items:center; border-radius:12px; color:var(--color-violet); background:var(--clay-control); }
-.verification-number-card>div { min-width:0; display:flex; flex-direction:column; gap:5px; }
-.verification-number-card small { color:var(--color-disabled); font-size:8px; font-weight:850; letter-spacing:.7px; }
-.verification-number-card b { overflow-wrap:anywhere; font:800 15px var(--font-display); }
-.verification-number-card>svg { color:var(--color-violet); }
-.verification-number-card.is-verified { border-color:var(--alpha-mint-35); background:linear-gradient(125deg,var(--surface-mint),var(--clay-surface)); }
-.verification-number-card.is-verified>svg { color:var(--color-success); }
-.customer-otp-card,.verified-whatsapp-card { margin-top:14px; padding:18px; border:1px solid var(--clay-border); border-radius:13px; background:var(--clay-surface); box-shadow:var(--clay-shadow-soft); }
-.customer-otp-card>b,.verified-whatsapp-card b { font:800 14px var(--font-display); }
-.customer-otp-card>p,.verified-whatsapp-card p { margin:7px 0 15px; color:var(--color-muted); font-size:10px; line-height:1.6; }
-.customer-otp-card>label { display:flex; flex-direction:column; gap:8px; color:var(--color-muted); font-size:10px; font-weight:800; }
-.customer-otp-card>label input { min-height:62px; padding:0 15px; border:1px solid var(--clay-border); border-radius:11px; outline:0; color:var(--ink); background:var(--clay-control); font:800 24px var(--font-display); letter-spacing:10px; text-align:center; }
-.customer-otp-card>label input:focus { border-color:var(--clay-border-strong); box-shadow:0 0 0 3px var(--alpha-violet-12); }
-.customer-otp-action { width:100%; min-height:52px; margin-top:4px; display:flex; align-items:center; justify-content:center; gap:8px; border:0; border-radius:11px; color:var(--color-white); background:var(--clay-action); font-size:11px; font-weight:850; cursor:pointer; }
-.customer-otp-action:disabled { opacity:.5; cursor:not-allowed; }
-.customer-otp-meta { margin-top:10px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
-.customer-otp-meta button { border:0; color:var(--color-violet); background:transparent; font-size:9px; font-weight:850; cursor:pointer; }
-.customer-otp-meta small { color:var(--color-disabled); font-size:8px; }
-.verified-whatsapp-card { display:flex; gap:12px; color:var(--color-success); background:linear-gradient(120deg,var(--surface-mint),var(--clay-surface)); }
-.verified-whatsapp-card>svg { flex:none; }
-.verified-whatsapp-card p { margin-bottom:0; color:var(--color-muted); }
 .whatsapp-consent-note { margin:14px 0 0; display:flex; align-items:flex-start; gap:8px; color:var(--color-muted); font-size:9px; line-height:1.55; }
 .whatsapp-consent-note svg { flex:none; color:var(--color-violet); }
 .one-shot-checkout-feedback { padding:0 32px 20px; }
@@ -2025,9 +1995,6 @@ footer.order-wizard-actions { min-height:84px; padding:12px 32px max(12px,env(sa
   .order-details-panel .whatsapp-field>div { height:auto; min-height:56px; display:grid; grid-template-columns:1fr; }
   .order-details-panel .whatsapp-field select { width:100%; height:48px; border-right:0; border-bottom:1px solid var(--line); }
   .order-details-panel .whatsapp-field input { height:52px; }
-  .saved-whatsapp-row { grid-template-columns:38px minmax(0,1fr); }
-  .saved-whatsapp-row>span { width:38px; height:38px; }
-  .saved-whatsapp-row button { grid-column:1/-1; width:100%; }
   .fulfilment-choice>div { grid-template-columns:1fr; }
   .fulfilment-choice button { min-height:64px; padding:12px 16px; flex-direction:row; justify-content:flex-start; }
   .fulfilment-choice button>svg:last-child { left:auto; right:12px; top:22px; }
