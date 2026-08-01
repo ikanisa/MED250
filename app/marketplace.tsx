@@ -2084,7 +2084,9 @@ export default function Marketplace({
   );
 
   const basketCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-  const basketCountLabel = basketCount === 1 ? "item" : "items";
+  const basketCountLabel = basketCount === 1
+    ? marketplaceMessage("inventory.4a33eacd5fa6")
+    : marketplaceMessage("inventory.5f3c4f8580d3");
   const basketIndicativeFrom = cart.reduce((sum, item) => sum + item.indicativePriceRwf * item.quantity, 0);
   const displayedCartItems = showAllCartItems ? cart : cart.slice(0, 3);
   const customerWhatsapp = useMemo(
@@ -2824,7 +2826,7 @@ export default function Marketplace({
         <div className="header-actions">
           <button type="button" className="header-utility" onClick={() => setOffersOpen(true)} disabled={publicCatalogMode} aria-label={publicCatalogMode ? marketplaceMessage("inventory.8671efa83e95") : undefined}><PackageCheck size={19} /><span><small>{marketplaceMessage("inventory.8ed6791bdf3d")}</small><b>{marketplaceMessage("inventory.ada27592c957")}</b></span></button>
           <button type="button" className="header-utility" onClick={openPortal} aria-label={marketplaceMessage("inventory.1a816c36d638")}><Store size={19} /><span><b>{marketplaceMessage("navigation.pharmacies")}</b></span></button>
-          <button className="bag-button" disabled={publicCatalogMode} onClick={() => { setShowAllCartItems(false); setRecentlyAddedBrand(""); setCartOpen(true); }} aria-label={publicCatalogMode ? marketplaceMessage("inventory.48a1691ef7ec") : undefined}><ShoppingCart size={22} /><span>{publicCatalogMode ? marketplaceMessage("inventory.b671001e229a") : marketplaceMessage("request.basket_label")}</span><b>{basketCount}</b>{!publicCatalogMode ? <span className="sr-only">{basketCountLabel}</span> : null}</button>
+          <button className="bag-button" disabled={publicCatalogMode} onClick={() => { setShowAllCartItems(false); setRecentlyAddedBrand(""); setCartOpen(true); }} aria-label={publicCatalogMode ? marketplaceMessage("inventory.48a1691ef7ec") : `${marketplaceMessage("request.basket_label")} ${basketCount} ${basketCountLabel}`}><ShoppingCart size={22} /><span>{publicCatalogMode ? marketplaceMessage("inventory.b671001e229a") : marketplaceMessage("request.basket_label")}</span><b>{basketCount}</b></button>
           <button className="mobile-toggle" onClick={() => setMobileMenu(!mobileMenu)} aria-label={marketplaceMessage("inventory.dfc1e6d16ba5")} aria-expanded={mobileMenu} aria-controls="mobile-marketplace-menu"><Menu size={22} /></button>
         </div>
       </header>

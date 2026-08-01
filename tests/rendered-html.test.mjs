@@ -359,9 +359,21 @@ test("keeps product cards free of verification and technical ranking labels", as
 });
 
 test("keeps the basket count light on its primary gradient badge", async () => {
-  const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const [css, marketplace] = await Promise.all([
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/marketplace.tsx", import.meta.url), "utf8"),
+  ]);
 
   assert.match(css, /\.site-header \.bag-button>b\s*\{[\s\S]*color:var\(--color-white\)!important;[\s\S]*-webkit-text-fill-color:var\(--color-white\);[\s\S]*background:var\(--clay-action\);/);
+  assert.match(marketplace, /aria-label=\{publicCatalogMode \? marketplaceMessage\("inventory\.48a1691ef7ec"\) : `\$\{marketplaceMessage\("request\.basket_label"\)\} \$\{basketCount\} \$\{basketCountLabel\}`\}/);
+  assert.match(marketplace, /basketCount === 1[\s\S]*marketplaceMessage\("inventory\.4a33eacd5fa6"\)[\s\S]*marketplaceMessage\("inventory\.5f3c4f8580d3"\)/);
+});
+
+test("keeps hero carousel controls above the minimum touch target size", async () => {
+  const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+
+  assert.match(css, /\.hero-art-controls>div button \{ width:28px; height:28px;/);
+  assert.doesNotMatch(css, /\.hero-art-controls>div button \{ width:22px; height:26px;/);
 });
 
 test("keeps the header search icon light on its primary gradient button", async () => {
@@ -506,7 +518,7 @@ test("keeps My Requests separate from the request basket", async () => {
   assert.match(marketplace, /onClick=\{\(\) => setOffersOpen\(true\)\}/);
   assertCataloguedMessage(marketplace, "inventory.a9b90e025a70", "No active requests");
   assertCataloguedMessage(marketplace, "inventory.57f437b24477", "Open request basket");
-  assert.match(marketplace, /basketCount === 1 \? "item" : "items"/);
+  assert.match(marketplace, /basketCount === 1[\s\S]*marketplaceMessage\("inventory\.4a33eacd5fa6"\)[\s\S]*marketplaceMessage\("inventory\.5f3c4f8580d3"\)/);
   assert.doesNotMatch(marketplace, /activeOrderId \? setOffersOpen\(true\) : setCartOpen\(true\)/);
 });
 
@@ -755,7 +767,7 @@ test("uses availability-request language and only the four MED+250 brand accents
   assertCataloguedMessage(marketplace, "inventory.e0f65214f68f", "Your request basket");
   assertCataloguedMessage(marketplace, "inventory.f9c2f1181763", "added to your request");
   assert.match(css, /\.product-card-cart[\s\S]*grid-column:2/);
-  assert.match(marketplace, /basketCount === 1 \? "item" : "items"/);
+  assert.match(marketplace, /basketCount === 1[\s\S]*marketplaceMessage\("inventory\.4a33eacd5fa6"\)[\s\S]*marketplaceMessage\("inventory\.5f3c4f8580d3"\)/);
   assert.doesNotMatch(marketplace, /basketCount === 1 \? "product" : "products"/);
   assertCataloguedMessage(marketplace, "inventory.2db32b4e0ab8", "Send availability request");
   assertCataloguedMessage(marketplace, "inventory.126834c25aaf", "We'll ask nearby pharmacies to confirm — no payment yet.");
