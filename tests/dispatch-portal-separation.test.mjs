@@ -12,6 +12,14 @@ const migration = await readFile(
   "utf8",
 );
 
+const duplicateTestPharmacyRepair = await readFile(
+  new URL(
+    "../supabase/migrations/20260801113000_retire_duplicate_kigali_test_pharmacy.sql",
+    import.meta.url,
+  ),
+  "utf8",
+);
+
 const helperDefinition = migration.match(
   /create or replace function dawanear_private\.dawanear_pharmacy_is_dispatch_eligible[\s\S]*?\n\$\$;/,
 )?.[0];
@@ -135,4 +143,16 @@ test("installs three owner-authorized test pharmacies with stable keys and coord
   assert.match(migration, /on conflict \(registry_entry_key\) do update/);
   assert.match(migration, /is_login_enabled,[\s\S]*true,[\s\S]*'admin_verified'/);
   assert.match(migration, /v_test_pharmacies <> 3 or v_test_contacts <> 3/);
+});
+
+test("retires the duplicate Kigali fixture without weakening the authorized test fleet", () => {
+  assert.match(duplicateTestPharmacyRepair, /dev-test-whatsapp-250788767816/);
+  assert.match(duplicateTestPharmacyRepair, /med250-test-kigali-01/);
+  assert.match(duplicateTestPharmacyRepair, /verification_status = 'stale'/);
+  assert.match(duplicateTestPharmacyRepair, /is_active = false/);
+  assert.match(duplicateTestPharmacyRepair, /marketplace_approved = false/);
+  assert.match(duplicateTestPharmacyRepair, /v_authorized_contact_count <> 3 or v_portal_contact_count <> 3/);
+  assert.match(duplicateTestPharmacyRepair, /membership\.status = 'active'/);
+  assert.match(duplicateTestPharmacyRepair, /transaction history or active membership authority/);
+  assert.doesNotMatch(duplicateTestPharmacyRepair, /delete\s+from/i);
 });

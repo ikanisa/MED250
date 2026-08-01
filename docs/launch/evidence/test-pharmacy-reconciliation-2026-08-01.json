@@ -1,0 +1,48 @@
+{
+  "schema_version": "1",
+  "captured_at": "2026-08-01T11:32:33+02:00",
+  "captured_against_live_revision": "497d74db2f020eb7eb11914baf596095e28edb96",
+  "classification": "privacy-safe direct-production test-pharmacy reconciliation evidence",
+  "project_contract": {
+    "deployment_mode": "direct-production",
+    "supabase_project_ref": "uskfnszcdqpcfrhjxitl",
+    "separate_staging_project_used": false
+  },
+  "migration": {
+    "version": "20260801113000",
+    "name": "retire_duplicate_kigali_test_pharmacy",
+    "source": "supabase/migrations/20260801113000_retire_duplicate_kigali_test_pharmacy.sql",
+    "sha256": "97fd49581627cd3b078ace76c7c6e695d02f608759c3a2a12c4e3760a75488ac",
+    "recorded_in_production_migration_ledger": true
+  },
+  "before": {
+    "authorized_test_pharmacies": 3,
+    "extra_active_legacy_fixtures": 1,
+    "legacy_active_memberships": 0,
+    "legacy_suspended_memberships_preserved": 1,
+    "legacy_recipient_history": 0,
+    "legacy_offer_history": 0,
+    "legacy_outbox_history": 0
+  },
+  "after": {
+    "authorized_active_dispatch_and_portal_contacts": 3,
+    "unauthorized_active_test_contacts": 0,
+    "legacy_fixture_active": false,
+    "legacy_fixture_marketplace_approved": false,
+    "legacy_contact_status": "stale",
+    "legacy_contact_login_enabled": false,
+    "legacy_fixture_dispatch_eligible": false,
+    "backend_contract_version": "2026-07-23.1",
+    "operational_status": "healthy"
+  },
+  "safety": {
+    "orders_created": 0,
+    "whatsapp_messages_sent": 0,
+    "otp_challenges_created": 0,
+    "phone_numbers_recorded": false,
+    "member_identifiers_recorded": false,
+    "credentials_or_tokens_recorded": false,
+    "historical_membership_deleted": false
+  },
+  "status": "passed"
+}

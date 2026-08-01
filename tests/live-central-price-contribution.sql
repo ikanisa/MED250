@@ -17,7 +17,7 @@ begin
   from public.dawanear_pharmacy_memberships as membership
   join public.dawanear_pharmacies as pharmacy
     on pharmacy.id = membership.pharmacy_id
-  where pharmacy.registry_entry_key = 'dev-test-whatsapp-250788767816'
+  where pharmacy.registry_entry_key = 'med250-test-kigali-01'
     and membership.status = 'active'
   limit 1;
 
