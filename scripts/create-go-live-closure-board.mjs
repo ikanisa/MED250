@@ -465,7 +465,7 @@ export function buildGoLiveClosureBoard({ manifest, handoff, readinessReport }) 
       },
       legacy_domain_redirect: {
         owner: "Named MED+250 infrastructure owner with Gikundiro Cloudflare zone authority",
-        artifact: "docs/launch/evidence/legacy-domain-redirect-2026-07-30.json",
+        artifact: "docs/launch/evidence/legacy-domain-redirect-2026-08-01.json",
         valid: readinessReport.legacyDomainRedirect.valid,
         status: readinessReport.legacyDomainRedirect.status,
         legacy_origin: readinessReport.legacyDomainRedirect.legacyOrigin,

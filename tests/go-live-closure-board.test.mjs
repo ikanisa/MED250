@@ -65,7 +65,7 @@ test("builds an owner closure board without promoting pending gates", () => {
   assert.match(board.prerequisites.rendered_production_audit.follow_up, /prior 16-scenario rendered audit is historical/i);
   assert.ok(board.prerequisites.rendered_production_audit.commands.includes("npm run audit:browser-evidence:verify:live"));
   assert.equal(board.prerequisites.legacy_domain_redirect.valid, true);
-  assert.equal(board.prerequisites.legacy_domain_redirect.artifact, "docs/launch/evidence/legacy-domain-redirect-2026-07-30.json");
+  assert.equal(board.prerequisites.legacy_domain_redirect.artifact, "docs/launch/evidence/legacy-domain-redirect-2026-08-01.json");
   assert.equal(board.prerequisites.legacy_domain_redirect.legacy_origin, "https://med250.gikundiro.com");
   assert.equal(board.prerequisites.legacy_domain_redirect.canonical_origin, "https://med-250.com");
   assert.equal(board.prerequisites.legacy_domain_redirect.blocker, null);

@@ -17,13 +17,13 @@
     "PREVIEW_FAIL_CLOSED": {
       "title": "Preview ordering and indexing remain disabled before controlled enablement",
       "status": "passed",
-      "evidence_reference": "docs/launch/evidence/current-production-technical-uat-2026-07-30.json",
+      "evidence_reference": "docs/launch/evidence/current-production-technical-uat-2026-08-01.json",
       "note": "Direct-production mode and fail-closed non-live behavior passed automated and rendered validation."
     },
     "GPS_DENIAL_RECOVERY": {
       "title": "GPS denial shows recovery guidance without dispatch",
       "status": "passed",
-      "evidence_reference": "docs/launch/evidence/current-production-technical-uat-2026-07-30.json",
+      "evidence_reference": "docs/launch/evidence/current-production-technical-uat-2026-08-01.json",
       "note": "Location denial or unavailability showed recovery guidance and retained the safe district fallback without dispatch."
     },
     "GPS_CONSENT_BOUNDED_DISPATCH": {
@@ -35,13 +35,13 @@
     "PRESCRIPTION_ENFORCEMENT": {
       "title": "Prescription-required products enforce private upload and missing-file rejection",
       "status": "passed",
-      "evidence_reference": "docs/launch/evidence/current-production-technical-uat-2026-07-30.json",
+      "evidence_reference": "docs/launch/evidence/current-production-technical-uat-2026-08-01.json",
       "note": "Automated production checks enforced missing-file rejection, private prescription boundaries and cleanup behavior."
     },
     "RECIPIENT_ISOLATION": {
       "title": "Only eligible recipient pharmacies receive and read the request",
       "status": "passed",
-      "evidence_reference": "docs/launch/evidence/current-production-technical-uat-2026-07-30.json",
+      "evidence_reference": "docs/launch/evidence/current-production-technical-uat-2026-08-01.json",
       "note": "Rollback-only production UAT proved exact eligible-recipient membership and cross-pharmacy isolation."
     },
     "WHATSAPP_OTP_LIFECYCLE": {
@@ -59,7 +59,7 @@
     "CONTACT_PRIVACY_AND_SELECTION": {
       "title": "Pharmacy contact remains private before selection and is limited after selection",
       "status": "passed",
-      "evidence_reference": "docs/launch/evidence/current-production-technical-uat-2026-07-30.json",
+      "evidence_reference": "docs/launch/evidence/current-production-technical-uat-2026-08-01.json",
       "note": "Preselection contact privacy, ownership isolation and selection-limited contact release passed rollback UAT."
     },
     "EXPLICIT_HANDOFFS": {
@@ -71,19 +71,19 @@
     "CANCELLATION_COMPLETION_EXPIRY": {
       "title": "Cancellation, completion, expiry and closure notifications behave correctly",
       "status": "passed",
-      "evidence_reference": "docs/launch/evidence/current-production-technical-uat-2026-07-30.json",
+      "evidence_reference": "docs/launch/evidence/current-production-technical-uat-2026-08-01.json",
       "note": "Cancellation, no-response recovery, selected timeout, completion and notification lifecycle passed rollback UAT."
     },
     "PRESCRIPTION_ACCESS_RETENTION": {
       "title": "Prescription access boundaries and approved retention behavior hold through lifecycle",
       "status": "passed",
-      "evidence_reference": "docs/launch/evidence/current-production-technical-uat-2026-07-30.json",
+      "evidence_reference": "docs/launch/evidence/current-production-technical-uat-2026-08-01.json",
       "note": "Private access boundaries, fail-closed upload enforcement and scheduled cleanup health passed current checks."
     },
     "PRIVACY_SAFE_OPERATIONS": {
       "title": "Operational health and Worker logs contain no prohibited identifiers",
       "status": "passed",
-      "evidence_reference": "docs/launch/evidence/current-production-technical-uat-2026-07-30.json",
+      "evidence_reference": "docs/launch/evidence/current-production-technical-uat-2026-08-01.json",
       "note": "Aggregate operational health and browser logs passed with no retained prohibited identifiers or test side effects."
     }
   }

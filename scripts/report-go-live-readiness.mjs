@@ -183,7 +183,7 @@ export async function buildGoLiveReadinessReport({
     assessCurrentProductContentReview({ strict: true }),
     loadJson("data/audit-browser-evidence.json"),
     loadJson("data/source-authority-decision.json"),
-    loadJson("docs/launch/evidence/legacy-domain-redirect-2026-07-30.json"),
+    loadJson("docs/launch/evidence/legacy-domain-redirect-2026-08-01.json"),
   ]);
   const sourceAuthority = await assessSourceAuthorityDecision(sourceAuthorityDecision, { strict: true });
   const handoff = createLaunchEvidenceHandoff(manifest, prepared);

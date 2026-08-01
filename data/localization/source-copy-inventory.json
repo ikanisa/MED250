@@ -25,7 +25,7 @@
     },
     {
       "file": "app/marketplace.tsx",
-      "sha256": "5d4ac8389f86be54e4d66ec6aa95ec235b67ea73c3c4840df9a1fa749a1944c9"
+      "sha256": "3a6912e815fcda334aaf6944860904931b9bcf6f9553a9bc47bce4c1ff56d354"
     },
     {
       "file": "app/navigation-feedback.tsx",
@@ -100,7 +100,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2784,
+          "line": 2805,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -132,7 +132,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2814,
+          "line": 2835,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -140,7 +140,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 953,
+          "line": 965,
           "kind": "catalog_reference",
           "context": "PharmacyCataloguePanel",
           "surface": "browse",
@@ -163,7 +163,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 970,
+          "line": 982,
           "kind": "catalog_reference",
           "context": "PharmacyCataloguePanel",
           "surface": "browse",
@@ -186,7 +186,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 735,
+          "line": 746,
           "kind": "catalog_reference",
           "context": "CatalogueHierarchy",
           "surface": "browse",
@@ -209,7 +209,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 738,
+          "line": 749,
           "kind": "catalog_reference",
           "context": "CatalogueHierarchy",
           "surface": "browse",
@@ -232,7 +232,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2931,
+          "line": 2952,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -255,7 +255,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 970,
+          "line": 982,
           "kind": "catalog_reference",
           "context": "PharmacyCataloguePanel",
           "surface": "browse",
@@ -278,7 +278,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 949,
+          "line": 961,
           "kind": "catalog_reference",
           "context": "PharmacyCataloguePanel",
           "surface": "browse",
@@ -313,7 +313,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 736,
+          "line": 747,
           "kind": "catalog_reference",
           "context": "CatalogueHierarchy",
           "surface": "browse",
@@ -356,7 +356,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2937,
+          "line": 2958,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -470,7 +470,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2891,
+          "line": 2912,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -677,7 +677,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3048,
+          "line": 3069,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -723,7 +723,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3004,
+          "line": 3025,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -746,7 +746,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 442,
+          "line": 453,
           "kind": "catalog_reference",
           "context": "HeroArtworkCarousel",
           "surface": "shared",
@@ -769,7 +769,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2818,
+          "line": 2839,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -815,7 +815,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2911,
+          "line": 2932,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -823,7 +823,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2946,
+          "line": 2967,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -846,7 +846,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3003,
+          "line": 3024,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -882,7 +882,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2978,
+          "line": 2999,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -890,7 +890,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 3077,
+          "line": 3098,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -913,7 +913,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2984,
+          "line": 3005,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -936,7 +936,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3061,
+          "line": 3082,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -959,7 +959,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2959,
+          "line": 2980,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -967,7 +967,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 3054,
+          "line": 3075,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -990,7 +990,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2795,
+          "line": 2816,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -1013,7 +1013,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2871,
+          "line": 2892,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -1048,7 +1048,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3052,
+          "line": 3073,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -1094,7 +1094,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2772,
+          "line": 2793,
           "kind": "catalog_reference",
           "context": "sendOffer",
           "surface": "status",
@@ -1117,7 +1117,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3037,
+          "line": 3058,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -1140,7 +1140,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2603,
+          "line": 2624,
           "kind": "catalog_reference",
           "context": "requestContactEdit",
           "surface": "shared",
@@ -1163,7 +1163,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3053,
+          "line": 3074,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -1209,7 +1209,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3025,
+          "line": 3046,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -1255,7 +1255,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3004,
+          "line": 3025,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -1290,7 +1290,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2845,
+          "line": 2866,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -1313,7 +1313,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2268,
+          "line": 2289,
           "kind": "catalog_reference",
           "context": "clearRequestState",
           "surface": "shared",
@@ -1336,7 +1336,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3038,
+          "line": 3059,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -1382,7 +1382,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2879,
+          "line": 2900,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -1405,7 +1405,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2882,
+          "line": 2903,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -1487,7 +1487,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 433,
+          "line": 444,
           "kind": "catalog_reference",
           "context": "HeroArtworkCarousel",
           "surface": "shared",
@@ -1510,7 +1510,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2844,
+          "line": 2865,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -1518,7 +1518,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 849,
+          "line": 861,
           "kind": "catalog_reference",
           "context": "ProductCard",
           "surface": "shared",
@@ -1541,7 +1541,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2865,
+          "line": 2886,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -1564,7 +1564,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2861,
+          "line": 2882,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -1587,7 +1587,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3077,
+          "line": 3098,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -1610,7 +1610,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3009,
+          "line": 3030,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -1633,7 +1633,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3045,
+          "line": 3066,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -1656,7 +1656,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2805,
+          "line": 2826,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -1679,7 +1679,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 534,
+          "line": 545,
           "kind": "catalog_reference",
           "context": "ProductDetailsList",
           "surface": "shared",
@@ -1702,7 +1702,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3077,
+          "line": 3098,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -1737,7 +1737,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2844,
+          "line": 2865,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -1745,7 +1745,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 704,
+          "line": 715,
           "kind": "catalog_reference",
           "context": "FeaturedProductTile",
           "surface": "shared",
@@ -1753,7 +1753,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 849,
+          "line": 861,
           "kind": "catalog_reference",
           "context": "ProductCard",
           "surface": "shared",
@@ -1776,7 +1776,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3053,
+          "line": 3074,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -1799,7 +1799,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2911,
+          "line": 2932,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -1807,7 +1807,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2946,
+          "line": 2967,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -1853,7 +1853,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2882,
+          "line": 2903,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -1876,7 +1876,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3025,
+          "line": 3046,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -1899,7 +1899,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3066,
+          "line": 3087,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -1922,7 +1922,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2929,
+          "line": 2950,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -1945,7 +1945,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2970,
+          "line": 2991,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -1980,7 +1980,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2965,
+          "line": 2986,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -2003,7 +2003,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3056,
+          "line": 3077,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -2026,7 +2026,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2882,
+          "line": 2903,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -2049,7 +2049,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2914,
+          "line": 2935,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -2072,7 +2072,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2906,
+          "line": 2927,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -2107,7 +2107,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2178,
+          "line": 2199,
           "kind": "catalog_reference",
           "context": "setSubstituteConsent",
           "surface": "shared",
@@ -2130,7 +2130,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2968,
+          "line": 2989,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -2153,7 +2153,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3037,
+          "line": 3058,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -2176,7 +2176,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3077,
+          "line": 3098,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -2199,7 +2199,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3042,
+          "line": 3063,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -2253,7 +2253,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3054,
+          "line": 3075,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -2276,7 +2276,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3016,
+          "line": 3037,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -2299,7 +2299,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3077,
+          "line": 3098,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -2330,7 +2330,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2937,
+          "line": 2958,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -2353,7 +2353,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3056,
+          "line": 3077,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -2376,7 +2376,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 964,
+          "line": 976,
           "kind": "catalog_reference",
           "context": "PharmacyCataloguePanel",
           "surface": "browse",
@@ -2422,7 +2422,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2886,
+          "line": 2907,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -2445,7 +2445,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 965,
+          "line": 977,
           "kind": "catalog_reference",
           "context": "PharmacyCataloguePanel",
           "surface": "browse",
@@ -2491,7 +2491,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2886,
+          "line": 2907,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -2515,7 +2515,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2855,
+          "line": 2876,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -2523,7 +2523,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2908,
+          "line": 2929,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -2531,7 +2531,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2943,
+          "line": 2964,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -2539,7 +2539,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 953,
+          "line": 965,
           "kind": "catalog_reference",
           "context": "PharmacyCataloguePanel",
           "surface": "browse",
@@ -2547,7 +2547,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 955,
+          "line": 967,
           "kind": "catalog_reference",
           "context": "PharmacyCataloguePanel",
           "surface": "browse",
@@ -2570,7 +2570,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3037,
+          "line": 3058,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -2593,7 +2593,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3053,
+          "line": 3074,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -2616,7 +2616,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2941,
+          "line": 2962,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -2639,7 +2639,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3037,
+          "line": 3058,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -2662,7 +2662,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2823,
+          "line": 2844,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -2685,7 +2685,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2959,
+          "line": 2980,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -2720,7 +2720,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 947,
+          "line": 959,
           "kind": "catalog_reference",
           "context": "PharmacyCataloguePanel",
           "surface": "browse",
@@ -2728,7 +2728,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 952,
+          "line": 964,
           "kind": "catalog_reference",
           "context": "PharmacyCataloguePanel",
           "surface": "browse",
@@ -2751,7 +2751,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3077,
+          "line": 3098,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -2774,7 +2774,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3017,
+          "line": 3038,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "request",
@@ -2798,7 +2798,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2910,
+          "line": 2931,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -2806,7 +2806,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2945,
+          "line": 2966,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -2814,7 +2814,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 532,
+          "line": 543,
           "kind": "catalog_reference",
           "context": "ProductDetailsList",
           "surface": "shared",
@@ -2837,7 +2837,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3066,
+          "line": 3087,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -2860,7 +2860,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3054,
+          "line": 3075,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -2883,7 +2883,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3077,
+          "line": 3098,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -2906,7 +2906,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3012,
+          "line": 3033,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -2929,7 +2929,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 768,
+          "line": 779,
           "kind": "catalog_reference",
           "context": "CatalogueHierarchy",
           "surface": "browse",
@@ -2952,7 +2952,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2868,
+          "line": 2889,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -2975,7 +2975,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3012,
+          "line": 3033,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -2998,7 +2998,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2212,
+          "line": 2233,
           "kind": "catalog_reference",
           "context": "requestNativeLocation",
           "surface": "shared",
@@ -3021,7 +3021,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2984,
+          "line": 3005,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -3044,7 +3044,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2848,
+          "line": 2869,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -3090,7 +3090,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 1617,
+          "line": 1631,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -3113,7 +3113,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3053,
+          "line": 3074,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -3159,7 +3159,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2910,
+          "line": 2931,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -3167,7 +3167,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2945,
+          "line": 2966,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -3213,7 +3213,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3017,
+          "line": 3038,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -3237,7 +3237,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 1005,
+          "line": 1017,
           "kind": "catalog_reference",
           "context": "InternationalPhoneInput",
           "surface": "pharmacy_portal",
@@ -3245,7 +3245,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2975,
+          "line": 2996,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -3268,7 +3268,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3029,
+          "line": 3050,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -3291,7 +3291,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2462,
+          "line": 2483,
           "kind": "catalog_reference",
           "context": "chooseOffer",
           "surface": "status",
@@ -3314,7 +3314,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 849,
+          "line": 861,
           "kind": "catalog_reference",
           "context": "ProductCard",
           "surface": "shared",
@@ -3337,7 +3337,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 441,
+          "line": 452,
           "kind": "catalog_reference",
           "context": "HeroArtworkCarousel",
           "surface": "shared",
@@ -3360,7 +3360,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2787,
+          "line": 2808,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -3368,7 +3368,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2844,
+          "line": 2865,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -3472,7 +3472,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3042,
+          "line": 3063,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -3495,7 +3495,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3037,
+          "line": 3058,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -3518,7 +3518,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3043,
+          "line": 3064,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -3541,7 +3541,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2547,
+          "line": 2568,
           "kind": "catalog_reference",
           "context": "verifyPharmacyCode",
           "surface": "shared",
@@ -3564,7 +3564,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 523,
+          "line": 534,
           "kind": "catalog_reference",
           "context": "ProductGallery",
           "surface": "shared",
@@ -3610,7 +3610,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2964,
+          "line": 2985,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -3633,7 +3633,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3002,
+          "line": 3023,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "request",
@@ -3656,7 +3656,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2347,
+          "line": 2368,
           "kind": "catalog_reference",
           "context": "submitOrder",
           "surface": "product",
@@ -3679,7 +3679,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2787,
+          "line": 2808,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -3772,7 +3772,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2861,
+          "line": 2882,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -3795,7 +3795,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3056,
+          "line": 3077,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -3818,7 +3818,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3054,
+          "line": 3075,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -3841,7 +3841,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3049,
+          "line": 3070,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -3864,7 +3864,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 968,
+          "line": 980,
           "kind": "catalog_reference",
           "context": "PharmacyCataloguePanel",
           "surface": "pharmacy_portal",
@@ -3887,7 +3887,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3045,
+          "line": 3066,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -3910,7 +3910,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2914,
+          "line": 2935,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -3933,7 +3933,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3038,
+          "line": 3059,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -3996,7 +3996,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2806,
+          "line": 2827,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "request",
@@ -4019,7 +4019,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3071,
+          "line": 3092,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -4074,7 +4074,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2796,
+          "line": 2817,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -4097,7 +4097,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2955,
+          "line": 2976,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -4143,7 +4143,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2811,
+          "line": 2832,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -4166,7 +4166,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 750,
+          "line": 761,
           "kind": "catalog_reference",
           "context": "CatalogueHierarchy",
           "surface": "browse",
@@ -4201,7 +4201,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2493,
+          "line": 2514,
           "kind": "catalog_reference",
           "context": "openPortal",
           "surface": "pharmacy_portal",
@@ -4224,7 +4224,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2796,
+          "line": 2817,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -4247,7 +4247,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3065,
+          "line": 3086,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -4270,7 +4270,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2998,
+          "line": 3019,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -4363,7 +4363,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3056,
+          "line": 3077,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -4398,7 +4398,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3056,
+          "line": 3077,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -4422,7 +4422,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2980,
+          "line": 3001,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -4430,7 +4430,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 3077,
+          "line": 3098,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -4453,7 +4453,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3044,
+          "line": 3065,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -4476,7 +4476,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 660,
+          "line": 671,
           "kind": "catalog_reference",
           "context": "SubcategoryRail",
           "surface": "shared",
@@ -4499,7 +4499,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 535,
+          "line": 546,
           "kind": "catalog_reference",
           "context": "ProductDetailsList",
           "surface": "shared",
@@ -4523,7 +4523,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3012,
+          "line": 3033,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -4531,7 +4531,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 3038,
+          "line": 3059,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -4600,7 +4600,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 474,
+          "line": 485,
           "kind": "catalog_reference",
           "context": "ProductGallery",
           "surface": "shared",
@@ -4623,7 +4623,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2799,
+          "line": 2820,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -4646,7 +4646,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2941,
+          "line": 2962,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -4669,7 +4669,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3037,
+          "line": 3058,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "request",
@@ -4715,7 +4715,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2997,
+          "line": 3018,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -4738,7 +4738,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3009,
+          "line": 3030,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -4773,7 +4773,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3012,
+          "line": 3033,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -4796,7 +4796,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3037,
+          "line": 3058,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -4819,7 +4819,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3049,
+          "line": 3070,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -4842,7 +4842,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2910,
+          "line": 2931,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -4850,7 +4850,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2945,
+          "line": 2966,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -4873,7 +4873,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2446,
+          "line": 2467,
           "kind": "catalog_reference",
           "context": "submitOrder",
           "surface": "product",
@@ -4896,7 +4896,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3043,
+          "line": 3064,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -4919,7 +4919,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2914,
+          "line": 2935,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -4942,7 +4942,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 379,
+          "line": 390,
           "kind": "catalog_reference",
           "context": "module",
           "surface": "shared",
@@ -4965,7 +4965,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2571,
+          "line": 2592,
           "kind": "catalog_reference",
           "context": "verifyPharmacyCode",
           "surface": "pharmacy_portal",
@@ -4988,7 +4988,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2955,
+          "line": 2976,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -5011,7 +5011,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2977,
+          "line": 2998,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -5034,7 +5034,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2910,
+          "line": 2931,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -5042,7 +5042,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2945,
+          "line": 2966,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -5065,7 +5065,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 1539,
+          "line": 1553,
           "kind": "catalog_reference",
           "context": "initialise",
           "surface": "shared",
@@ -5073,7 +5073,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 1673,
+          "line": 1687,
           "kind": "catalog_reference",
           "context": "openRestoredOrder",
           "surface": "shared",
@@ -5096,7 +5096,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3054,
+          "line": 3075,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "product",
@@ -5119,7 +5119,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3031,
+          "line": 3052,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -5142,7 +5142,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3037,
+          "line": 3058,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -5165,7 +5165,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2171,
+          "line": 2192,
           "kind": "catalog_reference",
           "context": "adjust",
           "surface": "shared",
@@ -5223,7 +5223,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2909,
+          "line": 2930,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -5231,7 +5231,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2944,
+          "line": 2965,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -5266,7 +5266,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3043,
+          "line": 3064,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -5289,7 +5289,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3066,
+          "line": 3087,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -5297,7 +5297,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 3069,
+          "line": 3090,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -5320,7 +5320,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 531,
+          "line": 542,
           "kind": "catalog_reference",
           "context": "ProductDetailsList",
           "surface": "shared",
@@ -5343,7 +5343,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2949,
+          "line": 2970,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -5366,7 +5366,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2970,
+          "line": 2991,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -5374,7 +5374,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 3013,
+          "line": 3034,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -5397,7 +5397,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3037,
+          "line": 3058,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "request",
@@ -5420,7 +5420,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2729,
+          "line": 2750,
           "kind": "catalog_reference",
           "context": "recordCentralPrice",
           "surface": "shared",
@@ -5501,7 +5501,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2910,
+          "line": 2931,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -5509,7 +5509,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2945,
+          "line": 2966,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -5532,7 +5532,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3068,
+          "line": 3089,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -5578,7 +5578,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3055,
+          "line": 3076,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -5601,7 +5601,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2931,
+          "line": 2952,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -5624,7 +5624,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2728,
+          "line": 2749,
           "kind": "catalog_reference",
           "context": "recordCentralPrice",
           "surface": "shared",
@@ -5647,7 +5647,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2974,
+          "line": 2995,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -5670,7 +5670,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2854,
+          "line": 2875,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -5693,7 +5693,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3012,
+          "line": 3033,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -5716,7 +5716,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3072,
+          "line": 3093,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -5797,7 +5797,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3054,
+          "line": 3075,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -5843,7 +5843,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3066,
+          "line": 3087,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -5851,7 +5851,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 3069,
+          "line": 3090,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -5874,7 +5874,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3056,
+          "line": 3077,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -5897,7 +5897,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2949,
+          "line": 2970,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -5920,7 +5920,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3066,
+          "line": 3087,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -5943,7 +5943,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3037,
+          "line": 3058,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -5966,7 +5966,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3054,
+          "line": 3075,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -5989,7 +5989,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 849,
+          "line": 861,
           "kind": "catalog_reference",
           "context": "ProductCard",
           "surface": "shared",
@@ -6024,7 +6024,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3064,
+          "line": 3085,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -6048,7 +6048,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2853,
+          "line": 2874,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -6056,7 +6056,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 954,
+          "line": 966,
           "kind": "catalog_reference",
           "context": "PharmacyCataloguePanel",
           "surface": "browse",
@@ -6079,7 +6079,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 964,
+          "line": 976,
           "kind": "catalog_reference",
           "context": "PharmacyCataloguePanel",
           "surface": "browse",
@@ -6102,7 +6102,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3061,
+          "line": 3082,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -6125,7 +6125,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 1622,
+          "line": 1636,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -6150,7 +6150,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2811,
+          "line": 2832,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -6158,7 +6158,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2904,
+          "line": 2925,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -6166,7 +6166,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2911,
+          "line": 2932,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -6174,7 +6174,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2946,
+          "line": 2967,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -6182,7 +6182,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 3048,
+          "line": 3069,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -6190,7 +6190,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 954,
+          "line": 966,
           "kind": "catalog_reference",
           "context": "PharmacyCataloguePanel",
           "surface": "browse",
@@ -6213,7 +6213,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2818,
+          "line": 2839,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -6236,7 +6236,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3033,
+          "line": 3054,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -6259,7 +6259,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3060,
+          "line": 3081,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -6282,7 +6282,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3037,
+          "line": 3058,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -6305,7 +6305,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2982,
+          "line": 3003,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -6328,7 +6328,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3042,
+          "line": 3063,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -6351,7 +6351,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3052,
+          "line": 3073,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -6409,7 +6409,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3052,
+          "line": 3073,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -6479,7 +6479,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3037,
+          "line": 3058,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -6502,7 +6502,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 523,
+          "line": 534,
           "kind": "catalog_reference",
           "context": "ProductGallery",
           "surface": "shared",
@@ -6525,7 +6525,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3045,
+          "line": 3066,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -6549,7 +6549,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 1008,
+          "line": 1020,
           "kind": "catalog_reference",
           "context": "InternationalPhoneInput",
           "surface": "pharmacy_portal",
@@ -6557,7 +6557,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 3070,
+          "line": 3091,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -6580,7 +6580,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2955,
+          "line": 2976,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "request",
@@ -6615,7 +6615,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 965,
+          "line": 977,
           "kind": "catalog_reference",
           "context": "PharmacyCataloguePanel",
           "surface": "browse",
@@ -6673,7 +6673,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 533,
+          "line": 544,
           "kind": "catalog_reference",
           "context": "ProductDetailsList",
           "surface": "shared",
@@ -6708,7 +6708,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2969,
+          "line": 2990,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -6731,7 +6731,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 549,
+          "line": 560,
           "kind": "catalog_reference",
           "context": "CatalogueSkeleton",
           "surface": "browse",
@@ -6754,7 +6754,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3066,
+          "line": 3087,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -6777,7 +6777,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2997,
+          "line": 3018,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "product",
@@ -6800,7 +6800,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3047,
+          "line": 3068,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -6808,7 +6808,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 3048,
+          "line": 3069,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -6862,7 +6862,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2865,
+          "line": 2886,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -6908,7 +6908,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3037,
+          "line": 3058,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -6931,7 +6931,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2804,
+          "line": 2825,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -6954,7 +6954,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2904,
+          "line": 2925,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -6989,7 +6989,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3037,
+          "line": 3058,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -7024,7 +7024,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2910,
+          "line": 2931,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -7032,7 +7032,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2945,
+          "line": 2966,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -7125,7 +7125,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3035,
+          "line": 3056,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -7171,7 +7171,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2905,
+          "line": 2926,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -7194,7 +7194,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2636,
+          "line": 2657,
           "kind": "catalog_reference",
           "context": "requestContactRemoval",
           "surface": "shared",
@@ -7229,7 +7229,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2338,
+          "line": 2359,
           "kind": "catalog_reference",
           "context": "submitOrder",
           "surface": "shared",
@@ -7252,7 +7252,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3037,
+          "line": 3058,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -7275,7 +7275,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3038,
+          "line": 3059,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -7310,7 +7310,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2804,
+          "line": 2825,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -7333,7 +7333,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3056,
+          "line": 3077,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -7356,7 +7356,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3068,
+          "line": 3089,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -7379,7 +7379,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3047,
+          "line": 3068,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -7387,7 +7387,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 3048,
+          "line": 3069,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -7410,7 +7410,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3012,
+          "line": 3033,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -7418,7 +7418,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 3037,
+          "line": 3058,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -7441,7 +7441,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2886,
+          "line": 2907,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -7464,7 +7464,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2467,
+          "line": 2488,
           "kind": "catalog_reference",
           "context": "chooseOffer",
           "surface": "status",
@@ -7487,7 +7487,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2970,
+          "line": 2991,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -7510,7 +7510,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2844,
+          "line": 2865,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -7518,7 +7518,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 849,
+          "line": 861,
           "kind": "catalog_reference",
           "context": "ProductCard",
           "surface": "shared",
@@ -7553,7 +7553,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3077,
+          "line": 3098,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -7576,7 +7576,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 551,
+          "line": 562,
           "kind": "catalog_reference",
           "context": "CatalogueSkeleton",
           "surface": "browse",
@@ -7611,7 +7611,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2911,
+          "line": 2932,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -7619,7 +7619,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2946,
+          "line": 2967,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -7642,7 +7642,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3061,
+          "line": 3082,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -7665,7 +7665,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3038,
+          "line": 3059,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -7688,7 +7688,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2970,
+          "line": 2991,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -7696,7 +7696,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 3013,
+          "line": 3034,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -7719,7 +7719,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3017,
+          "line": 3038,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -7742,7 +7742,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2343,
+          "line": 2364,
           "kind": "catalog_reference",
           "context": "submitOrder",
           "surface": "shared",
@@ -7750,7 +7750,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2522,
+          "line": 2543,
           "kind": "catalog_reference",
           "context": "sendPharmacyCode",
           "surface": "shared",
@@ -7758,7 +7758,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2552,
+          "line": 2573,
           "kind": "catalog_reference",
           "context": "verifyPharmacyCode",
           "surface": "shared",
@@ -7766,7 +7766,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2584,
+          "line": 2605,
           "kind": "catalog_reference",
           "context": "requestContactEdit",
           "surface": "shared",
@@ -7789,7 +7789,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 515,
+          "line": 526,
           "kind": "catalog_reference",
           "context": "ProductGallery",
           "surface": "shared",
@@ -7812,7 +7812,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3066,
+          "line": 3087,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -7835,7 +7835,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2968,
+          "line": 2989,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -7858,7 +7858,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2985,
+          "line": 3006,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -7912,7 +7912,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3056,
+          "line": 3077,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "product",
@@ -7935,7 +7935,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2931,
+          "line": 2952,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -7958,7 +7958,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 964,
+          "line": 976,
           "kind": "catalog_reference",
           "context": "PharmacyCataloguePanel",
           "surface": "browse",
@@ -8004,7 +8004,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2984,
+          "line": 3005,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -8027,7 +8027,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2231,
+          "line": 2252,
           "kind": "catalog_reference",
           "context": "applyMapLocation",
           "surface": "shared",
@@ -8050,7 +8050,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2984,
+          "line": 3005,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -8073,7 +8073,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 767,
+          "line": 778,
           "kind": "catalog_reference",
           "context": "CatalogueHierarchy",
           "surface": "browse",
@@ -8096,7 +8096,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2910,
+          "line": 2931,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -8104,7 +8104,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2945,
+          "line": 2966,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -8127,7 +8127,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2909,
+          "line": 2930,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "product",
@@ -8135,7 +8135,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2944,
+          "line": 2965,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "product",
@@ -8143,7 +8143,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 536,
+          "line": 547,
           "kind": "catalog_reference",
           "context": "ProductDetailsList",
           "surface": "product",
@@ -8189,7 +8189,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3069,
+          "line": 3090,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -8212,7 +8212,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2294,
+          "line": 2315,
           "kind": "catalog_reference",
           "context": "resetRequest",
           "surface": "shared",
@@ -8235,7 +8235,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2787,
+          "line": 2808,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -8243,7 +8243,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2868,
+          "line": 2889,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -8251,7 +8251,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2984,
+          "line": 3005,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -8274,7 +8274,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2886,
+          "line": 2907,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -8320,7 +8320,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2794,
+          "line": 2815,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -8343,7 +8343,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2977,
+          "line": 2998,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -8366,7 +8366,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3012,
+          "line": 3033,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -8389,7 +8389,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3070,
+          "line": 3091,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -8435,7 +8435,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 514,
+          "line": 525,
           "kind": "catalog_reference",
           "context": "ProductGallery",
           "surface": "shared",
@@ -8458,7 +8458,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3012,
+          "line": 3033,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -8481,7 +8481,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2798,
+          "line": 2819,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -8504,7 +8504,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2745,
+          "line": 2766,
           "kind": "catalog_reference",
           "context": "sendOffer",
           "surface": "status",
@@ -8527,7 +8527,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 693,
+          "line": 704,
           "kind": "catalog_reference",
           "context": "FeaturedProductTile",
           "surface": "shared",
@@ -8535,7 +8535,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 833,
+          "line": 845,
           "kind": "catalog_reference",
           "context": "ProductCard",
           "surface": "shared",
@@ -8558,7 +8558,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2970,
+          "line": 2991,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -8581,7 +8581,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 513,
+          "line": 524,
           "kind": "catalog_reference",
           "context": "ProductGallery",
           "surface": "shared",
@@ -8604,7 +8604,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2871,
+          "line": 2892,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -8627,7 +8627,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2787,
+          "line": 2808,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -8650,7 +8650,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3012,
+          "line": 3033,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -8673,7 +8673,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2787,
+          "line": 2808,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -8696,7 +8696,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3017,
+          "line": 3038,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -8719,7 +8719,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2135,
+          "line": 2156,
           "kind": "catalog_reference",
           "context": "clearCatalogueFilters",
           "surface": "browse",
@@ -8742,7 +8742,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 750,
+          "line": 761,
           "kind": "catalog_reference",
           "context": "CatalogueHierarchy",
           "surface": "browse",
@@ -8765,7 +8765,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2959,
+          "line": 2980,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -8773,7 +8773,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 3054,
+          "line": 3075,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -8796,7 +8796,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3052,
+          "line": 3073,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -8819,7 +8819,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3025,
+          "line": 3046,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -8827,7 +8827,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 3037,
+          "line": 3058,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -8862,7 +8862,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3052,
+          "line": 3073,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -8908,7 +8908,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2865,
+          "line": 2886,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -8931,7 +8931,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3037,
+          "line": 3058,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -8954,7 +8954,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3052,
+          "line": 3073,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -8977,7 +8977,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2787,
+          "line": 2808,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -9023,7 +9023,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2912,
+          "line": 2933,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -9031,7 +9031,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2947,
+          "line": 2968,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -9039,7 +9039,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 955,
+          "line": 967,
           "kind": "catalog_reference",
           "context": "PharmacyCataloguePanel",
           "surface": "browse",
@@ -9063,7 +9063,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3037,
+          "line": 3058,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -9071,7 +9071,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 3054,
+          "line": 3075,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -9106,7 +9106,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2909,
+          "line": 2930,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -9114,7 +9114,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2944,
+          "line": 2965,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -9195,7 +9195,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2255,
+          "line": 2276,
           "kind": "catalog_reference",
           "context": "handlePrescriptionChange",
           "surface": "product",
@@ -9219,7 +9219,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2804,
+          "line": 2825,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -9227,7 +9227,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 3049,
+          "line": 3070,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -9250,7 +9250,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3037,
+          "line": 3058,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -9273,7 +9273,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3002,
+          "line": 3023,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -9296,7 +9296,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2891,
+          "line": 2912,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -9319,7 +9319,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3071,
+          "line": 3092,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -9342,7 +9342,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3025,
+          "line": 3046,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -9365,7 +9365,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2844,
+          "line": 2865,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -9373,7 +9373,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 702,
+          "line": 713,
           "kind": "catalog_reference",
           "context": "FeaturedProductTile",
           "surface": "shared",
@@ -9381,7 +9381,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 849,
+          "line": 861,
           "kind": "catalog_reference",
           "context": "ProductCard",
           "surface": "shared",
@@ -9404,7 +9404,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 380,
+          "line": 391,
           "kind": "catalog_reference",
           "context": "module",
           "surface": "shared",
@@ -9450,7 +9450,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3012,
+          "line": 3033,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -9473,7 +9473,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3037,
+          "line": 3058,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -9508,7 +9508,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3055,
+          "line": 3076,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "product",
@@ -9543,7 +9543,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3077,
+          "line": 3098,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -9566,7 +9566,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 521,
+          "line": 532,
           "kind": "catalog_reference",
           "context": "ProductGallery",
           "surface": "shared",
@@ -9612,7 +9612,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 413,
+          "line": 424,
           "kind": "catalog_reference",
           "context": "HeroArtworkCarousel",
           "surface": "browse",
@@ -9635,7 +9635,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2786,
+          "line": 2807,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -9643,7 +9643,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2937,
+          "line": 2958,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -9666,7 +9666,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2813,
+          "line": 2834,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -9712,7 +9712,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2806,
+          "line": 2827,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -9736,7 +9736,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2979,
+          "line": 3000,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -9744,7 +9744,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 3077,
+          "line": 3098,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -9767,7 +9767,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 950,
+          "line": 962,
           "kind": "catalog_reference",
           "context": "PharmacyCataloguePanel",
           "surface": "browse",
@@ -9790,7 +9790,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2882,
+          "line": 2903,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -9813,7 +9813,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3043,
+          "line": 3064,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -9848,7 +9848,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3037,
+          "line": 3058,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -9871,7 +9871,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2970,
+          "line": 2991,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -9879,7 +9879,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 3013,
+          "line": 3034,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -9902,7 +9902,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3054,
+          "line": 3075,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -9925,7 +9925,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3079,
+          "line": 3100,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -9948,7 +9948,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2909,
+          "line": 2930,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -9956,7 +9956,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2944,
+          "line": 2965,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -9979,7 +9979,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2171,
+          "line": 2192,
           "kind": "catalog_reference",
           "context": "adjust",
           "surface": "shared",
@@ -10002,7 +10002,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2931,
+          "line": 2952,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -10025,7 +10025,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2941,
+          "line": 2962,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -10071,7 +10071,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2871,
+          "line": 2892,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -10094,7 +10094,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2912,
+          "line": 2933,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -10102,7 +10102,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2947,
+          "line": 2968,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -10110,7 +10110,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 955,
+          "line": 967,
           "kind": "catalog_reference",
           "context": "PharmacyCataloguePanel",
           "surface": "browse",
@@ -10168,7 +10168,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 521,
+          "line": 532,
           "kind": "catalog_reference",
           "context": "ProductGallery",
           "surface": "shared",
@@ -10191,7 +10191,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3013,
+          "line": 3034,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -10214,7 +10214,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2912,
+          "line": 2933,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -10222,7 +10222,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2947,
+          "line": 2968,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -10230,7 +10230,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 955,
+          "line": 967,
           "kind": "catalog_reference",
           "context": "PharmacyCataloguePanel",
           "surface": "browse",
@@ -10253,7 +10253,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3037,
+          "line": 3058,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -10276,7 +10276,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2178,
+          "line": 2199,
           "kind": "catalog_reference",
           "context": "setSubstituteConsent",
           "surface": "shared",
@@ -10299,7 +10299,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3045,
+          "line": 3066,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -10368,7 +10368,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3038,
+          "line": 3059,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -10460,7 +10460,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2355,
+          "line": 2376,
           "kind": "catalog_reference",
           "context": "submitOrder",
           "surface": "shared",
@@ -10483,7 +10483,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3037,
+          "line": 3058,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -10506,7 +10506,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3054,
+          "line": 3075,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -10529,7 +10529,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 950,
+          "line": 962,
           "kind": "catalog_reference",
           "context": "PharmacyCataloguePanel",
           "surface": "browse",
@@ -10552,7 +10552,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 494,
+          "line": 505,
           "kind": "catalog_reference",
           "context": "ProductGallery",
           "surface": "shared",
@@ -10575,7 +10575,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2912,
+          "line": 2933,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -10583,7 +10583,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2947,
+          "line": 2968,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -10606,7 +10606,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2904,
+          "line": 2925,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -10629,7 +10629,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3037,
+          "line": 3058,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -10652,7 +10652,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3034,
+          "line": 3055,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -10675,7 +10675,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2909,
+          "line": 2930,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -10683,7 +10683,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2944,
+          "line": 2965,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -10718,7 +10718,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2906,
+          "line": 2927,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -10726,7 +10726,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2941,
+          "line": 2962,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -10772,7 +10772,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2799,
+          "line": 2820,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -10818,7 +10818,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3071,
+          "line": 3092,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -10853,7 +10853,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2929,
+          "line": 2950,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -10876,7 +10876,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 442,
+          "line": 453,
           "kind": "catalog_reference",
           "context": "HeroArtworkCarousel",
           "surface": "shared",
@@ -10899,7 +10899,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3077,
+          "line": 3098,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -10922,7 +10922,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2985,
+          "line": 3006,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -10945,7 +10945,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2875,
+          "line": 2896,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -10980,7 +10980,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 436,
+          "line": 447,
           "kind": "catalog_reference",
           "context": "HeroArtworkCarousel",
           "surface": "shared",
@@ -10988,7 +10988,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 478,
+          "line": 489,
           "kind": "catalog_reference",
           "context": "ProductGallery",
           "surface": "shared",
@@ -10996,7 +10996,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 516,
+          "line": 527,
           "kind": "catalog_reference",
           "context": "ProductGallery",
           "surface": "shared",
@@ -11031,7 +11031,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2787,
+          "line": 2808,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -11089,7 +11089,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2949,
+          "line": 2970,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -11112,7 +11112,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 473,
+          "line": 484,
           "kind": "catalog_reference",
           "context": "ProductGallery",
           "surface": "shared",
@@ -11193,7 +11193,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3049,
+          "line": 3070,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -11216,7 +11216,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3077,
+          "line": 3098,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -11251,7 +11251,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3052,
+          "line": 3073,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -11274,7 +11274,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2795,
+          "line": 2816,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -11297,7 +11297,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2912,
+          "line": 2933,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -11305,7 +11305,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2947,
+          "line": 2968,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -11313,7 +11313,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 955,
+          "line": 967,
           "kind": "catalog_reference",
           "context": "PharmacyCataloguePanel",
           "surface": "browse",
@@ -11348,7 +11348,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3077,
+          "line": 3098,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -11371,7 +11371,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3077,
+          "line": 3098,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -11417,7 +11417,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3043,
+          "line": 3064,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -11440,7 +11440,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2931,
+          "line": 2952,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -11463,7 +11463,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2787,
+          "line": 2808,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -11498,7 +11498,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2915,
+          "line": 2936,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -11506,7 +11506,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 956,
+          "line": 968,
           "kind": "catalog_reference",
           "context": "PharmacyCataloguePanel",
           "surface": "browse",
@@ -11529,7 +11529,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3012,
+          "line": 3033,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -11576,7 +11576,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2904,
+          "line": 2925,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -11622,7 +11622,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2861,
+          "line": 2882,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -11645,7 +11645,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2705,
+          "line": 2726,
           "kind": "catalog_reference",
           "context": "recordCentralPrice",
           "surface": "shared",
@@ -11668,7 +11668,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2260,
+          "line": 2281,
           "kind": "catalog_reference",
           "context": "handlePrescriptionChange",
           "surface": "product",
@@ -11691,7 +11691,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2852,
+          "line": 2873,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -11714,7 +11714,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 968,
+          "line": 980,
           "kind": "catalog_reference",
           "context": "PharmacyCataloguePanel",
           "surface": "pharmacy_portal",
@@ -11737,7 +11737,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2334,
+          "line": 2355,
           "kind": "catalog_reference",
           "context": "submitOrder",
           "surface": "shared",
@@ -11760,7 +11760,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2807,
+          "line": 2828,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -11783,7 +11783,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2148,
+          "line": 2169,
           "kind": "catalog_reference",
           "context": "add",
           "surface": "shared",
@@ -11806,7 +11806,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2955,
+          "line": 2976,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "request",
@@ -11829,7 +11829,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 378,
+          "line": 389,
           "kind": "catalog_reference",
           "context": "module",
           "surface": "shared",
@@ -11852,7 +11852,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3062,
+          "line": 3083,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -11875,7 +11875,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3025,
+          "line": 3046,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -11898,7 +11898,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3012,
+          "line": 3033,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -11921,7 +11921,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3038,
+          "line": 3059,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -11944,7 +11944,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3008,
+          "line": 3029,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -11990,7 +11990,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 441,
+          "line": 452,
           "kind": "catalog_reference",
           "context": "HeroArtworkCarousel",
           "surface": "shared",
@@ -12013,7 +12013,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3077,
+          "line": 3098,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -12036,7 +12036,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3027,
+          "line": 3048,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -12059,7 +12059,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3043,
+          "line": 3064,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -12082,7 +12082,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2480,
+          "line": 2501,
           "kind": "catalog_reference",
           "context": "openPortal",
           "surface": "pharmacy_portal",
@@ -12105,7 +12105,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2535,
+          "line": 2556,
           "kind": "catalog_reference",
           "context": "sendPharmacyCode",
           "surface": "shared",
@@ -12128,7 +12128,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3037,
+          "line": 3058,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -12197,7 +12197,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3013,
+          "line": 3034,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -12220,7 +12220,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2976,
+          "line": 2997,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -12290,7 +12290,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2975,
+          "line": 2996,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -12298,7 +12298,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 3043,
+          "line": 3064,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -12321,7 +12321,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2863,
+          "line": 2884,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -12344,7 +12344,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2970,
+          "line": 2991,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -12367,7 +12367,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2911,
+          "line": 2932,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -12375,7 +12375,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2946,
+          "line": 2967,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -12410,7 +12410,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2969,
+          "line": 2990,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "request",
@@ -12433,7 +12433,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3042,
+          "line": 3063,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -12456,7 +12456,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2665,
+          "line": 2686,
           "kind": "catalog_reference",
           "context": "leavePharmacyPortal",
           "surface": "pharmacy_portal",
@@ -12479,7 +12479,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3024,
+          "line": 3045,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -12503,7 +12503,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3061,
+          "line": 3082,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -12534,7 +12534,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2871,
+          "line": 2892,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -12615,7 +12615,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3067,
+          "line": 3088,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -12638,7 +12638,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3077,
+          "line": 3098,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -12661,7 +12661,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3047,
+          "line": 3068,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -12707,7 +12707,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3045,
+          "line": 3066,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -12765,7 +12765,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3005,
+          "line": 3026,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -12811,7 +12811,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3037,
+          "line": 3058,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -12834,7 +12834,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2910,
+          "line": 2931,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -12842,7 +12842,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2945,
+          "line": 2966,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -12865,7 +12865,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2958,
+          "line": 2979,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -12911,7 +12911,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2965,
+          "line": 2986,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -12934,7 +12934,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3037,
+          "line": 3058,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -12957,7 +12957,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 846,
+          "line": 858,
           "kind": "catalog_reference",
           "context": "ProductCard",
           "surface": "product",
@@ -12980,7 +12980,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2929,
+          "line": 2950,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -13003,7 +13003,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2917,
+          "line": 2938,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -13026,7 +13026,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3047,
+          "line": 3068,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -13049,7 +13049,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3042,
+          "line": 3063,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -13057,7 +13057,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 3048,
+          "line": 3069,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -13080,7 +13080,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3047,
+          "line": 3068,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "pharmacy_portal",
@@ -13103,7 +13103,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3077,
+          "line": 3098,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -13162,7 +13162,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2243,
+          "line": 2264,
           "kind": "catalog_reference",
           "context": "applyDistrictLocation",
           "surface": "browse",
@@ -13185,7 +13185,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2994,
+          "line": 3015,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -13208,7 +13208,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2995,
+          "line": 3016,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -13231,7 +13231,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2986,
+          "line": 3007,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -13254,7 +13254,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2986,
+          "line": 3007,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -13277,7 +13277,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2989,
+          "line": 3010,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -13300,7 +13300,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2991,
+          "line": 3012,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -13323,7 +13323,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2237,
+          "line": 2258,
           "kind": "catalog_reference",
           "context": "applyDistrictLocation",
           "surface": "shared",
@@ -13346,7 +13346,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2995,
+          "line": 3016,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "browse",
@@ -13393,7 +13393,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2823,
+          "line": 2844,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -13424,7 +13424,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2805,
+          "line": 2826,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -13432,7 +13432,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2811,
+          "line": 2832,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -13440,7 +13440,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2937,
+          "line": 2958,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -13471,7 +13471,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2937,
+          "line": 2958,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "legal",
@@ -13518,7 +13518,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2823,
+          "line": 2844,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -13526,7 +13526,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2937,
+          "line": 2958,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -13557,7 +13557,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2937,
+          "line": 2958,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -13580,7 +13580,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 567,
+          "line": 578,
           "kind": "catalog_reference",
           "context": "prescriptionLabel",
           "surface": "product",
@@ -13603,7 +13603,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2837,
+          "line": 2858,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -13626,7 +13626,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2839,
+          "line": 2860,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -13650,7 +13650,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2728,
+          "line": 2749,
           "kind": "catalog_reference",
           "context": "recordCentralPrice",
           "surface": "shared",
@@ -13658,7 +13658,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2729,
+          "line": 2750,
           "kind": "catalog_reference",
           "context": "recordCentralPrice",
           "surface": "shared",
@@ -13666,7 +13666,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2843,
+          "line": 2864,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -13674,7 +13674,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 3004,
+          "line": 3025,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -13682,7 +13682,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 699,
+          "line": 710,
           "kind": "catalog_reference",
           "context": "FeaturedProductTile",
           "surface": "shared",
@@ -13690,7 +13690,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 848,
+          "line": 860,
           "kind": "catalog_reference",
           "context": "ProductCard",
           "surface": "shared",
@@ -13698,7 +13698,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 963,
+          "line": 975,
           "kind": "catalog_reference",
           "context": "PharmacyCataloguePanel",
           "surface": "browse",
@@ -13721,7 +13721,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 566,
+          "line": 577,
           "kind": "catalog_reference",
           "context": "prescriptionLabel",
           "surface": "product",
@@ -13744,7 +13744,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 565,
+          "line": 576,
           "kind": "catalog_reference",
           "context": "prescriptionLabel",
           "surface": "product",
@@ -13768,7 +13768,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2843,
+          "line": 2864,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -13776,7 +13776,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 848,
+          "line": 860,
           "kind": "catalog_reference",
           "context": "ProductCard",
           "surface": "shared",
@@ -13784,7 +13784,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 955,
+          "line": 967,
           "kind": "catalog_reference",
           "context": "PharmacyCataloguePanel",
           "surface": "browse",
@@ -13792,7 +13792,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 963,
+          "line": 975,
           "kind": "catalog_reference",
           "context": "PharmacyCataloguePanel",
           "surface": "browse",
@@ -13835,7 +13835,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2937,
+          "line": 2958,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -13866,7 +13866,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2937,
+          "line": 2958,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -13897,7 +13897,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2937,
+          "line": 2958,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -13928,7 +13928,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 2937,
+          "line": 2958,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -13963,7 +13963,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2806,
+          "line": 2827,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "request",
@@ -14046,7 +14046,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3037,
+          "line": 3058,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -14069,7 +14069,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 2811,
+          "line": 2832,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -14077,7 +14077,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 3024,
+          "line": 3045,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -14100,7 +14100,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3037,
+          "line": 3058,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -14123,7 +14123,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3012,
+          "line": 3033,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -14131,7 +14131,7 @@
         },
         {
           "file": "app/marketplace.tsx",
-          "line": 3037,
+          "line": 3058,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "status",
@@ -14154,7 +14154,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3038,
+          "line": 3059,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
@@ -14189,7 +14189,7 @@
       "occurrences": [
         {
           "file": "app/marketplace.tsx",
-          "line": 3043,
+          "line": 3064,
           "kind": "catalog_reference",
           "context": "Marketplace",
           "surface": "shared",
