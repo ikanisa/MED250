@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { getMed250RuntimeEnvironmentStore } from "./runtime-environment-store.js";
 
 const PUBLIC_FETCH_TIMEOUT_MS = 8_000;
 
@@ -109,8 +110,13 @@ function parsePublicTrustMetrics(payload: unknown): PublicTrustMetrics | null {
  * public signal; the storefront never substitutes a build-time or invented value.
  */
 export const getPublicTrustMetrics = cache(async function getPublicTrustMetrics(): Promise<PublicTrustMetrics | null> {
-  const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ?? "";
-  const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim() ?? "";
+  const runtimeEnvironment = getMed250RuntimeEnvironmentStore();
+  const baseUrl = (runtimeEnvironment
+    ? runtimeEnvironment.NEXT_PUBLIC_SUPABASE_URL
+    : process.env.NEXT_PUBLIC_SUPABASE_URL)?.trim() ?? "";
+  const publishableKey = (runtimeEnvironment
+    ? runtimeEnvironment.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    : process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY)?.trim() ?? "";
   if (!baseUrl || !publishableKey) return null;
 
   let endpoint: URL;

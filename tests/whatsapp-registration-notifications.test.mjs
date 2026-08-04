@@ -99,6 +99,11 @@ test("notification functions are configured with the intended public and private
   assert.match(dispatch, /WHATSAPP_DELIVERY_CONCURRENCY/);
   assert.match(dispatch, /Math\.min\([\s\S]*, 8\)/);
   assert.match(dispatch, /Promise\.all\(messages\.slice/);
+  assert.match(dispatch, /whatsapp_dispatch_degraded/);
+  assert.match(dispatch, /whatsapp_dispatch_completed/);
+  assert.match(dispatch, /max_attempt/);
+  assert.match(dispatch, /duration_ms/);
+  assert.doesNotMatch(dispatch, /return Response\.json\(\{ claimed: messages\.length, results \}\)/);
   assert.match(webhook, /x-hub-signature-256/);
   assert.match(webhook, /HMAC/);
 });

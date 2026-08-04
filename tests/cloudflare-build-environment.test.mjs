@@ -26,14 +26,19 @@ test("Cloudflare build wrapper rejects unknown environments", async () => {
 });
 
 test("Worker runtime bindings are request-scoped and production tracing is sampled", async () => {
-  const [runtimeEnvironment, worker, wrangler, generatedTypes] = await Promise.all([
+  const [runtimeEnvironment, runtimeEnvironmentStore, publicTrustMetrics, worker, wrangler, generatedTypes] = await Promise.all([
     readFile(new URL("../lib/runtime-environment.ts", import.meta.url), "utf8"),
+    readFile(new URL("../lib/runtime-environment-store.js", import.meta.url), "utf8"),
+    readFile(new URL("../lib/public-trust-metrics.ts", import.meta.url), "utf8"),
     readFile(new URL("../worker/index.ts", import.meta.url), "utf8"),
     readFile(new URL("../wrangler.jsonc", import.meta.url), "utf8"),
     readFile(new URL("../worker-configuration.d.ts", import.meta.url), "utf8"),
   ]);
-  assert.match(runtimeEnvironment, /new AsyncLocalStorage<Med250RuntimeEnvironment>/);
-  assert.doesNotMatch(runtimeEnvironment, /globalThis|__MED250_RUNTIME_ENVIRONMENT__/);
+  assert.match(runtimeEnvironmentStore, /new AsyncLocalStorage\(\)/);
+  assert.doesNotMatch(`${runtimeEnvironment}\n${runtimeEnvironmentStore}`, /globalThis|__MED250_RUNTIME_ENVIRONMENT__/);
+  assert.match(publicTrustMetrics, /getMed250RuntimeEnvironmentStore\(\)/);
+  assert.match(publicTrustMetrics, /runtimeEnvironment\.NEXT_PUBLIC_SUPABASE_URL/);
+  assert.match(publicTrustMetrics, /runtimeEnvironment\.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY/);
   assert.match(worker, /runWithMed250RuntimeEnvironment\(env/);
   assert.match(worker, /type Env = Omit<Cloudflare\.Env/);
   assert.match(wrangler, /"traces": \{ "enabled": true, "head_sampling_rate": 0\.05 \}/);

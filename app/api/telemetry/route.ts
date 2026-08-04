@@ -1,11 +1,14 @@
 const EVENT_NAMES = new Set([
   "catalogue_search",
   "catalogue_view_changed",
+  "product_viewed",
   "product_added",
   "order_started",
   "order_placed",
   "order_failed",
   "realtime_status",
+  "realtime_event",
+  "offer_received",
   "pharmacy_selected",
   "whatsapp_handoff",
   "momo_handoff",
@@ -66,6 +69,19 @@ function sanitizeProperties(name: string, properties: Record<string, unknown>) {
       has_price: booleanValue(properties, "hasPrice"),
     };
   }
+  if (name === "product_viewed") {
+    return {
+      category: typeof properties.category === "string" && CATEGORIES.has(properties.category) ? properties.category : "Other",
+      has_image: booleanValue(properties, "hasImage"),
+      has_price: booleanValue(properties, "hasPrice"),
+      prescription_state: properties.prescriptionState === "prescription"
+        || properties.prescriptionState === "non_prescription"
+        || properties.prescriptionState === "pharmacist_only"
+        || properties.prescriptionState === "unclassified"
+        ? properties.prescriptionState
+        : null,
+    };
+  }
   if (name === "order_started") {
     return {
       item_kinds_bucket: bucket(numberValue(properties, "itemKinds"), [1, 3, 6, 12]),
@@ -89,6 +105,18 @@ function sanitizeProperties(name: string, properties: Record<string, unknown>) {
       status: properties.status === "connecting" || properties.status === "connected" || properties.status === "degraded"
         ? properties.status
         : null,
+    };
+  }
+  if (name === "realtime_event") {
+    return {
+      scope: properties.scope === "customer_offers" || properties.scope === "pharmacy_requests" ? properties.scope : null,
+      latency_ms_bucket: bucket(numberValue(properties, "latencyMs"), [250, 1000, 5000, 15_000, 60_000]),
+    };
+  }
+  if (name === "offer_received") {
+    return {
+      first_response: booleanValue(properties, "firstResponse"),
+      response_count_bucket: bucket(numberValue(properties, "responseCount"), [1, 2, 5, 10]),
     };
   }
   if (name === "pharmacy_selected") {

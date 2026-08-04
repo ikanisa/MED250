@@ -1136,12 +1136,23 @@ export async function loadSelectedContact(orderId: string): Promise<SelectedPhar
 let offerSubscriptionSequence = 0;
 
 export type RealtimeConnectionStatus = "connecting" | "connected" | "degraded";
+export type RealtimeEventActivity = { latencyMs: number | null };
+
+function realtimeEventLatencyMs(payload: unknown): number | null {
+  if (!isRecord(payload) || !isRecord(payload.new)) return null;
+  const timestamp = stringValue(payload.new, "updated_at", "created_at", "responded_at", "selected_at");
+  const occurredAt = Date.parse(timestamp);
+  if (!Number.isFinite(occurredAt)) return null;
+  const latencyMs = Date.now() - occurredAt;
+  return latencyMs >= 0 && latencyMs <= 86_400_000 ? latencyMs : null;
+}
 
 export function subscribeToOffers(
   orderId: string,
   onOffers: (offers: OrderOffer[]) => void,
   onError?: (error: Error) => void,
   onStatus?: (status: RealtimeConnectionStatus) => void,
+  onActivity?: (activity: RealtimeEventActivity) => void,
 ): () => void {
   const cleanedOrderId = requireNonEmpty(orderId, "Order ID");
   const client = requireCustomerBackend();
@@ -1181,7 +1192,10 @@ export function subscribeToOffers(
         table: "dawanear_offers",
         filter: `order_id=eq.${cleanedOrderId}`,
       },
-      refresh,
+      (payload) => {
+        onActivity?.({ latencyMs: realtimeEventLatencyMs(payload) });
+        refresh();
+      },
     )
     .on(
       "postgres_changes",
@@ -1191,7 +1205,10 @@ export function subscribeToOffers(
         table: "dawanear_orders",
         filter: `id=eq.${cleanedOrderId}`,
       },
-      refresh,
+      (payload) => {
+        onActivity?.({ latencyMs: realtimeEventLatencyMs(payload) });
+        refresh();
+      },
     )
     .subscribe((status) => {
       if (status === "SUBSCRIBED") {
@@ -1470,6 +1487,7 @@ export function subscribeToPharmacyNotifications(
   onChange: () => void,
   onError?: (error: Error) => void,
   onStatus?: (status: RealtimeConnectionStatus) => void,
+  onActivity?: (activity: RealtimeEventActivity) => void,
 ): () => void {
   const cleanedPharmacyId = requireNonEmpty(pharmacyId, "Pharmacy ID");
   const client = requirePharmacyBackend();
@@ -1497,7 +1515,10 @@ export function subscribeToPharmacyNotifications(
         table: "dawanear_pharmacy_notifications",
         filter: `pharmacy_id=eq.${cleanedPharmacyId}`,
       },
-      refresh,
+      (payload) => {
+        onActivity?.({ latencyMs: realtimeEventLatencyMs(payload) });
+        refresh();
+      },
     )
     .subscribe((status) => {
       if (status === "SUBSCRIBED") {

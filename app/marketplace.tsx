@@ -1,6 +1,6 @@
 "use client";
 
-import { lazy, startTransition, Suspense, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, startTransition, Suspense, useDeferredValue, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -149,6 +149,8 @@ type MarketplaceProps = {
   initialProducts?: Product[];
   initialTaxonomy?: CatalogueTaxonomyRow[];
   initialTrustMetrics?: PublicTrustMetrics | null;
+  productDetails?: ReactNode;
+  productRequestExpectations?: ReactNode;
 };
 type PendingOrderAttempt = {
   clientRequestId: string;
@@ -532,25 +534,6 @@ function ProductGallery({ product }: { product: Product }) {
       </button>
     </div>
   </section>;
-}
-
-function ProductDetailsList({ product }: { product: Product }) {
-  const rows = [
-    product.strength ? { label: marketplaceMessage("inventory.63ee3a1b965a"), value: product.strength, icon: HeartPulse } : null,
-    product.form ? { label: marketplaceMessage("inventory.2e0e960ab320"), value: product.form, icon: Cross } : null,
-    product.packSize ? { label: marketplaceMessage("inventory.80dc21673e55"), value: product.packSize, icon: PackageCheck } : null,
-    product.manufacturer || product.manufacturerCountry ? { label: marketplaceMessage("inventory.1af384c577f2"), value: [product.manufacturer, product.manufacturerCountry].filter(Boolean).join(" · "), icon: Store } : null,
-    product.registrationNumber ? { label: marketplaceMessage("inventory.5546bafd5ec8"), value: product.registrationNumber, icon: ShieldCheck } : null,
-    prescriptionLabel(product.prescriptionStatus) ? { label: marketplaceMessage("inventory.9bc867e65b8f"), value: prescriptionLabel(product.prescriptionStatus), icon: FileText } : null,
-  ].filter((row): row is NonNullable<typeof row> => Boolean(row));
-
-  if (!rows.length) return null;
-  return <dl className="product-specification-list">
-    {rows.map((row) => {
-      const Icon = row.icon;
-      return <div key={row.label}><Icon size={19} aria-hidden="true" /><dt>{row.label}</dt><dd>{row.value}</dd></div>;
-    })}
-  </dl>;
 }
 
 function CatalogueSkeleton() {
@@ -1056,6 +1039,8 @@ export default function Marketplace({
   initialProducts = [],
   initialTaxonomy = [],
   initialTrustMetrics = null,
+  productDetails = null,
+  productRequestExpectations = null,
 }: MarketplaceProps = {}) {
   const previewMode = marketplaceMode !== "live";
   const publicCatalogMode = marketplaceMode === "catalog";
@@ -1152,6 +1137,8 @@ export default function Marketplace({
   const [selectingOfferId, setSelectingOfferId] = useState<string | null>(null);
   const [selectedContact, setSelectedContact] = useState<SelectedContact | null>(null);
   const [requestedOrderDeepLink, setRequestedOrderDeepLink] = useState<string | null>(null);
+  const offerTrackingRef = useRef<string | null>(null);
+  const productViewTrackedRef = useRef(false);
 
   const [portalOpen, setPortalOpen] = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
@@ -1203,6 +1190,31 @@ export default function Marketplace({
             : filtersOpen
               ? "catalogue-filters"
               : null;
+
+  useEffect(() => {
+    if (!initialProduct || productViewTrackedRef.current) return;
+    productViewTrackedRef.current = true;
+    trackMarketplaceEvent("product_viewed", {
+      category: initialProduct.category,
+      hasImage: Boolean(initialProduct.imageUrl || initialProduct.imageUrls?.[0]),
+      hasPrice: hasPriceData(initialProduct),
+      prescriptionState: initialProduct.prescriptionStatus || "unclassified",
+    });
+  }, [initialProduct]);
+
+  useEffect(() => {
+    if (!activeOrderId) {
+      offerTrackingRef.current = null;
+      return;
+    }
+    if (offers.length && offerTrackingRef.current !== activeOrderId) {
+      trackMarketplaceEvent("offer_received", {
+        firstResponse: true,
+        responseCount: offers.length,
+      });
+      offerTrackingRef.current = activeOrderId;
+    }
+  }, [activeOrderId, offers.length]);
 
   function announce(message: string, tone: FeedbackToast["tone"] = "success") {
     setFeedbackToast({ id: Date.now(), message, tone });
@@ -1704,6 +1716,7 @@ export default function Marketplace({
         setOfferRealtimeStatus(status);
         trackMarketplaceEvent("realtime_status", { scope: "customer_offers", status });
       },
+      ({ latencyMs }) => trackMarketplaceEvent("realtime_event", { scope: "customer_offers", latencyMs }),
     );
     return () => { unsubscribe(); };
   }, [activeOrderId]);
@@ -1740,6 +1753,7 @@ export default function Marketplace({
         setPharmacyRealtimeStatus(status);
         trackMarketplaceEvent("realtime_status", { scope: "pharmacy_requests", status });
       },
+      ({ latencyMs }) => trackMarketplaceEvent("realtime_event", { scope: "pharmacy_requests", latencyMs }),
     );
     return () => {
       cancelled = true;
@@ -2880,7 +2894,8 @@ export default function Marketplace({
               <p>{selectedProduct.description}</p>
               {selectedProduct.descriptionSourceName && selectedProduct.descriptionSourceUrl?.startsWith("https://") ? <a href={selectedProduct.descriptionSourceUrl} target="_blank" rel="noreferrer">{marketplaceFormatMessage("product.description_source", [selectedProduct.descriptionSourceName])}</a> : null}
             </section> : null}
-            <ProductDetailsList product={selectedProduct} />
+            {productDetails}
+            {!publicCatalogMode ? productRequestExpectations : null}
             <div className={`product-detail-buy ${hasPriceData(selectedProduct) ? "has-price" : "no-price"}`}>
               {hasPriceData(selectedProduct) ? <div><span>{marketplaceMessage("product.price_label")}</span><b>{marketplaceMessage("product.indicative_price_prefix")} {marketplaceNumber(selectedProduct.indicativePriceRwf)}</b></div> : null}
               <button onClick={() => add(selectedProduct)} disabled={publicCatalogMode || (!previewMode && !selectedProduct.isOrderable)} aria-label={publicCatalogMode ? marketplaceFormatMessage("inventory.9161bb4f1d4f", [selectedProductDisplayTitle]) : marketplaceFormatMessage("inventory.b16ae15256ae", [selectedProductDisplayTitle])} title={publicCatalogMode ? marketplaceMessage("inventory.167285abf102") : undefined}><ShoppingCart size={20} /> {publicCatalogMode ? marketplaceMessage("inventory.398c15b85be1") : marketplaceMessage("inventory.1bf36d90e261")}</button>

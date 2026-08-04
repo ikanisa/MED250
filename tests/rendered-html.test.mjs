@@ -172,12 +172,20 @@ test("server-renders canonical product metadata and fails image delivery blank w
   assert.doesNotMatch(html, /storage\/v1\/object\/public\/product-images\/v1\/rwanda-fda-hm-0002\//);
   assert.doesNotMatch(html, /storage\/v1\/render\/image\/public\/product-images/);
   assert.match(html, /"@type":"Product"/);
+  assert.ok(html.includes(`"@id":"${metadataOrigin}/product/${productId}#product"`));
+  assert.match(html, /"@type":"MedicalWebPage"/);
+  assert.ok(html.includes(`"mainEntity":{"@id":"${metadataOrigin}/product/${productId}#product"}`));
   assert.match(html, /"alternateName":"BUPICAINE HEAVY"/);
   assert.match(html, /Official catalogue name/);
   assert.match(html, /"@type":"BreadcrumbList"/);
   assert.match(html, /Manufacturer/);
   assert.match(html, /Rwanda FDA registration/);
   assert.match(html, /Tyche Industries Limited/);
+  assert.match(html, /What happens after you request/);
+  assert.match(html, /up to 10 eligible pharmacies near your chosen location/i);
+  assert.match(html, /confirms its final price/i);
+  assert.match(html, /pickup or delivery/i);
+  assert.match(html, /WhatsApp alert/i);
   assert.ok(!html.includes(`"image":"${metadataOrigin}/og-marketplace-v2.png"`));
   assert.doesNotMatch(html, /About this product/);
 });
@@ -385,6 +393,8 @@ test("keeps the header search icon light on its primary gradient button", async 
 test("accepts only privacy-safe bucketed marketplace telemetry", async () => {
   const telemetry = await readFile(new URL("../app/api/telemetry/route.ts", import.meta.url), "utf8");
   const observability = await readFile(new URL("../lib/marketplace-observability.ts", import.meta.url), "utf8");
+  const marketplace = await readFile(new URL("../app/marketplace.tsx", import.meta.url), "utf8");
+  const realtimeClient = await readFile(new URL("../lib/dawanear-client.ts", import.meta.url), "utf8");
   const preflight = await readFile(new URL("../scripts/validate-release-config.mjs", import.meta.url), "utf8");
 
   assert.match(telemetry, /MAX_BODY_BYTES = 2048/);
@@ -395,11 +405,21 @@ test("accepts only privacy-safe bucketed marketplace telemetry", async () => {
   assert.match(telemetry, /query_length_bucket/);
   assert.match(telemetry, /duration_ms_bucket/);
   assert.match(telemetry, /realtime_status/);
+  assert.match(telemetry, /product_viewed/);
+  assert.match(telemetry, /realtime_event/);
+  assert.match(telemetry, /offer_received/);
+  assert.match(telemetry, /latency_ms_bucket/);
+  assert.match(telemetry, /response_count_bucket/);
   assert.match(telemetry, /customer_offers/);
   assert.match(telemetry, /pharmacy_requests/);
   assert.doesNotMatch(telemetry, /phoneNumber|whatsappNumber|latitude|longitude|prescriptionPath|prescriptionData|orderId|pharmacyId|productId/i);
   assert.match(observability, /NEXT_PUBLIC_MED250_OBSERVABILITY === "cloud"/);
   assert.match(observability, /credentials: "omit"/);
+  assert.match(marketplace, /trackMarketplaceEvent\("product_viewed"/);
+  assert.match(marketplace, /trackMarketplaceEvent\("offer_received"/);
+  assert.match(marketplace, /trackMarketplaceEvent\("realtime_event"/);
+  assert.match(realtimeClient, /realtimeEventLatencyMs\(payload\)/);
+  assert.match(realtimeClient, /latencyMs <= 86_400_000/);
   assert.match(preflight, /NEXT_PUBLIC_MED250_OBSERVABILITY=cloud/);
 
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -783,10 +803,11 @@ test("uses availability-request language and only the four MED+250 brand accents
 });
 
 test("hides field labels when their source value is absent and uses readable gradient chrome", async () => {
-  const [marketplace, client, productPage, css] = await Promise.all([
+  const [marketplace, client, productPage, productDetails, css] = await Promise.all([
     readFile(new URL("../app/marketplace.tsx", import.meta.url), "utf8"),
     readFile(new URL("../lib/dawanear-client.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/product/[id]/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/product-details-list.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
   ]);
 
@@ -810,7 +831,9 @@ test("hides field labels when their source value is absent and uses readable gra
   assert.match(marketplace, /\{priced \? <div><small>\{marketplaceMessage\("product\.price_label"\)\}<\/small>/);
   assert.match(marketplace, /\{hasPriceData\(selectedProduct\) \? <div><span>\{marketplaceMessage\("product\.price_label"\)\}<\/span>/);
   assert.doesNotMatch(marketplace, /Reference only|confirm availability and final price on WhatsApp/i);
-  assert.match(marketplace, /<ProductDetailsList product=\{selectedProduct\} \/>/);
+  assert.match(marketplace, /\{productDetails\}/);
+  assert.match(productPage, /productDetails=\{<ProductDetailsList product=\{product\} \/>\}/);
+  assert.match(productDetails, /product\.registrationNumber \? \{ label:/);
   assert.match(productPage, /additionalProperty:[\s\S]*\.filter\(Boolean\)/);
   assert.doesNotMatch(client, /Responding pharmacy|Selected pharmacy|Licensed pharmacy|Registered product/);
   assert.match(css, /--brand-shell-gradient:linear-gradient/);
@@ -835,8 +858,9 @@ test("removes the pharmacy callout and uses the requested pharmacy label", async
 });
 
 test("opens the basket after add and provides a rotating product gallery", async () => {
-  const [marketplace, taxonomy, css, designQa] = await Promise.all([
+  const [marketplace, productDetails, taxonomy, css, designQa] = await Promise.all([
     readFile(new URL("../app/marketplace.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/product-details-list.tsx", import.meta.url), "utf8"),
     readFile(new URL("../lib/non-prescription-taxonomy.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../design/design-qa.md", import.meta.url), "utf8"),
@@ -882,7 +906,7 @@ test("opens the basket after add and provides a rotating product gallery", async
   assert.match(css, /Premium editorial product cards/);
   assert.match(css, /\.marketplace-section \.product-card\[data-card-variant="4"\]/);
   assert.match(css, /\.product-card-category \{/);
-  assert.match(marketplace, /function ProductDetailsList/);
+  assert.match(productDetails, /function ProductDetailsList/);
   assertCataloguedMessage(marketplace, "inventory.32593214650f", "Product information");
   assert.match(marketplace, /product-gallery-thumbnails/);
   assert.match(marketplace, /aria-controls="product-gallery-stage"/);

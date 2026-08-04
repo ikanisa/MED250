@@ -36,6 +36,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   const websiteSchema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
+    "@id": `${absoluteUrl("/")}#website`,
     name: siteName,
     url: siteUrl,
     description: defaultDescription,

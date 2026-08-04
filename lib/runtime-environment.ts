@@ -1,11 +1,12 @@
-import { AsyncLocalStorage } from "node:async_hooks";
+import {
+  getMed250RuntimeEnvironmentStore,
+  runWithMed250RuntimeEnvironmentStore,
+} from "./runtime-environment-store.js";
 
 export type Med250RuntimeEnvironment = {
   NEXT_PUBLIC_SUPABASE_URL?: string;
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?: string;
 };
-
-const runtimeEnvironmentStorage = new AsyncLocalStorage<Med250RuntimeEnvironment>();
 
 /**
  * Cloudflare bindings are request-scoped. Keep the public values used by SSR
@@ -17,12 +18,9 @@ export function runWithMed250RuntimeEnvironment<T>(
   environment: Med250RuntimeEnvironment | undefined,
   callback: () => T,
 ): T {
-  return runtimeEnvironmentStorage.run({
-    NEXT_PUBLIC_SUPABASE_URL: environment?.NEXT_PUBLIC_SUPABASE_URL?.trim() || undefined,
-    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: environment?.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim() || undefined,
-  }, callback);
+  return runWithMed250RuntimeEnvironmentStore(environment, callback) as T;
 }
 
 export function getMed250RuntimeEnvironment(): Med250RuntimeEnvironment | undefined {
-  return runtimeEnvironmentStorage.getStore();
+  return getMed250RuntimeEnvironmentStore() as Med250RuntimeEnvironment | undefined;
 }

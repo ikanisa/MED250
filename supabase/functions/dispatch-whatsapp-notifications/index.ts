@@ -187,7 +187,7 @@ async function deliverMessage(client: ReturnType<typeof adminClient>, message: O
       p_error_code: null,
     });
     if (finishError) throw finishError;
-    return { id: message.id, outcome: "sent" as const };
+    return { outcome: "sent" as const };
   } catch (sendError) {
     const errorCode = sendError instanceof Error ? sendError.message.slice(0, 120) : "UNKNOWN";
     await client.rpc("dawanear_finish_whatsapp_outbox", {
@@ -196,11 +196,12 @@ async function deliverMessage(client: ReturnType<typeof adminClient>, message: O
       p_message_id: null,
       p_error_code: errorCode,
     });
-    return { id: message.id, outcome: "retry" as const };
+    return { outcome: "retry" as const };
   }
 }
 
 Deno.serve(async (request: Request) => {
+  const startedAt = Date.now();
   if (request.method !== "POST") return new Response("Method not allowed", { status: 405 });
   const expectedSecret = env("DAWANEAR_CRON_TOKEN");
   const receivedSecret = request.headers.get("X-DawaNear-Cron-Token") ?? "";
@@ -213,11 +214,24 @@ Deno.serve(async (request: Request) => {
   if (error) return Response.json({ error: "Could not claim WhatsApp delivery work." }, { status: 500 });
 
   const messages = (data ?? []) as OutboxMessage[];
-  const results: Array<{ id: string; outcome: "sent" | "retry" }> = [];
+  const results: Array<{ outcome: "sent" | "retry" }> = [];
   const requestedConcurrency = Number(env("WHATSAPP_DELIVERY_CONCURRENCY") || 4);
   const concurrency = Math.min(Math.max(Number.isInteger(requestedConcurrency) ? requestedConcurrency : 4, 1), 8);
   for (let index = 0; index < messages.length; index += concurrency) {
     results.push(...await Promise.all(messages.slice(index, index + concurrency).map((message) => deliverMessage(client, message))));
   }
-  return Response.json({ claimed: messages.length, results });
+  const sent = results.filter((result) => result.outcome === "sent").length;
+  const retry = results.length - sent;
+  const summary = {
+    claimed: messages.length,
+    sent,
+    retry,
+    concurrency,
+    max_attempt: messages.reduce((highest, message) => Math.max(highest, message.attempt_number), 0),
+    duration_ms: Date.now() - startedAt,
+  };
+  const summaryLog = JSON.stringify({ event: retry > 0 ? "whatsapp_dispatch_degraded" : "whatsapp_dispatch_completed", ...summary });
+  if (retry > 0) console.error(summaryLog);
+  else console.info(summaryLog);
+  return Response.json(summary);
 });
