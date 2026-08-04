@@ -49,6 +49,15 @@ function number(value: unknown): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function isSupportedWhatsappImageUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && /\.(?:jpe?g|png)$/i.test(url.pathname);
+  } catch {
+    return false;
+  }
+}
+
 function compactItems(payload: JsonRecord): { summary: string; imageUrl: string | null; availableCount: number; itemCount: number } {
   const items = rows(payload.items);
   const visible = items.slice(0, 8).map((item) => {
@@ -59,7 +68,7 @@ function compactItems(payload: JsonRecord): { summary: string; imageUrl: string 
     return [`${quantity}× ${name}`, strength, packSize ? `pack ${packSize}` : ""].filter(Boolean).join(" · ");
   });
   if (items.length > visible.length) visible.push(`+${items.length - visible.length} more`);
-  const imageUrl = items.map((item) => text(item.image_url)).find((url) => /^https:\/\//i.test(url)) ?? null;
+  const imageUrl = items.map((item) => text(item.image_url)).find(isSupportedWhatsappImageUrl) ?? null;
   const availableCount = items.filter((item) => item.available !== false).length;
   return {
     summary: visible.join("\n").slice(0, 900),
@@ -78,8 +87,12 @@ function templateComponents(message: OutboxMessage): Array<JsonRecord> {
   const items = compactItems(payload);
   const components: Array<JsonRecord> = [];
   const mediaHeaderEnabled = env("WHATSAPP_NOTIFICATION_IMAGE_HEADERS") === "true";
-  if (mediaHeaderEnabled && items.imageUrl) {
-    components.push({ type: "header", parameters: [{ type: "image", image: { link: items.imageUrl } }] });
+  if (mediaHeaderEnabled) {
+    const configuredFallback = env("WHATSAPP_NOTIFICATION_FALLBACK_IMAGE_URL");
+    const fallbackImageUrl = isSupportedWhatsappImageUrl(configuredFallback)
+      ? configuredFallback
+      : "https://med-250.com/brand/app-icon-512.png";
+    components.push({ type: "header", parameters: [{ type: "image", image: { link: items.imageUrl ?? fallbackImageUrl } }] });
   }
 
   if (message.kind === "pharmacy_request") {
@@ -164,6 +177,29 @@ async function sendTemplate(message: OutboxMessage): Promise<string> {
   return messageId;
 }
 
+async function deliverMessage(client: ReturnType<typeof adminClient>, message: OutboxMessage) {
+  try {
+    const messageId = await sendTemplate(message);
+    const { error: finishError } = await client.rpc("dawanear_finish_whatsapp_outbox", {
+      p_id: message.id,
+      p_succeeded: true,
+      p_message_id: messageId,
+      p_error_code: null,
+    });
+    if (finishError) throw finishError;
+    return { id: message.id, outcome: "sent" as const };
+  } catch (sendError) {
+    const errorCode = sendError instanceof Error ? sendError.message.slice(0, 120) : "UNKNOWN";
+    await client.rpc("dawanear_finish_whatsapp_outbox", {
+      p_id: message.id,
+      p_succeeded: false,
+      p_message_id: null,
+      p_error_code: errorCode,
+    });
+    return { id: message.id, outcome: "retry" as const };
+  }
+}
+
 Deno.serve(async (request: Request) => {
   if (request.method !== "POST") return new Response("Method not allowed", { status: 405 });
   const expectedSecret = env("DAWANEAR_CRON_TOKEN");
@@ -178,27 +214,10 @@ Deno.serve(async (request: Request) => {
 
   const messages = (data ?? []) as OutboxMessage[];
   const results: Array<{ id: string; outcome: "sent" | "retry" }> = [];
-  for (const message of messages) {
-    try {
-      const messageId = await sendTemplate(message);
-      const { error: finishError } = await client.rpc("dawanear_finish_whatsapp_outbox", {
-        p_id: message.id,
-        p_succeeded: true,
-        p_message_id: messageId,
-        p_error_code: null,
-      });
-      if (finishError) throw finishError;
-      results.push({ id: message.id, outcome: "sent" });
-    } catch (sendError) {
-      const errorCode = sendError instanceof Error ? sendError.message.slice(0, 120) : "UNKNOWN";
-      await client.rpc("dawanear_finish_whatsapp_outbox", {
-        p_id: message.id,
-        p_succeeded: false,
-        p_message_id: null,
-        p_error_code: errorCode,
-      });
-      results.push({ id: message.id, outcome: "retry" });
-    }
+  const requestedConcurrency = Number(env("WHATSAPP_DELIVERY_CONCURRENCY") || 4);
+  const concurrency = Math.min(Math.max(Number.isInteger(requestedConcurrency) ? requestedConcurrency : 4, 1), 8);
+  for (let index = 0; index < messages.length; index += concurrency) {
+    results.push(...await Promise.all(messages.slice(index, index + concurrency).map((message) => deliverMessage(client, message))));
   }
   return Response.json({ claimed: messages.length, results });
 });

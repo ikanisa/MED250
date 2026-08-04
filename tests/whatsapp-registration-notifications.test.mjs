@@ -94,6 +94,11 @@ test("notification functions are configured with the intended public and private
   assert.match(dispatch, /X-DawaNear-Cron-Token/);
   assert.match(dispatch, /WHATSAPP_PHARMACY_REQUEST_TEMPLATE_NAME/);
   assert.match(dispatch, /WHATSAPP_CUSTOMER_OFFER_TEMPLATE_NAME/);
+  assert.match(dispatch, /isSupportedWhatsappImageUrl/);
+  assert.match(dispatch, /app-icon-512\.png/);
+  assert.match(dispatch, /WHATSAPP_DELIVERY_CONCURRENCY/);
+  assert.match(dispatch, /Math\.min\([\s\S]*, 8\)/);
+  assert.match(dispatch, /Promise\.all\(messages\.slice/);
   assert.match(webhook, /x-hub-signature-256/);
   assert.match(webhook, /HMAC/);
 });

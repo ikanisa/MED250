@@ -5,6 +5,7 @@ export type MarketplaceEventName =
   | "order_started"
   | "order_placed"
   | "order_failed"
+  | "realtime_status"
   | "pharmacy_selected"
   | "whatsapp_handoff"
   | "momo_handoff";

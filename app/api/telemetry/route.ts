@@ -5,6 +5,7 @@ const EVENT_NAMES = new Set([
   "order_started",
   "order_placed",
   "order_failed",
+  "realtime_status",
   "pharmacy_selected",
   "whatsapp_handoff",
   "momo_handoff",
@@ -81,6 +82,14 @@ function sanitizeProperties(name: string, properties: Record<string, unknown>) {
   }
   if (name === "order_failed") {
     return { stage: properties.stage === "dispatch" || properties.stage === "validation" ? properties.stage : null };
+  }
+  if (name === "realtime_status") {
+    return {
+      scope: properties.scope === "customer_offers" || properties.scope === "pharmacy_requests" ? properties.scope : null,
+      status: properties.status === "connecting" || properties.status === "connected" || properties.status === "degraded"
+        ? properties.status
+        : null,
+    };
   }
   if (name === "pharmacy_selected") {
     return {

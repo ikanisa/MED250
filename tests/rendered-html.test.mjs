@@ -394,6 +394,9 @@ test("accepts only privacy-safe bucketed marketplace telemetry", async () => {
   assert.match(telemetry, /EVENT_NAMES\.has\(body\.name\)/);
   assert.match(telemetry, /query_length_bucket/);
   assert.match(telemetry, /duration_ms_bucket/);
+  assert.match(telemetry, /realtime_status/);
+  assert.match(telemetry, /customer_offers/);
+  assert.match(telemetry, /pharmacy_requests/);
   assert.doesNotMatch(telemetry, /phoneNumber|whatsappNumber|latitude|longitude|prescriptionPath|prescriptionData|orderId|pharmacyId|productId/i);
   assert.match(observability, /NEXT_PUBLIC_MED250_OBSERVABILITY === "cloud"/);
   assert.match(observability, /credentials: "omit"/);
@@ -448,7 +451,7 @@ test("server-renders an immediate catalogue and keeps connected previews on pagi
   assert.doesNotMatch(marketplace, /product-pack-[^"']+\.webp/);
   assert.match(marketplace, /if \(!resolvedImageUrl\) return null/);
   assert.match(marketplace, /if \(approvedImages\.length !== 3\) return null/);
-  assert.match(marketplace, /cardImageUrl \? <Link className="product-image-wrap"/);
+  assert.match(marketplace, /approvedImageUrl \? <Link className="product-image-wrap"/);
   assert.match(brandLogo, /med-plus-250-wordmark-transparent\.webp/);
   assert.doesNotMatch(brandLogo, /med-plus-250-wordmark\.png/);
 });
@@ -964,6 +967,11 @@ test("keeps the launch candidate honest, connected, and free of simulated fulfil
   assert.match(client, /postgres_changes/);
   assert.match(client, /table: "dawanear_orders"/);
   assert.match(client, /setInterval\(refresh, 15_000\)/);
+  assert.match(client, /addEventListener\?\.\("online", refresh\)/);
+  assert.match(client, /addEventListener\?\.\("focus", refresh\)/);
+  assert.match(client, /addEventListener\("visibilitychange", refreshWhenVisible\)/);
+  assert.match(client, /RealtimeConnectionStatus/);
+  assert.match(client, /updateStatus\("degraded"\)/);
   assert.match(client, /dawanear_my_active_orders/);
   assert.match(client, /dawanear_pharmacy_selected_orders/);
   assert.match(client, /dawanear_pharmacy_notifications/);
@@ -1047,7 +1055,7 @@ test("keeps the launch candidate honest, connected, and free of simulated fulfil
   await assert.rejects(access(new URL("../data/imports/pharmacies-map-review.csv", import.meta.url)));
 });
 
-test("isolates persistent customer and pharmacy auth sessions without storage collisions", async () => {
+test("isolates customer and tab-scoped pharmacy auth sessions without manual token persistence", async () => {
   const [supabaseModule, client] = await Promise.all([
     readFile(new URL("../lib/supabase.ts", import.meta.url), "utf8"),
     readFile(new URL("../lib/dawanear-client.ts", import.meta.url), "utf8"),
@@ -1057,8 +1065,11 @@ test("isolates persistent customer and pharmacy auth sessions without storage co
   assert.match(supabaseModule, /PHARMACY_SESSION_KEY = "med250-pharmacy-auth"/);
   assert.match(supabaseModule, /customerSupabase[\s\S]*detectSessionInUrl: false/);
   assert.match(supabaseModule, /__med250CustomerSupabase \?\?=/);
-  assert.match(supabaseModule, /getPharmacySupabase\(\)[\s\S]*accessToken:/);
-  assert.match(supabaseModule, /refreshPharmacyAccessToken/);
+  assert.match(supabaseModule, /window\.sessionStorage\.getItem/);
+  assert.match(supabaseModule, /auth\.setSession/);
+  assert.match(supabaseModule, /auth\.getSession/);
+  assert.doesNotMatch(supabaseModule, /refreshPharmacyAccessToken|grant_type=refresh_token/);
+  assert.doesNotMatch(supabaseModule, /window\.localStorage\.setItem\(PHARMACY_SESSION_KEY/);
   assert.match(supabaseModule, /savePharmacySession/);
   assert.equal((supabaseModule.match(/createClient\(/g) ?? []).length, 2);
   assert.doesNotMatch(supabaseModule, /export const supabase\s*=/);

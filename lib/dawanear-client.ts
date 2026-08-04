@@ -1135,15 +1135,25 @@ export async function loadSelectedContact(orderId: string): Promise<SelectedPhar
 
 let offerSubscriptionSequence = 0;
 
+export type RealtimeConnectionStatus = "connecting" | "connected" | "degraded";
+
 export function subscribeToOffers(
   orderId: string,
   onOffers: (offers: OrderOffer[]) => void,
   onError?: (error: Error) => void,
+  onStatus?: (status: RealtimeConnectionStatus) => void,
 ): () => void {
   const cleanedOrderId = requireNonEmpty(orderId, "Order ID");
   const client = requireCustomerBackend();
   let closed = false;
   let refreshSequence = 0;
+  let connectionStatus: RealtimeConnectionStatus | null = null;
+
+  const updateStatus = (status: RealtimeConnectionStatus) => {
+    if (closed || connectionStatus === status) return;
+    connectionStatus = status;
+    onStatus?.(status);
+  };
 
   const refresh = () => {
     const sequence = ++refreshSequence;
@@ -1152,9 +1162,14 @@ export function subscribeToOffers(
         if (!closed && sequence === refreshSequence) onOffers(offers);
       })
       .catch((error: unknown) => {
-        if (!closed) onError?.(normalizeDawaNearError(error, "Could not refresh pharmacy offers"));
+        if (!closed) {
+          updateStatus("degraded");
+          onError?.(normalizeDawaNearError(error, "Could not refresh pharmacy offers"));
+        }
       });
   };
+
+  updateStatus("connecting");
 
   const channel = client
     .channel(`dawanear-offers-${cleanedOrderId}-${++offerSubscriptionSequence}`)
@@ -1179,17 +1194,30 @@ export function subscribeToOffers(
       refresh,
     )
     .subscribe((status) => {
-      if (status === "SUBSCRIBED") refresh();
+      if (status === "SUBSCRIBED") {
+        updateStatus("connected");
+        refresh();
+      }
       if (!closed && (status === "CHANNEL_ERROR" || status === "TIMED_OUT")) {
+        updateStatus("degraded");
         onError?.(new Error("Live pharmacy offers disconnected. Check your connection and refresh."));
       }
     });
   const refreshTimer = globalThis.setInterval(refresh, 15_000);
+  const refreshWhenVisible = () => {
+    if (typeof document === "undefined" || document.visibilityState === "visible") refresh();
+  };
+  globalThis.addEventListener?.("online", refresh);
+  globalThis.addEventListener?.("focus", refresh);
+  if (typeof document !== "undefined") document.addEventListener("visibilitychange", refreshWhenVisible);
 
   return () => {
     closed = true;
     refreshSequence += 1;
     globalThis.clearInterval(refreshTimer);
+    globalThis.removeEventListener?.("online", refresh);
+    globalThis.removeEventListener?.("focus", refresh);
+    if (typeof document !== "undefined") document.removeEventListener("visibilitychange", refreshWhenVisible);
     void client.removeChannel(channel);
   };
 }
@@ -1234,7 +1262,7 @@ export async function requestPharmacyWhatsappOtp(phone: string): Promise<Pharmac
 /** Ends the permanent pharmacy session. A later customer order starts a fresh guest session. */
 export async function signOutPharmacy(): Promise<void> {
   requirePharmacyBackend();
-  clearPharmacySession();
+  await clearPharmacySession();
 }
 
 export async function verifyPharmacyWhatsappOtp(phone: string, challengeId: string, token: string): Promise<void> {
@@ -1255,7 +1283,7 @@ export async function verifyPharmacyWhatsappOtp(phone: string, challengeId: stri
     throw new Error("Could not verify the pharmacy WhatsApp code: no permanent session was returned.");
   }
 
-  savePharmacySession(data.accessToken, data.refreshToken, data.expiresAt);
+  await savePharmacySession(data.accessToken, data.refreshToken);
 }
 
 function mapMembership(row: JsonRecord): PharmacyMembership {
@@ -1441,10 +1469,24 @@ export function subscribeToPharmacyNotifications(
   pharmacyId: string,
   onChange: () => void,
   onError?: (error: Error) => void,
+  onStatus?: (status: RealtimeConnectionStatus) => void,
 ): () => void {
   const cleanedPharmacyId = requireNonEmpty(pharmacyId, "Pharmacy ID");
   const client = requirePharmacyBackend();
   let closed = false;
+  let connectionStatus: RealtimeConnectionStatus | null = null;
+  const updateStatus = (status: RealtimeConnectionStatus) => {
+    if (closed || connectionStatus === status) return;
+    connectionStatus = status;
+    onStatus?.(status);
+  };
+  const refresh = () => {
+    if (!closed) onChange();
+  };
+  const refreshWhenVisible = () => {
+    if (typeof document === "undefined" || document.visibilityState === "visible") refresh();
+  };
+  updateStatus("connecting");
   const channel = client
     .channel(`dawanear-pharmacy-notifications-${cleanedPharmacyId}-${++pharmacyNotificationSubscriptionSequence}`)
     .on(
@@ -1455,18 +1497,29 @@ export function subscribeToPharmacyNotifications(
         table: "dawanear_pharmacy_notifications",
         filter: `pharmacy_id=eq.${cleanedPharmacyId}`,
       },
-      () => {
-        if (!closed) onChange();
-      },
+      refresh,
     )
     .subscribe((status) => {
+      if (status === "SUBSCRIBED") {
+        updateStatus("connected");
+        refresh();
+      }
       if (!closed && (status === "CHANNEL_ERROR" || status === "TIMED_OUT")) {
+        updateStatus("degraded");
         onError?.(new Error("Live pharmacy order updates disconnected. Check your connection and refresh."));
       }
     });
+  const refreshTimer = globalThis.setInterval(refresh, 15_000);
+  globalThis.addEventListener?.("online", refresh);
+  globalThis.addEventListener?.("focus", refresh);
+  if (typeof document !== "undefined") document.addEventListener("visibilitychange", refreshWhenVisible);
 
   return () => {
     closed = true;
+    globalThis.clearInterval(refreshTimer);
+    globalThis.removeEventListener?.("online", refresh);
+    globalThis.removeEventListener?.("focus", refresh);
+    if (typeof document !== "undefined") document.removeEventListener("visibilitychange", refreshWhenVisible);
     void client.removeChannel(channel);
   };
 }

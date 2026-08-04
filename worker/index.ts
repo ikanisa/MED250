@@ -1,22 +1,12 @@
 /** Cloudflare Worker entry point for the vinext-starter template. */
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
-import { setMed250RuntimeEnvironment } from "../lib/runtime-environment";
+import { runWithMed250RuntimeEnvironment, type Med250RuntimeEnvironment } from "../lib/runtime-environment";
 
-interface Env {
-  ASSETS: Fetcher;
+type Env = Omit<Cloudflare.Env, "MED250_RELEASE_MODE"> & Med250RuntimeEnvironment & {
   MED250_RELEASE_MODE?: "preview" | "catalog" | "live";
   MED250_RELEASE_REVISION?: string;
-  NEXT_PUBLIC_SUPABASE_URL?: string;
-  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?: string;
-  IMAGES: {
-    input(stream: ReadableStream): {
-      transform(options: Record<string, unknown>): {
-        output(options: { format: string; quality: number }): Promise<{ response(): Response }>;
-      };
-    };
-  };
-}
+};
 
 interface ExecutionContext {
   waitUntil(promise: Promise<unknown>): void;
@@ -89,20 +79,22 @@ const worker = {
     let response: Response;
 
     try {
-      setMed250RuntimeEnvironment(env);
-      if (url.pathname === "/_vinext/image" && env?.ASSETS && env.IMAGES) {
-        const allowedWidths = [...DEFAULT_DEVICE_SIZES, ...DEFAULT_IMAGE_SIZES];
-        const imageResponse = await handleImageOptimization(request, {
-          fetchAsset: (path) => env.ASSETS.fetch(new Request(new URL(path, request.url))),
-          transformImage: async (body, { width, format, quality }) => {
-            const result = await env.IMAGES.input(body).transform(width > 0 ? { width } : {}).output({ format, quality });
-            return result.response();
-          },
-        }, allowedWidths);
-        response = imageResponse;
-      } else {
-        response = await handler.fetch(request, env ?? {}, ctx);
-      }
+      response = await runWithMed250RuntimeEnvironment(env, async () => {
+        if (url.pathname === "/_vinext/image" && env?.ASSETS && env.IMAGES) {
+          const allowedWidths = [...DEFAULT_DEVICE_SIZES, ...DEFAULT_IMAGE_SIZES];
+          return handleImageOptimization(request, {
+            fetchAsset: (path) => env.ASSETS.fetch(new Request(new URL(path, request.url))),
+            transformImage: async (body, { width, format, quality }) => {
+              const result = await env.IMAGES.input(body).transform(width > 0 ? { width } : {}).output({
+                format: format as "image/jpeg" | "image/png" | "image/gif" | "image/webp" | "image/avif",
+                quality,
+              });
+              return result.response();
+            },
+          }, allowedWidths);
+        }
+        return handler.fetch(request, env ?? {}, ctx);
+      });
     } catch (error) {
       console.error(JSON.stringify({
         event: "http_request_failed",

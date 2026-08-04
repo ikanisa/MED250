@@ -94,6 +94,7 @@ import {
   type PharmacySelectedOrder,
   type Product,
   type ProductImagePresentation,
+  type RealtimeConnectionStatus,
   type CatalogueTaxonomyRow,
 } from "../lib/dawanear-client";
 import { getPharmacySupabase } from "../lib/supabase";
@@ -110,6 +111,7 @@ import {
   serializeCatalogueNavigationState,
   withCatalogueReturnPosition,
 } from "../lib/catalogue-navigation-state";
+import { isCatalogueIntentActive } from "../lib/marketplace-view-state";
 import { trackMarketplaceEvent } from "../lib/marketplace-observability";
 import {
   NON_PRESCRIPTION_TAXONOMY,
@@ -248,6 +250,12 @@ function FeatureLoading({ label }: { label: string }) {
   return <div className="inline-loading" role="status" aria-live="polite"><LoaderCircle className="button-spinner" size={16} aria-hidden="true" /> {label}</div>;
 }
 
+function realtimeStatusMessage(status: RealtimeConnectionStatus) {
+  if (status === "connected") return marketplaceMessage("status.realtime_connected");
+  if (status === "degraded") return marketplaceMessage("status.realtime_degraded");
+  return marketplaceMessage("status.realtime_connecting");
+}
+
 function productMatchesCategory(product: Product, category: string) {
   if (category === "All products") return true;
   if (category === "Medicines") return product.category === "Medicines";
@@ -290,17 +298,6 @@ function CategoryOptions({ taxonomy }: { taxonomy: CatalogueTaxonomyRow[] }) {
 function catalogueText(value: string | undefined) {
   const text = value?.trim() ?? "";
   return !text || /^(?:—+|-+|n\/?a|null)$/i.test(text) ? "" : text;
-}
-
-function productIllustrationUrl(product: Pick<Product, "category" | "department" | "productType">) {
-  const classification = [product.department, product.category, product.productType]
-    .filter(Boolean)
-    .join(" ")
-    .toLocaleLowerCase();
-  if (/baby|family|pregnancy|maternity|nursery/.test(classification)) return "/marketplace/category-baby-family.webp";
-  if (/beauty|personal|skin|hair|fragrance/.test(classification)) return "/marketplace/category-personal-care.webp";
-  if (/wellness|household|health|device/.test(classification)) return "/marketplace/category-wellness-devices.webp";
-  return "/marketplace/category-medicines.webp";
 }
 
 function parseCsv(text: string) {
@@ -657,11 +654,13 @@ function SubcategoryRail({
     aria-pressed={activeCategory === item.value}
     onClick={() => onSelectCategory(item.value)}
   >
-    <span className="subcategory-rail-media" aria-hidden="true">
-      {/* Catalogue product images are already optimized at their public source. */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={item.imageUrl ?? "/marketplace/hero-pharmacy-still-life.webp"} alt="" loading="lazy" decoding="async" />
-      <i><SubcategoryIcon label={item.label} /></i>
+    <span className={`subcategory-rail-media${item.imageUrl ? "" : " no-image"}`} aria-hidden="true">
+      {item.imageUrl ? <>
+        {/* Catalogue product images are already optimized at their public source. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={item.imageUrl} alt="" loading="lazy" decoding="async" />
+        <i><SubcategoryIcon label={item.label} /></i>
+      </> : <span className="subcategory-rail-placeholder"><SubcategoryIcon label={item.label} /></span>}
     </span>
     <b>{item.label}</b>
   </button>;
@@ -830,7 +829,6 @@ function ProductCard({
   const priced = hasPriceData(product);
   const displayTitle = customerProductTitle(product.brand);
   const approvedImageUrl = product.imageUrl ?? product.imageUrls?.[0] ?? null;
-  const cardImageUrl = approvedImageUrl ?? productIllustrationUrl(product);
   const productHref = `/product/${encodeURIComponent(product.id)}`;
   const preloadProduct = () => router.prefetch(productHref);
 
@@ -842,17 +840,19 @@ function ProductCard({
     data-card-variant={(index % 4) + 1}
     data-product-card={product.id}
   >
-    {cardImageUrl ? <Link className="product-image-wrap" href={productHref} aria-label={marketplaceFormatMessage("inventory.a51b44650fe3", [displayTitle])} onClick={() => onOpen?.(product)} onMouseEnter={preloadProduct} onFocus={preloadProduct} onTouchStart={preloadProduct}>
+    {approvedImageUrl ? <Link className="product-image-wrap" href={productHref} aria-label={marketplaceFormatMessage("inventory.a51b44650fe3", [displayTitle])} onClick={() => onOpen?.(product)} onMouseEnter={preloadProduct} onFocus={preloadProduct} onTouchStart={preloadProduct}>
       <span className="product-card-category">{displayCategory(product)}</span>
       <PrescriptionStatusIcon status={product.prescriptionStatus} />
-      <ProductVisual product={product} imageUrl={cardImageUrl} eager={index < 4} />
+      <ProductVisual product={product} imageUrl={approvedImageUrl} eager={index < 4} />
       <span className="product-image-action" aria-hidden="true"><ArrowRight size={17} /></span>
-    </Link> : null}
+    </Link> : <Link className="product-image-wrap product-image-placeholder" href={productHref} aria-label={marketplaceFormatMessage("inventory.a51b44650fe3", [displayTitle])} onClick={() => onOpen?.(product)} onMouseEnter={preloadProduct} onFocus={preloadProduct} onTouchStart={preloadProduct}>
+      <span className="product-card-category">{displayCategory(product)}</span>
+      <PrescriptionStatusIcon status={product.prescriptionStatus} />
+      <span className="product-image-placeholder-icon" aria-hidden="true"><PackageCheck size={27} /></span>
+      <small>{marketplaceMessage("product.image_unavailable")}</small>
+      <span className="product-image-action" aria-hidden="true"><ArrowRight size={17} /></span>
+    </Link>}
     <div className="product-card-content">
-      {!cardImageUrl ? <div className="product-meta">
-        <span>{displayCategory(product)}</span>
-        <PrescriptionStatusIcon status={product.prescriptionStatus} />
-      </div> : null}
       <h3><Link href={productHref} onClick={() => onOpen?.(product)} onMouseEnter={preloadProduct} onFocus={preloadProduct} onTouchStart={preloadProduct}>{displayTitle}</Link></h3>
       <p className={`product-card-generic${generic ? "" : " is-empty"}`} aria-hidden={generic ? undefined : true}>{generic || "\u00a0"}</p>
       {details.length ? <div className="product-card-specs" aria-label={marketplaceMessage("inventory.fd294f8ad383")}>{details.slice(0, 3).join(" · ")}</div> : <div className="product-card-specs is-empty" aria-hidden="true" />}
@@ -1147,6 +1147,7 @@ export default function Marketplace({
   const [restoredActiveOrders, setRestoredActiveOrders] = useState<ActiveOrder[]>([]);
   const [orderSent, setOrderSent] = useState(false);
   const [offers, setOffers] = useState<OrderOffer[]>([]);
+  const [offerRealtimeStatus, setOfferRealtimeStatus] = useState<RealtimeConnectionStatus | null>(null);
   const [offersOpen, setOffersOpen] = useState(false);
   const [selectingOfferId, setSelectingOfferId] = useState<string | null>(null);
   const [selectedContact, setSelectedContact] = useState<SelectedContact | null>(null);
@@ -1165,6 +1166,7 @@ export default function Marketplace({
   const [unregisteredPharmacyWhatsapp, setUnregisteredPharmacyWhatsapp] = useState("");
   const [activeMembership, setActiveMembership] = useState<PharmacyMembership | null>(null);
   const [pharmacyRequests, setPharmacyRequests] = useState<PharmacyRequest[]>([]);
+  const [pharmacyRealtimeStatus, setPharmacyRealtimeStatus] = useState<RealtimeConnectionStatus | null>(null);
   const [pharmacySelectedOrders, setPharmacySelectedOrders] = useState<PharmacySelectedOrder[]>([]);
   const [selectedRequest, setSelectedRequest] = useState<PharmacyRequest | null>(null);
   const [offerPrices, setOfferPrices] = useState<Record<string, string>>({});
@@ -1697,7 +1699,11 @@ export default function Marketplace({
     const unsubscribe = subscribeToOffers(
       activeOrderId,
       setOffers,
-      (error) => setCheckoutError(error.message),
+      () => setOfferRealtimeStatus("degraded"),
+      (status) => {
+        setOfferRealtimeStatus(status);
+        trackMarketplaceEvent("realtime_status", { scope: "customer_offers", status });
+      },
     );
     return () => { unsubscribe(); };
   }, [activeOrderId]);
@@ -1729,11 +1735,16 @@ export default function Marketplace({
     const unsubscribe = subscribeToPharmacyNotifications(
       activePharmacyId,
       refresh,
-      (error) => setPortalError(error.message),
+      () => setPharmacyRealtimeStatus("degraded"),
+      (status) => {
+        setPharmacyRealtimeStatus(status);
+        trackMarketplaceEvent("realtime_status", { scope: "pharmacy_requests", status });
+      },
     );
     return () => {
       cancelled = true;
       refreshSequence += 1;
+      setPharmacyRealtimeStatus(null);
       unsubscribe();
     };
   }, [activePharmacyId, portalOpen, portalStage]);
@@ -1892,6 +1903,16 @@ export default function Marketplace({
 
   const searchSuggestions = useMemo(() => deferredQuery.trim().length >= 2 ? filtered.slice(0, 6) : [], [deferredQuery, filtered]);
   const hasActiveFilters = category !== initialCategory || prescriptionFilter !== "all" || formFilter !== "all" || availabilityFilter !== "all";
+  const catalogueIntentActive = isCatalogueIntentActive({
+    query,
+    initialCategory,
+    category,
+    prescription: prescriptionFilter,
+    form: formFilter,
+    availability: availabilityFilter,
+    sort,
+    view: viewMode,
+  });
   const hierarchyDepartment = useMemo(() => {
     const selectedDepartment = taxonomyFilterDepartment(category)?.label;
     if (selectedDepartment) return selectedDepartment;
@@ -1981,13 +2002,11 @@ export default function Marketplace({
   ]);
 
   const hierarchyItemsWithImages = useMemo(() => hierarchyItems.map((item) => {
-    const departmentImage = departmentPresentation.find((presentation) => presentation.department === item.department)?.image;
     return {
       ...item,
       imageUrl: localSubcategoryRepresentativeImages.get(item.value)
         ?? subcategoryRepresentativeImages.get(item.value)
-        ?? departmentImage
-        ?? "/marketplace/hero-pharmacy-still-life.webp",
+        ?? null,
     };
   }), [hierarchyItems, localSubcategoryRepresentativeImages, subcategoryRepresentativeImages]);
   const hierarchyGroups = useMemo<CatalogueProductGroup[]>(() => {
@@ -2887,19 +2906,19 @@ export default function Marketplace({
           </section> : null}
         </> : <div className="catalogue-empty"><Clock3 size={28} /><h1>{marketplaceMessage("inventory.8420d06d605c")}</h1><p>{marketplaceMessage("inventory.1745fc536368")}</p><Link href="/categories">{marketplaceMessage("inventory.aab5f657216a")}</Link></div>}
       </section> : <>
-        {pageTitle && !showDepartments ? <section className="category-route-banner">
+        {!catalogueIntentActive && (pageTitle && !showDepartments ? <section className="category-route-banner">
           <div><h1>{pageTitle}</h1><p>{pageDescription}</p><button onClick={() => requestNativeLocation(true)}><LocateFixed size={18} /> {coordinates ? marketplaceMessage("inventory.9d58f0cdd494") : marketplaceMessage("inventory.30cbc33ba1a5")}</button></div>
           <Image src={pageImage ?? "/marketplace/hero-pharmacy-still-life.webp"} alt="" width={620} height={330} priority unoptimized />
         </section> : !pageTitle ? <section className="market-banner">
           <div className="market-banner-copy"><h1>{marketplaceMessage("inventory.bada83fd765c")} <em>{marketplaceMessage("inventory.a68745f09fc1")}</em></h1><p>{marketplaceMessage("inventory.f0908d3d760e")}</p><a className="shop-button" href="#marketplace">{marketplaceMessage("inventory.0b01e69b2a20")} <ArrowRight size={18} /></a></div>
           <HeroArtworkCarousel />
-        </section> : null}
+        </section> : null)}
 
-        {(!pageTitle || showDepartments) && departmentCards.length ? <section className={`department-cards${pageTitle && showDepartments ? " category-index-departments" : ""}`} aria-label={marketplaceMessage("inventory.cd1c7049eb5c")}>
+        {!catalogueIntentActive && (!pageTitle || showDepartments) && departmentCards.length ? <section className={`department-cards${pageTitle && showDepartments ? " category-index-departments" : ""}`} aria-label={marketplaceMessage("inventory.cd1c7049eb5c")}>
           {departmentCards.map((item) => <article key={item.department}><div><h2>{item.title}</h2><p>{item.description}</p><Link href={item.href}>{item.action} <ArrowRight size={15} /></Link></div><Image src={item.image} alt={item.imageAlt} width={210} height={150} unoptimized /></article>)}
         </section> : null}
 
-        {!pageTitle && (initialTrustMetrics?.readyPharmacyCount || initialTrustMetrics?.typicalResponse) ? <section className="public-trust-signals" aria-label={marketplaceMessage("inventory.1362e2a3afc4")}>
+        {!catalogueIntentActive && !pageTitle && (initialTrustMetrics?.readyPharmacyCount || initialTrustMetrics?.typicalResponse) ? <section className="public-trust-signals" aria-label={marketplaceMessage("inventory.1362e2a3afc4")}>
           {initialTrustMetrics.readyPharmacyCount ? <article>
             <span className="public-trust-icon"><ShieldCheck size={20} aria-hidden="true" /></span>
             <div><b>{marketplaceFormatMessage("inventory.1d9a32f87023", [marketplaceNumber(initialTrustMetrics.readyPharmacyCount.value), initialTrustMetrics.readyPharmacyCount.value === 1 ? marketplaceMessage("inventory.20b04a4f018b") : marketplaceMessage("inventory.13ab5da0df2b")])}</b><small>{marketplaceFormatMessage("inventory.b6e45056d7d3", [marketplaceNumber(initialTrustMetrics.readyPharmacyCount.sampleSize), marketplaceDate(initialTrustMetrics.readyPharmacyCount.asOf)])}</small></div>
@@ -2924,7 +2943,7 @@ export default function Marketplace({
             onOpen={rememberCataloguePosition}
             onSelectCategory={selectHierarchyCategory}
           /> : null}
-          <div className="section-heading catalogue-grid-heading"><div>{pageTitle && showDepartments ? <h1>{pageTitle}</h1> : <h2>{showCatalogueHierarchy ? marketplaceMessage("inventory.718622df41f1") : pageTitle ?? marketplaceMessage("inventory.dd1860e44be5")}</h2>}{query.trim() ? <p>{marketplaceFormatMessage("inventory.86d3661b8b9f", [query.trim()])}</p> : null}</div><span className="catalogue-progress">{marketplaceFormatMessage("inventory.c67ec9a7a4e9", [marketplaceNumber(visibleProducts.length)])}</span></div>
+          <div className="section-heading catalogue-grid-heading"><div>{pageTitle && showDepartments && !catalogueIntentActive ? <h1>{pageTitle}</h1> : <h2>{query.trim() ? marketplaceMessage("catalogue.search_results") : showCatalogueHierarchy ? marketplaceMessage("inventory.718622df41f1") : pageTitle ?? marketplaceMessage("inventory.dd1860e44be5")}</h2>}{query.trim() ? <p>{marketplaceFormatMessage("inventory.86d3661b8b9f", [query.trim()])}</p> : null}</div><span className="catalogue-progress">{marketplaceFormatMessage("inventory.c67ec9a7a4e9", [marketplaceNumber(visibleProducts.length)])}</span></div>
           <div className="smart-filter-bar" aria-label={marketplaceMessage("inventory.8bc26db75b8c")}>
             <button className="mobile-filter-button" type="button" onClick={() => setFiltersOpen(true)} aria-haspopup="dialog"><SlidersHorizontal size={17} /> {marketplaceMessage("inventory.c8cecf5be79f")}{hasActiveFilters ? <b aria-label={marketplaceMessage("inventory.213a9822c38a")}>!</b> : null}</button>
             <div className="desktop-filter-controls">
@@ -2977,6 +2996,10 @@ export default function Marketplace({
         <aside className="drawer order-wizard" role="dialog" aria-modal="true" aria-labelledby="order-basket-title" data-modal-root="order-basket" tabIndex={-1}>
           <header className="order-wizard-head"><div><h2 id="order-basket-title">{marketplaceMessage("inventory.e0f65214f68f")}</h2><p>{basketCount} {basketCount === 1 ? marketplaceMessage("inventory.4a33eacd5fa6") : marketplaceMessage("inventory.5f3c4f8580d3")}</p></div><button data-autofocus onClick={() => { setCartOpen(false); setRecentlyAddedBrand(""); }} aria-label={marketplaceMessage("inventory.7e29cdf2c712")}><X size={22} /></button></header>
           <div className="order-wizard-body" ref={orderWizardBodyRef}>
+            {!orderSent ? <section className="request-model-note" aria-labelledby="request-model-note-title">
+              <ShieldCheck size={20} aria-hidden="true" />
+              <div><h3 id="request-model-note-title">{marketplaceMessage("request.explainer_title")}</h3><p>{marketplaceMessage("request.explainer_body")}</p><small>{marketplaceMessage("request.explainer_next")}</small></div>
+            </section> : null}
             {!orderSent ? <section className="order-step-panel" aria-labelledby="order-review-heading">
               {recentlyAddedBrand ? <p className="sr-only" role="status">{recentlyAddedBrand} {marketplaceMessage("inventory.f9c2f1181763")}</p> : null}
               <div className="order-step-heading"><h3 id="order-review-heading">{marketplaceMessage("inventory.2ce4067ce16c")}</h3>{cart.length ? <span>{cart.length} {cart.length === 1 ? marketplaceMessage("inventory.a8792157cb4f") : marketplaceMessage("inventory.0a3e27b8ca81")}</span> : null}</div>
@@ -3032,7 +3055,7 @@ export default function Marketplace({
               {cart.length || requestLocked ? <button className="text-action" onClick={resetRequest} disabled={ordering}>{requestLocked ? marketplaceMessage("inventory.190304bb034e") : marketplaceMessage("inventory.594e3c8701b9")}</button> : null}
             </div> : null}
 
-            {orderSent ? <div className="sent-state"><span><Check size={35} /></span><h2>{marketplaceMessage("inventory.59fe2287713c")}</h2><p>{activeOrderNoRecipients ? marketplaceMessage("inventory.311cc1e57793") : marketplaceMessage("inventory.a386d4388388")}</p><div className="sent-timeline"><div><b>{marketplaceMessage("inventory.a73f99f6bfc8")}</b><small>{activeOrderId}</small></div><div><b>{activeOrderNoRecipients ? marketplaceMessage("inventory.a171bb3464b8") : activeOrderExpired ? marketplaceMessage("inventory.69318175e6db") : marketplaceMessage("status.waiting_for_confirmation")}</b><small>{activeOrderNoRecipients ? marketplaceMessage("inventory.b310b0fdec12") : activeOrderExpired ? marketplaceMessage("inventory.e3d9fa5974d7") : marketplaceMessage("inventory.2f44f48efbe9")}</small></div></div><button className="primary-wide" onClick={() => { setCartOpen(false); setOffersOpen(true); }}>{marketplaceMessage("inventory.db5a0ca06305")} <ArrowRight size={18} /></button><button className="text-action" onClick={() => closeAndResetOrder("cancelled")} disabled={closingOrder}>{closingOrder ? marketplaceMessage("inventory.9097a34aa426") : marketplaceMessage("inventory.56196683592d")}</button></div> : null}
+            {orderSent ? <div className="sent-state"><span><Check size={35} /></span><h2>{marketplaceMessage("inventory.59fe2287713c")}</h2><p>{activeOrderNoRecipients ? marketplaceMessage("inventory.311cc1e57793") : marketplaceMessage("inventory.a386d4388388")}</p><div className="sent-timeline"><div><b>{marketplaceMessage("inventory.a73f99f6bfc8")}</b><small>{activeOrderId}</small></div><div><b>{activeOrderNoRecipients ? marketplaceMessage("inventory.a171bb3464b8") : activeRecipientCount == null ? marketplaceMessage("status.matching_pharmacies") : marketplaceFormatMessage("status.dispatched_count", [activeRecipientCount, activeRecipientCount === 1 ? marketplaceMessage("inventory.20b04a4f018b") : marketplaceMessage("inventory.13ab5da0df2b")])}</b><small>{activeOrderNoRecipients ? marketplaceMessage("inventory.b310b0fdec12") : marketplaceMessage("status.dispatched_note")}</small></div><div><b>{activeOrderExpired ? marketplaceMessage("inventory.69318175e6db") : offers.length ? marketplaceFormatMessage("status.response_count", [offers.length, offers.length === 1 ? marketplaceMessage("inventory.93cdccc66f8c") : marketplaceMessage("inventory.b73cbb3647cf")]) : marketplaceMessage("status.waiting_for_confirmation")}</b><small>{activeOrderExpired ? marketplaceMessage("inventory.e3d9fa5974d7") : offers.length ? marketplaceMessage("status.response_next") : marketplaceMessage("inventory.2f44f48efbe9")}</small></div></div><button className="primary-wide" onClick={() => { setCartOpen(false); setOffersOpen(true); }}>{marketplaceMessage("inventory.db5a0ca06305")} <ArrowRight size={18} /></button><button className="text-action" onClick={() => closeAndResetOrder("cancelled")} disabled={closingOrder}>{closingOrder ? marketplaceMessage("inventory.9097a34aa426") : marketplaceMessage("inventory.56196683592d")}</button></div> : null}
             {orderSent && restoredActiveOrders.some((order) => order.orderId !== activeOrderId) ? <div className="sent-timeline"><div><b>{marketplaceMessage("inventory.be96c8c8639a")}</b><small>{marketplaceMessage("inventory.e902cb493ad0")}</small></div>{restoredActiveOrders.filter((order) => order.orderId !== activeOrderId).map((order) => <button className="text-action" key={order.orderId} onClick={() => openRestoredOrder(order)} disabled={ordering}>{marketplaceFormatMessage("inventory.653dbcb28b22", [order.reference, order.offerCount, order.offerCount === 1 ? marketplaceMessage("inventory.93cdccc66f8c") : marketplaceMessage("inventory.b73cbb3647cf")])}</button>)}</div> : null}
           </div>
           {!orderSent ? <footer className="order-wizard-actions">
@@ -3056,6 +3079,7 @@ export default function Marketplace({
                   ? marketplaceMessage("inventory.71df5127e4ea")
                   : marketplaceFormatMessage("inventory.c72abdc4c191", [activeOrderMinutesRemaining != null ? ` About ${activeOrderMinutesRemaining} minutes remain.` : ""])}</p>
         </div><button type="button" data-autofocus onClick={() => setOffersOpen(false)} aria-label={marketplaceMessage("inventory.8b1d2d8a0765")}><X size={20} /></button></div>
+        {activeOrderId && offerRealtimeStatus ? <p className={`realtime-status ${offerRealtimeStatus}`} role="status">{offerRealtimeStatus === "connected" ? <CircleCheck size={14} /> : offerRealtimeStatus === "degraded" ? <CircleAlert size={14} /> : <LoaderCircle className="button-spinner" size={14} />} {realtimeStatusMessage(offerRealtimeStatus)}</p> : null}
         {checkoutError ? <p className="form-error" role="alert"><CircleAlert size={15} /> {checkoutError}</p> : null}
         {!activeOrderId ? <div className="offers-empty"><PackageCheck size={29} /><b>{marketplaceMessage("inventory.a9b90e025a70")}</b><p>{marketplaceMessage("inventory.7c387a6135b6")}</p><button type="button" className="primary-wide" onClick={() => { setOffersOpen(false); setCartOpen(true); }}>{marketplaceMessage("inventory.57f437b24477")}</button></div> : !offers.length ? <div className={`offers-empty ${activeOrderExpired || activeOrderNoRecipients ? "terminal" : ""}`}>{activeOrderExpired || activeOrderNoRecipients ? <CircleAlert size={29} /> : <Clock3 size={29} />}<b>{activeOrderNoRecipients ? marketplaceMessage("inventory.bed101fcd6d5") : activeOrderExpired ? marketplaceMessage("inventory.f97506419978") : marketplaceMessage("status.waiting_for_confirmation")}</b><p>{activeOrderNoRecipients ? marketplaceMessage("inventory.657f24041e27") : activeOrderExpired ? marketplaceMessage("inventory.5a00003fe6ba") : marketplaceFormatMessage("inventory.e866672f84cd", [marketplaceMessage("status.no_stock_claim")])}</p>{activeOrderExpired || activeOrderNoRecipients ? <button type="button" className="primary-wide" onClick={() => closeAndResetOrder("cancelled")} disabled={closingOrder}>{closingOrder ? marketplaceMessage("inventory.9097a34aa426") : marketplaceMessage("status.close_request")}</button> : null}</div> : <div className="quotes">{offers.map((offer) => <article key={offer.id}><div className="quote-brand"><span><Cross size={18} /></span><div><h3>{offer.pharmacyName}</h3><p>{offer.distanceM >= 0 ? marketplaceFormatMessage("inventory.ac447e78b32c", [(offer.distanceM / 1_000).toFixed(1)]) : marketplaceMessage("inventory.2b60108eab7f")}</p></div></div><div className="availability complete"><Check size={15} />{marketplaceMessage("inventory.8779806acd36")}</div><div className="availability fulfilment"><PackageCheck size={15} />{offer.fulfilmentMethod === "pickup" ? marketplaceMessage("inventory.3e1a6c2093f4") : offer.fulfilmentMethod === "delivery" ? marketplaceMessage("inventory.84ae33b5cfd4") : marketplaceMessage("inventory.620d1a817aaf")}</div><div className="offer-items">{offer.items.map((item) => { const itemDetails = [item.product?.brand || item.offeredProductId, item.product?.strength, item.product?.packSize ? `Pack ${item.product.packSize}` : "", item.quantity ? `Qty ${item.quantity}` : "", item.unitPriceRwf ? `Optional estimate RWF ${marketplaceNumber(item.unitPriceRwf)} each` : ""].filter(Boolean); return <div key={item.id}><b>{item.isSubstitute ? marketplaceMessage("inventory.2a46ae71822a") : marketplaceMessage("inventory.fcae1310b229")}</b>{itemDetails.length ? <small>{itemDetails.join(" · ")}</small> : null}</div>; })}</div>{offer.totalRwf > 0 ? <div className="quote-price"><span>{marketplaceMessage("inventory.74f6f878d0a8")}</span><b>{marketplaceFormatMessage("inventory.c2a18c29440c", [marketplaceNumber(offer.totalRwf)])}</b><small>{marketplaceFormatMessage("inventory.b73b6ed9772f", [offer.readyInMinutes ? marketplaceFormatMessage("inventory.ae57138898c6", [offer.readyInMinutes]) : ""])}</small></div> : offer.readyInMinutes ? <div className="quote-price"><small>{marketplaceFormatMessage("inventory.b34789b2d655", [offer.readyInMinutes])}</small></div> : null}<div className="quote-actions"><button type="button" onClick={() => chooseOffer(offer)} disabled={selectionLocked} aria-busy={selectingOfferId === offer.id}>{selectingOfferId === offer.id ? <LoaderCircle className="button-spinner" size={15} aria-hidden="true" /> : null}{offer.status === "selected" ? marketplaceMessage("inventory.c6da331eadbe") : selectionLocked ? marketplaceMessage("inventory.8e672bac1fab") : selectingOfferId === offer.id ? marketplaceMessage("inventory.6ceaa117aca7") : marketplaceMessage("inventory.0dbd329b08d2")}</button><span className="contact-locked"><ShieldCheck size={15} /> {selectionLocked ? marketplaceMessage("inventory.ab13096fafe7") : marketplaceMessage("inventory.23de3977c324")}</span></div></article>)}</div>}
         {activeOrderSelected ? <div className="selected-contact">{selectedContact ? <><div><CircleCheck size={23} /><span><b>{marketplaceFormatMessage("inventory.486dc2549235", [selectedContact.pharmacyName])}</b><small>{marketplaceMessage("inventory.8e7e3ce3ad1c")}</small></span></div><div>{whatsappUrl(selectedContact.whatsapp, `Hello, ${selectedContact.pharmacyName} confirmed availability for my MED+250 request ${activeOrderId}. Please reconfirm the products, final price, and pickup or delivery details.`) ? <a onClick={() => trackMarketplaceEvent("whatsapp_handoff", { configured: true })} href={whatsappUrl(selectedContact.whatsapp, `Hello, ${selectedContact.pharmacyName} confirmed availability for my MED+250 request ${activeOrderId}. Please reconfirm the products, final price, and pickup or delivery details.`) ?? undefined} target="_blank" rel="noreferrer"><MessageCircle size={16} /> {marketplaceMessage("whatsapp.continue_with_pharmacy")}</a> : null}</div></> : <div><CircleAlert size={23} /><span><b>{marketplaceMessage("inventory.e3ecf041cb1d")}</b><small>{marketplaceMessage("inventory.13010923c704")}</small></span></div>}<div className="quote-actions"><button onClick={() => closeAndResetOrder("completed")} disabled={closingOrder}>{closingOrder ? marketplaceMessage("inventory.c0e1dcb79abd") : marketplaceMessage("inventory.937f6a721f25")}</button><button onClick={() => closeAndResetOrder("cancelled")} disabled={closingOrder}>{marketplaceMessage("inventory.56196683592d")}</button></div></div> : null}
@@ -3070,6 +3094,7 @@ export default function Marketplace({
           <aside className="portal-sidebar"><Link className="brand" href="/"><BrandLogo /></Link><small>{marketplaceMessage("inventory.ff540cf154c2")}</small><nav><button className={portalTab === "requests" ? "active" : ""} onClick={() => setPortalTab("requests")}><Bell size={18} /> {marketplaceMessage("inventory.900b67c87ae0")} {pharmacyRequests.length ? <b>{pharmacyRequests.length}</b> : null}</button><button className={portalTab === "catalogue" ? "active" : ""} onClick={() => setPortalTab("catalogue")}><ShoppingBag size={18} /> {marketplaceMessage("inventory.fdb14e852a0c")}</button><button className={portalTab === "profile" ? "active" : ""} onClick={() => setPortalTab("profile")}><HeartPulse size={18} /> {marketplaceMessage("inventory.83e71ff6cc83")}</button></nav><div className="portal-user"><span>{activeMembership?.pharmacyName.slice(0, 2).toUpperCase()}</span><div><b>{activeMembership?.pharmacyName}</b><small>{activeMembership?.role}</small></div></div><button className="text-action" onClick={leavePharmacyPortal} disabled={portalLoading}>{marketplaceMessage("inventory.f20b73d631ff")}</button></aside>
           <div className="portal-main"><div className="portal-top"><div><h2 id="pharmacy-workspace-title">{portalTab === "requests" ? marketplaceMessage("inventory.900b67c87ae0") : portalTab === "catalogue" ? marketplaceMessage("inventory.718622df41f1") : marketplaceMessage("inventory.83e71ff6cc83")}</h2>{portalTab === "catalogue" ? null : <p>{marketplaceMessage("inventory.004ed96e7d9a")}</p>}</div><button data-autofocus onClick={() => setPortalOpen(false)} aria-label={marketplaceMessage("inventory.ff49c2a5683a")}><X size={20} /></button></div>
             <nav className="portal-mobile-tabs" aria-label={marketplaceMessage("inventory.454219d116e2")}><button className={portalTab === "requests" ? "active" : ""} onClick={() => setPortalTab("requests")}><Bell size={16} /> {marketplaceMessage("inventory.ada27592c957")}</button><button className={portalTab === "catalogue" ? "active" : ""} onClick={() => setPortalTab("catalogue")}><ShoppingBag size={16} /> {marketplaceMessage("inventory.5a6e4f56c0a2")}</button><button className={portalTab === "profile" ? "active" : ""} onClick={() => setPortalTab("profile")}><HeartPulse size={16} /> {marketplaceMessage("inventory.d696a35bdd18")}</button></nav>
+            {portalTab === "requests" && pharmacyRealtimeStatus ? <p className={`realtime-status ${pharmacyRealtimeStatus}`} role="status">{pharmacyRealtimeStatus === "connected" ? <CircleCheck size={14} /> : pharmacyRealtimeStatus === "degraded" ? <CircleAlert size={14} /> : <LoaderCircle className="button-spinner" size={14} />} {realtimeStatusMessage(pharmacyRealtimeStatus)}</p> : null}
             {portalMessage ? <p className="form-success"><CircleCheck size={15} /> {portalMessage}</p> : null}{portalError ? <p className="form-error"><CircleAlert size={15} /> {portalError}</p> : null}
             {portalTab === "requests" ? <>
               <div className="portal-metrics"><div><span><Bell size={18} /></span><p>{marketplaceMessage("inventory.d7d4a471c666")}</p><b>{pharmacyRequests.length}</b><small>{marketplaceMessage("inventory.ab3026fc0c02")}</small></div><div><span><Clock3 size={18} /></span><p>{marketplaceMessage("inventory.0bc2fd0e7f8a")}</p><b>{marketplaceMessage("inventory.78b9b22ebb6f")}</b><small>{marketplaceMessage("inventory.76306b737845")}</small></div><div><span><ShieldCheck size={18} /></span><p>{marketplaceMessage("inventory.aa09ffebfd30")}</p><b>{pharmacySelectedOrders.length}</b><small>{marketplaceMessage("inventory.a8f284393031")}</small></div></div>

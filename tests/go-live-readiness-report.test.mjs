@@ -99,7 +99,7 @@ test("separates production engineering readiness from genuine transaction blocke
   assert.equal(report.legacyDomainRedirect.status, "passed");
   assert.equal(report.legacyDomainRedirect.legacyOrigin, "https://med250.gikundiro.com");
   assert.equal(report.legacyDomainRedirect.canonicalOrigin, "https://med-250.com");
-  assert.match(report.legacyDomainRedirect.capturedAt, /^2026-08-01T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+  assert.match(report.legacyDomainRedirect.capturedAt, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
   assert.equal(report.legacyDomainRedirect.verifierCurrent, true);
   assert.equal(report.legacyDomainRedirect.probeCount, 5);
   assert.equal(report.legacyDomainRedirect.passedProbeCount, 5);

@@ -23,75 +23,48 @@ export const customerSupabase = url && key
   : null;
 
 const PHARMACY_SESSION_KEY = "med250-pharmacy-auth";
-type StoredPharmacySession = {
-  accessToken: string;
-  refreshToken: string;
-  expiresAt: number;
+const pharmacySessionStorage = {
+  getItem(keyName: string): string | null {
+    if (typeof window === "undefined") return null;
+    return window.sessionStorage.getItem(keyName);
+  },
+  setItem(keyName: string, value: string): void {
+    if (typeof window === "undefined") return;
+    window.sessionStorage.setItem(keyName, value);
+  },
+  removeItem(keyName: string): void {
+    if (typeof window === "undefined") return;
+    window.sessionStorage.removeItem(keyName);
+  },
 };
-let pharmacyRefresh: Promise<string | null> | null = null;
 
-function readPharmacySession(): StoredPharmacySession | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = window.localStorage.getItem(PHARMACY_SESSION_KEY);
-    if (!raw) return null;
-    const parsed: unknown = JSON.parse(raw);
-    if (!parsed || typeof parsed !== "object") return null;
-    const session = parsed as Partial<StoredPharmacySession>;
-    if (!session.accessToken || !session.refreshToken || !Number.isFinite(session.expiresAt)) return null;
-    return session as StoredPharmacySession;
-  } catch {
-    return null;
-  }
-}
-
-export function savePharmacySession(accessToken: string, refreshToken: string, expiresAt?: number): void {
+export async function savePharmacySession(accessToken: string, refreshToken: string): Promise<void> {
   if (typeof window === "undefined") throw new Error("Pharmacy sign-in requires a browser.");
   if (!accessToken || !refreshToken) throw new Error("The pharmacy session is incomplete.");
-  const session: StoredPharmacySession = {
-    accessToken,
-    refreshToken,
-    expiresAt: expiresAt && Number.isFinite(expiresAt) ? expiresAt : Math.floor(Date.now() / 1_000) + 3_600,
-  };
-  window.localStorage.setItem(PHARMACY_SESSION_KEY, JSON.stringify(session));
+  window.localStorage.removeItem(PHARMACY_SESSION_KEY);
+  const client = getPharmacySupabase();
+  if (!client) throw new Error("The pharmacy service is unavailable.");
+  const { error } = await client.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+  if (error) throw new Error("The pharmacy session could not be established.");
 }
 
-export function clearPharmacySession(): void {
+export async function clearPharmacySession(): Promise<void> {
   if (typeof window === "undefined") return;
+  const client = getPharmacySupabase();
+  if (client) await client.auth.signOut({ scope: "local" }).catch(() => undefined);
+  window.sessionStorage.removeItem(PHARMACY_SESSION_KEY);
   window.localStorage.removeItem(PHARMACY_SESSION_KEY);
 }
 
-async function refreshPharmacyAccessToken(session: StoredPharmacySession): Promise<string | null> {
-  if (!url || !key) return null;
-  try {
-    const response = await fetch(`${url}/auth/v1/token?grant_type=refresh_token`, {
-      method: "POST",
-      headers: { apikey: key, "Content-Type": "application/json" },
-      body: JSON.stringify({ refresh_token: session.refreshToken }),
-    });
-    if (!response.ok) {
-      clearPharmacySession();
-      return null;
-    }
-    const payload: unknown = await response.json();
-    if (!payload || typeof payload !== "object") return null;
-    const next = payload as { access_token?: string; refresh_token?: string; expires_at?: number; expires_in?: number };
-    if (!next.access_token || !next.refresh_token) return null;
-    const expiresAt = next.expires_at
-      ?? Math.floor(Date.now() / 1_000) + (Number.isFinite(next.expires_in) ? Number(next.expires_in) : 3_600);
-    savePharmacySession(next.access_token, next.refresh_token, expiresAt);
-    return next.access_token;
-  } catch {
-    return session.expiresAt > Math.floor(Date.now() / 1_000) ? session.accessToken : null;
-  }
-}
-
 export async function pharmacyAccessToken(): Promise<string | null> {
-  const session = readPharmacySession();
-  if (!session) return null;
-  if (session.expiresAt > Math.floor(Date.now() / 1_000) + 60) return session.accessToken;
-  pharmacyRefresh ??= refreshPharmacyAccessToken(session).finally(() => { pharmacyRefresh = null; });
-  return pharmacyRefresh;
+  const client = getPharmacySupabase();
+  if (!client) return null;
+  const { data, error } = await client.auth.getSession();
+  if (error) {
+    await clearPharmacySession();
+    return null;
+  }
+  return data.session?.access_token ?? null;
 }
 
 export async function hasStoredPharmacySession(): Promise<boolean> {
@@ -101,6 +74,12 @@ export async function hasStoredPharmacySession(): Promise<boolean> {
 export function getPharmacySupabase(): SupabaseClient | null {
   if (!url || !key) return null;
   return shared.__med250PharmacySupabase ??= createClient(url, key, {
-    accessToken: async () => await pharmacyAccessToken() ?? key,
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: false,
+      storageKey: PHARMACY_SESSION_KEY,
+      storage: pharmacySessionStorage,
+    },
   });
 }
