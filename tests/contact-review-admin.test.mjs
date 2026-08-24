@@ -10,8 +10,8 @@ import {
 
 const requestId = "22222222-2222-4222-8222-222222222222";
 const environment = {
-  NEXT_PUBLIC_SUPABASE_URL: "https://uskfnszcdqpcfrhjxitl.supabase.co",
-  DAWANEAR_ADMIN_TOKEN: "test-admin-token",
+  MED250_OPERATOR_ORIGIN: "https://staging.med-250.com",
+  MED250_ADMIN_TOKEN: "test-contact-admin-token-32-chars!",
 };
 
 test("builds bounded list and single-request contact reviews", () => {
@@ -39,14 +39,14 @@ test("keeps the contact-review admin token process-only", async () => {
       return new Response(JSON.stringify({ request: { id: requestId } }), { status: 200 });
     },
   });
-  assert.equal(captured.url, "https://uskfnszcdqpcfrhjxitl.supabase.co/functions/v1/review-pharmacy-contacts");
-  assert.equal(captured.init.headers["X-DawaNear-Admin-Token"], environment.DAWANEAR_ADMIN_TOKEN);
+  assert.equal(captured.url, "https://staging.med-250.com/api/internal/operator/contacts");
+  assert.equal(captured.init.headers.Authorization, `Bearer ${environment.MED250_ADMIN_TOKEN}`);
   assert.equal(JSON.parse(captured.init.body).request_id, requestId);
   await assert.rejects(
-    runContactReviewAdmin(["inspect", "--request-id", requestId], { environment: { NEXT_PUBLIC_SUPABASE_URL: environment.NEXT_PUBLIC_SUPABASE_URL } }),
-    /DAWANEAR_ADMIN_TOKEN/,
+    runContactReviewAdmin(["inspect", "--request-id", requestId], { environment: { MED250_OPERATOR_ORIGIN: environment.MED250_OPERATOR_ORIGIN } }),
+    /MED250_ADMIN_TOKEN/,
   );
-  assert.throws(() => resolveContactReviewEndpoint({ SUPABASE_URL: "http://localhost:54321" }), /HTTPS \*\.supabase\.co/);
+  assert.throws(() => resolveContactReviewEndpoint({ MED250_OPERATOR_ORIGIN: "http://localhost:8787" }), /HTTPS origin/);
 });
 
 test("keeps contact-review Edge access custom-token protected and one-request-at-a-time", async () => {

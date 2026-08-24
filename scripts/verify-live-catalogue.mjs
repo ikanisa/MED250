@@ -24,18 +24,23 @@ function sha256(value) {
   return createHash("sha256").update(value).digest("hex");
 }
 
-export function validateSupabaseOrigin(value) {
+export function validateWorkerOrigin(value) {
   const url = new URL(value);
   if (url.protocol !== "https:") throw new Error("Live catalogue verification requires HTTPS.");
-  if (url.username || url.password || url.search || url.hash) throw new Error("The Supabase URL cannot contain credentials, query parameters, or a fragment.");
-  if (url.pathname !== "/") throw new Error("The Supabase URL must be an origin without a path.");
-  if (!/^[a-z0-9]{20}\.supabase\.co$/.test(url.hostname)) throw new Error("The live catalogue URL must use a Supabase project origin.");
+  if (url.username || url.password || url.search || url.hash) throw new Error("The Worker URL cannot contain credentials, query parameters, or a fragment.");
+  if (url.pathname !== "/") throw new Error("The Worker URL must be an origin without a path.");
+  if (url.hostname !== "med-250.com" && !url.hostname.endsWith(".workers.dev")) {
+    throw new Error("The live catalogue URL must use the MED250 Cloudflare Worker origin.");
+  }
   return url.origin;
 }
 
 function parseArguments(values) {
   const parsed = {
-    url: process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ?? "",
+    url: process.env.MED250_DEPLOYMENT_ORIGIN?.trim()
+      || process.env.NEXT_PUBLIC_MED250_DEPLOYMENT_ORIGIN?.trim()
+      || process.env.NEXT_PUBLIC_SITE_URL?.trim()
+      || "",
     sourceIndex: DEFAULT_SOURCE_INDEX,
     evidenceOutput: "",
     concurrency: 4,
@@ -50,7 +55,7 @@ function parseArguments(values) {
     else if (flag === "--concurrency") parsed.concurrency = Number(value);
     else throw new Error(`Unknown argument ${flag}.`);
   }
-  if (!parsed.url) throw new Error("NEXT_PUBLIC_SUPABASE_URL or --url is required.");
+  if (!parsed.url) throw new Error("MED250_DEPLOYMENT_ORIGIN, NEXT_PUBLIC_MED250_DEPLOYMENT_ORIGIN, NEXT_PUBLIC_SITE_URL, or --url is required.");
   if (!Number.isInteger(parsed.concurrency) || parsed.concurrency < 1 || parsed.concurrency > 6) {
     throw new Error("--concurrency must be an integer from 1 to 6.");
   }
@@ -77,34 +82,40 @@ async function boundedResponseText(response, limit = 5 * 1024 * 1024) {
   }
 }
 
-async function requestCatalogue({ endpoint, publishableKey, query = "", category = "All products", sort = "relevance", limit = PAGE_SIZE, offset = 0 }) {
+async function requestCatalogue({ origin, query = "", category = "All products", availability = "orderable", sort = "relevance", limit = PAGE_SIZE, offset = 0 }) {
+  const endpoint = new URL("/api/catalogue", origin);
+  endpoint.search = new URLSearchParams({
+    query,
+    category,
+    prescriptionStatus: "all",
+    formGroup: "all",
+    availability,
+    sort,
+    limit: String(limit),
+    offset: String(offset),
+  }).toString();
   const response = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      apikey: publishableKey,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      p_query: query,
-      p_category: category,
-      p_prescription_status: "all",
-      p_form_group: "all",
-      p_availability: "all",
-      p_sort: sort,
-      p_limit: limit,
-      p_offset: offset,
-    }),
+    method: "GET",
+    headers: { Accept: "application/json" },
+    redirect: "error",
     signal: AbortSignal.timeout(20_000),
   });
   const body = await boundedResponseText(response);
-  if (!response.ok) throw new Error(`Catalogue RPC returned HTTP ${response.status}.`);
-  let rows;
+  if (!response.ok) throw new Error(`Worker catalogue returned HTTP ${response.status}.`);
+  let receipt;
   try {
-    rows = JSON.parse(body);
+    receipt = JSON.parse(body);
   } catch {
-    throw new Error("Catalogue RPC returned invalid JSON.");
+    throw new Error("Worker catalogue returned invalid JSON.");
   }
-  if (!Array.isArray(rows)) throw new Error("Catalogue RPC did not return a row array.");
+  if (
+    typeof receipt !== "object"
+    || receipt === null
+    || !Array.isArray(receipt.products)
+    || !Number.isSafeInteger(receipt.total)
+    || receipt.total < 0
+  ) throw new Error("Worker catalogue did not return the governed receipt shape.");
+  const rows = receipt.products.map((row) => ({ ...row, total_count: receipt.total }));
   return {
     offset,
     status: response.status,
@@ -230,28 +241,22 @@ async function writeEvidence(outputPath, evidence) {
 
 async function main() {
   const args = parseArguments(process.argv.slice(2));
-  const origin = validateSupabaseOrigin(args.url);
-  const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim() ?? "";
-  if (!/^sb_publishable_[A-Za-z0-9_-]{20,}$/.test(publishableKey)) {
-    throw new Error("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY must be a modern public publishable key.");
-  }
+  const origin = validateWorkerOrigin(args.url);
   const sourcePath = resolve(args.sourceIndex);
   const sourceBytes = await readFile(sourcePath);
   const sourceRows = JSON.parse(sourceBytes);
   if (!Array.isArray(sourceRows) || sourceRows.some((row) => !row?.id)) throw new Error("The governed source index is invalid.");
   const sourceIds = sourceRows.map(({ id }) => String(id));
-  const endpoint = `${origin}/rest/v1/rpc/dawanear_search_marketplace_catalogue`;
-
-  const firstPage = await requestCatalogue({ endpoint, publishableKey, sort: "az", offset: 0 });
+  const firstPage = await requestCatalogue({ origin, sort: "az", offset: 0 });
+  const visiblePage = await requestCatalogue({ origin, availability: "all", sort: "az", limit: 1, offset: 0 });
   const observedTotal = numericTotal(firstPage.rows);
   if (!Number.isInteger(observedTotal) || observedTotal < 1 || observedTotal > 10_120) throw new Error("The live catalogue total is outside the verifier boundary.");
   const offsets = Array.from({ length: Math.ceil(observedTotal / PAGE_SIZE) - 1 }, (_, index) => (index + 1) * PAGE_SIZE);
-  const remainingPages = await mapWithConcurrency(offsets, args.concurrency, (offset) => requestCatalogue({ endpoint, publishableKey, sort: "az", offset }));
+  const remainingPages = await mapWithConcurrency(offsets, args.concurrency, (offset) => requestCatalogue({ origin, sort: "az", offset }));
   const pages = [firstPage, ...remainingPages];
 
   const departmentResponses = await mapWithConcurrency(DEPARTMENTS, args.concurrency, (department) => requestCatalogue({
-    endpoint,
-    publishableKey,
+    origin,
     category: department,
     sort: "az",
     limit: 1,
@@ -264,8 +269,7 @@ async function main() {
   }));
 
   const searchResponses = await mapWithConcurrency(SEARCH_CASES, args.concurrency, (searchCase) => requestCatalogue({
-    endpoint,
-    publishableKey,
+    origin,
     query: searchCase.query,
     limit: 5,
   }));
@@ -276,7 +280,8 @@ async function main() {
     schemaVersion: "1.0",
     capturedAt: new Date().toISOString(),
     origin,
-    rpc: "dawanear_search_marketplace_catalogue",
+    endpoint: "/api/catalogue",
+    visibleCatalogueTotal: numericTotal(visiblePage.rows),
     ...assessment,
     source: {
       path: args.sourceIndex,
@@ -302,6 +307,7 @@ async function main() {
     origin: evidence.origin,
     expectedTotal: evidence.expectedTotal,
     observedTotal: evidence.observedTotal,
+    visibleCatalogueTotal: evidence.visibleCatalogueTotal,
     capturedPageCount: evidence.capturedPageCount,
     boundaryProducts: evidence.boundaryProducts,
     departmentTotals: Object.fromEntries(departments.map(({ department, total }) => [department, total])),

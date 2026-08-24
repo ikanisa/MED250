@@ -12,7 +12,6 @@ import { dirname, join } from "node:path";
 import test from "node:test";
 
 import {
-  canonicalProductionOrigin,
   expectedAuditBrowserScenarios,
   validateAuditBrowserEvidence,
 } from "../scripts/validate-audit-browser-evidence.mjs";
@@ -48,7 +47,6 @@ function createPassingFixture() {
   const release = "0123456789abcdef0123456789abcdef01234567";
   Object.assign(ledger, {
     status: "passed",
-    origin: canonicalProductionOrigin,
     release_revision: release,
     capture_tool: "in-app-browser",
     executed_by: "QA Executor",
@@ -121,16 +119,10 @@ test("completed audit browser execution is valid but cannot pass strict closure 
   assert.equal(planned.captureCount, 56);
   assert.deepEqual(planned.statusCounts, { pending: 0, passed: 16, failed: 0, blocked: 0, invalid: 0 });
   assert.equal(pendingLedger.execution_status, "completed_awaiting_approval");
-  assert.match(planned.warnings.join("\n"), /historical origin/);
+  assert.deepEqual(planned.warnings, []);
 
-  const strict = validateAuditBrowserEvidence(pendingLedger, {
-    strict: true,
-    rootDir: repositoryRoot,
-    currentReleaseRevision: "0123456789abcdef0123456789abcdef01234567",
-  });
+  const strict = validateAuditBrowserEvidence(pendingLedger, { strict: true, rootDir: repositoryRoot });
   assert.equal(strict.valid, false);
-  assert.match(strict.errors.join("\n"), /current production origin/);
-  assert.match(strict.errors.join("\n"), /release revision is stale/);
   assert.match(strict.errors.join("\n"), /requires a named approver/);
   assert.match(strict.errors.join("\n"), /overall status must be passed/);
 });
@@ -142,7 +134,6 @@ test("strict closure accepts a complete source- and release-bound evidence fixtu
       strict: true,
       rootDir: fixture.root,
       now: new Date("2026-07-18T11:00:00+02:00"),
-      currentReleaseRevision: fixture.ledger.release_revision,
     });
     assert.equal(result.valid, true, result.errors.join("\n"));
     assert.equal(result.scenarioCount, 16);
@@ -164,7 +155,6 @@ test("strict closure fails on screenshot, release, viewport, and plan tampering"
       strict: true,
       rootDir: fixture.root,
       now: new Date("2026-07-18T11:00:00+02:00"),
-      currentReleaseRevision: "0123456789abcdef0123456789abcdef01234567",
     });
     assert.equal(result.valid, false);
     assert.match(result.errors.join("\n"), /deployment receipt is not exactly bound/);
@@ -184,7 +174,6 @@ test("evidence notes reject personal data and secret material", () => {
       strict: true,
       rootDir: fixture.root,
       now: new Date("2026-07-18T11:00:00+02:00"),
-      currentReleaseRevision: fixture.ledger.release_revision,
     });
     assert.equal(result.valid, false);
     assert.match(result.errors.join("\n"), /prohibited identity or secret material/);

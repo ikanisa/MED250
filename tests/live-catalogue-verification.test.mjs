@@ -6,7 +6,7 @@ import { PGlite } from "@electric-sql/pglite";
 
 import {
   assessLiveCatalogueEvidence,
-  validateSupabaseOrigin,
+  validateWorkerOrigin,
 } from "../scripts/verify-live-catalogue.mjs";
 
 function row(id, total, brand = id, generic = "") {
@@ -60,12 +60,14 @@ test("fails on source drift, duplicate pages, empty departments, and missing mul
   assert.ok(result.errors.some((error) => error.includes("kinyarwanda")));
 });
 
-test("restricts live catalogue verification to a clean Supabase project origin", () => {
-  const origin = "https://uskfnszcdqpcfrhjxitl.supabase.co";
-  assert.equal(validateSupabaseOrigin(origin), origin);
-  assert.throws(() => validateSupabaseOrigin("http://uskfnszcdqpcfrhjxitl.supabase.co"), /requires HTTPS/);
-  assert.throws(() => validateSupabaseOrigin(`${origin}/rest/v1`), /without a path/);
-  assert.throws(() => validateSupabaseOrigin("https://example.com"), /Supabase project origin/);
+test("restricts live catalogue verification to a clean MED250 Cloudflare Worker origin", () => {
+  const staging = "https://med250-marketplace-staging.ikanisa.workers.dev";
+  assert.equal(validateWorkerOrigin(staging), staging);
+  assert.equal(validateWorkerOrigin("https://med-250.com"), "https://med-250.com");
+  assert.throws(() => validateWorkerOrigin("http://med-250.com"), /requires HTTPS/);
+  assert.throws(() => validateWorkerOrigin(`${staging}/api/catalogue`), /without a path/);
+  assert.throws(() => validateWorkerOrigin("https://example.com"), /Cloudflare Worker origin/);
+  assert.throws(() => validateWorkerOrigin("https://example.supabase.co"), /Cloudflare Worker origin/);
 });
 
 test("restores approved French and Kinyarwanda queries on both public search contracts", async () => {
@@ -151,8 +153,10 @@ test("restores approved French and Kinyarwanda queries on both public search con
   }
 });
 
-test("never prints the public key or accepts it as a command-line argument", async () => {
+test("never accepts or transmits a database-provider key", async () => {
   const source = await readFile(new URL("../scripts/verify-live-catalogue.mjs", import.meta.url), "utf8");
+  assert.match(source, /availability = "orderable"/);
+  assert.match(source, /visibleCatalogueTotal/);
   assert.doesNotMatch(source, /--publishable-key/);
-  assert.doesNotMatch(source, /console\.(?:log|error)\([^\n]*publishableKey/);
+  assert.doesNotMatch(source, /apikey|authorization|supabase|neon/i);
 });

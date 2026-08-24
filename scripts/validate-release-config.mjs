@@ -3,14 +3,7 @@ import { resolve } from "node:path";
 import { publicContactChannelErrors } from "../lib/public-contact-channels.mjs";
 
 const liveRequired = process.argv.includes("--live");
-const runtimeManaged = process.argv.includes("--runtime-managed");
-const envCandidates = liveRequired
-  ? [".env.local", ".env"]
-  : [".env.local", ".env", ".env.example"];
-const envPath = envCandidates.map((path) => resolve(path)).find(existsSync);
-const envFileSource = envPath
-  ? envCandidates.find((candidate) => resolve(candidate) === envPath) ?? null
-  : null;
+const envPath = [".env.local", ".env"].map((path) => resolve(path)).find(existsSync);
 const wranglerPath = resolve("wrangler.jsonc");
 const source = envPath ? readFileSync(envPath, "utf8") : "";
 const fileEnv = Object.fromEntries(source
@@ -25,20 +18,10 @@ const fileEnv = Object.fromEntries(source
     return [key, value];
   }));
 
-let configuredWorkerVars = {};
-if (existsSync(wranglerPath)) {
-  try {
-    const configuredWrangler = JSON.parse(readFileSync(wranglerPath, "utf8"));
-    const configuredWorker = liveRequired ? configuredWrangler?.env?.production : configuredWrangler;
-    configuredWorkerVars = configuredWorker?.vars ?? {};
-  } catch {
-    configuredWorkerVars = {};
-  }
-}
-const env = { ...configuredWorkerVars, ...fileEnv, ...process.env };
+const env = { ...fileEnv, ...process.env };
 const errors = [];
 const warnings = [];
-const legacyAdvisoryGateNames = [
+const liveGateNames = [
   "MED250_GATE_GPS_READY",
   "MED250_GATE_WHATSAPP_READY",
   "MED250_GATE_DUPLICATE_REGISTER_REVIEWED",
@@ -50,20 +33,30 @@ const legacyAdvisoryGateNames = [
   "MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED",
   "MED250_GATE_DOMAIN_DNS_VERIFIED",
   "MED250_GATE_PHYSICAL_UAT_PASSED",
+  "MED250_GATE_SOURCE_RECONCILED",
+  "MED250_GATE_WORKER_D1_CUTOVER_APPROVED",
 ];
 
 function required(name) {
   const value = env[name]?.trim();
-  const runtimeBinding = runtimeManaged && new Set([
-    "NEXT_PUBLIC_SUPABASE_URL",
-    "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
-  ]).has(name);
-  if (!value && !runtimeBinding) errors.push(`${name} is missing.`);
+  if (!value) errors.push(`${name} is missing.`);
   return value ?? "";
 }
 
-const supabaseUrl = required("NEXT_PUBLIC_SUPABASE_URL");
-const publishableKey = required("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY");
+const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL?.trim() ?? "";
+const publishableKey = env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim() ?? "";
+const backendModes = Object.fromEntries([
+  "NEXT_PUBLIC_MED250_CATALOGUE_BACKEND",
+  "NEXT_PUBLIC_MED250_AUTH_BACKEND",
+  "NEXT_PUBLIC_MED250_ORDER_BACKEND",
+  "NEXT_PUBLIC_MED250_WORKSPACE_BACKEND",
+].map((name) => [name, required(name)]));
+const workerD1Cutover = Object.values(backendModes).every((value) => value === "worker-d1");
+const transactionalModes = [
+  backendModes.NEXT_PUBLIC_MED250_AUTH_BACKEND,
+  backendModes.NEXT_PUBLIC_MED250_ORDER_BACKEND,
+  backendModes.NEXT_PUBLIC_MED250_WORKSPACE_BACKEND,
+];
 const mode = required("NEXT_PUBLIC_MARKETPLACE_MODE");
 const siteUrl = env.NEXT_PUBLIC_SITE_URL?.trim() ?? "";
 const turnstileSiteKey = env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() ?? "";
@@ -98,19 +91,13 @@ if (!existsSync(wranglerPath)) {
   }
 }
 
-if (supabaseUrl) {
-  try {
-    const parsed = new URL(supabaseUrl);
-    if (parsed.protocol !== "https:" || !parsed.hostname.endsWith(".supabase.co")) {
-      errors.push("NEXT_PUBLIC_SUPABASE_URL must be an HTTPS Supabase project URL.");
-    }
-  } catch {
-    errors.push("NEXT_PUBLIC_SUPABASE_URL is not a valid URL.");
-  }
+if (!workerD1Cutover) errors.push("Every MED250 backend slice must use worker-d1; no legacy runtime is permitted.");
+if (supabaseUrl || publishableKey || env.SUPABASE_URL?.trim() || env.SUPABASE_SECRET_KEY?.trim() || env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+  errors.push("MED250 runtime configuration must not contain Supabase credentials or origins.");
 }
 
-if (publishableKey && !publishableKey.startsWith("sb_publishable_")) {
-  errors.push("Use a modern sb_publishable_ key in NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY; never use a secret or service-role key.");
+if (transactionalModes.some((value) => value === "worker-d1") && !transactionalModes.every((value) => value === "worker-d1")) {
+  errors.push("Worker-D1 auth, customer orders, and pharmacy workspace must cut over together.");
 }
 
 if (!new Set(["preview", "catalog", "live"]).has(mode)) {
@@ -123,25 +110,16 @@ if (!new Set(["preview", "catalog", "live"]).has(workerMode)) {
   errors.push("Frontend and Worker release modes do not match.");
 }
 
-const approvedPublicCredentialNames = new Set([
-  "NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY",
-  "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
-  "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
-]);
-const unsafePublicKeys = Object.entries(env).filter(([name, value]) => (
+const unsafePublicKeys = Object.keys(env).filter((name) => (
   name.startsWith("NEXT_PUBLIC_")
-  && String(value).trim()
-  && !approvedPublicCredentialNames.has(name)
+  && name !== "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"
   && /(SECRET|SERVICE_ROLE|PASSWORD|ACCESS_TOKEN|PRIVATE_KEY|ADMIN_TOKEN|API_KEY)/i.test(name)
-)).map(([name]) => name);
+));
 if (unsafePublicKeys.length) {
   errors.push(`Server credentials use public variable names: ${unsafePublicKeys.join(", ")}.`);
 }
 
-if (!envPath) warnings.push("No governed environment file was found; only process environment values were checked.");
-if (envFileSource === ".env.example") {
-  warnings.push("Using committed public preview defaults from .env.example; process environment values take precedence.");
-}
+if (!envPath) warnings.push("No .env.local or .env file was found; only process environment values were checked.");
 if (mode !== "live") warnings.push(`Marketplace mode is ${mode || "preview"}, so customer ordering remains disabled.`);
 if (!siteUrl) warnings.push("NEXT_PUBLIC_SITE_URL is not explicitly configured; metadata uses the med-250.com default.");
 
@@ -159,29 +137,29 @@ if (siteUrl) {
 
 if (liveRequired) {
   if (mode !== "live") errors.push("Live release validation requires NEXT_PUBLIC_MARKETPLACE_MODE=live.");
+  if (!workerD1Cutover) errors.push("Live release validation requires every MED250 backend slice to use worker-d1.");
   if (!siteUrl) errors.push("Live release validation requires an explicit NEXT_PUBLIC_SITE_URL.");
-  if (!turnstileSiteKey && !runtimeManaged) errors.push("Live release validation requires NEXT_PUBLIC_TURNSTILE_SITE_KEY.");
-  if (!turnstileSiteKey && runtimeManaged) warnings.push("NEXT_PUBLIC_TURNSTILE_SITE_KEY is runtime-managed and must be verified after deployment.");
+  if (!turnstileSiteKey) errors.push("Live release validation requires NEXT_PUBLIC_TURNSTILE_SITE_KEY.");
   if (observabilityMode !== "cloud") errors.push("Live release validation requires NEXT_PUBLIC_MED250_OBSERVABILITY=cloud.");
-  const publicContactErrors = publicContactChannelErrors(env, { requireAll: true });
-  if (runtimeManaged) warnings.push(...publicContactErrors.map((error) => `Non-blocking public contact follow-up: ${error}`));
-  else errors.push(...publicContactErrors);
-  if (runtimeManaged) warnings.push("Committed production public bindings require exact live verification after deployment.");
+  errors.push(...publicContactChannelErrors(env, { requireAll: true }));
+  for (const gateName of liveGateNames) {
+    if (env[gateName]?.trim().toLowerCase() !== "confirmed") {
+      errors.push(`Live release validation requires ${gateName}=confirmed.`);
+    }
+  }
 }
 
 const result = {
   status: errors.length ? "failed" : "passed",
   target: liveRequired ? "live" : mode || "unknown",
   envFileDetected: Boolean(envPath),
-  envFileSource,
   workerReleaseMode: workerMode || "missing",
   workerName: workerName || "missing",
   workerEnvironment,
-  runtimeManagedBindings: runtimeManaged,
+  backendModes,
+  workerD1Cutover,
   publicVariablesChecked: Object.keys(env).filter((name) => name.startsWith("NEXT_PUBLIC_")).sort(),
-  legacyAdvisoryGateFlagsObserved: liveRequired
-    ? legacyAdvisoryGateNames.filter((name) => Boolean(env[name]?.trim()))
-    : [],
+  liveGatesChecked: liveRequired ? liveGateNames : [],
   warnings,
   errors,
 };

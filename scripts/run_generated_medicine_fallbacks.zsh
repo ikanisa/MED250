@@ -4,7 +4,7 @@ set -euo pipefail
 REPO="/Volumes/PRO-G40/MED250"
 PROJECT_REF="uskfnszcdqpcfrhjxitl"
 PYTHON="$REPO/.venv-product-images/bin/python"
-CONTRACT_VERSION="2026-07-23.1"
+CONTRACT_VERSION="2026-07-18.3"
 CONTRACT_CACHE="/tmp/med250-product-image-contract-${CONTRACT_VERSION}.ok"
 
 cd "$REPO"

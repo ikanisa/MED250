@@ -5,10 +5,6 @@ const DEFAULT_DATASET = new URL(
   "../outputs/019f66ce-d480-7a90-9bb7-ee6e417b5ce7/corrected/research/corrected-catalog-dataset-2026-07-15.json",
   import.meta.url,
 );
-const RECOVERED_VALIDATION_DATASET = new URL(
-  "../outputs/recovered-evidence/med250-marketplace-public-recovery-2026-07-23/recovered-public-marketplace-catalogue.json",
-  import.meta.url,
-);
 const MINIMUM_PRICE_TARGET = 100;
 
 function countBy(rows, keyFor) {
@@ -176,14 +172,7 @@ function parseArguments(values) {
 
 async function main() {
   const options = parseArguments(process.argv.slice(2));
-  let datasetSource;
-  try {
-    datasetSource = await readFile(options.dataset, "utf8");
-  } catch (error) {
-    if (error?.code !== "ENOENT" || options.dataset.href !== DEFAULT_DATASET.href) throw error;
-    datasetSource = await readFile(RECOVERED_VALIDATION_DATASET, "utf8");
-  }
-  const dataset = JSON.parse(datasetSource);
+  const dataset = JSON.parse(await readFile(options.dataset, "utf8"));
   const report = summarizePriceCoverage(dataset, options.asOf);
   process.stdout.write(options.format === "json" ? `${JSON.stringify(report, null, 2)}\n` : priceCoverageMarkdown(report));
 }

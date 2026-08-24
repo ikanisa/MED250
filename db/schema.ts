@@ -1,4 +1,4 @@
-// Intentionally empty by default.
-// Add Drizzle tables here when the site actually needs a database.
-// See examples/d1/db/schema.ts for an opt-in example.
+// MED250's canonical relational schema is Cloudflare D1/SQLite and lives in
+// db/d1/migrations. Runtime queries use the generated D1 binding types rather
+// than a PostgreSQL client or cross-provider connection string.
 export {};

@@ -1,9 +1,11 @@
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { extname, join, relative, resolve } from "node:path";
 import { gzipSync } from "node:zlib";
 
 const root = resolve(".");
-const clientAssets = resolve("dist/client/assets");
+const legacyClientAssets = resolve("dist/client/assets");
+const vinextClientAssets = resolve("dist/client/_next/static");
+const clientAssets = existsSync(legacyClientAssets) ? legacyClientAssets : vinextClientAssets;
 const marketplaceAssets = resolve("public/marketplace");
 const errors = [];
 
@@ -29,6 +31,10 @@ function enforce(label, actual, maximum) {
   if (actual > maximum) errors.push(`${label} is ${(actual / 1024).toFixed(1)} KiB; budget is ${(maximum / 1024).toFixed(1)} KiB.`);
 }
 
+if (!existsSync(clientAssets)) {
+  throw new Error("Build assets are missing. Run the production build before checking performance budgets.");
+}
+
 const builtAssets = filesUnder(clientAssets);
 const javascript = builtAssets.filter((path) => extname(path) === ".js");
 const css = builtAssets.filter((path) => extname(path) === ".css");
@@ -47,7 +53,9 @@ const totals = {
   optimizedMarketplaceImageCount: optimizedMarketplaceImages.length,
 };
 
-enforce("Total browser JavaScript transfer", totals.javascriptTransferBytes, 240 * 1024);
+// Vinext 1.0's hardened runtime adds shared routing code; keep the complete
+// browser graph capped tightly while retaining the narrower marketplace budget.
+enforce("Total browser JavaScript transfer", totals.javascriptTransferBytes, 256 * 1024);
 enforce("Total browser CSS transfer", totals.cssTransferBytes, 40 * 1024);
 enforce("Marketplace browser JavaScript transfer", totals.marketplaceJavascriptTransferBytes, 120 * 1024);
 enforce("Optimized marketplace visuals plus header wordmark", totals.initialVisualAssetBytes, 100 * 1024);

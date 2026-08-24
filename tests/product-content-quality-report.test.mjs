@@ -4,20 +4,10 @@ import test from "node:test";
 
 import { productContentQualityMarkdown, summarizeProductContentQuality } from "../scripts/report-product-content-quality.mjs";
 
-let datasetSource;
-try {
-  datasetSource = await readFile(
-    new URL("../outputs/019f66ce-d480-7a90-9bb7-ee6e417b5ce7/corrected/research/corrected-catalog-dataset-2026-07-15.json", import.meta.url),
-    "utf8",
-  );
-} catch (error) {
-  if (error?.code !== "ENOENT") throw error;
-  datasetSource = await readFile(
-    new URL("../outputs/recovered-evidence/med250-marketplace-public-recovery-2026-07-23/recovered-public-marketplace-catalogue.json", import.meta.url),
-    "utf8",
-  );
-}
-const dataset = JSON.parse(datasetSource);
+const dataset = JSON.parse(await readFile(
+  new URL("../outputs/019f66ce-d480-7a90-9bb7-ee6e417b5ce7/corrected/research/corrected-catalog-dataset-2026-07-15.json", import.meta.url),
+  "utf8",
+));
 
 test("reports product-content gaps without treating unreviewed exceptions as complete", () => {
   const report = summarizeProductContentQuality(dataset, new Date("2026-07-18T23:59:59Z"));

@@ -213,38 +213,21 @@ function validContract() {
       active_orders_complete_offer_filter: true,
       selected_contact_complete_offer_guard: true,
     },
-    pharmacy_identity_binding: {
-      function_exists: true,
-      security_definer: true,
-      search_path_locked: true,
-      service_role_can_execute: true,
-      anon_can_execute: false,
-      authenticated_can_execute: false,
-      one_login_authority_index_exists: true,
-      login_authority_constraint_validated: true,
-      enabled_without_named_review_count: 0,
-      duplicate_enabled_phone_count: 0,
-    },
-    go_live_hardening: {
-      offer_item_policy_binds_participants: true,
-      public_description_base_grant_exists: false,
-      mismatched_image_published_count: 0,
-    },
     prescriptions: { bucket_exists: true, cleanup_claims_rls: true },
     realtime: { orders: true, offers: true, notifications: true },
     api_surface: {
-      function_count: 41,
-      expected_function_count: 41,
+      function_count: 31,
+      expected_function_count: 31,
       public_execute_count: 0,
       anonymous_security_definer_count: 1,
       mutable_security_definer_path_count: 0,
-      expected_authenticated_security_definer_count: 15,
+      expected_authenticated_security_definer_count: 14,
       missing_authenticated_security_definer_count: 0,
       unexpected_authenticated_security_definer_count: 0,
     },
     table_surface: {
-      table_count: 27,
-      expected_table_count: 27,
+      table_count: 24,
+      expected_table_count: 24,
       rls_disabled_count: 0,
       anonymous_select_count: 0,
       expected_deny_by_default_count: 11,
@@ -261,26 +244,44 @@ test("accepts the complete MED+250 backend deployment contract", () => {
   assert.deepEqual(assessBackendContract(validContract()), []);
 });
 
-test("verifies the aggregate contract through one clean Supabase origin", async () => {
+test("verifies the aggregate contract through one clean Cloudflare Worker origin", async () => {
   const environment = {
-    SUPABASE_URL: "https://uskfnszcdqpcfrhjxitl.supabase.co",
-    SUPABASE_SECRET_KEY: "process-only-secret",
+    MED250_DEPLOYMENT_ORIGIN: "https://med250-marketplace-staging.ikanisa.workers.dev",
+    MED250_HEALTH_PROBE_TOKEN: "process-only-health-token-at-least-32-bytes",
   };
   let captured;
   const result = await verifyBackendContract({
     environment,
     fetchImpl: async (url, init) => {
       captured = { url: String(url), init };
-      return Response.json(validContract());
+      return Response.json({
+        contract_version: "med250-worker-d1-health-v1",
+        status: "healthy",
+        database: { migrations_current: true },
+        pharmacies: { dispatch_ready: 1, verified_login_contacts: 1 },
+        dispatch: {
+          provider_send_unknown: 0, dead_letter: 0, stale_work: 0, failed_24h: 0,
+          retry: 0, provider_callback_failures_24h: 0,
+        },
+        inbound: { stale_unprocessed: 0 },
+        orders: { waiting_without_confirmation_over_30m: 0 },
+        private_media: { expired_not_deleted: 0, stale_processing: 0, expired_active_grants: 0 },
+        privacy: {
+          aggregate_only: true,
+          contains_identifiers: false,
+          contains_phone_numbers: false,
+          contains_coordinates: false,
+          contains_health_or_prescription_data: false,
+        },
+      });
     },
   });
-  assert.equal(result.status, "passed");
-  assert.equal(captured.url, "https://uskfnszcdqpcfrhjxitl.supabase.co/rest/v1/rpc/dawanear_backend_contract");
-  assert.equal(captured.init.headers.apikey, environment.SUPABASE_SECRET_KEY);
-  assert.equal(captured.init.headers.Authorization, `Bearer ${environment.SUPABASE_SECRET_KEY}`);
+  assert.equal(result.status, "healthy");
+  assert.equal(captured.url, "https://med250-marketplace-staging.ikanisa.workers.dev/api/internal/health");
+  assert.equal(captured.init.headers.Authorization, `Bearer ${environment.MED250_HEALTH_PROBE_TOKEN}`);
   assert.throws(
-    () => resolveBackendContractEndpoint({ SUPABASE_URL: "https://uskfnszcdqpcfrhjxitl.supabase.co/path" }),
-    /HTTPS \*\.supabase\.co origin/,
+    () => resolveBackendContractEndpoint({ MED250_DEPLOYMENT_ORIGIN: "https://med-250.com/path" }),
+    /without a path/,
   );
 });
 
@@ -525,7 +526,7 @@ test("keeps the deployed contract service-only and identifier-free", async () =>
   assert.doesNotMatch(migration, /phone_numbers|whatsapp_numbers|customer_location/);
 });
 
-test("keeps technical drift mandatory without making safe deferred reviews block deployment", async () => {
+test("makes Worker-D1 drift and cutover controls mandatory in the production-only release gate", async () => {
   const packageJson = JSON.parse(await readFile(
     new URL("../package.json", import.meta.url),
     "utf8",
@@ -533,27 +534,31 @@ test("keeps technical drift mandatory without making safe deferred reviews block
   const liveGate = packageJson.scripts["release:check:live"];
   assert.match(liveGate, /^npm run release:preflight:live/);
   assert.match(liveGate, /&& npm run launch:go-live:status/);
-  assert.match(liveGate, /&& npm run backend:verify/);
-  assert.match(liveGate, /&& npm run backend:verify:description-reviewer/);
-  assert.match(liveGate, /MED250_DESCRIPTION_REVIEWER_PROBE_PRODUCT_ID/);
-  assert.match(liveGate, /MED250_DESCRIPTION_REVIEWER_PROBE_EXPECTED_UPDATED_AT/);
-  assert.match(liveGate, /&& npm run ops:health/);
-  assert.doesNotMatch(liveGate, /source-authority:verify:strict|data:duplicates:verify -- --strict|data:content-review:verify -- --strict|uat:verify:live|audit:browser-evidence:verify:live|ops:health:strict/);
+  assert.match(liveGate, /&& npm run data:duplicates:verify -- --strict/);
+  assert.match(liveGate, /&& npm run cloudflare:typecheck/);
+  assert.match(liveGate, /&& npm run cloudflare:check:worker-d1/);
+  const workerD1Check = packageJson.scripts["cloudflare:check:worker-d1"];
+  assert.match(workerD1Check, /^npm run test:production/);
+  assert.match(workerD1Check, /npm run cloudflare:prepare:worker-d1/);
+  assert.match(workerD1Check, /wrangler deploy --config dist\/server\/wrangler[.]worker-d1[.]production[.]json --dry-run --strict/);
+  assert.doesNotMatch(workerD1Check, /--keep-vars/);
+  assert.doesNotMatch(workerD1Check, /--env production/);
+  assert.doesNotMatch(liveGate, /backend:verify|ops:health|SUPABASE/);
+  assert.ok(
+    liveGate.indexOf("release:preflight:live") < liveGate.indexOf("data:duplicates:verify"),
+    "fail-closed attestation checks must run before source-governance checks",
+  );
   assert.ok(
     liveGate.indexOf("release:preflight:live") < liveGate.indexOf("launch:go-live:status")
-      && liveGate.indexOf("launch:go-live:status") < liveGate.indexOf("backend:verify"),
-    "informational readiness must be reported before service-credential checks",
+      && liveGate.indexOf("launch:go-live:status") < liveGate.indexOf("data:duplicates:verify"),
+    "consolidated go-live readiness must run before source-governance and Worker packaging checks",
   );
   assert.ok(
-    liveGate.indexOf("backend:verify") < liveGate.indexOf("wrangler deploy"),
-    "backend drift must be checked before Cloudflare packaging",
+    liveGate.indexOf("data:duplicates:verify") < liveGate.indexOf("cloudflare:typecheck"),
+    "source-governance review must pass before Worker packaging checks",
   );
   assert.ok(
-    liveGate.indexOf("backend:verify:description-reviewer") < liveGate.indexOf("ops:health"),
-    "the protected reviewer must be probed before operational health is reported",
-  );
-  assert.ok(
-    liveGate.indexOf("ops:health") < liveGate.indexOf("wrangler deploy"),
-    "operational health must remain visible before Cloudflare packaging",
+    liveGate.indexOf("cloudflare:typecheck") < liveGate.indexOf("cloudflare:check:worker-d1"),
+    "Worker type drift must be checked before the production config is prepared",
   );
 });

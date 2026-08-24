@@ -2,24 +2,10 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const originalDatasetUrl = new URL(
-  "../outputs/019f66ce-d480-7a90-9bb7-ee6e417b5ce7/corrected/research/corrected-catalog-dataset-2026-07-15.json",
-  import.meta.url,
-);
-const recoveredDatasetUrl = new URL(
-  "../outputs/recovered-evidence/med250-marketplace-public-recovery-2026-07-23/recovered-public-marketplace-catalogue.json",
-  import.meta.url,
-);
-let usingRecoveredDataset = false;
-let datasetSource;
-try {
-  datasetSource = await readFile(originalDatasetUrl, "utf8");
-} catch (error) {
-  if (error?.code !== "ENOENT") throw error;
-  usingRecoveredDataset = true;
-  datasetSource = await readFile(recoveredDatasetUrl, "utf8");
-}
-const dataset = JSON.parse(datasetSource);
+const dataset = JSON.parse(await readFile(
+  new URL("../outputs/019f66ce-d480-7a90-9bb7-ee6e417b5ce7/corrected/research/corrected-catalog-dataset-2026-07-15.json", import.meta.url),
+  "utf8",
+));
 const migration = await readFile(
   new URL("../supabase/migrations/20260715184639_add_amazon_marketplace_catalogue.sql", import.meta.url),
   "utf8",
@@ -76,6 +62,7 @@ const client = await readFile(new URL("../lib/dawanear-client.ts", import.meta.u
 const taxonomy = await readFile(new URL("../lib/non-prescription-taxonomy.ts", import.meta.url), "utf8");
 const productPage = await readFile(new URL("../app/product/[id]/page.tsx", import.meta.url), "utf8");
 const publicProduct = await readFile(new URL("../lib/public-marketplace-product.ts", import.meta.url), "utf8");
+const d1CatalogueServer = await readFile(new URL("../lib/d1-catalogue-server.ts", import.meta.url), "utf8");
 const marketplace = await readFile(new URL("../app/marketplace.tsx", import.meta.url), "utf8");
 const medicinesPage = await readFile(new URL("../app/category/medicines/page.tsx", import.meta.url), "utf8");
 const categoryPages = await Promise.all([
@@ -141,9 +128,7 @@ test("uses complete consumer product names instead of quantity or pack tokens", 
   assert.match(nonProductRetirementMigration, /publication_status = 'rejected'/);
   assert.match(nonProductRetirementMigration, /raise exception 'Non-product catalogue records remain publicly visible'/);
   assert.equal(dataset.qa.duplicate_product_titles, 0);
-  assert.ok(usingRecoveredDataset
-    ? dataset.consumer_products.some((row) => row.product_name.includes("Makeup Brushes"))
-    : dataset.consumer_products.some((row) => row.brand_name === "10pcs" && row.product_name.includes("Makeup Brushes")));
+  assert.ok(dataset.consumer_products.some((row) => row.brand_name === "10pcs" && row.product_name.includes("Makeup Brushes")));
 });
 
 test("marketplace schema is RLS-protected and keeps pricing central", () => {
@@ -183,11 +168,11 @@ test("marketplace schema is RLS-protected and keeps pricing central", () => {
   );
 });
 
-test("public server rendering fails blank instead of returning a transient upstream 503", () => {
-  assert.match(publicProduct, /async function fetchPublicRows/);
-  assert.match(publicProduct, /AbortSignal\.timeout\(PUBLIC_FETCH_TIMEOUT_MS\)/);
-  assert.match(publicProduct, /catch \{[\s\S]*return \[\];[\s\S]*\}/);
-  assert.doesNotMatch(publicProduct, /const \[response, imageUrls\]/);
+test("public server rendering keeps the retained snapshot without calling the retired provider", () => {
+  assert.match(publicProduct, /if \(serverD1CatalogueConfigured\)/);
+  assert.match(publicProduct, /withServerCatalogueRepository/);
+  assert.match(publicProduct, /return \[\];/);
+  assert.doesNotMatch(publicProduct, /NEXT_PUBLIC_SUPABASE|supabase\.co|fetchPublicRows|PUBLIC_FETCH_TIMEOUT_MS/);
   for (const page of categoryPages) {
     assert.match(page, /initialTaxonomy\.length > 0 && !initialTaxonomy\.some/);
   }
@@ -199,25 +184,30 @@ test("publishes central indicative price columns through the RLS-protected catal
 });
 
 test("storefront loads and searches the unified catalogue with exact taxonomy fields", () => {
-  assert.match(client, /dawanear_all_product_catalog/);
+  assert.match(client, /catalogueBackendConfigured = true/);
+  assert.match(client, /med250ApiJson\("\/api\/catalogue\/taxonomy"\)/);
   assert.match(client, /export async function loadCatalogueProductsByIds/);
   assert.match(client, /export async function loadProductImagePresentation/);
-  assert.match(client, /\.from\("dawanear_product_images"\)[\s\S]*\.eq\("position", 1\)[\s\S]*\.eq\("approved", true\)/);
+  assert.match(client, /"\/api\/catalogue\/image-presentations"/);
   assert.match(marketplace, /loadProductImagePresentation\(ids\)/);
   assert.match(marketplace, /qualityScore: featuredImageRanking\.rows\.get\(product\.id\)\?\.qualityScore/);
   assert.match(marketplace, /right\.qualityScore - left\.qualityScore/);
   assert.match(client, /MAX_BASKET_PRODUCT_IDS = 100/);
-  assert.match(client, /\.in\("id", ids\.slice\(index, index \+ BASKET_PRODUCT_QUERY_SIZE\)\)/);
-  assert.match(client, /dawanear_search_marketplace_catalogue/);
+  assert.match(client, /jsonRequest\(\{ ids: ids\.slice\(index, index \+ BASKET_PRODUCT_QUERY_SIZE\) \}\)/);
+  assert.match(client, /med250ApiJson\(`\/api\/catalogue\?\$\{parameters\.toString\(\)\}`\)/);
   assert.match(client, /subcategory: stringValue\(row, "subcategory"\)/);
   assert.match(taxonomy, /product\.subcategory/);
   assert.match(taxonomy, /return value;/);
   assert.match(productPage, /getPublicMarketplaceProduct/);
-  assert.match(publicProduct, /dawanear_all_product_catalog/);
+  assert.match(publicProduct, /if \(serverD1CatalogueConfigured\)/);
+  assert.match(publicProduct, /withServerCatalogueRepository\(\(repository\) => repository\.productsByIds\(ids\)\)/);
+  assert.match(d1CatalogueServer, /await import\("cloudflare:workers"\)/);
+  assert.match(d1CatalogueServer, /d1Database\(workerEnv\)/);
+  assert.doesNotMatch(d1CatalogueServer, /NEXT_PUBLIC_SUPABASE|SUPABASE_(?:URL|KEY)|console\./);
   assert.match(publicProduct, /export async function getPublicMarketplaceProducts/);
   assert.match(publicProduct, /MAX_RELATED_PRODUCT_IDS = 12/);
-  assert.match(publicProduct, /id", `in\.\(\$\{ids\.join\(","\)\}\)`/);
-  assert.match(publicProduct, /cache: "no-store"/);
+  assert.match(publicProduct, /repository\.productsByIds\(ids\)/);
+  assert.doesNotMatch(publicProduct, /NEXT_PUBLIC_SUPABASE|supabase\.co|dawanear_all_product_catalog|cache: "no-store"/);
   assert.match(client, /indicativePriceRwf/);
   assert.match(publicProduct, /indicative_price_rwf/);
   assert.doesNotMatch(publicProduct, /SERVICE_ROLE|SECRET_KEY/);
@@ -229,7 +219,7 @@ test("storefront loads and searches the unified catalogue with exact taxonomy fi
   assert.match(optionalProductImageMigration, /missing_images_hidden[\s\S]*true/);
   assert.match(optionalProductImageMigration, /generated_placeholders_allowed[\s\S]*false/);
   assert.match(optionalProductImageMigration, /partial_product_count/);
-  assert.match(publicProduct, /dawanear_product_images/);
+  assert.match(publicProduct, /repository\.productsByIds\(\[productId\]\)/);
   assert.match(productPage, /getPublicProductImages/);
 });
 

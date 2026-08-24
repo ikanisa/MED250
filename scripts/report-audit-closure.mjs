@@ -14,12 +14,6 @@ import { validateLaunchEvidence } from "./validate-launch-evidence.mjs";
 import { validateLocalizationFiles } from "./validate-localization.mjs";
 import { validatePhysicalUat } from "./validate-physical-uat.mjs";
 
-const machineVerifiedLaunchGates = new Set([
-  "MED250_GATE_SECURITY_HARDENING_DEPLOYED",
-  "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED",
-  "MED250_GATE_DOMAIN_DNS_VERIFIED",
-]);
-
 const browser = (id, label) => ({ type: "browser", id, label });
 const launch = (id, label) => ({ type: "launch", id, label });
 const manual = (id, label) => ({ type: "manual", id, label });
@@ -241,22 +235,14 @@ export function buildAuditClosureReport({
   localizationRegistry,
   contentReviewAssessment,
   technicalEvidence = {},
-  technicalEvidenceErrors = [],
 }) {
-  const effectiveTechnicalEvidence = technicalEvidenceErrors.length
-    ? Object.fromEntries(Object.entries(technicalEvidence).map(([id, signal]) => [id, {
-      ...signal,
-      status: "stale_or_unavailable",
-      satisfied: false,
-    }]))
-    : technicalEvidence;
   const sources = {
     browserLedger,
     launchManifest,
     physicalUat: physicalUatLedger,
     localizationRegistry,
     contentReviewAssessment,
-    technicalEvidence: effectiveTechnicalEvidence,
+    technicalEvidence,
   };
   const registerItems = [...(register.findings ?? []), ...(register.strategic_items ?? [])];
   const items = registerItems.map((item) => {
@@ -310,9 +296,7 @@ export function buildAuditClosureReport({
       owner: gate?.owner ?? "",
       status: gate?.status ?? "missing",
       missingEvidenceTypes,
-      approvalRequired: gate?.status === "pending"
-        && missingEvidenceTypes.length === 0
-        && !machineVerifiedLaunchGates.has(name),
+      approvalRequired: gate?.status === "pending" && missingEvidenceTypes.length === 0,
     }];
   });
   const allBrowserEvidencePassed = browserLedger?.status === "passed"
@@ -385,15 +369,6 @@ export function buildAuditClosureReport({
         expectedEntryCount: contentReviewAssessment?.expectedEntryCount ?? null,
         pendingCount: contentReviewAssessment?.pendingCount ?? null,
         blockingCorrectionCount: contentReviewAssessment?.blockingCorrectionCount ?? null,
-        sourceAvailable: contentReviewAssessment?.sourceAvailable ?? true,
-        disposition: contentReviewAssessment?.sourceAvailable === false
-          ? "non_blocking_fail_closed_follow_up"
-          : "governed_review",
-      },
-      technicalEvidence: {
-        status: technicalEvidenceErrors.length ? "stale_or_unavailable" : "passed",
-        errorCount: technicalEvidenceErrors.length,
-        errors: technicalEvidenceErrors,
       },
     },
     items,
@@ -432,33 +407,6 @@ async function loadJson(path) {
   return JSON.parse(await readFile(path, "utf8"));
 }
 
-export function assessUnavailableContentReviewSource(actualReview) {
-  const entries = [
-    ...(actualReview?.duplicate_title_groups ?? []),
-    ...(actualReview?.missing_medicine_generics ?? []),
-    ...(actualReview?.short_or_pack_like_titles ?? []),
-  ];
-  const decisionCounts = entries.reduce((counts, entry) => {
-    const decision = entry?.review?.decision ?? "pending";
-    counts[decision] = (counts[decision] ?? 0) + 1;
-    return counts;
-  }, {});
-  const pendingCount = decisionCounts.pending ?? 0;
-  const blockingCorrectionCount = decisionCounts.correction_required ?? 0;
-  return {
-    valid: false,
-    strict: true,
-    expectedEntryCount: actualReview?.summary?.review_entry_count ?? entries.length,
-    reviewedEntryCount: entries.length,
-    pendingCount,
-    blockingCorrectionCount,
-    decisionCounts,
-    sourceAvailable: false,
-    sourceStatus: "unavailable_non_blocking_fail_closed",
-    errors: [],
-  };
-}
-
 async function validateReceiptSourceBindings(receipt) {
   const errors = [];
   const bindings = receipt?.sources
@@ -487,35 +435,24 @@ async function main() {
   const unknown = process.argv.slice(2).filter((argument) => argument !== "--json" && argument !== "--strict");
   if (unknown.length) throw new Error("Unknown argument(s): " + unknown.join(", "));
 
-  const [register, browserLedger, launchManifest, physicalUatLedger, localizationRegistry, actualReview, sitesCatalogReceipt, liveRelatedReceipt] = await Promise.all([
+  const [register, browserLedger, launchManifest, physicalUatLedger, localizationRegistry, actualReview, datasetSource, sitesCatalogReceipt, liveRelatedReceipt] = await Promise.all([
     loadJson("data/audit-implementation-register.json"),
     loadJson("data/audit-browser-evidence.json"),
     loadJson("data/launch-evidence.json"),
     loadJson("data/physical-device-uat.json"),
     loadJson("data/localization/locale-releases.json"),
     loadJson(DEFAULT_REVIEW_PATH),
+    readFile(DEFAULT_DATASET_PATH, "utf8"),
     loadJson("docs/audit/live-baseline-2026-07-18/16-sites-catalog-verification-5ef50a.json"),
     loadJson("docs/audit/live-baseline-2026-07-18/18-live-related-products-5ef50a.json"),
   ]);
-  let contentReviewPreview;
-  let contentReviewAssessment;
-  try {
-    const datasetSource = await readFile(DEFAULT_DATASET_PATH, "utf8");
-    const dataset = JSON.parse(datasetSource);
-    const expectedReview = buildProductContentReviewPacket(dataset, {
-      sourcePath: DEFAULT_DATASET_PATH,
-      sourceSha256: createHash("sha256").update(datasetSource).digest("hex"),
-    });
-    contentReviewPreview = assessProductContentReview(expectedReview, actualReview);
-    contentReviewAssessment = {
-      ...assessProductContentReview(expectedReview, actualReview, { strict: true }),
-      sourceAvailable: true,
-    };
-  } catch (error) {
-    if (error?.code !== "ENOENT") throw error;
-    contentReviewAssessment = assessUnavailableContentReviewSource(actualReview);
-    contentReviewPreview = { ...contentReviewAssessment, strict: false };
-  }
+  const dataset = JSON.parse(datasetSource);
+  const expectedReview = buildProductContentReviewPacket(dataset, {
+    sourcePath: DEFAULT_DATASET_PATH,
+    sourceSha256: createHash("sha256").update(datasetSource).digest("hex"),
+  });
+  const contentReviewPreview = assessProductContentReview(expectedReview, actualReview);
+  const contentReviewAssessment = assessProductContentReview(expectedReview, actualReview, { strict: true });
   const technicalAssessment = assessTechnicalClosureEvidence({ sitesCatalogReceipt, liveRelatedReceipt });
   const technicalBindingErrors = (await Promise.all([
     validateReceiptSourceBindings(sitesCatalogReceipt),
@@ -529,12 +466,12 @@ async function main() {
     validateLocalizationFiles(),
     Promise.resolve(contentReviewPreview),
   ]);
-  const validationErrors = validations.flatMap((result) => result.errors ?? []);
-  if (validationErrors.length) throw new Error("Authoritative closure input is invalid: " + validationErrors.join("; "));
-  const technicalEvidenceErrors = [
+  const validationErrors = [
+    ...validations.flatMap((result) => result.errors ?? []),
     ...technicalAssessment.errors,
     ...technicalBindingErrors,
   ];
+  if (validationErrors.length) throw new Error("Authoritative closure input is invalid: " + validationErrors.join("; "));
 
   const report = buildAuditClosureReport({
     register,
@@ -544,7 +481,6 @@ async function main() {
     localizationRegistry,
     contentReviewAssessment,
     technicalEvidence: technicalAssessment.signals,
-    technicalEvidenceErrors,
   });
   if (json) console.log(JSON.stringify(report, null, 2));
   else printText(report);

@@ -1,17 +1,6 @@
-import type { Session, User } from "@supabase/supabase-js";
-
 import { normalizeCatalogueText } from "./catalogue-search";
-import { governPublicProductMedia, isPublicProductMediaHeld } from "./product-media-governance";
-import {
-  clearPharmacySession,
-  customerSupabase,
-  getPharmacySupabase,
-  hasStoredPharmacySession,
-  savePharmacySession,
-  supabaseConfigured,
-} from "./supabase";
+import { jsonRequest, med250ApiJson } from "./med250-api";
 
-const PRESCRIPTION_BUCKET = "dawanear-prescriptions";
 const MAX_PRESCRIPTION_BYTES = 10 * 1024 * 1024;
 const MAX_PAGE_SIZE = 1_000;
 const MAX_BASKET_PRODUCT_IDS = 100;
@@ -332,8 +321,14 @@ export type PharmacySelectedOrder = {
   updatedAt: string;
 };
 
-/** True when the shared project URL and publishable key are configured. */
-export const backendConfigured = supabaseConfigured;
+/** MED250 has one operating backend: the same-origin Cloudflare Worker and D1. */
+export const catalogueBackendConfigured = true;
+export const authBackendConfigured = true;
+export const orderBackendConfigured = true;
+export const orderingBackendConfigured = true;
+export const pharmacyWorkspaceBackendConfigured = true;
+export const backendConfigured = true;
+export const pharmacyPortalBackendConfigured = true;
 
 function isRecord(value: unknown): value is JsonRecord {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -420,7 +415,7 @@ function cleanContext(context: string): string {
   return context.replace(/[.:\s]+$/, "");
 }
 
-/** Converts Supabase/PostgREST/Storage/Auth errors into concise, actionable UI errors. */
+/** Converts Worker/API errors into concise, actionable UI errors. */
 export function normalizeDawaNearError(error: unknown, context = "MED+250 order failed"): Error {
   if (error instanceof Error && error.name === "DawaNearError") return error;
 
@@ -438,8 +433,8 @@ export function normalizeDawaNearError(error: unknown, context = "MED+250 order 
   let message = rawMessage || "Unknown backend error";
   if (/failed to fetch|fetcherror|networkerror|network request failed/.test(lower)) {
     message = "Could not reach MED250. Check your internet connection and try again.";
-  } else if (/anonymous.*(disabled|not enabled)|anonymous_provider_disabled/.test(lower)) {
-    message = "Guest checkout is not enabled yet. Enable Anonymous Sign-Ins in Supabase Auth.";
+  } else if (/guest.*(disabled|not enabled)|anonymous_provider_disabled/.test(lower)) {
+    message = "Guest checkout is not enabled on the MED250 Worker.";
   } else if (/invalid login credentials|email not confirmed/.test(lower)) {
     message = "The pharmacy sign-in could not be verified. Send a new WhatsApp code and try again.";
   } else if (/rate.?limit|over_email_send_rate_limit|429/.test(lower)) {
@@ -448,10 +443,8 @@ export function normalizeDawaNearError(error: unknown, context = "MED+250 order 
     message = "Your session expired. Sign in again, then retry this action.";
   } else if (/row-level security|violates row-level|permission denied|42501|unauthorized|403/.test(lower)) {
     message = "You do not have permission for this action. Check that you are signed in with the correct account.";
-  } else if (/pgrst202|42883|function .* does not exist|could not find the function/.test(lower)) {
-    message = "This marketplace action is not installed in the configured Supabase project. Apply the MED250 marketplace migration and retry.";
-  } else if (/42p01|relation .* does not exist|could not find the table/.test(lower)) {
-    message = "The MED250 database schema is missing from the configured Supabase project.";
+  } else if (/d1_error|no such table|no such column|database schema/.test(lower)) {
+    message = "The MED250 D1 schema is incomplete. Apply the required Cloudflare D1 migrations and retry.";
   } else if (/23505|duplicate key|already exists/.test(lower)) {
     message = "That record already exists. Refresh the page before trying again.";
   } else if (/payload too large|file.*too large|413/.test(lower)) {
@@ -465,31 +458,6 @@ export function normalizeDawaNearError(error: unknown, context = "MED+250 order 
 
 export function readableDawaNearError(error: unknown): string {
   return normalizeDawaNearError(error).message;
-}
-
-function requireCustomerBackend() {
-  if (!customerSupabase) {
-    throw normalizeDawaNearError(
-      "Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, then restart the site.",
-      "MED250 customer backend is not configured",
-    );
-  }
-  return customerSupabase;
-}
-
-function requirePharmacyBackend() {
-  const pharmacySupabase = getPharmacySupabase();
-  if (!pharmacySupabase) {
-    throw normalizeDawaNearError(
-      "Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, then restart the site.",
-      "MED250 pharmacy backend is not configured",
-    );
-  }
-  return pharmacySupabase;
-}
-
-function rethrow(context: string, error: unknown): never {
-  throw normalizeDawaNearError(error, context);
 }
 
 function requireNonEmpty(value: string, label: string): string {
@@ -522,78 +490,48 @@ function normalizeEmail(value: string): string {
   return email;
 }
 
-async function customerSession(context: string): Promise<Session | null> {
-  const client = requireCustomerBackend();
-  const { data, error } = await client.auth.getSession();
-  if (error) rethrow(context, error);
-  return data.session;
-}
-
 async function requirePermanentPharmacyUser(context: string): Promise<void> {
-  if (!await hasStoredPharmacySession()) {
+  if (!(await hasPermanentPharmacySession())) {
     throw new Error(`${context}: Sign in with your pharmacy WhatsApp number first.`);
   }
 }
 
 export async function hasAnonymousCustomerSession(): Promise<boolean> {
-  const client = requireCustomerBackend();
-  const { data, error } = await client.auth.getSession();
-  if (error) rethrow("Could not restore your customer session", error);
-  if (!data.session?.user) return false;
-  if (data.session.user.is_anonymous !== true) {
-    throw new Error("Customer session isolation failed: the customer auth store contains a permanent identity.");
-  }
-  return true;
+  const payload = await med250ApiJson("/api/auth/client/session");
+  return isRecord(payload) && payload.authenticated === true && Boolean(stringValue(payload, "userId"));
 }
 
-export async function ensureAnonymousCustomer(captchaToken?: string): Promise<User> {
-  const client = requireCustomerBackend();
-  const { data: sessionData, error: sessionError } = await client.auth.getSession();
-  if (sessionError) rethrow("Could not restore your customer session", sessionError);
-  if (sessionData.session?.user) {
-    if (sessionData.session.user.is_anonymous !== true) {
-      throw new Error("Customer session isolation failed: the customer auth store contains a permanent identity.");
-    }
-    return sessionData.session.user;
+export async function ensureAnonymousCustomer(captchaToken?: string): Promise<{ id: string; is_anonymous: true }> {
+  const restored = await med250ApiJson("/api/auth/client/session");
+  if (isRecord(restored) && restored.authenticated === true && stringValue(restored, "userId")) {
+    return { id: stringValue(restored, "userId"), is_anonymous: true };
   }
-
-  const cleanedCaptchaToken = captchaToken?.trim() || "";
-  if (process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && !cleanedCaptchaToken) {
-    throw new Error("Complete the security check before placing your order.");
+  const created = await med250ApiJson(
+    "/api/auth/client/session",
+    jsonRequest({ captchaToken: captchaToken?.trim() || null }),
+  );
+  if (!isRecord(created) || created.authenticated !== true || !stringValue(created, "userId")) {
+    throw new Error("Could not start a private MED250 guest session.");
   }
-  const { data, error } = await client.auth.signInAnonymously(cleanedCaptchaToken
-    ? { options: { captchaToken: cleanedCaptchaToken } }
-    : undefined);
-  if (error) rethrow("Could not start a private guest session", error);
-  if (!data.session || !data.user) {
-    throw new Error("Could not start a private guest session: Supabase returned no authenticated user.");
-  }
-  return data.user;
+  return { id: stringValue(created, "userId"), is_anonymous: true };
 }
 
 export async function hasPermanentPharmacySession(): Promise<boolean> {
-  requirePharmacyBackend();
-  return await hasStoredPharmacySession();
+  const payload = await med250ApiJson("/api/auth/pharmacy/session");
+  return isRecord(payload) && payload.authenticated === true && stringValue(payload, "actorType") === "pharmacy";
 }
 
 export async function loadCustomerProfile(): Promise<CustomerProfile | null> {
   const user = await ensureAnonymousCustomer();
-  const client = requireCustomerBackend();
-  const { data, error } = await client
-    .from("dawanear_customer_profiles")
-    .select("user_id,whatsapp,whatsapp_verified_at,preferred_language,created_at,updated_at")
-    .eq("user_id", user.id)
-    .maybeSingle();
-  if (error) rethrow("Could not load your MED250 profile", error);
-  if (!isRecord(data)) return null;
-
+  const payload = await med250ApiJson("/api/auth/client/session");
+  if (!isRecord(payload) || payload.authenticated !== true) return null;
   return {
-    userId: requiredString(data, "profile", "user_id"),
-    whatsapp: nullableString(data, "whatsapp"),
-    whatsappVerifiedAt: nullableString(data, "whatsapp_verified_at"),
-    preferredLanguage: stringValue(data, "preferred_language") || "en",
-    createdAt: nullableString(data, "created_at"),
-    updatedAt: nullableString(data, "updated_at"),
+    userId: stringValue(payload, "userId") || user.id,
+    whatsapp: nullableString(payload, "whatsapp"),
+    whatsappVerifiedAt: nullableString(payload, "whatsappVerifiedAt"),
+    preferredLanguage: stringValue(payload, "preferredLanguage") || "en",
+    createdAt: null,
+    updatedAt: null,
   };
 }
 
@@ -601,17 +539,14 @@ export async function requestCustomerWhatsappOtp(phone: string): Promise<Custome
   const normalizedPhone = normalizeInternationalWhatsapp(phone);
   if (!normalizedPhone) throw new Error("Enter the WhatsApp number you want to verify.");
   await ensureAnonymousCustomer();
-  const client = requireCustomerBackend();
-  const { data, error } = await client.functions.invoke<CustomerWhatsappOtpChallenge & { error?: string }>(
-    "dawanear-customer-send-otp",
-    { body: { phone: normalizedPhone } },
+  const payload = await med250ApiJson(
+    "/api/auth/client/otp/request",
+    jsonRequest({ phone: normalizedPhone }),
   );
-  if (error) rethrow("Could not send your WhatsApp verification code", error);
-  if (data?.error) throw new Error(data.error);
-  if (!data?.challengeId || !data.expiresAt) {
+  if (!isRecord(payload) || !stringValue(payload, "challengeId") || !stringValue(payload, "expiresAt")) {
     throw new Error("Could not start WhatsApp verification. Please try again.");
   }
-  return { challengeId: data.challengeId, expiresAt: data.expiresAt };
+  return { challengeId: stringValue(payload, "challengeId"), expiresAt: stringValue(payload, "expiresAt") };
 }
 
 export async function verifyCustomerWhatsappOtp(
@@ -625,17 +560,14 @@ export async function verifyCustomerWhatsappOtp(
   if (!/^\d{6}$/.test(cleanedToken)) throw new Error("Enter the complete 6-digit WhatsApp code.");
   if (!/^[0-9a-f-]{36}$/i.test(challengeId)) throw new Error("Send a new WhatsApp code.");
   await ensureAnonymousCustomer();
-  const client = requireCustomerBackend();
-  const { data, error } = await client.functions.invoke<VerifiedCustomerWhatsapp & { error?: string }>(
-    "dawanear-customer-verify-otp",
-    { body: { phone: normalizedPhone, challengeId, code: cleanedToken } },
+  const payload = await med250ApiJson(
+    "/api/auth/client/otp/verify",
+    jsonRequest({ phone: normalizedPhone, challengeId, code: cleanedToken }),
   );
-  if (error) rethrow("Could not verify your WhatsApp code", error);
-  if (data?.error) throw new Error(data.error);
-  if (!data?.phone || !data.verifiedAt) {
+  if (!isRecord(payload) || payload.verified !== true || !stringValue(payload, "phone") || !stringValue(payload, "verifiedAt")) {
     throw new Error("WhatsApp verification completed without a profile receipt. Please retry.");
   }
-  return { phone: data.phone, verifiedAt: data.verifiedAt };
+  return { phone: stringValue(payload, "phone"), verifiedAt: stringValue(payload, "verifiedAt") };
 }
 
 function pageSize(value: number): number {
@@ -643,25 +575,6 @@ function pageSize(value: number): number {
     throw new Error(`Page size must be a whole number between 1 and ${MAX_PAGE_SIZE}.`);
   }
   return value;
-}
-
-async function loadAllRows(table: string, orderColumn: string, requestedPageSize: number): Promise<JsonRecord[]> {
-  const client = requireCustomerBackend();
-  const size = pageSize(requestedPageSize);
-  const rows: JsonRecord[] = [];
-
-  for (let from = 0; ; from += size) {
-    const { data, error } = await client
-      .from(table)
-      .select("*")
-      .order(orderColumn, { ascending: true })
-      .order("id", { ascending: true })
-      .range(from, from + size - 1);
-    if (error) rethrow(`Could not load ${table.replaceAll("_", " ")}`, error);
-    const page = asRows(data);
-    rows.push(...page);
-    if (page.length < size) return rows;
-  }
 }
 
 function mapProduct(row: JsonRecord): Product {
@@ -677,11 +590,6 @@ function mapProduct(row: JsonRecord): Product {
   const min = indicativePriceRwf;
   const max = indicativePriceRwf;
   const defaultOrderable = !["expired", "withdrawn", "suspended"].includes(regulatoryStatus.toLowerCase());
-  const media = governPublicProductMedia(
-    id,
-    nullableString(row, "image_url", "imageUrl"),
-    stringArray(row, "image_urls", "imageUrls"),
-  );
 
   return {
     id,
@@ -709,8 +617,8 @@ function mapProduct(row: JsonRecord): Product {
     indicativePriceBasis: stringValue(row, "indicative_price_basis", "indicativePriceBasis"),
     indicativePriceSourceUrl: nullableString(row, "indicative_price_source_url", "indicativePriceSourceUrl"),
     indicativePriceUpdatedAt: nullableString(row, "indicative_price_updated_at", "indicativePriceUpdatedAt"),
-    imageUrl: media.imageUrl,
-    imageUrls: media.imageUrls,
+    imageUrl: nullableString(row, "image_url", "imageUrl"),
+    imageUrls: stringArray(row, "image_urls", "imageUrls"),
     description: nullableString(row, "description"),
     descriptionSourceName: nullableString(row, "description_source_name", "descriptionSourceName"),
     descriptionSourceUrl: nullableString(row, "description_source_url", "descriptionSourceUrl"),
@@ -719,14 +627,9 @@ function mapProduct(row: JsonRecord): Product {
 }
 
 export async function loadCatalogueTaxonomy(): Promise<CatalogueTaxonomyRow[]> {
-  const client = requireCustomerBackend();
-  const { data, error } = await client
-    .from("dawanear_catalogue_taxonomy")
-    .select("department, subcategory, product_count")
-    .order("department", { ascending: true })
-    .order("subcategory", { ascending: true, nullsFirst: true });
-  if (error) rethrow("Could not load catalogue categories", error);
-  return asRows(data)
+  const payload = await med250ApiJson("/api/catalogue/taxonomy");
+  const rows = isRecord(payload) ? asRows(payload.rows) : [];
+  return rows
     .map((row) => ({
       department: stringValue(row, "department"),
       subcategory: nullableString(row, "subcategory"),
@@ -736,8 +639,14 @@ export async function loadCatalogueTaxonomy(): Promise<CatalogueTaxonomyRow[]> {
 }
 
 export async function loadCatalogue(requestedPageSize = MAX_PAGE_SIZE): Promise<Product[]> {
-  const rows = await loadAllRows("dawanear_all_product_catalog", "brand_name", requestedPageSize);
-  return rows.map(mapProduct);
+  const size = Math.min(120, pageSize(requestedPageSize));
+  const products: Product[] = [];
+  for (let offset = 0; offset <= 10_000; offset += size) {
+    const result = await searchCatalogue({ limit: size, offset, sort: "az" });
+    products.push(...result.products);
+    if (!result.products.length || products.length >= result.total) return products;
+  }
+  throw new Error("The MED250 catalogue exceeds the supported pagination bound.");
 }
 
 /**
@@ -752,15 +661,13 @@ export async function loadCatalogueProductsByIds(productIds: string[]): Promise<
     throw new Error(`A basket can refresh no more than ${MAX_BASKET_PRODUCT_IDS} products at once.`);
   }
 
-  const client = requireCustomerBackend();
   const rows: JsonRecord[] = [];
   for (let index = 0; index < ids.length; index += BASKET_PRODUCT_QUERY_SIZE) {
-    const { data, error } = await client
-      .from("dawanear_all_product_catalog")
-      .select("*")
-      .in("id", ids.slice(index, index + BASKET_PRODUCT_QUERY_SIZE));
-    if (error) rethrow("Could not refresh basket products", error);
-    rows.push(...asRows(data));
+    const payload = await med250ApiJson(
+      "/api/catalogue/products",
+      jsonRequest({ ids: ids.slice(index, index + BASKET_PRODUCT_QUERY_SIZE) }),
+    );
+    rows.push(...(isRecord(payload) ? asRows(payload.rows) : []));
   }
   return rows.map(mapProduct);
 }
@@ -771,26 +678,17 @@ export async function loadCatalogueProductsByIds(productIds: string[]): Promise<
  * source asset is enlarged into a featured visual.
  */
 export async function loadProductImagePresentation(productIds: string[]): Promise<ProductImagePresentation[]> {
-  const ids = [...new Set(
-    productIds
-      .map((id) => id.trim())
-      .filter((id) => Boolean(id) && !isPublicProductMediaHeld(id)),
-  )];
+  const ids = [...new Set(productIds.map((id) => id.trim()).filter(Boolean))];
   if (!ids.length) return [];
   if (ids.length > MAX_FEATURED_IMAGE_IDS) {
     throw new Error(`Featured image ranking accepts no more than ${MAX_FEATURED_IMAGE_IDS} products at once.`);
   }
 
-  const client = requireCustomerBackend();
-  const { data, error } = await client
-    .from("dawanear_product_images")
-    .select("product_id, quality_score, source_kind")
-    .in("product_id", ids)
-    .eq("position", 1)
-    .eq("approved", true);
-  if (error) rethrow("Could not load featured image quality", error);
-
-  return asRows(data).map((row) => ({
+  const payload = await med250ApiJson(
+    "/api/catalogue/image-presentations",
+    jsonRequest({ ids }),
+  );
+  return (isRecord(payload) ? asRows(payload.rows) : []).map((row) => ({
     productId: requiredString(row, "product image presentation", "product_id"),
     qualityScore: Math.max(0, Math.min(100, numericValue(row, "quality_score") ?? 0)),
     sourceKind: stringValue(row, "source_kind"),
@@ -819,19 +717,18 @@ export async function searchCatalogue(input: CatalogueSearchInput = {}): Promise
   // and ingredient matching.
   const query = normalizeCatalogueText(rawQuery);
 
-  const client = requireCustomerBackend();
-  const { data, error } = await client.rpc("dawanear_search_marketplace_catalogue", {
-    p_query: query,
-    p_category: input.category ?? "All products",
-    p_prescription_status: input.prescriptionStatus ?? "all",
-    p_form_group: input.formGroup ?? "all",
-    p_availability: input.availability ?? "all",
-    p_sort: input.sort ?? "relevance",
-    p_limit: limit,
-    p_offset: offset,
+  const parameters = new URLSearchParams({
+    query,
+    category: input.category ?? "All products",
+    prescriptionStatus: input.prescriptionStatus ?? "all",
+    formGroup: input.formGroup ?? "all",
+    availability: input.availability ?? "all",
+    sort: input.sort ?? "relevance",
+    limit: String(limit),
+    offset: String(offset),
   });
-  if (error) rethrow("Could not search the MED250 catalogue", error);
-  const rows = asRows(data);
+  const payload = await med250ApiJson(`/api/catalogue?${parameters.toString()}`);
+  const rows = isRecord(payload) ? asRows(payload.products) : [];
   const explanations = new Map<string, string>();
   const products = rows.map((row) => {
     const product = mapProduct(row);
@@ -839,7 +736,9 @@ export async function searchCatalogue(input: CatalogueSearchInput = {}): Promise
     if (explanation) explanations.set(product.id, explanation);
     return product;
   });
-  const total = rows.length ? Math.max(0, Math.round(numericValue(rows[0], "total_count") ?? products.length)) : 0;
+  const total = isRecord(payload)
+    ? Math.max(0, Math.round(numericValue(payload, "total") ?? products.length))
+    : products.length;
   return { products, total, explanations };
 }
 
@@ -872,32 +771,27 @@ export async function uploadPrescription(file: File): Promise<string> {
     throw new Error("The prescription file content does not match its PDF or image type.");
   }
 
-  const user = await ensureAnonymousCustomer();
-  if (!globalThis.crypto?.randomUUID) {
-    throw new Error("Secure file naming is unavailable in this browser. Update your browser and try again.");
-  }
-  const path = `${user.id}/${globalThis.crypto.randomUUID()}.${extension}`;
-  const client = requireCustomerBackend();
-  const { data, error } = await client.storage.from(PRESCRIPTION_BUCKET).upload(path, file, {
-    cacheControl: "3600",
-    contentType,
-    upsert: false,
+  await ensureAnonymousCustomer();
+  const payload = await med250ApiJson("/api/orders/prescription", {
+    method: "PUT",
+    headers: { "Content-Type": contentType },
+    body: file,
+    signal: AbortSignal.timeout(60_000),
   });
-  if (error) rethrow("Could not upload the prescription", error);
-  if (!data?.path) throw new Error("Could not upload the prescription: Supabase returned no private file path.");
-  return data.path;
+  if (!isRecord(payload) || !stringValue(payload, "mediaId")) {
+    throw new Error("Could not upload the prescription: the secure backend returned no receipt.");
+  }
+  return stringValue(payload, "mediaId");
 }
 
 /** Removes a newly uploaded prescription that was not attached to a matched order. */
 export async function deletePrescription(path: string): Promise<void> {
   const cleanedPath = requireNonEmpty(path, "Prescription path");
-  const user = await ensureAnonymousCustomer();
-  if (!cleanedPath.startsWith(`${user.id}/`)) {
-    throw new Error("The prescription can only be removed from the customer session that uploaded it.");
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(cleanedPath)) {
+    throw new Error("The prescription receipt is invalid.");
   }
-  const client = requireCustomerBackend();
-  const { error } = await client.storage.from(PRESCRIPTION_BUCKET).remove([cleanedPath]);
-  if (error) rethrow("Could not remove the unused prescription upload", error);
+  await ensureAnonymousCustomer();
+  await med250ApiJson(`/api/orders/prescription/${cleanedPath.toLowerCase()}`, { method: "DELETE" });
 }
 
 function orderItemsPayload(items: CreateOrderItem[], defaultSubstitutesAllowed: boolean): JsonRecord[] {
@@ -947,33 +841,29 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
   const items = orderItemsPayload(input.items, substitutesAllowed);
   const whatsapp = normalizeInternationalWhatsapp(input.whatsapp);
   if (!whatsapp) throw new Error("WhatsApp number is required.");
-  const user = await ensureAnonymousCustomer();
+  await ensureAnonymousCustomer();
   const prescriptionPath = input.prescriptionPath?.trim() || null;
-  if (prescriptionPath && !prescriptionPath.startsWith(`${user.id}/`)) {
-    throw new Error("The prescription must be uploaded from the current customer session.");
+  if (prescriptionPath && !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(prescriptionPath)) {
+    throw new Error("The prescription receipt is invalid for this customer session.");
   }
-
-  const client = requireCustomerBackend();
-  const { data, error } = await client.rpc("dawanear_create_order", {
-    p_client_request_id: clientRequestId,
-    p_latitude: input.latitude,
-    p_longitude: input.longitude,
-    p_location_accuracy_m: accuracy,
-    p_whatsapp: whatsapp,
-    p_delivery_preference: deliveryPreference,
-    p_substitutes_allowed: substitutesAllowed,
-    p_prescription_path: prescriptionPath,
-    p_items: items,
-  });
-  if (error) rethrow("Could not send your order to verified pharmacies", error);
-  const row = asRows(data)[0];
-  if (!row) throw new Error("Could not create the order: the backend returned no order receipt.");
-  const recipientCount = numericValue(row, "recipient_count");
+  const payload = await med250ApiJson("/api/orders", jsonRequest({
+    client_request_id: clientRequestId,
+    latitude: input.latitude,
+    longitude: input.longitude,
+    location_accuracy_m: accuracy,
+    whatsapp,
+    delivery_preference: deliveryPreference,
+    substitutes_allowed: substitutesAllowed,
+    prescription_media_id: prescriptionPath,
+    items,
+  }));
+  if (!isRecord(payload)) throw new Error("Could not create the order: the secure backend returned no receipt.");
+  const recipientCount = numericValue(payload, "recipientCount");
   if (recipientCount == null || recipientCount < 0) {
-    throw new Error("Could not create the order: the backend returned an invalid pharmacy recipient count.");
+    throw new Error("Could not create the order: the secure backend returned an invalid pharmacy recipient count.");
   }
   return {
-    orderId: requiredString(row, "created order", "order_id"),
+    orderId: requiredString(payload, "created order", "orderId"),
     recipientCount: Math.round(recipientCount),
   };
 }
@@ -984,22 +874,17 @@ export async function closeOrder(orderId: string, outcome: "completed" | "cancel
   if (outcome !== "completed" && outcome !== "cancelled") {
     throw new Error("Order outcome must be completed or cancelled.");
   }
-  const client = requireCustomerBackend();
-  const { data, error } = await client.rpc("dawanear_close_order", {
-    p_order_id: requireNonEmpty(orderId, "Order ID"),
-    p_outcome: outcome,
-  });
-  if (error) rethrow(`Could not mark the order ${outcome}`, error);
-  const row = asRows(data)[0];
-  if (!row) throw new Error("Could not close the order: the backend returned no receipt.");
-  const status = stringValue(row, "status");
-  if (status !== "completed" && status !== "cancelled") {
-    throw new Error("Could not close the order: the backend returned an invalid status.");
-  }
+  const payload = await med250ApiJson(
+    `/api/orders/${requireNonEmpty(orderId, "Order ID")}/close`,
+    jsonRequest({ outcome }),
+  );
+  if (!isRecord(payload)) throw new Error("Could not close the order: the secure backend returned no receipt.");
+  const status = stringValue(payload, "status");
+  if (status !== "completed" && status !== "cancelled") throw new Error("Could not close the order: the backend returned an invalid status.");
   return {
-    orderId: requiredString(row, "closed order", "order_id"),
+    orderId: requiredString(payload, "closed order", "orderId"),
     status,
-    closedAt: requiredString(row, "closed order", "closed_at"),
+    closedAt: requiredString(payload, "closed order", "closedAt"),
   };
 }
 
@@ -1027,10 +912,8 @@ function mapActiveOrder(row: JsonRecord): ActiveOrder {
 /** Restores the current customer's unexpired request state after a reload. */
 export async function loadMyActiveOrders(): Promise<ActiveOrder[]> {
   await ensureAnonymousCustomer();
-  const client = requireCustomerBackend();
-  const { data, error } = await client.rpc("dawanear_my_active_orders");
-  if (error) rethrow("Could not restore your active orders", error);
-  return asRows(data)
+  const payload = await med250ApiJson("/api/orders");
+  return asRows(payload)
     .map(mapActiveOrder)
     .toSorted((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt));
 }
@@ -1052,13 +935,7 @@ function mapOfferItem(row: JsonRecord, products: Map<string, Product>): OfferIte
 
 export async function loadOffers(orderId: string): Promise<OrderOffer[]> {
   const cleanedOrderId = requireNonEmpty(orderId, "Order ID");
-  const session = await customerSession("Could not load pharmacy offers");
-  if (!session) throw new Error("Could not load pharmacy offers: your customer session is unavailable.");
-  const client = requireCustomerBackend();
-  const { data, error } = await client.rpc("dawanear_my_confirmed_offers", {
-    p_order_id: cleanedOrderId,
-  });
-  if (error) rethrow("Could not load confirmed pharmacies", error);
+  const data = await med250ApiJson(`/api/orders/${cleanedOrderId}/offers`);
 
   return asRows(data).map((row) => {
     const id = requiredString(row, "confirmed offer", "offer_id", "id");
@@ -1101,26 +978,20 @@ export async function loadOffers(orderId: string): Promise<OrderOffer[]> {
 }
 
 export async function selectOffer(orderId: string, offerId: string): Promise<SelectedPharmacyContact> {
-  const client = requireCustomerBackend();
   const cleanedOrderId = requireNonEmpty(orderId, "Order ID");
-  const { data, error } = await client.rpc("dawanear_select_offer", {
-    p_order_id: cleanedOrderId,
-    p_offer_id: requireNonEmpty(offerId, "Offer ID"),
-  });
-  if (error) rethrow("Could not select this pharmacy offer", error);
-  if (asRows(data).length === 0) {
-    throw new Error("Could not select this pharmacy offer: the backend returned no selection receipt.");
-  }
-  return loadSelectedContact(cleanedOrderId);
+  const payload = await med250ApiJson(
+    `/api/orders/${cleanedOrderId}/select`,
+    jsonRequest({ offer_id: requireNonEmpty(offerId, "Offer ID") }),
+  );
+  return mapSelectedContact(payload);
 }
 
 export async function loadSelectedContact(orderId: string): Promise<SelectedPharmacyContact> {
-  const client = requireCustomerBackend();
-  const { data, error } = await client.rpc("dawanear_selected_contact", {
-    p_order_id: requireNonEmpty(orderId, "Order ID"),
-  });
-  if (error) rethrow("Could not load the selected pharmacy contact", error);
-  const row = asRows(data)[0];
+  return mapSelectedContact(await med250ApiJson(`/api/orders/${requireNonEmpty(orderId, "Order ID")}/contact`));
+}
+
+function mapSelectedContact(data: unknown): SelectedPharmacyContact {
+  const row = isRecord(data) ? data : asRows(data)[0];
   if (!row) throw new Error("No pharmacy contact is available until an offer has been selected.");
   const pharmacyId = requiredString(row, "selected pharmacy", "pharmacy_id");
   return {
@@ -1133,109 +1004,31 @@ export async function loadSelectedContact(orderId: string): Promise<SelectedPhar
   };
 }
 
-let offerSubscriptionSequence = 0;
-
-export type RealtimeConnectionStatus = "connecting" | "connected" | "degraded";
-export type RealtimeEventActivity = { latencyMs: number | null };
-
-function realtimeEventLatencyMs(payload: unknown): number | null {
-  if (!isRecord(payload) || !isRecord(payload.new)) return null;
-  const timestamp = stringValue(payload.new, "updated_at", "created_at", "responded_at", "selected_at");
-  const occurredAt = Date.parse(timestamp);
-  if (!Number.isFinite(occurredAt)) return null;
-  const latencyMs = Date.now() - occurredAt;
-  return latencyMs >= 0 && latencyMs <= 86_400_000 ? latencyMs : null;
-}
-
 export function subscribeToOffers(
   orderId: string,
   onOffers: (offers: OrderOffer[]) => void,
   onError?: (error: Error) => void,
-  onStatus?: (status: RealtimeConnectionStatus) => void,
-  onActivity?: (activity: RealtimeEventActivity) => void,
 ): () => void {
   const cleanedOrderId = requireNonEmpty(orderId, "Order ID");
-  const client = requireCustomerBackend();
   let closed = false;
   let refreshSequence = 0;
-  let connectionStatus: RealtimeConnectionStatus | null = null;
-
-  const updateStatus = (status: RealtimeConnectionStatus) => {
-    if (closed || connectionStatus === status) return;
-    connectionStatus = status;
-    onStatus?.(status);
-  };
-
   const refresh = () => {
     const sequence = ++refreshSequence;
-    void loadOffers(cleanedOrderId)
-      .then((offers) => {
-        if (!closed && sequence === refreshSequence) onOffers(offers);
-      })
-      .catch((error: unknown) => {
-        if (!closed) {
-          updateStatus("degraded");
-          onError?.(normalizeDawaNearError(error, "Could not refresh pharmacy offers"));
-        }
-      });
-  };
-
-  updateStatus("connecting");
-
-  const channel = client
-    .channel(`dawanear-offers-${cleanedOrderId}-${++offerSubscriptionSequence}`)
-    .on(
-      "postgres_changes",
-      {
-        event: "*",
-        schema: "public",
-        table: "dawanear_offers",
-        filter: `order_id=eq.${cleanedOrderId}`,
-      },
-      (payload) => {
-        onActivity?.({ latencyMs: realtimeEventLatencyMs(payload) });
-        refresh();
-      },
-    )
-    .on(
-      "postgres_changes",
-      {
-        event: "*",
-        schema: "public",
-        table: "dawanear_orders",
-        filter: `id=eq.${cleanedOrderId}`,
-      },
-      (payload) => {
-        onActivity?.({ latencyMs: realtimeEventLatencyMs(payload) });
-        refresh();
-      },
-    )
-    .subscribe((status) => {
-      if (status === "SUBSCRIBED") {
-        updateStatus("connected");
-        refresh();
-      }
-      if (!closed && (status === "CHANNEL_ERROR" || status === "TIMED_OUT")) {
-        updateStatus("degraded");
-        onError?.(new Error("Live pharmacy offers disconnected. Check your connection and refresh."));
-      }
+    void loadOffers(cleanedOrderId).then((offers) => {
+      if (!closed && sequence === refreshSequence) onOffers(offers);
+    }).catch((error: unknown) => {
+      if (!closed) onError?.(normalizeDawaNearError(error, "Could not refresh pharmacy offers"));
     });
-  const refreshTimer = globalThis.setInterval(refresh, 15_000);
-  const refreshWhenVisible = () => {
-    if (typeof document === "undefined" || document.visibilityState === "visible") refresh();
   };
-  globalThis.addEventListener?.("online", refresh);
-  globalThis.addEventListener?.("focus", refresh);
-  if (typeof document !== "undefined") document.addEventListener("visibilitychange", refreshWhenVisible);
-
+  const timer = globalThis.setInterval(refresh, 5_000);
+  const visibility = () => { if (typeof document !== "undefined" && document.visibilityState === "visible") refresh(); };
+  if (typeof document !== "undefined") document.addEventListener("visibilitychange", visibility);
+  refresh();
   return () => {
     closed = true;
     refreshSequence += 1;
-    globalThis.clearInterval(refreshTimer);
-    globalThis.removeEventListener?.("online", refresh);
-    globalThis.removeEventListener?.("focus", refresh);
-    if (typeof document !== "undefined") document.removeEventListener("visibilitychange", refreshWhenVisible);
-    void client.removeChannel(channel);
+    globalThis.clearInterval(timer);
+    if (typeof document !== "undefined") document.removeEventListener("visibilitychange", visibility);
   };
 }
 
@@ -1250,57 +1043,42 @@ export type PharmacyWhatsappNotRegistered = {
   adminWhatsapp: string;
 };
 
-type PharmacyWhatsappOtpSession = {
-  accessToken?: string;
-  refreshToken?: string;
-  expiresAt?: number;
-  error?: string;
-};
-
 export async function requestPharmacyWhatsappOtp(phone: string): Promise<PharmacyWhatsappOtpChallenge | PharmacyWhatsappNotRegistered> {
-  const client = requirePharmacyBackend();
   const normalizedPhone = normalizeInternationalWhatsapp(phone);
   if (!normalizedPhone) throw new Error("Enter the pharmacy WhatsApp number.");
-  const { data, error } = await client.functions.invoke<(PharmacyWhatsappOtpChallenge | PharmacyWhatsappNotRegistered) & { error?: string }>(
-    "dawanear-pharmacy-send-otp",
-    { body: { phone: normalizedPhone } },
+  const payload = await med250ApiJson(
+    "/api/auth/pharmacy/otp/request",
+    jsonRequest({ phone: normalizedPhone }),
   );
-  if (error) rethrow("Could not send the pharmacy WhatsApp code", error);
-  if (data?.error) throw new Error(data.error);
-  if (data?.registered === false) {
-    return { registered: false, adminWhatsapp: data.adminWhatsapp || "250795588248" };
+  if (!isRecord(payload)) throw new Error("Could not start WhatsApp verification. Please try again.");
+  if (payload.registered === false) {
+    return { registered: false, adminWhatsapp: stringValue(payload, "adminWhatsapp") || "250795588248" };
   }
-  if (!data?.challengeId || !data.expiresAt) {
+  if (!stringValue(payload, "challengeId") || !stringValue(payload, "expiresAt")) {
     throw new Error("Could not start WhatsApp verification. Please try again.");
   }
-  return { registered: true, challengeId: data.challengeId, expiresAt: data.expiresAt };
+  return { registered: true, challengeId: stringValue(payload, "challengeId"), expiresAt: stringValue(payload, "expiresAt") };
 }
 
 /** Ends the permanent pharmacy session. A later customer order starts a fresh guest session. */
 export async function signOutPharmacy(): Promise<void> {
-  requirePharmacyBackend();
-  await clearPharmacySession();
+  await med250ApiJson("/api/auth/pharmacy/session", { method: "DELETE" });
 }
 
 export async function verifyPharmacyWhatsappOtp(phone: string, challengeId: string, token: string): Promise<void> {
-  const client = requirePharmacyBackend();
   const cleanedToken = token.replace(/\s/g, "");
   if (!/^\d{6}$/.test(cleanedToken)) throw new Error("Enter the complete 6-digit WhatsApp code.");
   const normalizedPhone = normalizeInternationalWhatsapp(phone);
   if (!normalizedPhone) throw new Error("Enter the pharmacy WhatsApp number.");
   if (!/^[0-9a-f-]{36}$/i.test(challengeId)) throw new Error("Send a new WhatsApp code.");
 
-  const { data, error } = await client.functions.invoke<PharmacyWhatsappOtpSession>(
-    "dawanear-pharmacy-verify-otp",
-    { body: { phone: normalizedPhone, challengeId, code: cleanedToken } },
+  const payload = await med250ApiJson(
+    "/api/auth/pharmacy/otp/verify",
+    jsonRequest({ phone: normalizedPhone, challengeId, code: cleanedToken }),
   );
-  if (error) rethrow("Could not verify the pharmacy WhatsApp code", error);
-  if (data?.error) throw new Error(data.error);
-  if (!data?.accessToken || !data.refreshToken) {
+  if (!isRecord(payload) || payload.verified !== true || !stringValue(payload, "pharmacyId")) {
     throw new Error("Could not verify the pharmacy WhatsApp code: no permanent session was returned.");
   }
-
-  await savePharmacySession(data.accessToken, data.refreshToken);
 }
 
 function mapMembership(row: JsonRecord): PharmacyMembership {
@@ -1324,19 +1102,13 @@ function mapMembership(row: JsonRecord): PharmacyMembership {
 
 export async function loadMyPharmacies(): Promise<PharmacyMembership[]> {
   await requirePermanentPharmacyUser("Could not load your pharmacies");
-  const client = requirePharmacyBackend();
-  const { data, error } = await client.rpc("dawanear_my_pharmacies");
-  if (error) rethrow("Could not load your pharmacies", error);
-  return asRows(data).map(mapMembership);
+  return asRows(await med250ApiJson("/api/pharmacy/workspace")).map(mapMembership);
 }
 
 export async function loadMyPharmacyContacts(pharmacyId: string): Promise<PharmacyContactState> {
   await requirePermanentPharmacyUser("Could not load pharmacy contacts");
-  const client = requirePharmacyBackend();
-  const { data, error } = await client.rpc("dawanear_my_pharmacy_contacts", {
-    p_pharmacy_id: requireNonEmpty(pharmacyId, "Pharmacy ID"),
-  });
-  if (error) rethrow("Could not load pharmacy contacts", error);
+  requireNonEmpty(pharmacyId, "Pharmacy ID");
+  const data = await med250ApiJson("/api/pharmacy/contacts");
   if (!isRecord(data)) throw new Error("Could not load pharmacy contacts: the backend returned no contact state.");
   const contacts = asRows(data.contacts).map((row): PharmacyContact => {
     const contactType = stringValue(row, "contact_type");
@@ -1409,32 +1181,8 @@ function mapPharmacyRequest(row: JsonRecord): PharmacyRequest {
 
 export async function loadPharmacyRequests(pharmacyId: string): Promise<PharmacyRequest[]> {
   await requirePermanentPharmacyUser("Could not load assigned orders");
-  const client = requirePharmacyBackend();
-  const { data, error } = await client.rpc("dawanear_pharmacy_requests", {
-    p_pharmacy_id: requireNonEmpty(pharmacyId, "Pharmacy ID"),
-  });
-  if (error) rethrow("Could not load assigned pharmacy orders", error);
-  const requests = asRows(data).map(mapPharmacyRequest);
-  const productIds = [...new Set(requests.flatMap((request) => request.items.map((item) => item.productId)))];
-  if (productIds.length === 0 || requests.every((request) => request.items.every((item) => item.packSize))) {
-    return requests;
-  }
-  const { data: productData, error: productError } = await client
-    .from("dawanear_product_catalog")
-    .select("id,pack_size")
-    .in("id", productIds);
-  if (productError) rethrow("Could not load order product pack sizes", productError);
-  const packSizes = new Map(asRows(productData).map((row) => [
-    requiredString(row, "order product", "id"),
-    catalogueText(row, "pack_size"),
-  ]));
-  return requests.map((request) => ({
-    ...request,
-    items: request.items.map((item) => ({
-      ...item,
-      packSize: item.packSize || packSizes.get(item.productId) || "",
-    })),
-  }));
+  requireNonEmpty(pharmacyId, "Pharmacy ID");
+  return asRows(await med250ApiJson("/api/pharmacy/requests")).map(mapPharmacyRequest);
 }
 
 function mapPharmacySelectedOrder(row: JsonRecord): Omit<PharmacySelectedOrder, "prescriptionUrl"> {
@@ -1454,94 +1202,31 @@ function mapPharmacySelectedOrder(row: JsonRecord): Omit<PharmacySelectedOrder, 
 /** Loads orders that selected this pharmacy and signs any private prescription link briefly. */
 export async function loadPharmacySelectedOrders(pharmacyId: string): Promise<PharmacySelectedOrder[]> {
   await requirePermanentPharmacyUser("Could not load selected customer orders");
-  const client = requirePharmacyBackend();
-  const { data, error } = await client.rpc("dawanear_pharmacy_selected_orders", {
-    p_pharmacy_id: requireNonEmpty(pharmacyId, "Pharmacy ID"),
-  });
-  if (error) rethrow("Could not load selected customer orders", error);
-  const rows = asRows(data).map(mapPharmacySelectedOrder);
-  return Promise.all(rows.map(async (row) => {
-    if (!row.prescriptionPath) return { ...row, prescriptionUrl: null };
-    const selectedAtMs = Date.parse(row.selectedAt);
-    const serverRemaining = row.prescriptionAccessSecondsRemaining;
-    const remainingSeconds = serverRemaining == null
-      ? Number.isFinite(selectedAtMs)
-        ? Math.floor((selectedAtMs + 24 * 60 * 60 * 1_000 - Date.now()) / 1_000)
-        : 0
-      : Math.floor(serverRemaining);
-    const expiresIn = Math.min(10 * 60, remainingSeconds);
-    if (expiresIn <= 0) return { ...row, prescriptionUrl: null };
-    const { data: signed, error: signedError } = await client.storage
-      .from(PRESCRIPTION_BUCKET)
-      .createSignedUrl(row.prescriptionPath, expiresIn);
-    if (signedError) rethrow("Could not open the selected customer's prescription", signedError);
-    return { ...row, prescriptionUrl: signed?.signedUrl ?? null };
+  return asRows(await med250ApiJson("/api/pharmacy/selected-orders", jsonRequest({
+    pharmacy_id: requireNonEmpty(pharmacyId, "Pharmacy ID"),
+  }))).map((row) => ({
+    ...mapPharmacySelectedOrder(row),
+    prescriptionUrl: nullableString(row, "prescription_url"),
   }));
 }
-
-let pharmacyNotificationSubscriptionSequence = 0;
 
 /** Refresh signal for open requests and customer selections assigned to one pharmacy. */
 export function subscribeToPharmacyNotifications(
   pharmacyId: string,
   onChange: () => void,
-  onError?: (error: Error) => void,
-  onStatus?: (status: RealtimeConnectionStatus) => void,
-  onActivity?: (activity: RealtimeEventActivity) => void,
+  _onError?: (error: Error) => void,
 ): () => void {
-  const cleanedPharmacyId = requireNonEmpty(pharmacyId, "Pharmacy ID");
-  const client = requirePharmacyBackend();
+  void _onError;
+  requireNonEmpty(pharmacyId, "Pharmacy ID");
   let closed = false;
-  let connectionStatus: RealtimeConnectionStatus | null = null;
-  const updateStatus = (status: RealtimeConnectionStatus) => {
-    if (closed || connectionStatus === status) return;
-    connectionStatus = status;
-    onStatus?.(status);
-  };
-  const refresh = () => {
-    if (!closed) onChange();
-  };
-  const refreshWhenVisible = () => {
-    if (typeof document === "undefined" || document.visibilityState === "visible") refresh();
-  };
-  updateStatus("connecting");
-  const channel = client
-    .channel(`dawanear-pharmacy-notifications-${cleanedPharmacyId}-${++pharmacyNotificationSubscriptionSequence}`)
-    .on(
-      "postgres_changes",
-      {
-        event: "*",
-        schema: "public",
-        table: "dawanear_pharmacy_notifications",
-        filter: `pharmacy_id=eq.${cleanedPharmacyId}`,
-      },
-      (payload) => {
-        onActivity?.({ latencyMs: realtimeEventLatencyMs(payload) });
-        refresh();
-      },
-    )
-    .subscribe((status) => {
-      if (status === "SUBSCRIBED") {
-        updateStatus("connected");
-        refresh();
-      }
-      if (!closed && (status === "CHANNEL_ERROR" || status === "TIMED_OUT")) {
-        updateStatus("degraded");
-        onError?.(new Error("Live pharmacy order updates disconnected. Check your connection and refresh."));
-      }
-    });
-  const refreshTimer = globalThis.setInterval(refresh, 15_000);
-  globalThis.addEventListener?.("online", refresh);
-  globalThis.addEventListener?.("focus", refresh);
-  if (typeof document !== "undefined") document.addEventListener("visibilitychange", refreshWhenVisible);
-
+  const refresh = () => { if (!closed) onChange(); };
+  const timer = globalThis.setInterval(refresh, 5_000);
+  const visibility = () => { if (typeof document !== "undefined" && document.visibilityState === "visible") refresh(); };
+  if (typeof document !== "undefined") document.addEventListener("visibilitychange", visibility);
   return () => {
     closed = true;
-    globalThis.clearInterval(refreshTimer);
-    globalThis.removeEventListener?.("online", refresh);
-    globalThis.removeEventListener?.("focus", refresh);
-    if (typeof document !== "undefined") document.removeEventListener("visibilitychange", refreshWhenVisible);
-    void client.removeChannel(channel);
+    globalThis.clearInterval(timer);
+    if (typeof document !== "undefined") document.removeEventListener("visibilitychange", visibility);
   };
 }
 
@@ -1578,27 +1263,24 @@ export async function submitOffer(draft: OfferDraft): Promise<SubmitOfferResult>
   const readyInMinutes = draft.readyInMinutes == null
     ? null
     : requireInteger(draft.readyInMinutes, "Preparation time", 0, 1_440);
-  const client = requirePharmacyBackend();
   if (!["pickup", "delivery", "either"].includes(draft.fulfilmentMethod)) {
     throw new Error("Choose a valid pickup or delivery option.");
   }
-  const { data, error } = await client.rpc("dawanear_submit_offer", {
-    p_pharmacy_id: requireNonEmpty(draft.pharmacyId, "Pharmacy ID"),
-    p_order_id: requireNonEmpty(draft.orderId, "Order ID"),
-    p_ready_in_minutes: readyInMinutes,
-    p_note: draft.note?.trim() || null,
-    p_fulfilment_method: draft.fulfilmentMethod,
-    p_items: offerItemsPayload(draft.items),
-  });
-  if (error) rethrow("Could not submit the pharmacy offer", error);
-  const row = asRows(data)[0];
-  if (!row) throw new Error("Could not submit the pharmacy offer: the backend returned no offer receipt.");
-  const totalRwf = numericValue(row, "total_rwf");
+  const payload = await med250ApiJson("/api/pharmacy/offers", jsonRequest({
+    pharmacy_id: requireNonEmpty(draft.pharmacyId, "Pharmacy ID"),
+    order_id: requireNonEmpty(draft.orderId, "Order ID"),
+    ready_in_minutes: readyInMinutes,
+    note: draft.note?.trim() || null,
+    fulfilment_method: draft.fulfilmentMethod,
+    items: offerItemsPayload(draft.items),
+  }));
+  if (!isRecord(payload)) throw new Error("Could not submit the pharmacy offer: the secure backend returned no receipt.");
+  const totalRwf = numericValue(payload, "totalRwf");
   if (totalRwf == null || totalRwf < 0) throw new Error("The backend returned an invalid offer total.");
   return {
-    offerId: requiredString(row, "submitted offer", "offer_id", "id"),
+    offerId: requiredString(payload, "submitted offer", "offerId"),
     totalRwf: Math.round(totalRwf),
-    complete: booleanValue(row, false, "complete"),
+    complete: booleanValue(payload, false, "complete"),
   };
 }
 
@@ -1614,29 +1296,26 @@ export async function contributeCentralPrice(input: {
 }): Promise<CentralPriceContributionResult> {
   await requirePermanentPharmacyUser("Could not record the central price contribution");
   const priceRwf = requireInteger(input.priceRwf, "Price", 1, 100_000_000);
-  const client = requirePharmacyBackend();
-  const { data, error } = await client.rpc("dawanear_contribute_central_price", {
-    p_pharmacy_id: requireNonEmpty(input.pharmacyId, "Pharmacy ID"),
-    p_product_id: requireNonEmpty(input.productId, "Product ID"),
-    p_price_rwf: priceRwf,
-  });
-  if (error) rethrow("Could not record the central price contribution", error);
-  const row = asRows(data)[0];
-  if (!row) throw new Error("Could not record the central price contribution: no receipt was returned.");
-  const submittedPriceRwf = numericValue(row, "submitted_price_rwf");
-  const previousPriceRwf = numericValue(row, "previous_price_rwf");
-  const centralPriceRwf = numericValue(row, "central_price_rwf");
-  const status = stringValue(row, "contribution_status");
+  const payload = await med250ApiJson("/api/pharmacy/prices", jsonRequest({
+    pharmacy_id: requireNonEmpty(input.pharmacyId, "Pharmacy ID"),
+    product_id: requireNonEmpty(input.productId, "Product ID"),
+    price_rwf: priceRwf,
+  }));
+  if (!isRecord(payload)) throw new Error("Could not record the central price contribution: no receipt was returned.");
+  const status = stringValue(payload, "contributionStatus");
+  const submittedPriceRwf = numericValue(payload, "submittedPriceRwf");
+  const previousPriceRwf = numericValue(payload, "previousPriceRwf");
+  const centralPriceRwf = numericValue(payload, "centralPriceRwf");
   if (submittedPriceRwf == null || centralPriceRwf == null || !["initialized", "lowered", "not_lower"].includes(status)) {
     throw new Error("Could not record the central price contribution: the backend returned an invalid receipt.");
   }
   return {
-    contributionId: requiredString(row, "central price contribution", "contribution_id"),
-    productId: requiredString(row, "central price contribution", "product_id"),
+    contributionId: requiredString(payload, "central price contribution", "contributionId"),
+    productId: requiredString(payload, "central price contribution", "productId"),
     submittedPriceRwf: Math.round(submittedPriceRwf),
     previousPriceRwf: previousPriceRwf == null ? null : Math.round(previousPriceRwf),
     centralPriceRwf: Math.round(centralPriceRwf),
-    becameLowest: booleanValue(row, false, "became_lowest"),
+    becameLowest: booleanValue(payload, false, "becameLowest"),
     status: status as CentralPriceContributionResult["status"],
   };
 }
@@ -1650,50 +1329,42 @@ export async function requestPharmacyContactEdit(input: {
   note?: string;
 }): Promise<string> {
   await requirePermanentPharmacyUser("Could not submit the pharmacy contact update");
-  const client = requirePharmacyBackend();
   const normalized = input.action === "remove" ? null : normalizeInternationalWhatsapp(input.e164 || "");
   if (input.action !== "remove" && !normalized) throw new Error("Enter a valid international mobile number.");
   if ((input.action === "update" || input.action === "remove") && !input.contactId) {
     throw new Error("Choose the linked contact to change.");
   }
-  const { data, error } = await client.rpc("dawanear_request_pharmacy_contact_edit", {
-    p_pharmacy_id: requireNonEmpty(input.pharmacyId, "Pharmacy ID"),
-    p_requested_action: input.action,
-    p_requested_contact_type: input.contactType,
-    p_contact_id: input.contactId || null,
-    p_requested_e164: normalized,
-    p_note: input.note?.trim() || `${input.action} this pharmacy ${input.contactType} contact`,
-  });
-  if (error) rethrow("Could not submit the pharmacy contact update", error);
-  if (typeof data !== "string" || !/^[0-9a-f-]{36}$/i.test(data)) {
+  requireNonEmpty(input.pharmacyId, "Pharmacy ID");
+  const payload = await med250ApiJson("/api/pharmacy/contact-changes", jsonRequest({
+    action: input.action,
+    contact_type: input.contactType,
+    contact_id: input.contactId || null,
+    e164: normalized,
+    note: input.note?.trim() || `${input.action} this pharmacy ${input.contactType} contact`,
+  }));
+  if (!isRecord(payload) || !/^[0-9a-f-]{36}$/i.test(stringValue(payload, "requestId"))) {
     throw new Error("Could not submit the pharmacy contact update: no update receipt was returned.");
   }
-  return data;
+  return stringValue(payload, "requestId");
 }
 
 export async function submitPharmacyClaim(input: PharmacyClaimInput): Promise<PharmacyClaim> {
   await requirePermanentPharmacyUser("Could not submit the pharmacy claim");
-  const client = requirePharmacyBackend();
   const payload = {
     pharmacy_id: requireNonEmpty(input.pharmacyId, "Pharmacy ID"),
     contact_email: normalizeEmail(input.contactEmail),
     contact_phone: normalizeInternationalWhatsapp(input.contactPhone),
     note: input.note?.trim() || null,
   };
-  const { data, error } = await client
-    .from("dawanear_pharmacy_claims")
-    .insert(payload)
-    .select("*")
-    .single();
-  if (error) rethrow("Could not submit the pharmacy claim", error);
-  if (!isRecord(data)) throw new Error("Could not submit the pharmacy claim: the backend returned no claim receipt.");
+  const receipt = await med250ApiJson("/api/pharmacy/claims", jsonRequest(payload));
+  if (!isRecord(receipt)) throw new Error("Could not submit the pharmacy claim: the backend returned no claim receipt.");
   return {
-    id: requiredString(data, "pharmacy claim", "id"),
-    pharmacyId: requiredString(data, "pharmacy claim", "pharmacy_id"),
-    status: stringValue(data, "status") || "pending",
-    contactEmail: requiredString(data, "pharmacy claim", "contact_email"),
-    contactPhone: nullableString(data, "contact_phone"),
-    note: nullableString(data, "note"),
-    createdAt: requiredString(data, "pharmacy claim", "created_at"),
+    id: requiredString(receipt, "pharmacy claim", "id"),
+    pharmacyId: requiredString(receipt, "pharmacy claim", "pharmacyId"),
+    status: stringValue(receipt, "status") || "pending",
+    contactEmail: requiredString(receipt, "pharmacy claim", "contactEmail"),
+    contactPhone: nullableString(receipt, "contactPhone"),
+    note: nullableString(receipt, "note"),
+    createdAt: requiredString(receipt, "pharmacy claim", "createdAt"),
   };
 }

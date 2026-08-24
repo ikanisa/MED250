@@ -4,7 +4,7 @@ import { dirname, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { selectRelatedCatalogueRecords } from "../lib/product-related.ts";
-import { validateSupabaseOrigin } from "./verify-live-catalogue.mjs";
+import { validateWorkerOrigin } from "./verify-live-catalogue.mjs";
 
 const PAGE_SIZE = 120;
 const DEFAULT_RELATED_INDEX = "data/product-related-index.json";
@@ -17,7 +17,10 @@ const sha256 = (value) => createHash("sha256").update(value).digest("hex");
 
 function parseArguments(values) {
   const parsed = {
-    url: process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ?? "",
+    url: process.env.MED250_DEPLOYMENT_ORIGIN?.trim()
+      || process.env.NEXT_PUBLIC_MED250_DEPLOYMENT_ORIGIN?.trim()
+      || process.env.NEXT_PUBLIC_SITE_URL?.trim()
+      || "",
     relatedIndex: DEFAULT_RELATED_INDEX,
     deploymentReceipt: DEFAULT_DEPLOYMENT_RECEIPT,
     catalogueReceipt: DEFAULT_CATALOGUE_RECEIPT,
@@ -38,7 +41,7 @@ function parseArguments(values) {
     else if (flag === "--concurrency") parsed.concurrency = Number(value);
     else throw new Error(`Unknown argument ${flag}.`);
   }
-  if (!parsed.url) throw new Error("NEXT_PUBLIC_SUPABASE_URL or --url is required.");
+  if (!parsed.url) throw new Error("A MED250 Cloudflare Worker origin or --url is required.");
   if (!/^[a-f0-9]{40}$/.test(parsed.releaseRevision)) throw new Error("--release-revision must be a lowercase 40-character Git revision.");
   if (!Number.isInteger(parsed.concurrency) || parsed.concurrency < 1 || parsed.concurrency > 6) {
     throw new Error("--concurrency must be an integer from 1 to 6.");
@@ -58,25 +61,34 @@ async function boundedJson(response, limit = 5 * 1024 * 1024) {
   }
 }
 
-async function requestPage({ endpoint, publishableKey, offset }) {
+async function requestPage({ origin, offset }) {
+  const endpoint = new URL("/api/catalogue", origin);
+  endpoint.search = new URLSearchParams({
+    query: "",
+    category: "All products",
+    prescriptionStatus: "all",
+    formGroup: "all",
+    availability: "all",
+    sort: "az",
+    limit: String(PAGE_SIZE),
+    offset: String(offset),
+  }).toString();
   const response = await fetch(endpoint, {
-    method: "POST",
-    headers: { apikey: publishableKey, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      p_query: "",
-      p_category: "All products",
-      p_prescription_status: "all",
-      p_form_group: "all",
-      p_availability: "all",
-      p_sort: "az",
-      p_limit: PAGE_SIZE,
-      p_offset: offset,
-    }),
+    method: "GET",
+    headers: { Accept: "application/json" },
+    redirect: "error",
     signal: AbortSignal.timeout(20_000),
   });
   if (!response.ok) throw new Error(`Related-product catalogue request returned HTTP ${response.status}.`);
-  const rows = await boundedJson(response);
-  if (!Array.isArray(rows)) throw new Error("Related-product catalogue request did not return an array.");
+  const receipt = await boundedJson(response);
+  if (
+    typeof receipt !== "object"
+    || receipt === null
+    || !Array.isArray(receipt.products)
+    || !Number.isSafeInteger(receipt.total)
+    || receipt.total < 0
+  ) throw new Error("Related-product catalogue request did not return the governed Worker receipt.");
+  const rows = receipt.products.map((row) => ({ ...row, total_count: receipt.total }));
   return { offset, rows };
 }
 
@@ -200,11 +212,7 @@ async function writeEvidence(path, value) {
 
 async function main() {
   const args = parseArguments(process.argv.slice(2));
-  const origin = validateSupabaseOrigin(args.url);
-  const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim() ?? "";
-  if (!/^sb_publishable_[A-Za-z0-9_-]{20,}$/.test(publishableKey)) {
-    throw new Error("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY must be a modern public publishable key.");
-  }
+  const origin = validateWorkerOrigin(args.url);
   const [relatedBytes, deploymentBytes, catalogueBytes, verifierBytes] = await Promise.all([
     readFile(resolve(args.relatedIndex)),
     readFile(resolve(args.deploymentReceipt)),
@@ -215,12 +223,11 @@ async function main() {
   const deploymentReceipt = JSON.parse(deploymentBytes);
   const catalogueReceipt = JSON.parse(catalogueBytes);
   if (!Array.isArray(relatedIndex)) throw new Error("The related-product index must be an array.");
-  const endpoint = `${origin}/rest/v1/rpc/dawanear_search_marketplace_catalogue`;
-  const first = await requestPage({ endpoint, publishableKey, offset: 0 });
+  const first = await requestPage({ origin, offset: 0 });
   const total = Number(first.rows[0]?.total_count ?? 0);
   if (!Number.isInteger(total) || total < 1 || total > 10_120) throw new Error("The live catalogue total is outside the verifier boundary.");
   const offsets = Array.from({ length: Math.ceil(total / PAGE_SIZE) - 1 }, (_, index) => (index + 1) * PAGE_SIZE);
-  const pages = [first, ...await mapWithConcurrency(offsets, args.concurrency, (offset) => requestPage({ endpoint, publishableKey, offset }))]
+  const pages = [first, ...await mapWithConcurrency(offsets, args.concurrency, (offset) => requestPage({ origin, offset }))]
     .sort((left, right) => left.offset - right.offset);
   const liveRows = pages.flatMap(({ rows }) => rows);
   const assessment = assessLiveRelatedProductEvidence({
@@ -234,7 +241,7 @@ async function main() {
     schemaVersion: "1.0",
     capturedAt: new Date().toISOString(),
     origin,
-    rpc: "dawanear_search_marketplace_catalogue",
+    endpoint: "/api/catalogue",
     ...assessment,
     sources: {
       relatedIndex: { path: args.relatedIndex, sha256: sha256(relatedBytes), rowCount: relatedIndex.length },

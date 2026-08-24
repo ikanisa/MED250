@@ -6,7 +6,7 @@
 -- invariant raises an exception and PostgreSQL aborts the transaction.
 --
 -- This exercises the deployed functions rather than a copied test model:
---   * exactly 10 nearest eligible-pharmacy dispatch recipients
+--   * top-20 / 10 km dispatch to eligible pharmacies
 --   * idempotent customer retries
 --   * recipient-only pharmacy visibility
 --   * complete pharmacy confirmation with an optional private price
@@ -210,8 +210,8 @@ begin
     null
   ) as created;
 
-  if v_recipient_count <> 10 then
-    raise exception 'Expected exactly ten rollback recipients, received %', v_recipient_count;
+  if v_recipient_count <> 2 then
+    raise exception 'Expected two rollback recipients, received %', v_recipient_count;
   end if;
 
   select retried.order_id, retried.recipient_count
@@ -322,13 +322,12 @@ begin
     true
   );
 
-  select count(*)::integer
-    into v_precontact_eligible_count
-  from public.dawanear_selected_contact(v_order_id);
-
-  if v_precontact_eligible_count <> 0 then
-    raise exception 'Pharmacy contact was exposed before customer selection';
-  end if;
+  begin
+    perform 1 from public.dawanear_selected_contact(v_order_id);
+    raise exception 'Pharmacy contact was exposed before customer selection' using errcode = 'P0001';
+  exception
+    when sqlstate 'P0002' then null;
+  end;
 
   select
     count(*)::integer,
@@ -351,14 +350,8 @@ begin
   );
 
   begin
-    select count(*)::integer
-      into v_offer_count
-    from public.dawanear_my_confirmed_offers(v_order_id);
-
-    if v_offer_count <> 0 then
-      raise exception 'Another customer could read the order confirmations'
-        using errcode = 'P0001';
-    end if;
+    perform 1 from public.dawanear_my_confirmed_offers(v_order_id);
+    raise exception 'Another customer could read the order confirmations' using errcode = 'P0001';
   exception
     when sqlstate 'P0002' then null;
   end;

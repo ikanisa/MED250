@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
-import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, join, resolve } from "node:path";
+import { readdir, readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { validateLaunchEvidenceArtifact } from "./validate-launch-evidence-artifact.mjs";
@@ -160,40 +160,23 @@ export function createLaunchEvidenceHandoff(manifest, preparedArtifacts = []) {
 async function main() {
   const manifest = JSON.parse(await readFile("data/launch-evidence.json", "utf8"));
   const values = process.argv.slice(2);
-  const outputIndex = values.indexOf("--output");
-  const outputPath = outputIndex >= 0 ? values[outputIndex + 1] : "";
-  if (outputIndex >= 0 && !outputPath) throw new Error("--output requires a path.");
-  const commandValues = outputIndex >= 0
-    ? values.filter((_, index) => index !== outputIndex && index !== outputIndex + 1)
-    : values;
-  let output;
-  if (commandValues.includes("--all-missing")) {
+  if (values.includes("--all-missing")) {
     const prepared = await discoverPreparedLaunchEvidence();
-    if (commandValues.length !== 1) throw new Error("--all-missing cannot be combined with gate or type arguments.");
-    output = createLaunchEvidenceHandoff(manifest, prepared);
-  } else {
-    const args = {};
-    for (let index = 0; index < commandValues.length; index += 2) {
-      const flag = commandValues[index];
-      const value = commandValues[index + 1];
-      if (!flag?.startsWith("--") || !value) throw new Error("Use --gate <gate-name> --type <evidence-type>, or --all-missing.");
-      args[flag.slice(2)] = value;
-    }
-    if (!args.gate || !args.type) throw new Error("Use --gate <gate-name> --type <evidence-type>, or --all-missing.");
-    const gate = manifest.gates?.[args.gate];
-    if (!gate) throw new Error(`Unknown launch gate ${args.gate}.`);
-    if (!gate.required_evidence_types.includes(args.type)) throw new Error(`${args.type} is not required by ${args.gate}.`);
-    output = createLaunchEvidenceTemplate(args.gate, args.type);
-  }
-  const serialized = `${JSON.stringify(output, null, 2)}\n`;
-  if (!outputPath) {
-    process.stdout.write(serialized);
+    process.stdout.write(`${JSON.stringify(createLaunchEvidenceHandoff(manifest, prepared), null, 2)}\n`);
     return;
   }
-  const resolvedOutput = resolve(outputPath);
-  await mkdir(dirname(resolvedOutput), { recursive: true });
-  await writeFile(resolvedOutput, serialized, "utf8");
-  console.log(JSON.stringify({ status: "written", output: outputPath }, null, 2));
+  const args = {};
+  for (let index = 0; index < values.length; index += 2) {
+    const flag = values[index];
+    const value = values[index + 1];
+    if (!flag?.startsWith("--") || !value) throw new Error("Use --gate <gate-name> --type <evidence-type>, or --all-missing.");
+    args[flag.slice(2)] = value;
+  }
+  if (!args.gate || !args.type) throw new Error("Use --gate <gate-name> --type <evidence-type>, or --all-missing.");
+  const gate = manifest.gates?.[args.gate];
+  if (!gate) throw new Error(`Unknown launch gate ${args.gate}.`);
+  if (!gate.required_evidence_types.includes(args.type)) throw new Error(`${args.type} is not required by ${args.gate}.`);
+  process.stdout.write(`${JSON.stringify(createLaunchEvidenceTemplate(args.gate, args.type), null, 2)}\n`);
 }
 
 const isMain = process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url;

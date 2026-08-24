@@ -40,16 +40,13 @@ A pharmacy may receive customer availability requests only while all of the foll
 - the pharmacy is an active current entry in the governed Rwanda FDA pharmacy registry;
 - marketplace participation is active;
 - the licence has not expired;
-- at least one WhatsApp contact has `source_verified` or `admin_verified` evidence.
-
-Receiving an order does not require pharmacy-portal access. Portal access is a
-separate administrative permission granted only to a login-enabled WhatsApp
-contact after the pharmacy asks the MED+250 administrator to add it.
+- at least one WhatsApp contact is login-enabled and has `source_verified` or `admin_verified` evidence; and
+- the pharmacy account is used by an active authorized member.
 
 GPS improves nearby ranking but is not fabricated or inferred. Routing behaves as follows:
 
 - pharmacies with approved coordinates within 10 km are prioritized by distance;
-- the request is sent to at most 10 eligible pharmacy responders;
+- the request is sent to at most 20 eligible pharmacy responders;
 - eligible pharmacies outside the verified nearby set may be included through the stable national responder fallback;
 - a pharmacy without verified proximity is shown as national service coverage, never with an invented distance; and
 - a national responder must confirm practical pickup or delivery arrangements before the customer proceeds.
@@ -152,14 +149,9 @@ Pharmacy staff must not continue using expired MED+250 access. Any later interac
 
 ## 10. Contact correction and pharmacy access
 
-Pharmacy-portal access uses an admin-approved, login-enabled WhatsApp contact.
-It is independent from the verified WhatsApp destination used for order
-dispatch.
+Pharmacy access uses an already-governed, login-enabled WhatsApp contact.
 
-- A source-verified WhatsApp contact may receive order notifications without
-  being granted portal access.
-- A public-source contact must never become a portal login merely because it
-  can receive a dispatch message.
+- Do not infer WhatsApp authority from an ordinary public phone listing.
 - A pharmacy member may request an addition, replacement or removal from the pharmacy portal.
 - An operator must inspect and decide exactly one request at a time.
 - Approval requires direct pharmacy or authoritative-source verification, a named reviewer and a useful evidence note.

@@ -29,7 +29,7 @@ test("builds bounded single-product moderation payloads", () => {
 });
 
 test("keeps the marketplace admin token process-only", async () => {
-  const environment = { NEXT_PUBLIC_SUPABASE_URL: "https://uskfnszcdqpcfrhjxitl.supabase.co", MED250_ADMIN_TOKEN: "test-admin-token" };
+  const environment = { MED250_OPERATOR_ORIGIN: "https://staging.med-250.com", MED250_ADMIN_TOKEN: "test-marketplace-admin-token-32!" };
   let captured;
   await runMarketplaceProductAdmin(["inspect", "--product-id", id], {
     environment,
@@ -38,11 +38,11 @@ test("keeps the marketplace admin token process-only", async () => {
       return new Response(JSON.stringify({ product: { id } }), { status: 200 });
     },
   });
-  assert.equal(captured.url, "https://uskfnszcdqpcfrhjxitl.supabase.co/functions/v1/review-marketplace-products");
-  assert.equal(captured.init.headers["X-MED250-Admin-Token"], environment.MED250_ADMIN_TOKEN);
+  assert.equal(captured.url, "https://staging.med-250.com/api/internal/operator/products");
+  assert.equal(captured.init.headers.Authorization, `Bearer ${environment.MED250_ADMIN_TOKEN}`);
   assert.equal(JSON.parse(captured.init.body).product_id, id);
-  await assert.rejects(runMarketplaceProductAdmin(["inspect", "--product-id", id], { environment: { NEXT_PUBLIC_SUPABASE_URL: environment.NEXT_PUBLIC_SUPABASE_URL } }), /MED250_ADMIN_TOKEN/);
-  assert.throws(() => resolveMarketplaceProductEndpoint({ SUPABASE_URL: "http://localhost:54321" }), /HTTPS \*\.supabase\.co/);
+  await assert.rejects(runMarketplaceProductAdmin(["inspect", "--product-id", id], { environment: { MED250_OPERATOR_ORIGIN: environment.MED250_OPERATOR_ORIGIN } }), /MED250_ADMIN_TOKEN/);
+  assert.throws(() => resolveMarketplaceProductEndpoint({ MED250_OPERATOR_ORIGIN: "http://localhost:8787" }), /HTTPS origin/);
 });
 
 test("protects the Edge reviewer and prohibits batch approval", async () => {

@@ -9,15 +9,14 @@ import { validatePhysicalUat } from "../scripts/validate-physical-uat.mjs";
 
 const ledger = JSON.parse(await readFile(new URL("../data/physical-device-uat.json", import.meta.url), "utf8"));
 
-test("keeps the partially completed physical-device UAT ledger valid but not production-ready", () => {
+test("keeps the complete pending physical-device UAT ledger valid but not production-ready", () => {
   const result = validatePhysicalUat(ledger, { rootDir: new URL("..", import.meta.url).pathname });
   assert.equal(result.valid, true);
   assert.equal(result.scenarioCount, 12);
-  assert.equal(result.statusCounts.pending, 4);
-  assert.equal(result.statusCounts.passed, 8);
+  assert.equal(result.statusCounts.pending, 12);
   const strict = validatePhysicalUat(ledger, { strict: true, rootDir: new URL("..", import.meta.url).pathname });
   assert.equal(strict.valid, false);
-  assert.equal(strict.errors.filter((error) => /production UAT requires passed evidence/.test(error)).length, 4);
+  assert.equal(strict.errors.filter((error) => /production UAT requires passed evidence/.test(error)).length, 12);
 });
 
 test("builds a deterministic privacy-safe UAT execution packet", () => {
@@ -27,8 +26,7 @@ test("builds a deterministic privacy-safe UAT execution packet", () => {
   });
 
   assert.equal(packet.source_ledger.scenario_count, 12);
-  assert.equal(packet.source_ledger.status_counts.pending, 4);
-  assert.equal(packet.source_ledger.status_counts.passed, 8);
+  assert.equal(packet.source_ledger.status_counts.pending, 12);
   assert.equal(packet.scenarios.length, 12);
   assert.deepEqual(packet.required_run_metadata, [
     "customer_identity_label",

@@ -42,6 +42,29 @@ sys.modules.setdefault("enrich_product_images", MODULE)
 
 
 class ProductImagePipelineTests(unittest.TestCase):
+    def test_stable_json_matches_javascript_for_integer_valued_float(self):
+        self.assertEqual(MODULE.stable_json({"score": 89.0}), '{"score":89}')
+
+    def test_cloudflare_acquisition_checkpoint_is_resumable(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            (output / "galleries").mkdir()
+            (output / "galleries/p.json").write_text("{}")
+            checkpoint = {
+                "status": "ready",
+                "payload": {
+                    "product_id": "p",
+                    "validation_policy_version": MODULE.IMAGE_VALIDATION_POLICY_VERSION,
+                    "images": [{}, {}, {}],
+                },
+            }
+            self.assertTrue(
+                MODULE.checkpoint_is_complete_acquisition(checkpoint, 3, output)
+            )
+            self.assertFalse(
+                MODULE.checkpoint_is_complete_acquisition(checkpoint, 4, output)
+            )
+
     def test_coverage_only_cli_rejects_conflicting_final_allocation(self):
         parser = MODULE.build_parser()
         args = parser.parse_args(["--publish", "--coverage-only"])
@@ -956,12 +979,7 @@ class ProductImagePipelineTests(unittest.TestCase):
         )
 
     def test_catalogue_contains_all_4680_source_products(self):
-        dataset = (
-            MODULE.DEFAULT_DATASET
-            if MODULE.DEFAULT_DATASET.exists()
-            else MODULE.RECOVERED_VALIDATION_DATASET
-        )
-        products = MODULE.load_products(dataset)
+        products = MODULE.load_products(MODULE.DEFAULT_DATASET)
         self.assertEqual(len(products), 4680)
         self.assertEqual(len({product.id for product in products}), 4680)
 
@@ -4032,6 +4050,24 @@ class ProductImagePipelineTests(unittest.TestCase):
                 product,
                 wrong_form,
                 "ULPAN 40 Pantoprazole Tablet",
+            )
+        )
+        mixed_family_page = MODULE.replace(
+            candidate,
+            image_url="https://manufacturer.example/images/ulpan-tablet.webp",
+            source_page_url="https://manufacturer.example/products/ulpan-capsules",
+            title=(
+                "ULPAN 40 Pantoprazole Capsules product family with Tablets "
+                "and Suspensions"
+            ),
+            source_kind="manufacturer",
+            page_primary_image=True,
+        )
+        self.assertFalse(
+            MODULE.medicine_visual_evidence_matches(
+                product,
+                mixed_family_page,
+                "ULPAN 40 Pantoprazole Dispersible Tablets",
             )
         )
         wrong_variant = MODULE.replace(

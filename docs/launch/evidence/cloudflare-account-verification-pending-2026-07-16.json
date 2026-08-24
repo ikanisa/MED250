@@ -5,31 +5,31 @@
   "evidence_type": "account_verification",
   "status": "pending",
   "title": "Pending MED+250 Cloudflare least-privilege account verification",
-  "summary": "Owner-ready workbook for fresh verification of the intended account, canonical production Worker route, protected environments and a non-billable least-privilege deployment credential.",
-  "recorded_at": "2026-07-24T12:15:12+02:00",
-  "recorded_by": "Codex release evidence preparer",
-  "recorded_role": "Release evidence preparer",
+  "summary": "The intended account and production deployment are visible, but the current interactive OAuth session has broad write permissions and cannot satisfy the least-privilege production gate.",
+  "recorded_at": "2026-07-16T11:42:36Z",
+  "recorded_by": "Codex automated verifier",
+  "recorded_role": "Release verification agent",
   "redactions_confirmed": true,
   "checks": [
     {
       "name": "Authenticated account visibility",
-      "status": "pending",
-      "detail": "Rerun a redacted management-plane account check and confirm the intended MED+250 account without retaining account identifiers or operator identity."
+      "status": "passed",
+      "detail": "Wrangler reports an authenticated interactive session with exactly one visible account; account identifiers and operator identity are omitted from this artifact."
     },
     {
       "name": "Production deployment visibility",
-      "status": "pending",
-      "detail": "Confirm the production Worker, immutable release version, traffic allocation, preview isolation and rollback target in the intended account."
+      "status": "passed",
+      "detail": "The production Worker reports a current Wrangler deployment with one version receiving all traffic, and the seven-route live deployment verifier passes."
     },
     {
       "name": "Custom-domain configuration",
-      "status": "pending",
-      "detail": "Confirm med-250.com is attached only to the intended production Worker, workers.dev and preview URLs are disabled for production, and no Sites project or second Worker competes for the hostname."
+      "status": "passed",
+      "detail": "The production environment declares med250.gikundiro.com as an exact custom domain, disables the workers.dev route, and sets the live release mode."
     },
     {
       "name": "Least-privilege credential",
       "status": "blocked",
-      "detail": "No current redacted proof shows that the release credential is limited to the MED+250 Worker, required route and assets, and read-only zone inspection. Do not place a broad interactive credential in the release path."
+      "detail": "The current OAuth session reports 29 permissions, including multiple unrelated account-wide write capabilities. Replace it with a credential limited to the MED+250 Worker, required route and assets, and read-only zone inspection."
     },
     {
       "name": "Infrastructure-owner approval",
@@ -41,12 +41,5 @@
   "verifier_role": null,
   "verified_at": null,
   "account_label": "MED+250 Cloudflare account (redacted)",
-  "least_privilege_confirmed": false,
-  "completion_instructions": [
-    "Use only a GitHub-free release path and a Cloudflare credential scoped to the MED+250 Worker, med-250.com route, required assets and read-only zone inspection.",
-    "Rerun the management-plane checks without retaining account identifiers, operator identity, tokens or permission payloads.",
-    "Bind the verified production Worker and rollback target to the exact immutable release revision.",
-    "Set every check to passed only from fresh evidence, record the named verifier, role and timezone-qualified timestamp, confirm redactions, and set status to complete.",
-    "Validate the completed artifact strictly before recording its exact SHA-256 digest in the launch registry."
-  ]
+  "least_privilege_confirmed": false
 }

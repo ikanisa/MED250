@@ -63,13 +63,13 @@ test("refreshes domain launch artifacts only from an exact-revision live receipt
     deploymentReceipt: deploymentReceipt(),
     expectedRevision: releaseRevision,
     artifactDate: "2026-07-22",
-    now: new Date("2026-07-30T23:00:00Z"),
+    now: new Date("2026-07-22T12:00:00Z"),
   });
   await writeDomainLaunchEvidenceRefresh({
     manifestPath: "data/launch-evidence.json",
     result,
     rootDir: root,
-    now: new Date("2026-07-30T23:00:00Z"),
+    now: new Date("2026-07-22T12:00:00Z"),
   });
 
   const updatedManifest = JSON.parse(await readFile(join(root, "data", "launch-evidence.json"), "utf8"));
@@ -92,7 +92,7 @@ test("refreshes domain launch artifacts only from an exact-revision live receipt
 
   const validation = validateLaunchEvidence(updatedManifest, {
     rootDir: root,
-    now: new Date("2026-07-30T23:00:00Z"),
+    now: new Date("2026-07-22T12:00:00Z"),
   });
   assert.equal(validation.valid, true, validation.errors.join("; "));
   await rm(root, { recursive: true, force: true });
@@ -108,7 +108,7 @@ test("rejects stale or mismatched domain deployment receipts", async () => {
       }),
       expectedRevision: releaseRevision,
       artifactDate: "2026-07-22",
-      now: new Date("2026-07-30T23:00:00Z"),
+      now: new Date("2026-07-22T12:00:00Z"),
     }),
     /observedReleaseRevision does not match|releaseRevisionExpectation must be matched/,
   );

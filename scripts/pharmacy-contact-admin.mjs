@@ -1,4 +1,5 @@
 import { pathToFileURL } from "node:url";
+import { callWorkerOperator, resolveWorkerOperatorEndpoint } from "./worker-operator-client.mjs";
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const commands = new Set(["list", "inspect", "approve", "reject"]);
@@ -57,35 +58,15 @@ export function buildContactReviewPayload(argv) {
 }
 
 export function resolveContactReviewEndpoint(environment = process.env) {
-  const rawUrl = String(environment.SUPABASE_URL || environment.NEXT_PUBLIC_SUPABASE_URL || "").trim();
-  if (!rawUrl) throw new Error("SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL is required in the process environment.");
-  const base = new URL(rawUrl);
-  if (base.protocol !== "https:" || !base.hostname.endsWith(".supabase.co")) {
-    throw new Error("The Supabase URL must be an HTTPS *.supabase.co origin.");
-  }
-  return new URL("/functions/v1/review-pharmacy-contacts", base);
+  return resolveWorkerOperatorEndpoint("/api/internal/operator/contacts", environment);
 }
 
 export async function runContactReviewAdmin(argv, { environment = process.env, fetchImpl = fetch } = {}) {
-  const adminToken = String(environment.DAWANEAR_ADMIN_TOKEN || "").trim();
-  if (!adminToken) throw new Error("DAWANEAR_ADMIN_TOKEN is required in the process environment.");
-  const response = await fetchImpl(resolveContactReviewEndpoint(environment), {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-DawaNear-Admin-Token": adminToken },
-    body: JSON.stringify(buildContactReviewPayload(argv)),
+  return callWorkerOperator("/api/internal/operator/contacts", buildContactReviewPayload(argv), {
+    environment,
+    fetchImpl,
+    responseLabel: "Contact reviewer",
   });
-  const responseText = await response.text();
-  let result;
-  try {
-    result = responseText ? JSON.parse(responseText) : {};
-  } catch {
-    result = { error: "The contact reviewer returned a non-JSON response." };
-  }
-  if (!response.ok) {
-    const message = typeof result?.error === "string" ? result.error : `Contact reviewer returned HTTP ${response.status}.`;
-    throw new Error(`${message} (HTTP ${response.status})`);
-  }
-  return result;
 }
 
 function help() {
@@ -96,7 +77,7 @@ function help() {
     "  npm run ops:contacts -- approve --request-id <uuid> --reviewed-by <name> --review-note <evidence>",
     "  npm run ops:contacts -- reject --request-id <uuid> --reviewed-by <name> --review-note <reason>",
     "",
-    "Required process environment: SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL) and DAWANEAR_ADMIN_TOKEN.",
+    "Required process environment: MED250_OPERATOR_ORIGIN and MED250_ADMIN_TOKEN.",
     "Every decision affects exactly one pending request; batch review is unsupported.",
   ].join("\n");
 }

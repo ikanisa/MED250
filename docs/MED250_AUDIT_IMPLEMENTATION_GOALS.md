@@ -1,11 +1,8 @@
 # MED+250 audit implementation goals
 
-Date: 2026-07-18; extended 2026-08-04
-
-Sources: `MED250_Digital_Marketplace_Audit` and the [MED+250 vs Amazon product/full-stack audit](audits/med250-amazon-2026-08-04/REPORT.md)
-
-Current audit target: `https://med-250.com/`
-
+Date: 2026-07-18  
+Source: `MED250_Digital_Marketplace_Audit`  
+Audit target: `https://med250.gikundiro.com/`  
 Program owner: IKANISA Ltd. / MED+250
 
 ## Program outcome
@@ -45,57 +42,13 @@ This status is deliberately evidence-scoped. `Implemented locally` means the beh
 | 2 — SEO | SSR metadata, canonical product routes, environment-aware robots policy, Product/Breadcrumb schema, and a source-dated sitemap for all 4,657 publishable products now exist. The [2026-07-18 technical SEO report](audit/seo-readiness-2026-07-18.md) records the corrected 2,459-medicine/2,198-consumer population and strengthened deployment checks. | Search Console ownership/submission, URL Inspection, indexed-route monitoring, and live canonical/crawl reconciliation remain owner actions. |
 | 3 — Indicative pricing | The reproducible [2026-07-18 price-coverage report](audit/price-coverage-2026-07-18.md) proves 128 central consumer-product prices, 0 medicine prices, complete technical metadata, and no Amazon-derived public values; public UI fails closed when a price is absent. | Approve or replace the priority set with medicine representation, approve price-source rights and freshness/expiry policy, name the reviewer, and capture deployed samples. |
 | 4 — Request model | Customer actions now use `Add to request`, `Request basket`, `Send availability request`, and `My requests`, with no-payment microcopy and regression coverage. | Complete desktop/mobile live journey evidence and owner copy approval. |
-| 5 — Trust and response expectations | The [2026-07-18 trust-metrics report](audit/trust-metrics-readiness-2026-07-18.md) documents a privacy-safe aggregate RPC, exact governed-readiness count, 90-day p50 response methodology, sample/day/freshness suppression, optional storefront rendering, and zero/small/stale/nearby/national regression coverage. The production RPC is aggregate-only and currently suppresses both values, so no unsupported claim appears. | Accumulate genuine production volume, satisfy automated sample/freshness thresholds, and capture the live state. Feedback and any reliability score remain deferred behind evidence requirements. |
-| 6 — Privacy/public accountability | Terms, Privacy, retention controls, and public contact channels exist. | Verify that published entity/contact details and the implemented privacy lifecycle are accurate; this is a disclosure and implementation check, not a separate regulatory-approval launch gate. |
-| 7 — Localization | A SHA-bound inventory covers 625 messages across 12 customer, legal, pharmacy-portal, system, location, and PWA source files, including icon-bearing text segments and conditional accessibility labels. The governed source/runtime catalogs contain 625/623 messages, 543 source messages are referenced at runtime, and zero budgets prevent hardcoded copy from returning on any surface. Reserved locale URL aliases, language alternates, and Rwanda-aware formatting are implemented. Publication fails closed: Kinyarwanda and French have no runtime catalog or public route until the required evidence passes. | Commission qualified Kinyarwanda translation, record glossary and clinical/legal approvals, enable localized rendering and the language switcher, and run desktop/mobile journey QA. |
+| 5 — Trust and response expectations | The [2026-07-18 trust-metrics report](audit/trust-metrics-readiness-2026-07-18.md) documents a privacy-safe aggregate RPC, exact governed-readiness count, 90-day p50 response methodology, sample/day/freshness suppression, expiring operations approvals, optional storefront rendering, and zero/small/stale/nearby/national regression coverage. The production RPC is deployed and verified aggregate-only; both values currently return `null` with `approval_required`, so no unsupported claim appears. | Accumulate genuine production volume, obtain dated expiring operations approval, and capture the approved live state. Feedback operations and any reliability score remain deferred behind their separate governance requirements. |
+| 6 — Legal/privacy | Terms, Privacy, regulatory brief, retention policy, and hard release gates exist. | Registered address, approved public contact/DPO identity, DPIA, registrations, contracts, transfer decisions, data-reuse permission, and legal approvals remain pending. |
+| 7 — Localization | A SHA-bound inventory covers 592 messages across 12 customer, legal, pharmacy-portal, system, location, and PWA source files, including icon-bearing text segments and conditional accessibility labels. The governed runtime catalog contains 590 messages, 574 source messages are referenced at runtime, and zero budgets prevent hardcoded copy from returning on any surface. Reserved locale URL aliases, language alternates, and Rwanda-aware formatting are implemented. Publication fails closed: Kinyarwanda and French have no runtime catalog or public route until the required evidence passes. | Commission qualified Kinyarwanda translation, record glossary and clinical/legal approvals, enable localized rendering and the language switcher, and run desktop/mobile journey QA. |
 | 8 — Product comprehension | Category-aware visual/JSON-LD breadcrumbs, URL-preserved catalogue state/focus, bounded customer titles, and exact official-name disclosure are implemented locally. A source-digest-bound 72-entry owner packet covers all 40 duplicate-title groups, 24 missing medicine generics, and 8 short-title candidates with strict fail-closed validation and no inferred clinical decisions. An atomic, locked, one-entry owner workflow validates the complete packet before every decision. Public descriptions now fail closed behind exact source digests, verified reuse rights, clinical applicability, substantive rationale, named review, and withdrawal guards. The live database reconciles contract `2026-07-18.3`, all 13 governance columns, both mandatory audit triggers, service-only review privileges, zero public leaks, and zero approved rows lacking current audit evidence. The protected reviewer is deployed and active; its unauthenticated production probe fails closed with the expected no-store and contract headers. The related rail uses conservative medicine/consumer boundaries. An exact-revision production verifier reconciles all 4,657 recommendable products and 17,690 generated edges with zero unsafe, duplicate, missing, or unexpected edges. The complete browser run covers related products and representative product content on desktop and mobile. | Use the protected administrator credential and a controlled product identity to capture the body-free positive-path reviewer receipt; complete and approve the 72 packet decisions; import authoritative corrections; approve source-bound descriptions; reconcile live imagery; and obtain independent QA and product/data-owner approval. |
 | 9 — Visual/PWA | Rights-verified image publication remains fail-closed. A repeat-visit install prompt, iOS guidance, service-worker update flow, API-safe static caching, and explicit offline state are implemented locally. | Authentic locally approved creative, provenance completion, breakpoint/design QA, Lighthouse budgets, and supported Android/iOS physical-device evidence remain open. |
 | 10 — Release gates | The 15-gate registry and strict live verification workflow exist. | All named owners must supply and approve the still-pending external, production, and physical-device evidence. |
 | 11 — Strategic depth | Related browsing is constrained to non-advice catalogue similarity; payment remains outside MED+250. | Owner decisions for MoMo options, reliability scoring, and experiments remain deferred until entry criteria pass. |
-
-## 2026-08-04 Amazon-comparison implementation extension
-
-The newer audit changes the priority from “make the catalogue exist” to “make the marketplace model obvious and dependable.” Amazon is the benchmark for decision completeness and state visibility, not the visual target. MED+250 must preserve its calm healthcare presentation, pharmacy-native filters, Rwanda FDA-backed product fields, non-payment boundary, and lighter frontend.
-
-### Explicit product constraints
-
-- Do not copy Amazon's visual density, advertising system, urgency mechanics, or generic seller-marketplace language.
-- Do not reintroduce the declined standalone journey-education page or section. Explain the request model at the point of action: product CTA, request basket, submitted state, and request-status panel.
-- Do not publish stock, pharmacy count, response time, price, rating, or delivery promises unless the displayed value comes from the governed production source and passes suppression/freshness rules.
-- Do not publish unverified pack photography. Where an approved representative image is unavailable, use an honest category-icon treatment instead of repeating one unrelated stock image.
-- Product and Breadcrumb JSON-LD already exist. Treat structured SEO as a verification and monitoring task, not a missing implementation.
-- Pharmacy-operations approval, marketplace regulatory approval, public source-data reuse approval, and credential-rotation approval are not launch gates for this program and must not be reintroduced into readiness reporting.
-
-### Extension requirement register
-
-| ID | Priority | Outcome and implementation | Acceptance evidence | Current state |
-| --- | --- | --- | --- | --- |
-| AX-P0-1 | P0 | Search or filter intent collapses homepage/category storytelling and places query, count, filters, and results directly below global navigation. | Unit coverage for every intent control; desktop/mobile browser evidence for query, category, filter, sort, and reset; no layout trap or focus loss. | Implemented locally; full live desktop/mobile evidence pending. |
-| AX-P0-2 | P0 | Explain “availability request” at the product action and inside the request basket: one request goes to up to 10 eligible nearby pharmacies; verified WhatsApp contacts may receive an alert; pharmacies confirm availability, final price, and fulfilment; MED+250 takes no payment. | Copy-contract, localization, accessibility, and browser-journey tests; no purchase/checkout claim. | Implemented locally; live copy/accessibility evidence pending. |
-| AX-P0-3 | P0 | Make dispatch and response work visible through a status timeline showing request ID, eligible-recipient count, WhatsApp-alert qualification, responses received, expiry/no-recipient state, and the next customer action. | Controlled database, Realtime, and UI receipt tied by one correlation ID; polling fallback test; desktop/mobile status evidence. | Local status and recovery UI implemented; controlled production receipt pending. |
-| AX-P0-4 | P0 | Prove the live path with a privacy-safe synthetic request: nearest-ten recipient selection, Realtime delivery, WhatsApp outbox/send/webhook status, pharmacy response, customer offer display, selection, and cleanup. | Dated production-safe receipt with no customer data or secrets; all physical UAT scenarios pass. | Pending execution. |
-| AX-P1-1 | P1 | Eliminate repeated placeholder imagery in category cards and improve approved packshot coverage without weakening provenance controls. | Zero repeated fallback stock image across unrelated subcategories; image-provenance verifier and responsive visual QA pass. | Repeated fallback eliminated locally; approved packshot coverage remains open. |
-| AX-P1-2 | P1 | Add honest decision support to cards/detail pages: prescription state, indicative-price behavior, eligible coverage or its absence, approved expected-response metric, and delivery/pickup capability. | Every value has source/freshness/suppression evidence; zero fabricated stock or promise; result/detail consistency tests. | Product details now explain dispatch scope, indicative-versus-final price, fulfilment confirmation, WhatsApp privacy, and only render approved aggregate readiness/response evidence. Card-level consistency and live visual evidence remain open. |
-| AX-P1-3 | P1 | Instrument Realtime connection, event latency, polling activation, duplicate suppression, offer refresh, and customer-visible recovery. | Aggregate telemetry and alerts cover disconnect, timeout, fallback, delayed offer, and duplicate-event scenarios. | Connection/fallback, bounded event-latency, offer-arrival telemetry, and customer-visible recovery are implemented; production alert thresholds and release-bound samples remain open. |
-| AX-P1-4 | P1 | Instrument WhatsApp from outbox claim through Meta message ID and webhook state; move sequential delivery to provider-safe bounded concurrency or a queue consumer. | Load/retry/idempotency tests; alerting for queue depth, retry exhaustion, zero delivery, and webhook delay. | Bounded delivery, WebP-safe media fallback, and aggregate completed/degraded dispatcher summaries are implemented; fresh Meta delivery/webhook receipt and production alert routing remain open. |
-| AX-P1-5 | P1 | Reduce session and XSS risk by replacing manually managed pharmacy refresh-token persistence, tightening CSP, and proving no privileged key reaches the client. | Auth journey and session-revocation tests; CSP report; secret scan; Supabase advisors pass. | Manual refresh-token handling removed; pharmacy auth now uses Supabase-managed, tab-scoped session storage and local sign-out. CSP nonce/hash migration, live revocation evidence, secret scan, and advisor closure remain open. |
-| AX-P1-6 | P1 | Remove mutable Worker global environment state, generate binding types, and enable sampled tracing for catalogue and marketplace operations. | Generated `Env` compiles; concurrency test; Wrangler validation; trace and structured-log samples tied to request IDs. | Request-scoped `AsyncLocalStorage`, generated production binding types, and 5% tracing implemented; production trace sample and deployed-revision evidence remain open. |
-| AX-P1-7 | P1 | Optimize CSS/marketplace JavaScript and establish real performance telemetry without sacrificing the calmer design. | Performance budget, route-level bundle report, desktop/mobile lab trace, and production LCP/INP/CLS/TTFB dashboard. | Budget passes; field telemetry pending. |
-| AX-P1-8 | P1 | Verify existing Product/Breadcrumb schema, canonical/locale metadata, sitemap, and crawl controls on representative live medicine and consumer-product URLs. | Rich-results/schema validation, Search Console submission/inspection, and exact-release deployment receipt. | Product/Breadcrumb plus linked MedicalWebPage/WebPage and WebSite schema are implemented; external rich-results and Search Console verification remain pending. |
-| AX-P2-1 | P2 | Complete qualified Kinyarwanda and French storefront journeys when approved catalogs exist. | Full browse → request → status → WhatsApp QA on desktop/mobile with glossary and review evidence. | Framework exists; translations pending. |
-| AX-P2-2 | P2 | Add privacy-safe fulfilment quality signals—response rate, median response time, and completion reliability—only after sample thresholds are met. | Methodology, suppression, anti-gaming, correction path, and aggregate-only API tests. | Deferred until production volume. |
-| AX-P2-3 | P2 | Support intermittent connectivity with low-bandwidth media behavior, resumable request/status state, and explicit offline truth boundaries. | Throttled/offline browser tests; no fabricated request success or availability; recovery preserves safe state. | Partial PWA foundation. |
-| AX-P2-4 | P2 | Instrument the complete funnel: search, product detail, request add, submission, recipient dispatch, first response, selection, WhatsApp continuation, and completion. | Privacy-reviewed event dictionary, funnel dashboard, event-loss tests, and release-bound sample. | Privacy-safe product-view, request-add, submit, first-response, selection, and handoff events are implemented; recipient-dispatch/completion correlation, dashboarding, and release-bound samples remain open. |
-
-### Extension execution order
-
-1. **Intent and comprehension:** AX-P0-1, AX-P0-2, AX-P0-3, AX-P1-1.
-2. **Production correctness:** AX-P0-4, AX-P1-3, AX-P1-4.
-3. **Decision confidence:** AX-P1-2, AX-P2-2.
-4. **Security and runtime:** AX-P1-5, AX-P1-6.
-5. **Performance, acquisition, and reach:** AX-P1-7, AX-P1-8, AX-P2-1, AX-P2-3, AX-P2-4.
-
-No extension item becomes complete merely because code exists. Completion requires the acceptance evidence in the same row against the current deployed revision.
 
 ## Delivery principles
 
@@ -256,29 +209,29 @@ Give customers useful confidence signals while avoiding unsupported badges, rati
 - Every displayed trust metric has source, sample size, time window, freshness, and suppression rules.
 - No public directory, pharmacy badge, stock count, rating, or ranking leaks before the allowed stage.
 - Tests cover zero-data, stale-data, small-sample, national-responder, and nearby-responder cases.
-- Production telemetry proves that public wording matches actual service levels.
+- Operations signs off that public wording matches actual service levels.
 
-## Goal 6 — Keep privacy and public accountability accurate
+## Goal 6 — Complete legal, privacy, and regulatory disclosure
 
-**Audit coverage:** P1-3 and benchmark public disclosure
+**Audit coverage:** P1-3, benchmark legal disclosure, existing launch gates  
+**Owner:** Legal/privacy owner  
+**Target:** before protected live ordering or scaled acquisition
 
-**Owner:** Product/privacy owner
-
-**Target:** maintained continuously
-
-Publish accurate accountable-entity, contact, and data-handling information that matches the implemented service.
+Publish the exact accountable entity and data-handling information required for the approved operating model.
 
 ### Deliverables
 
-- Publish the operating entity name, service address/contact details, and working privacy contact.
-- Publish purposes, recipients, retention behavior, rights/contact process, transfer handling, security-contact route, and prescription lifecycle in plain language.
+- Obtain and publish the registered operating entity name, registered address, company/contact details, and approved DPO or privacy contact.
+- Publish controller/processor roles, purposes, lawful bases, recipients, retention periods, rights process, complaint route, transfer conditions, breach route, and prescription lifecycle.
+- Complete the DPIA, controller/processor registration decisions, processor contracts, data-reuse permissions, and applicable Rwanda FDA/RICA/e-commerce review.
 - Keep legal copy synchronized with the implemented data flow, WhatsApp, MoMo, Cloudflare, Supabase, Google Maps, and prescription handling.
 
 ### Acceptance evidence
 
-- Privacy and Terms contain non-placeholder identity and working contact details.
-- Automated data-flow and retention tests match the public explanation.
-- A product-to-disclosure trace confirms that every public privacy and fulfilment statement matches implemented behavior.
+- Privacy and Terms contain owner-approved, non-placeholder identity and contact details.
+- The regulatory, data-reuse, prescription-retention, and pharmacy-operations gates have named, timestamped approvals and evidence.
+- A legal-to-product trace confirms that every public claim matches the approved operating model.
+- No release workflow can enable live ordering while required legal gates remain pending.
 
 ## Goal 7 — Localize the high-trust journey
 
@@ -495,4 +448,4 @@ The machine-validated companion register is [`data/audit-implementation-register
 
 ## Definition of done
 
-The audit program is complete only when the traceability table has no unowned item, Goals 0–10 and every AX requirement meet their acceptance evidence, every conditional Goal 11 decision is recorded, and the deployed public revision passes the full live, security, data, accessibility, performance, and physical-UAT verification suite. A passing local build or test suite alone is insufficient.
+The audit program is complete only when the traceability table has no unowned item, Goals 0–10 meet their acceptance evidence, every conditional Goal 11 decision is recorded, the deployed public revision passes the full live verification suite, and named product, legal, operations, security, infrastructure, and QA owners approve the evidence. A passing local build or test suite alone is insufficient.

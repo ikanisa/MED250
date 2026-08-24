@@ -12,11 +12,11 @@ const [client, marketplace, css, migration, runtimeCatalogJson] = await Promise.
 const profileMigration = await readFile(new URL("../supabase/migrations/20260718150000_extend_member_pharmacy_profile.sql", import.meta.url), "utf8");
 const runtimeMessages = JSON.parse(runtimeCatalogJson).messages;
 
-test("loads contacts only through the member-scoped RPC", () => {
+test("loads contacts only through the member-scoped Cloudflare Worker route", () => {
   assert.match(client, /loadMyPharmacyContacts/);
-  assert.match(client, /rpc\("dawanear_my_pharmacy_contacts"/);
+  assert.match(client, /med250ApiJson\("\/api\/pharmacy\/contacts"\)/);
   assert.match(client, /requestPharmacyContactEdit/);
-  assert.doesNotMatch(client, /from\("dawanear_pharmacy_contacts"\)/);
+  assert.doesNotMatch(client, /from\("dawanear_pharmacy_contacts"\)|\.rpc\(|Supabase|supabase/);
   assert.match(migration, /dawanear_is_permanent_user/);
   assert.match(migration, /membership\.user_id = v_user_id/);
   assert.match(migration, /membership\.pharmacy_id = p_pharmacy_id/);

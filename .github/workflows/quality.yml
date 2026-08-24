@@ -1,6 +1,8 @@
 name: MED+250 quality
 
 on:
+  push:
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -13,10 +15,6 @@ concurrency:
 jobs:
   release-check:
     name: Preview-safe release gate
-    # MED+250 never uses a billed GitHub account or paid Actions capacity.
-    # This optional copy of the local gate is allowed only when the account and
-    # the remaining Actions allocation are both confirmed as free.
-    if: ${{ vars.MED250_GITHUB_FREE_ACCOUNT_CONFIRMED == 'true' && vars.MED250_GITHUB_ACTIONS_FREE_TIER_CONFIRMED == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:

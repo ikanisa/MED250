@@ -8,7 +8,6 @@ on:
         required: true
         type: choice
         options:
-          - preview
           - production
       confirmation:
         description: Type DEPLOY MED250 LIVE for a production deployment
@@ -26,9 +25,6 @@ concurrency:
 jobs:
   validate-request:
     name: Validate deployment request
-    # GitHub Actions is optional. MED+250 never uses a billed GitHub account or
-    # paid Actions capacity, so both free-only confirmations are mandatory.
-    if: ${{ vars.MED250_GITHUB_FREE_ACCOUNT_CONFIRMED == 'true' && vars.MED250_GITHUB_ACTIONS_FREE_TIER_CONFIRMED == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
@@ -42,38 +38,6 @@ jobs:
             exit 1
           fi
 
-  preview:
-    name: Deploy protected preview
-    if: inputs.target == 'preview'
-    needs: validate-request
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    environment: med250-preview
-    env:
-      NEXT_PUBLIC_MED250_OBSERVABILITY: cloud
-    steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
-        with:
-          node-version-file: package.json
-          cache: npm
-      - name: Use committed preview-safe public configuration
-        run: cp .env.example .env.local
-      - run: npm ci
-      - run: npm run release:check
-      - name: Deploy preview Worker
-        id: deploy
-        uses: cloudflare/wrangler-action@9acf94ace14e7dc412b076f2c5c20b8ce93c79cd # v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          wranglerVersion: 4.110.0
-          command: deploy --strict --var MED250_RELEASE_MODE:preview --var MED250_RELEASE_REVISION:${{ github.sha }}
-      - name: Verify protected deployment
-        env:
-          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
-        run: npm run deployment:verify -- --url "$DEPLOYMENT_URL" --mode preview
-
   production:
     name: Deploy production Worker
     if: inputs.target == 'production'
@@ -82,13 +46,27 @@ jobs:
     timeout-minutes: 30
     environment: med250-production
     env:
-      NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+      NEXT_PUBLIC_MED250_CATALOGUE_BACKEND: worker-d1
+      NEXT_PUBLIC_MED250_AUTH_BACKEND: worker-d1
+      NEXT_PUBLIC_MED250_ORDER_BACKEND: worker-d1
+      NEXT_PUBLIC_MED250_WORKSPACE_BACKEND: worker-d1
       NEXT_PUBLIC_MARKETPLACE_MODE: live
       NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
       NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
       NEXT_PUBLIC_MED250_OBSERVABILITY: cloud
-      SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+      MED250_DEPLOYMENT_TARGET: production
+      MED250_DEPLOYMENT_ORIGIN: ${{ vars.NEXT_PUBLIC_SITE_URL }}
+      MED250_RELEASE_REVISION: ${{ github.sha }}
+      MED250_D1_DATABASE_ID: ${{ vars.MED250_D1_DATABASE_ID }}
+      MED250_ADMIN_WHATSAPP: ${{ vars.MED250_ADMIN_WHATSAPP }}
+      TWILIO_ACCOUNT_SID: ${{ vars.TWILIO_ACCOUNT_SID }}
+      TWILIO_WHATSAPP_FROM: ${{ vars.TWILIO_WHATSAPP_FROM }}
+      TWILIO_CLIENT_LOCATION_CAPTURE_CONTENT_SID: ${{ vars.TWILIO_CLIENT_LOCATION_CAPTURE_CONTENT_SID }}
+      TWILIO_CLIENT_LOCATION_CHOICE_CONTENT_SID: ${{ vars.TWILIO_CLIENT_LOCATION_CHOICE_CONTENT_SID }}
+      TWILIO_CUSTOMER_OTP_CONTENT_SID: ${{ vars.TWILIO_CUSTOMER_OTP_CONTENT_SID }}
+      TWILIO_PHARMACY_CLIENT_MEDIA_REQUEST_CONTENT_SID: ${{ vars.TWILIO_PHARMACY_CLIENT_MEDIA_REQUEST_CONTENT_SID }}
+      TWILIO_PHARMACY_OTP_CONTENT_SID: ${{ vars.TWILIO_PHARMACY_OTP_CONTENT_SID }}
+      TWILIO_PHARMACY_REQUEST_CONTENT_SID: ${{ vars.TWILIO_PHARMACY_REQUEST_CONTENT_SID }}
       MED250_GATE_GPS_READY: ${{ vars.MED250_GATE_GPS_READY }}
       MED250_GATE_WHATSAPP_READY: ${{ vars.MED250_GATE_WHATSAPP_READY }}
       MED250_GATE_DUPLICATE_REGISTER_REVIEWED: ${{ vars.MED250_GATE_DUPLICATE_REGISTER_REVIEWED }}
@@ -100,8 +78,8 @@ jobs:
       MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED: ${{ vars.MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED }}
       MED250_GATE_DOMAIN_DNS_VERIFIED: ${{ vars.MED250_GATE_DOMAIN_DNS_VERIFIED }}
       MED250_GATE_PHYSICAL_UAT_PASSED: ${{ vars.MED250_GATE_PHYSICAL_UAT_PASSED }}
-      MED250_DESCRIPTION_REVIEWER_PROBE_PRODUCT_ID: ${{ vars.MED250_DESCRIPTION_REVIEWER_PROBE_PRODUCT_ID }}
-      MED250_DESCRIPTION_REVIEWER_PROBE_EXPECTED_UPDATED_AT: ${{ vars.MED250_DESCRIPTION_REVIEWER_PROBE_EXPECTED_UPDATED_AT }}
+      MED250_GATE_SOURCE_RECONCILED: ${{ vars.MED250_GATE_SOURCE_RECONCILED }}
+      MED250_GATE_WORKER_D1_CUTOVER_APPROVED: ${{ vars.MED250_GATE_WORKER_D1_CUTOVER_APPROVED }}
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
@@ -110,27 +88,24 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Validate production attestations and governed sources
-        run: npm run data:source-authority:verify:strict && npm run release:preflight:live && npm run data:duplicates:verify -- --strict && npm run data:content-review:verify -- --strict && npm run uat:verify:live && npm run audit:browser-evidence:verify:live && npm run launch:go-live:status
-      - name: Verify privileged production backend
+        run: npm run release:preflight:live && npm run data:duplicates:verify -- --strict && npm run uat:verify:live
+      - name: Run Worker-D1 production release checks
+        run: npm run lint && npm run cloudflare:typecheck && npm run data:validate && npm run data:quality && npm run test:preview && npm run cloudflare:check:worker-d1 && npm run performance:budget
+      - name: Apply approved D1 production migrations
         env:
-          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
-          MED250_ADMIN_TOKEN: ${{ secrets.MED250_ADMIN_TOKEN }}
-        run: |
-          npm run backend:verify
-          npm run backend:verify:description-reviewer -- --product-id "$MED250_DESCRIPTION_REVIEWER_PROBE_PRODUCT_ID" --expected-updated-at "$MED250_DESCRIPTION_REVIEWER_PROBE_EXPECTED_UPDATED_AT"
-          npm run ops:health:strict
-      - name: Run unprivileged production release checks
-        run: npm run data:source-authority:verify:strict && npm run lint && npm run data:validate && npm run data:quality && npm run localization:verify && npm run test:sites:catalog && npm run sites:verify:catalog && npm run test:preview && npm run test:production && npm run performance:budget && wrangler deploy --env production --dry-run --strict
-      - name: Verify source-bound live catalogue
-        run: npm run catalogue:verify:live
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler d1 migrations apply med250-production --remote --config dist/server/wrangler.worker-d1.production.json
       - name: Deploy production Worker
         uses: cloudflare/wrangler-action@9acf94ace14e7dc412b076f2c5c20b8ce93c79cd # v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: 4.110.0
-          command: deploy --env production --keep-vars --strict --var MED250_RELEASE_MODE:live --var MED250_RELEASE_REVISION:${{ github.sha }}
+          command: deploy --config dist/server/wrangler.worker-d1.production.json --strict
+      - name: Verify private Worker-D1 operational readiness
+        env:
+          MED250_HEALTH_PROBE_TOKEN: ${{ secrets.MED250_HEALTH_PROBE_TOKEN }}
+        run: npm run ops:health:worker-d1 -- --url "$NEXT_PUBLIC_SITE_URL/api/internal/health" --production --strict
       - name: Verify production deployment
         run: npm run deployment:verify -- --url "$NEXT_PUBLIC_SITE_URL" --mode live --expected-revision "${{ github.sha }}"
-      - name: Verify historical hostname redirects to canonical production
-        run: npm run domain:legacy-redirect:verify

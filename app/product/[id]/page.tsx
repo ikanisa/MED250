@@ -8,9 +8,6 @@ import { absoluteUrl } from "../../../lib/site";
 import { safeJsonLd } from "../../../lib/safe-json-ld";
 import { customerProductTitle } from "../../../lib/product-display";
 import { marketplaceAlternates } from "../../../lib/marketplace-locale";
-import { getPublicTrustMetrics } from "../../../lib/public-trust-metrics";
-import ProductRequestExpectations from "../../product-request-expectations";
-import ProductDetailsList from "../../product-details-list";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -45,10 +42,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const localProduct = getProductSeo(id);
-  const [remoteProduct, initialTrustMetrics] = await Promise.all([
-    getPublicMarketplaceProduct(id),
-    getPublicTrustMetrics(),
-  ]);
+  const remoteProduct = await getPublicMarketplaceProduct(id);
   const baseProduct = remoteProduct ?? (localProduct ? toMarketplaceProduct(localProduct) : null);
   const imageUrls = remoteProduct?.imageUrls?.length
     ? remoteProduct.imageUrls
@@ -76,19 +70,16 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   const description = product.description || (localProduct
     ? productSeoDescription(localProduct)
     : `${displayName}${product.subcategory ? ` — ${product.subcategory}` : ""}. View central product information, request availability, and continue with a pharmacy on WhatsApp.`);
-  const canonicalProductUrl = absoluteUrl(`/product/${encodeURIComponent(product.id)}`);
-  const productSchemaId = `${canonicalProductUrl}#product`;
   const productSchema = {
     "@context": "https://schema.org",
     "@type": "Product",
-    "@id": productSchemaId,
     name: [displayName, product.strength].filter(Boolean).join(" "),
     alternateName: displayName !== product.brand ? product.brand : undefined,
     description,
     sku: product.registrationNumber || product.id,
     category: product.category,
     image: product.imageUrls?.length ? product.imageUrls : product.imageUrl ? [product.imageUrl] : undefined,
-    url: canonicalProductUrl,
+    url: absoluteUrl(`/product/${encodeURIComponent(product.id)}`),
     additionalProperty: [
       product.generic ? { "@type": "PropertyValue", name: "Generic name", value: product.generic } : null,
       product.form ? { "@type": "PropertyValue", name: "Dosage form", value: product.form } : null,
@@ -96,17 +87,6 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
       product.manufacturer || product.manufacturerCountry ? { "@type": "PropertyValue", name: "Manufacturer", value: [product.manufacturer, product.manufacturerCountry].filter(Boolean).join(" · ") } : null,
       product.registrationNumber ? { "@type": "PropertyValue", name: "Rwanda FDA registration", value: product.registrationNumber } : null,
     ].filter(Boolean),
-  };
-  const pageSchema = {
-    "@context": "https://schema.org",
-    "@type": product.productType === "medicine" || product.category === "Medicines" ? "MedicalWebPage" : "WebPage",
-    "@id": `${canonicalProductUrl}#webpage`,
-    url: canonicalProductUrl,
-    name: [displayName, product.strength].filter(Boolean).join(" "),
-    description,
-    inLanguage: "en-RW",
-    isPartOf: { "@id": `${absoluteUrl("/")}#website` },
-    mainEntity: { "@id": productSchemaId },
   };
   const breadcrumbs = {
     "@context": "https://schema.org",
@@ -117,8 +97,5 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
       { "@type": "ListItem", position: 3, name: displayName, item: absoluteUrl(`/product/${encodeURIComponent(product.id)}`) },
     ],
   };
-  const hasIndicativePrice = product.priceIsIndicative
-    && Number.isFinite(product.indicativePriceRwf)
-    && (product.indicativePriceRwf ?? 0) > 0;
-  return <><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(productSchema) }} /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(pageSchema) }} /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbs) }} /><Marketplace initialProductId={id} initialProduct={product} initialProducts={relatedProducts} initialTrustMetrics={initialTrustMetrics} productDetails={<ProductDetailsList product={product} />} productRequestExpectations={<ProductRequestExpectations hasIndicativePrice={hasIndicativePrice} trustMetrics={initialTrustMetrics} />} /></>;
+  return <><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(productSchema) }} /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbs) }} /><Marketplace initialProductId={id} initialProduct={product} initialProducts={relatedProducts} /></>;
 }

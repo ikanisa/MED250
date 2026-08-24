@@ -3,10 +3,9 @@ import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
-import { expectedBackendContractVersion } from "./backend-contract-invariants.mjs";
-import { verifyBackendContract } from "./verify-backend-contract.mjs";
+import { validateWorkerOrigin } from "./verify-live-catalogue.mjs";
 
-export const expectedReviewerContractVersion = "product-description-reviewer-2026-07-18.1";
+export const expectedReviewerContractVersion = "worker-d1-operator-v1";
 
 const productIdPattern = /^(?:rwanda-fda-hm-[0-9]{4}|AMZ-[A-Z0-9]{10})$/;
 const timezoneTimestampPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,6})?)?(?:Z|[+-]\d{2}:\d{2})$/;
@@ -26,53 +25,40 @@ function readArguments(values) {
     else if (flag === "--evidence-output") result.evidenceOutput = value;
     else throw new Error(`Unknown argument ${flag}.`);
   }
-  if (!productIdPattern.test(result.productId)) {
-    throw new Error("--product-id must be one governed MED+250 product ID.");
-  }
+  if (!productIdPattern.test(result.productId)) throw new Error("--product-id must be one governed MED+250 product ID.");
   if (!timezoneTimestampPattern.test(result.expectedUpdatedAt) || !Number.isFinite(Date.parse(result.expectedUpdatedAt))) {
     throw new Error("--expected-updated-at must be the exact timezone-qualified timestamp returned by inspect.");
   }
   return result;
 }
 
+function configuredOrigin(environment) {
+  return String(
+    environment.MED250_DEPLOYMENT_ORIGIN
+    || environment.NEXT_PUBLIC_MED250_DEPLOYMENT_ORIGIN
+    || environment.NEXT_PUBLIC_SITE_URL
+    || "",
+  ).trim();
+}
+
 export function resolveReviewerVerificationEndpoint(environment = process.env) {
-  const rawUrl = String(environment.SUPABASE_URL || environment.NEXT_PUBLIC_SUPABASE_URL || "").trim();
-  if (!rawUrl) throw new Error("SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL is required.");
-  let base;
-  try { base = new URL(rawUrl); }
-  catch { throw new Error("The Supabase URL must be an HTTPS *.supabase.co origin."); }
-  if (
-    base.protocol !== "https:"
-    || !base.hostname.endsWith(".supabase.co")
-    || base.username
-    || base.password
-    || base.search
-    || base.hash
-    || !new Set(["", "/"]).has(base.pathname)
-  ) {
-    throw new Error("The Supabase URL must be an HTTPS *.supabase.co origin.");
-  }
-  return new URL("/functions/v1/review-product-descriptions", base);
+  const rawOrigin = configuredOrigin(environment);
+  if (!rawOrigin) throw new Error("A MED250 Cloudflare Worker origin is required.");
+  return new URL("/api/internal/operator/descriptions", validateWorkerOrigin(rawOrigin));
 }
 
 function reviewerHeaders(response) {
   return {
-    backendContract: response.headers.get("x-med250-backend-contract"),
-    reviewerContract: response.headers.get("x-med250-reviewer-contract"),
+    operatorContract: response.headers.get("x-med250-operator-contract"),
     cacheControl: response.headers.get("cache-control"),
   };
 }
 
 function assessHeaders(headers, label, errors) {
-  if (headers.backendContract !== expectedBackendContractVersion) {
-    errors.push(`${label}: reviewer backend-contract header does not match ${expectedBackendContractVersion}`);
+  if (headers.operatorContract !== expectedReviewerContractVersion) {
+    errors.push(`${label}: operator contract header does not match ${expectedReviewerContractVersion}`);
   }
-  if (headers.reviewerContract !== expectedReviewerContractVersion) {
-    errors.push(`${label}: reviewer contract header does not match ${expectedReviewerContractVersion}`);
-  }
-  if (!headers.cacheControl?.toLowerCase().includes("no-store")) {
-    errors.push(`${label}: reviewer response is not marked no-store`);
-  }
+  if (!headers.cacheControl?.toLowerCase().includes("no-store")) errors.push(`${label}: reviewer response is not marked no-store`);
 }
 
 async function cancelBody(response) {
@@ -98,7 +84,7 @@ function requestOptions(payload, adminToken = "") {
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
-      ...(adminToken ? { "X-MED250-Admin-Token": adminToken } : {}),
+      ...(adminToken ? { Authorization: `Bearer ${adminToken}` } : {}),
     },
     body: payload,
     redirect: "error",
@@ -111,30 +97,20 @@ export async function verifyProductDescriptionReviewerDeployment({
   expectedUpdatedAt,
   environment = process.env,
   fetchImpl = fetch,
-  backendVerifier = verifyBackendContract,
 } = {}) {
   if (!productIdPattern.test(String(productId ?? ""))) throw new Error("A governed product ID is required.");
   if (!timezoneTimestampPattern.test(String(expectedUpdatedAt ?? "")) || !Number.isFinite(Date.parse(expectedUpdatedAt))) {
     throw new Error("The exact timezone-qualified product updated_at value is required.");
   }
-  const adminToken = String(environment.MED250_ADMIN_TOKEN || environment.DAWANEAR_ADMIN_TOKEN || "").trim();
-  if (!adminToken) throw new Error("MED250_ADMIN_TOKEN is required in the process environment.");
-  const secretKey = String(environment.SUPABASE_SECRET_KEY || environment.SUPABASE_SERVICE_ROLE_KEY || "").trim();
-  if (!secretKey) throw new Error("SUPABASE_SECRET_KEY or SUPABASE_SERVICE_ROLE_KEY is required in the process environment.");
+  const adminToken = String(environment.MED250_ADMIN_TOKEN || "").trim();
+  if (adminToken.length < 32 || adminToken.length > 256) throw new Error("MED250_ADMIN_TOKEN must be a 32-256 byte process secret.");
 
   const endpoint = resolveReviewerVerificationEndpoint(environment);
-  const backend = await backendVerifier({ environment, fetchImpl });
   const errors = [];
-  if (backend.status !== "passed" || backend.failures.length) {
-    errors.push(`Database contract failed ${backend.failures.length} invariant(s).`);
-  }
-
   const payload = JSON.stringify({ action: "inspect", product_id: productId });
   const unauthenticated = await fetchImpl(endpoint, requestOptions(payload));
   const unauthenticatedHeaders = reviewerHeaders(unauthenticated);
-  if (unauthenticated.status !== 403) {
-    errors.push(`Unauthenticated inspect expected HTTP 403, received ${unauthenticated.status}.`);
-  }
+  if (unauthenticated.status !== 401) errors.push(`Unauthenticated inspect expected HTTP 401, received ${unauthenticated.status}.`);
   assessHeaders(unauthenticatedHeaders, "Unauthenticated inspect", errors);
   await cancelBody(unauthenticated);
 
@@ -160,54 +136,33 @@ export async function verifyProductDescriptionReviewerDeployment({
     }
   }
 
-  const observedBackendContractVersion = backend.observedVersion ?? backend.contract?.contract_version ?? null;
-  if (observedBackendContractVersion !== expectedBackendContractVersion) {
-    errors.push(`Database contract version does not match ${expectedBackendContractVersion}.`);
-  }
-  if (authenticatedHeaders.backendContract !== observedBackendContractVersion) {
-    errors.push("Authenticated reviewer and database contract versions do not match.");
-  }
-
   return {
     status: errors.length ? "failed" : "passed",
-    supabaseOrigin: endpoint.origin,
+    workerOrigin: endpoint.origin,
     productIdSha256: sha256(productId),
     expectedProductUpdatedAt: expectedUpdatedAt,
     observedProductUpdatedAt: observedUpdatedAt,
-    expectedBackendContractVersion,
-    observedBackendContractVersion,
     expectedReviewerContractVersion,
-    unauthenticated: {
-      status: unauthenticated.status,
-      ...unauthenticatedHeaders,
-    },
-    authenticated: {
-      status: authenticated.status,
-      bodyBytes: authenticatedBodyBytes,
-      ...authenticatedHeaders,
-    },
+    unauthenticated: { status: unauthenticated.status, ...unauthenticatedHeaders },
+    authenticated: { status: authenticated.status, bodyBytes: authenticatedBodyBytes, ...authenticatedHeaders },
     errors,
   };
 }
 
 export function buildProductDescriptionReviewerEvidence({ result, capturedAt, verifierSha256 }) {
   return {
-    schemaVersion: "1.0",
+    schemaVersion: "2.0",
     capturedAt,
     status: result.status,
-    supabaseOrigin: result.supabaseOrigin,
+    workerOrigin: result.workerOrigin,
     probeAction: "inspect",
     productIdSha256: result.productIdSha256,
     expectedProductUpdatedAt: result.expectedProductUpdatedAt,
     observedProductUpdatedAt: result.observedProductUpdatedAt,
-    databaseContract: {
-      expected: result.expectedBackendContractVersion,
-      observed: result.observedBackendContractVersion,
-    },
-    reviewerContract: {
+    operatorContract: {
       expected: result.expectedReviewerContractVersion,
-      unauthenticatedObserved: result.unauthenticated.reviewerContract,
-      authenticatedObserved: result.authenticated.reviewerContract,
+      unauthenticatedObserved: result.unauthenticated.operatorContract,
+      authenticatedObserved: result.authenticated.operatorContract,
     },
     probes: {
       unauthenticatedStatus: result.unauthenticated.status,
@@ -218,10 +173,7 @@ export function buildProductDescriptionReviewerEvidence({ result, capturedAt, ve
     },
     errors: result.errors,
     responseBodiesRetained: false,
-    verifier: {
-      path: "scripts/verify-product-description-reviewer-deployment.mjs",
-      sha256: verifierSha256,
-    },
+    verifier: { path: "scripts/verify-product-description-reviewer-deployment.mjs", sha256: verifierSha256 },
   };
 }
 
@@ -236,26 +188,19 @@ async function writeEvidence(outputPath, evidence) {
 async function main() {
   try {
     const args = readArguments(process.argv.slice(2));
-    const result = await verifyProductDescriptionReviewerDeployment({
-      productId: args.productId,
-      expectedUpdatedAt: args.expectedUpdatedAt,
-    });
+    const result = await verifyProductDescriptionReviewerDeployment({ productId: args.productId, expectedUpdatedAt: args.expectedUpdatedAt });
     if (args.evidenceOutput) {
       const verifierSource = await readFile(new URL(import.meta.url), "utf8");
-      const evidence = buildProductDescriptionReviewerEvidence({
+      await writeEvidence(args.evidenceOutput, buildProductDescriptionReviewerEvidence({
         result,
         capturedAt: new Date().toISOString(),
         verifierSha256: sha256(verifierSource),
-      });
-      await writeEvidence(args.evidenceOutput, evidence);
+      }));
     }
     console.log(JSON.stringify(result, null, 2));
     if (result.errors.length) process.exitCode = 1;
   } catch (error) {
-    console.error(JSON.stringify({
-      status: "configuration_error",
-      error: error instanceof Error ? error.message : "Reviewer deployment verification failed.",
-    }, null, 2));
+    console.error(JSON.stringify({ status: "configuration_error", error: error instanceof Error ? error.message : "Reviewer deployment verification failed." }, null, 2));
     process.exitCode = 2;
   }
 }

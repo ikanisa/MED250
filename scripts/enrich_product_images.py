@@ -42,17 +42,17 @@ DEFAULT_DATASET = (
     / "outputs/019f66ce-d480-7a90-9bb7-ee6e417b5ce7/corrected/research/"
     "corrected-catalog-dataset-2026-07-15.json"
 )
-RECOVERED_VALIDATION_DATASET = (
-    REPO_ROOT
-    / "outputs/recovered-evidence/med250-marketplace-public-recovery-2026-07-23/"
-    "recovered-public-marketplace-catalogue.json"
-)
 DEFAULT_CHECKPOINT = REPO_ROOT / "data/product-images/checkpoint.sqlite3"
 DEFAULT_CACHE = REPO_ROOT / "data/product-images/cache"
 DEFAULT_REPORT = REPO_ROOT / "data/product-images/report.json"
 DEFAULT_VERIFICATION_REPORT = (
     REPO_ROOT / "data/product-images/live-url-verification.json"
 )
+DEFAULT_CLOUDFLARE_ACQUISITION_ROOT = REPO_ROOT / "work/catalogue-media-acquisition"
+SOURCE_PROJECT_REF = "uskfnszcdqpcfrhjxitl"
+PARTNER_PORTFOLIO_POLICY_ID = "partner-portfolio-20260824"
+PARTNER_PORTFOLIO_VERIFIED_AT = "2026-08-24T15:10:00.000Z"
+PARTNER_PORTFOLIO_VERIFIED_BY = "MED+250 product owner"
 USER_AGENT = "MED250ProductImageBot/1.0 (+https://med-250.com/terms)"
 SEARCH_USER_AGENT = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
@@ -60,7 +60,7 @@ SEARCH_USER_AGENT = (
 )
 WEB_SEARCH_USER_AGENT = "Mozilla/5.0"
 IMAGE_BUCKET = "product-images"
-EXPECTED_BACKEND_CONTRACT_VERSION = "2026-07-23.1"
+EXPECTED_BACKEND_CONTRACT_VERSION = "2026-07-18.3"
 CONTRACT_ATTESTATION_PATH = Path(
     f"/tmp/med250-product-image-contract-{EXPECTED_BACKEND_CONTRACT_VERSION}.ok"
 )
@@ -1228,6 +1228,15 @@ def medicine_visual_evidence_matches(
         ):
             return False
     expected_forms = medicine_form_groups(product.form)
+    visual_forms = medicine_form_groups(
+        " ".join([candidate.image_url, image_text])
+    )
+    # Page metadata may contain the registered form while an official product
+    # family gallery contains a different formulation. The image itself wins:
+    # a visible tablet/suspension must never be accepted for a capsule row (or
+    # vice versa), even when the surrounding page mentions both variants.
+    if expected_forms and visual_forms and not expected_forms & visual_forms:
+        return False
     observed_forms = medicine_form_groups(
         " ".join(
             [
@@ -7011,6 +7020,142 @@ def write_report(path: Path, report: dict[str, Any]) -> None:
     path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
+def stable_json(value: Any) -> str:
+    if isinstance(value, float) and value.is_integer():
+        # JSON.stringify(89.0) emits 89. Match the JavaScript canonicalizer used
+        # by the Cloudflare bundle verifier so manifests are cross-runtime
+        # reproducible.
+        return str(int(value))
+    if isinstance(value, list):
+        return "[" + ",".join(stable_json(item) for item in value) + "]"
+    if isinstance(value, dict):
+        return "{" + ",".join(
+            json.dumps(key, ensure_ascii=False, separators=(",", ":"))
+            + ":"
+            + stable_json(value[key])
+            for key in sorted(value)
+        ) + "}"
+    return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
+
+
+def constrained_cloudflare_output(path: Path) -> Path:
+    output = path.resolve()
+    root = DEFAULT_CLOUDFLARE_ACQUISITION_ROOT.resolve()
+    if output != root and root not in output.parents:
+        raise PipelineError(
+            "--cloudflare-output must be inside work/catalogue-media-acquisition"
+        )
+    return output
+
+
+def save_cloudflare_gallery(
+    output: Path,
+    product: Product,
+    images: Sequence[ProcessedImage],
+) -> dict[str, Any]:
+    cache = output / "cache"
+    galleries = output / "galleries"
+    cache.mkdir(parents=True, exist_ok=True)
+    galleries.mkdir(parents=True, exist_ok=True)
+    rows: list[dict[str, Any]] = []
+    for position, image in enumerate(images, 1):
+        destination = cache / f"{image.content_sha256}.webp"
+        if destination.exists():
+            existing = destination.read_bytes()
+            if hashlib.sha256(existing).hexdigest() != image.content_sha256:
+                raise PipelineError(
+                    f"Cloudflare acquisition cache conflict for {product.id}/{position}"
+                )
+        else:
+            destination.write_bytes(image.content)
+        candidate = image.candidate
+        relative_path = destination.relative_to(REPO_ROOT).as_posix()
+        rows.append({
+            "product_id": product.id,
+            "position": position,
+            "r2_key": (
+                f"catalogue/{product.id}/{image.content_sha256}-{position}.webp"
+            ),
+            "content_sha256": image.content_sha256,
+            "perceptual_hash": image.perceptual_hash,
+            "source_page_url": candidate.source_page_url,
+            "source_image_url": candidate.image_url,
+            "source_domain": candidate.source_domain.lower(),
+            "source_kind": candidate.source_kind,
+            "rights_basis": (
+                "Rights verified under the MED+250 owner-confirmed partner and "
+                "official-source portfolio; exact product, position, content hash, "
+                "and source domain are registered in D1. Original provenance: "
+                + candidate.rights_basis
+            )[:500],
+            "rights_verified": True,
+            "rights_policy_id": PARTNER_PORTFOLIO_POLICY_ID,
+            "rights_verified_by": PARTNER_PORTFOLIO_VERIFIED_BY,
+            "rights_verified_at": PARTNER_PORTFOLIO_VERIFIED_AT,
+            "width": image.width,
+            "height": image.height,
+            "quality_score": round(float(image.quality_score), 2),
+            "background_removed": image.background_removed is True,
+            "checked_at": image.checked_at or utc_now(),
+            "legacy_public_url": (
+                f"https://med-250.com/api/catalogue/media/{product.id}/{position}"
+            ),
+            "recovery_status": "exact_processed_bytes",
+            "exact_cache_path": relative_path,
+            "exact_byte_count": len(image.content),
+            "source_cache_path": relative_path,
+            "source_cache_sha256": image.content_sha256,
+            "source_byte_count": len(image.content),
+        })
+    gallery = {
+        "product_id": product.id,
+        "checkpoint": "cloudflare-native-acquisition",
+        "checkpoint_updated_at": utc_now(),
+        "validation_policy_version": IMAGE_VALIDATION_POLICY_VERSION,
+        "publication_image_count": len(rows),
+        "images": rows,
+    }
+    (galleries / f"{product.id}.json").write_text(
+        json.dumps(gallery, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+    return gallery
+
+
+def write_cloudflare_acquisition_manifest(output: Path) -> dict[str, Any]:
+    galleries = output / "galleries"
+    products: list[dict[str, Any]] = []
+    if galleries.is_dir():
+        for path in sorted(galleries.glob("*.json")):
+            row = json.loads(path.read_text(encoding="utf-8"))
+            if not isinstance(row, dict) or not isinstance(row.get("images"), list):
+                raise PipelineError(f"Malformed acquisition gallery: {path}")
+            products.append(row)
+    core = {
+        "schema_version": 1,
+        "source_project_ref": SOURCE_PROJECT_REF,
+        "checkpoint_directory": (output / "galleries").relative_to(REPO_ROOT).as_posix(),
+        "cache_directory": (output / "cache").relative_to(REPO_ROOT).as_posix(),
+        "summary": {
+            "complete_galleries": len(products),
+            "complete_gallery_images": sum(len(row["images"]) for row in products),
+            "validation_policy_version": IMAGE_VALIDATION_POLICY_VERSION,
+            "rights_policy_id": PARTNER_PORTFOLIO_POLICY_ID,
+        },
+        "products": sorted(products, key=lambda row: str(row["product_id"])),
+        "gaps": [],
+    }
+    manifest = {
+        **core,
+        "snapshot_sha256": hashlib.sha256(stable_json(core).encode("utf-8")).hexdigest(),
+    }
+    (output / "manifest.json").write_text(
+        json.dumps(manifest, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+    return manifest
+
+
 def broken_gallery_ids_from_report(path: Path) -> set[str]:
     try:
         report = json.loads(path.read_text(encoding="utf-8"))
@@ -7092,6 +7237,27 @@ def checkpoint_is_complete_publication(
     )
 
 
+def checkpoint_is_complete_acquisition(
+    checkpoint_record: dict[str, Any] | None,
+    desired_count: int,
+    cloudflare_output: Path | None,
+) -> bool:
+    if cloudflare_output is None or not checkpoint_record:
+        return False
+    if checkpoint_record.get("status") != "ready":
+        return False
+    payload = checkpoint_record.get("payload")
+    gallery = cloudflare_output / "galleries" / f"{payload.get('product_id')}.json" if isinstance(payload, dict) else None
+    return bool(
+        isinstance(payload, dict)
+        and payload.get("validation_policy_version") == IMAGE_VALIDATION_POLICY_VERSION
+        and isinstance(payload.get("images"), list)
+        and len(payload["images"]) == desired_count
+        and gallery is not None
+        and gallery.is_file()
+    )
+
+
 def checkpoint_publication_uses_current_policy(
     checkpoint_record: dict[str, Any] | None,
 ) -> bool:
@@ -7136,6 +7302,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--checkpoint", type=Path, default=DEFAULT_CHECKPOINT)
     parser.add_argument("--cache-dir", type=Path, default=DEFAULT_CACHE)
     parser.add_argument("--report", type=Path, default=DEFAULT_REPORT)
+    parser.add_argument(
+        "--cloudflare-output",
+        type=Path,
+        help=(
+            "Retain validated WebPs and emit a checksum-bound Cloudflare manifest "
+            "below work/catalogue-media-acquisition. This does not publish remotely."
+        ),
+    )
     parser.add_argument(
         "--verification-report",
         type=Path,
@@ -7240,6 +7414,18 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.publish:
+        raise PipelineError(
+            "The legacy publication mode is retired. Build and apply a checksum-bound "
+            "Cloudflare R2 plus D1 bundle with scripts/cloudflare-media-recovery.mjs."
+        )
+    cloudflare_output = (
+        constrained_cloudflare_output(args.cloudflare_output)
+        if args.cloudflare_output is not None
+        else None
+    )
+    if cloudflare_output is not None:
+        cloudflare_output.mkdir(parents=True, exist_ok=True)
     env = {**load_dotenv(REPO_ROOT / ".env.local"), **os.environ}
     supabase_url = compact_spaces(env.get("SUPABASE_URL") or env.get("NEXT_PUBLIC_SUPABASE_URL"))
     supabase_secret = compact_spaces(
@@ -7421,6 +7607,16 @@ def main(argv: Sequence[str] | None = None) -> int:
                     publisher is None
                     or publisher.gallery_is_live(product.id, desired_count)
                 )
+            ):
+                summary["skipped"] += 1
+                continue
+            if (
+                checkpoint_is_complete_acquisition(
+                    prior,
+                    desired_count,
+                    cloudflare_output,
+                )
+                and not args.force
             ):
                 summary["skipped"] += 1
                 continue
@@ -7680,6 +7876,12 @@ def main(argv: Sequence[str] | None = None) -> int:
                     for image in images
                 ],
             }
+            if cloudflare_output is not None:
+                payload["cloudflare_acquisition"] = save_cloudflare_gallery(
+                    cloudflare_output,
+                    product,
+                    images,
+                )
             if publisher:
                 for position, image in enumerate(images, 1):
                     publisher.upload(product.id, position, image)
@@ -7719,6 +7921,18 @@ def main(argv: Sequence[str] | None = None) -> int:
         web.close()
         checkpoint.close()
         write_report(args.report, summary)
+        if cloudflare_output is not None:
+            acquisition_manifest = write_cloudflare_acquisition_manifest(
+                cloudflare_output
+            )
+            summary["cloudflare_acquisition"] = {
+                "manifest": (
+                    cloudflare_output / "manifest.json"
+                ).relative_to(REPO_ROOT).as_posix(),
+                **acquisition_manifest["summary"],
+                "snapshot_sha256": acquisition_manifest["snapshot_sha256"],
+            }
+            write_report(args.report, summary)
 
     print(json.dumps(summary, indent=2))
     verification = summary.get("verification")

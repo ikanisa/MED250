@@ -4,20 +4,10 @@ import test from "node:test";
 
 import { priceCoverageMarkdown, summarizePriceCoverage } from "../scripts/report-price-coverage.mjs";
 
-let datasetSource;
-try {
-  datasetSource = await readFile(
-    new URL("../outputs/019f66ce-d480-7a90-9bb7-ee6e417b5ce7/corrected/research/corrected-catalog-dataset-2026-07-15.json", import.meta.url),
-    "utf8",
-  );
-} catch (error) {
-  if (error?.code !== "ENOENT") throw error;
-  datasetSource = await readFile(
-    new URL("../outputs/recovered-evidence/med250-marketplace-public-recovery-2026-07-23/recovered-public-marketplace-catalogue.json", import.meta.url),
-    "utf8",
-  );
-}
-const dataset = JSON.parse(datasetSource);
+const dataset = JSON.parse(await readFile(
+  new URL("../outputs/019f66ce-d480-7a90-9bb7-ee6e417b5ce7/corrected/research/corrected-catalog-dataset-2026-07-15.json", import.meta.url),
+  "utf8",
+));
 
 test("reports governed central price coverage without overstating Goal 3 completion", () => {
   const report = summarizePriceCoverage(dataset, new Date("2026-07-18T23:59:59Z"));

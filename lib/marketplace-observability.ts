@@ -1,14 +1,10 @@
 export type MarketplaceEventName =
   | "catalogue_search"
   | "catalogue_view_changed"
-  | "product_viewed"
   | "product_added"
   | "order_started"
   | "order_placed"
   | "order_failed"
-  | "realtime_status"
-  | "realtime_event"
-  | "offer_received"
   | "pharmacy_selected"
   | "whatsapp_handoff"
   | "momo_handoff";

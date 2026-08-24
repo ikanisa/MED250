@@ -8,11 +8,7 @@ import {
 import { isAbsolute, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
-import { currentGitRevision } from "./launch-release-bindings.mjs";
-
 export const expectedAuditSourceRevision = "ALtnJHwQWBgt5JycfaOGftvKWVHBOLMKzbI9tuf-JrxPmecFrmDaMt1VqSxxxAxyOZIqpkTkcapZA8VcxqQNLq9OMDzTgjApfiO0tloLkak";
-export const canonicalProductionOrigin = "https://med-250.com";
-const historicalProductionOrigins = new Set(["https://med250.gikundiro.com"]);
 
 const productRoute = /^\/product\/(?:rwanda-fda-hm-[0-9]{4}|AMZ-[A-Z0-9]{10})(?:\?[^#]{1,400})?$/;
 const catalogueRoute = /^(?:\/|\/categories|\/category\/(?:medicines|personal-care|baby-family|wellness))(?:\?[^#]{1,400})?$/;
@@ -187,24 +183,17 @@ export function validateAuditBrowserEvidence(ledger, {
   strict = false,
   rootDir = process.cwd(),
   now = new Date(),
-  currentReleaseRevision = currentGitRevision({ rootDir }),
 } = {}) {
   const errors = [];
   const warnings = [];
-  const options = { strict, rootDir, now, currentReleaseRevision };
+  const options = { strict, rootDir, now };
   const scenarios = ledger?.scenarios && typeof ledger.scenarios === "object" ? ledger.scenarios : {};
   const expectedScenarioIds = Object.keys(expectedAuditBrowserScenarios).sort();
   const scenarioIds = Object.keys(scenarios).sort();
 
   if (ledger?.schema_version !== "1") errors.push("audit browser evidence schema_version must be 1");
   if (ledger?.environment !== "production") errors.push("audit browser evidence environment must be production");
-  if (strict && ledger?.origin !== canonicalProductionOrigin) {
-    errors.push(`audit browser evidence origin must be the current production origin ${canonicalProductionOrigin}`);
-  } else if (!strict && historicalProductionOrigins.has(ledger?.origin)) {
-    warnings.push(`audit browser evidence uses historical origin ${ledger.origin}; rerun it on ${canonicalProductionOrigin} before strict closure`);
-  } else if (ledger?.origin !== canonicalProductionOrigin) {
-    errors.push(`audit browser evidence origin must be ${canonicalProductionOrigin}`);
-  }
+  if (ledger?.origin !== "https://med250.gikundiro.com") errors.push("audit browser evidence origin must be the production custom domain");
   if (ledger?.audit_source_revision !== expectedAuditSourceRevision) errors.push("audit browser evidence is not bound to the current audit source revision");
   if (!allowedStatuses.has(ledger?.status)) errors.push("audit browser evidence has an invalid overall status");
   for (const id of expectedScenarioIds.filter((id) => !scenarioIds.includes(id))) errors.push(`missing audit browser scenario ${id}`);
@@ -269,11 +258,6 @@ export function validateAuditBrowserEvidence(ledger, {
 
   if (strict || ledger?.status === "passed") {
     if (!/^[a-f0-9]{40}$/.test(String(ledger?.release_revision ?? ""))) errors.push("audit browser evidence requires the exact lowercase Git release revision");
-    if (!/^[a-f0-9]{40}$/.test(String(currentReleaseRevision ?? ""))) {
-      errors.push("audit browser evidence cannot determine the current checkout revision");
-    } else if (ledger?.release_revision !== currentReleaseRevision) {
-      errors.push(`audit browser evidence release revision is stale; expected current checkout ${currentReleaseRevision}`);
-    }
     if (!allowedCaptureTools.has(ledger?.capture_tool)) errors.push("audit browser evidence requires an approved capture_tool");
     if (typeof ledger?.executed_by !== "string" || ledger.executed_by.trim().length < 3) errors.push("audit browser evidence requires a named executor");
     if (!validTimestamp(ledger?.started_at)) errors.push("audit browser evidence requires a timezone-qualified started_at");

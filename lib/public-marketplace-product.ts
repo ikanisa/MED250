@@ -1,10 +1,11 @@
 import { cache } from "react";
 import type { CatalogueTaxonomyRow, Product } from "./dawanear-client";
-import { governPublicProductMedia, isPublicProductMediaHeld } from "./product-media-governance";
-import { getMed250RuntimeEnvironment } from "./runtime-environment";
+import {
+  serverD1CatalogueConfigured,
+  withServerCatalogueRepository,
+} from "./d1-catalogue-server.ts";
 
 type CatalogueRow = Record<string, unknown>;
-const PUBLIC_FETCH_TIMEOUT_MS = 8_000;
 const MAX_RELATED_PRODUCT_IDS = 12;
 
 function text(row: CatalogueRow, field: string) {
@@ -41,56 +42,10 @@ function httpsUrl(row: CatalogueRow, field: string) {
   }
 }
 
-function publicSupabaseEndpoint(path: string): { endpoint: URL; publishableKey: string } | null {
-  const runtimeEnvironment = getMed250RuntimeEnvironment();
-  const baseUrl = (runtimeEnvironment
-    ? runtimeEnvironment.NEXT_PUBLIC_SUPABASE_URL
-    : process.env.NEXT_PUBLIC_SUPABASE_URL)?.trim() ?? "";
-  const publishableKey = (runtimeEnvironment
-    ? runtimeEnvironment.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-    : process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY)?.trim() ?? "";
-  if (!baseUrl || !publishableKey) return null;
-  try {
-    const endpoint = new URL(path, baseUrl);
-    if (endpoint.protocol !== "https:" || !endpoint.hostname.endsWith(".supabase.co")) return null;
-    return { endpoint, publishableKey };
-  } catch {
-    return null;
-  }
-}
-
-async function fetchPublicRows(endpoint: URL, publishableKey: string): Promise<CatalogueRow[]> {
-  try {
-    const response = await fetch(endpoint, {
-      headers: {
-        apikey: publishableKey,
-        Authorization: `Bearer ${publishableKey}`,
-      },
-      cache: "no-store",
-      signal: AbortSignal.timeout(PUBLIC_FETCH_TIMEOUT_MS),
-    });
-    if (!response.ok) return [];
-    const payload: unknown = await response.json();
-    if (!Array.isArray(payload)) return [];
-    return payload.filter((row): row is CatalogueRow => typeof row === "object" && row !== null);
-  } catch {
-    // Public pages retain their source-backed build snapshot and hydrate again
-    // in the browser. A transient upstream failure must not turn the route into
-    // an HTTP 503 or invent an empty-state label.
-    return [];
-  }
-}
-
 function mapPublicMarketplaceProduct(row: CatalogueRow, fallbackId: string): Product {
   const id = text(row, "id") || fallbackId;
   const brand = text(row, "brand_name") || text(row, "generic_name") || id;
   const indicativePriceRwf = Math.max(0, Math.round(number(row, "indicative_price_rwf") || number(row, "price_min_rwf")));
-
-  const media = governPublicProductMedia(
-    id,
-    text(row, "image_url") || null,
-    textArray(row, "image_urls"),
-  );
 
   return {
     id,
@@ -116,8 +71,8 @@ function mapPublicMarketplaceProduct(row: CatalogueRow, fallbackId: string): Pro
     indicativePriceBasis: text(row, "indicative_price_basis"),
     indicativePriceSourceUrl: text(row, "indicative_price_source_url") || null,
     indicativePriceUpdatedAt: text(row, "indicative_price_updated_at") || null,
-    imageUrl: media.imageUrl,
-    imageUrls: media.imageUrls,
+    imageUrl: text(row, "image_url") || null,
+    imageUrls: textArray(row, "image_urls"),
     description: text(row, "description") || null,
     descriptionSourceName: text(row, "description_source_name") || null,
     descriptionSourceUrl: httpsUrl(row, "description_source_url"),
@@ -126,39 +81,29 @@ function mapPublicMarketplaceProduct(row: CatalogueRow, fallbackId: string): Pro
 }
 
 export const getPublicCatalogueTaxonomy = cache(async function getPublicCatalogueTaxonomy(): Promise<CatalogueTaxonomyRow[]> {
-  const connection = publicSupabaseEndpoint("/rest/v1/dawanear_catalogue_taxonomy");
-  if (!connection) return [];
-  connection.endpoint.searchParams.set("select", "department,subcategory,product_count");
-  connection.endpoint.searchParams.set("product_count", "gt.0");
-  connection.endpoint.searchParams.set("order", "department.asc,subcategory.asc.nullsfirst");
-
-  const rows = await fetchPublicRows(connection.endpoint, connection.publishableKey);
-  return rows
-    .map((row) => ({
-      department: text(row, "department"),
-      subcategory: text(row, "subcategory") || null,
-      productCount: Math.max(0, Math.round(number(row, "product_count"))),
-    }))
-    .filter((row) => row.department && row.productCount > 0);
+  if (serverD1CatalogueConfigured) {
+    const rows = await withServerCatalogueRepository((repository) => repository.taxonomy());
+    return (rows ?? [])
+      .map((row) => ({
+        department: text(row, "department"),
+        subcategory: text(row, "subcategory") || null,
+        productCount: Math.max(0, Math.round(number(row, "product_count"))),
+      }))
+      .filter((row) => row.department && row.productCount > 0);
+  }
+  return [];
 });
 
 export const getPublicProductImages = cache(async function getPublicProductImages(id: string): Promise<string[]> {
   const productId = id.trim();
-  if (!/^[A-Za-z0-9-]{1,80}$/.test(productId) || isPublicProductMediaHeld(productId)) return [];
+  if (!/^[A-Za-z0-9-]{1,80}$/.test(productId)) return [];
 
-  const connection = publicSupabaseEndpoint("/rest/v1/dawanear_product_images");
-  if (!connection) return [];
-  const { endpoint, publishableKey } = connection;
-  endpoint.searchParams.set("select", "public_url,position");
-  endpoint.searchParams.set("product_id", `eq.${productId}`);
-  endpoint.searchParams.set("approved", "eq.true");
-  endpoint.searchParams.set("order", "position.asc");
-  endpoint.searchParams.set("limit", "3");
+  if (serverD1CatalogueConfigured) {
+    const rows = await withServerCatalogueRepository((repository) => repository.productsByIds([productId]));
+    return rows?.[0] ? textArray(rows[0], "image_urls") : [];
+  }
 
-  const rows = await fetchPublicRows(endpoint, publishableKey);
-  return rows
-    .map((row) => text(row, "public_url"))
-    .filter(Boolean);
+  return [];
 });
 
 /** Loads a bounded related-product set in one public catalogue request. */
@@ -166,19 +111,12 @@ export async function getPublicMarketplaceProducts(productIds: string[]): Promis
   const ids = [...new Set(productIds.map((id) => id.trim()).filter((id) => /^[A-Za-z0-9-]{1,80}$/.test(id)))];
   if (!ids.length || ids.length > MAX_RELATED_PRODUCT_IDS) return [];
 
-  const connection = publicSupabaseEndpoint("/rest/v1/dawanear_all_product_catalog");
-  if (!connection) return [];
-  const { endpoint, publishableKey } = connection;
-  endpoint.searchParams.set("select", "*");
-  endpoint.searchParams.set("id", `in.(${ids.join(",")})`);
-  endpoint.searchParams.set("limit", String(ids.length));
+  if (serverD1CatalogueConfigured) {
+    const rows = await withServerCatalogueRepository((repository) => repository.productsByIds(ids));
+    return (rows ?? []).map((row) => mapPublicMarketplaceProduct(row, text(row, "id")));
+  }
 
-  const rows = await fetchPublicRows(endpoint, publishableKey);
-  const productsById = new Map(rows.map((row) => {
-    const product = mapPublicMarketplaceProduct(row, text(row, "id"));
-    return [product.id, product] as const;
-  }));
-  return ids.map((id) => productsById.get(id)).filter((product): product is Product => Boolean(product));
+  return [];
 }
 
 /** Loads one already-approved public product through the same RLS boundary as the storefront. */
@@ -186,23 +124,10 @@ export const getPublicMarketplaceProduct = cache(async function getPublicMarketp
   const productId = id.trim();
   if (!/^[A-Za-z0-9-]{1,80}$/.test(productId)) return null;
 
-  const connection = publicSupabaseEndpoint("/rest/v1/dawanear_all_product_catalog");
-  if (!connection) return null;
-  const { endpoint, publishableKey } = connection;
-  endpoint.searchParams.set("select", "*");
-  endpoint.searchParams.set("id", `eq.${productId}`);
-  endpoint.searchParams.set("limit", "1");
+  if (serverD1CatalogueConfigured) {
+    const rows = await withServerCatalogueRepository((repository) => repository.productsByIds([productId]));
+    return rows?.[0] ? mapPublicMarketplaceProduct(rows[0], productId) : null;
+  }
 
-  const [rows, imageUrls] = await Promise.all([
-    fetchPublicRows(endpoint, publishableKey),
-    getPublicProductImages(productId),
-  ]);
-  const row = rows[0];
-  if (!row) return null;
-  const product = mapPublicMarketplaceProduct(row, productId);
-  return {
-    ...product,
-    imageUrl: imageUrls[0] || product.imageUrl,
-    imageUrls: imageUrls.length ? imageUrls : product.imageUrls,
-  };
+  return null;
 });

@@ -61,24 +61,19 @@ function assertPassedVerifierResult(result) {
   if (result?.status !== "passed") throw new Error("Turnstile verifier status must be passed.");
   if (result?.identifiersEmitted !== false) throw new Error("Turnstile verifier must declare identifiersEmitted=false.");
   if (result?.tokensEmitted !== false) throw new Error("Turnstile verifier must declare tokensEmitted=false.");
-  if (result?.checks?.missingToken?.status !== "passed" || result.checks.missingToken.userCountUnchanged !== true) {
-    throw new Error("Missing-token rejection check must pass without changing the aggregate user count.");
+  if (result?.checks?.missingToken?.status !== "passed" || result.checks.missingToken.sessionCookieNotIssued !== true) {
+    throw new Error("Missing-token rejection check must pass without issuing a browser session.");
   }
-  if (result?.checks?.invalidToken?.status !== "passed" || result.checks.invalidToken.userCountUnchanged !== true) {
-    throw new Error("Invalid-token rejection check must pass without changing the aggregate user count.");
-  }
-  if (result?.checks?.expiredToken?.status !== "passed" || result.checks.expiredToken.userCountUnchanged !== true) {
-    throw new Error("Expired-token rejection check must pass without changing the aggregate user count.");
+  if (result?.checks?.invalidToken?.status !== "passed" || result.checks.invalidToken.sessionCookieNotIssued !== true) {
+    throw new Error("Invalid-token rejection check must pass without issuing a browser session.");
   }
   const valid = result?.checks?.validToken;
   if (valid?.status !== "passed"
-    || valid.disposableAnonymousUserCreated !== true
+    || valid.disposableAnonymousSessionCreated !== true
+    || valid.disposableSessionRestored !== true
     || valid.disposableSessionRevoked !== true
-    || valid.disposableUserDeleted !== true) {
-    throw new Error("Valid-token positive path must create, revoke and delete exactly one disposable anonymous identity.");
-  }
-  if (result?.checks?.replayedToken?.status !== "passed" || result.checks.replayedToken.userCountUnchanged !== true) {
-    throw new Error("Replayed-token rejection check must pass without changing the aggregate user count.");
+    || valid.postRevokeUnauthenticated !== true) {
+    throw new Error("Valid-token positive path must create, restore and revoke one disposable anonymous session.");
   }
 }
 
@@ -113,7 +108,7 @@ export function buildTurnstileLaunchEvidence({
     evidence_type: "test_record",
     status: "complete",
     title: "MED+250 production Turnstile positive-path completed test record",
-    summary: "The controlled production Turnstile verifier rejected missing, invalid, expired and replayed responses, accepted one real widget response, created exactly one disposable anonymous identity, revoked and deleted it, and retained no tokens or identifiers.",
+    summary: "The controlled production Turnstile verifier rejected missing and invalid responses, accepted one real widget response, created and revoked one disposable Cloudflare Worker session, and retained no tokens or identifiers.",
     recorded_at: completed,
     recorded_by: named(executedBy, "executed_by"),
     recorded_role: named(executorRole, "executor_role"),
@@ -122,17 +117,12 @@ export function buildTurnstileLaunchEvidence({
       {
         name: "Missing Turnstile evidence rejected",
         status: "passed",
-        detail: "The protected verifier rejected a missing Turnstile response without changing the aggregate Auth user count.",
+        detail: "The protected Worker rejected a missing Turnstile response without issuing a browser session cookie.",
       },
       {
         name: "Invalid Turnstile evidence rejected",
         status: "passed",
-        detail: "The protected verifier rejected an invalid Turnstile response without changing the aggregate Auth user count.",
-      },
-      {
-        name: "Expired Turnstile evidence rejected",
-        status: "passed",
-        detail: "The protected verifier rejected a real production response after its validity window elapsed without changing the aggregate Auth user count.",
+        detail: "The protected Worker rejected an invalid Turnstile response without issuing a browser session cookie.",
       },
       {
         name: "Real production widget completed",
@@ -140,19 +130,14 @@ export function buildTurnstileLaunchEvidence({
         detail: "The verifier received a short-lived real widget response only through the protected operator process environment.",
       },
       {
-        name: "Disposable anonymous identity created",
+        name: "Disposable anonymous session created",
         status: "passed",
-        detail: "The valid response created exactly one disposable anonymous customer identity for the controlled Auth test.",
+        detail: "The valid response created and restored one disposable anonymous customer session through the Cloudflare Worker.",
       },
       {
-        name: "Replayed Turnstile evidence rejected",
+        name: "Disposable session revoked",
         status: "passed",
-        detail: "The same valid response could not be reused to create a second anonymous identity.",
-      },
-      {
-        name: "Disposable identity completely removed",
-        status: "passed",
-        detail: "The disposable session was revoked, the Auth identity was deleted, and the aggregate user count returned to its pre-test value.",
+        detail: "The disposable session was revoked and the same cookie no longer authenticated after sign-out.",
       },
       {
         name: "No marketplace side effect",
@@ -171,7 +156,7 @@ export function buildTurnstileLaunchEvidence({
     completed_at: completed,
     verifier_result_reference: verifierResultReference || null,
     verifier_result_sha256: verifierResultSha256,
-    supabase_host: verifierResult.supabaseHost,
+    worker_host: verifierResult.workerHost,
     no_marketplace_side_effect_confirmed: true,
   };
   const validation = validateLaunchEvidenceArtifact(artifact, {

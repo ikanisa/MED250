@@ -9,8 +9,8 @@ import {
 
 const pharmacyId = "11111111-1111-4111-8111-111111111111";
 const environment = {
-  NEXT_PUBLIC_SUPABASE_URL: "https://uskfnszcdqpcfrhjxitl.supabase.co",
-  DAWANEAR_ADMIN_TOKEN: "test-admin-token-that-must-not-be-printed",
+  MED250_OPERATOR_ORIGIN: "https://staging.med-250.com",
+  MED250_ADMIN_TOKEN: "test-admin-token-that-must-not-print",
 };
 
 test("builds bounded candidate generation and exact inspection requests", () => {
@@ -45,19 +45,19 @@ test("sends the admin token only as a protected request header", async () => {
       return new Response(JSON.stringify({ candidate: { pharmacy_id: pharmacyId } }), { status: 200 });
     },
   });
-  assert.equal(captured.url, "https://uskfnszcdqpcfrhjxitl.supabase.co/functions/v1/geocode-pharmacies");
-  assert.equal(captured.init.headers["X-DawaNear-Admin-Token"], environment.DAWANEAR_ADMIN_TOKEN);
+  assert.equal(captured.url, "https://staging.med-250.com/api/internal/operator/geocode");
+  assert.equal(captured.init.headers.Authorization, `Bearer ${environment.MED250_ADMIN_TOKEN}`);
   assert.equal(JSON.parse(captured.init.body).action, "inspect");
   assert.deepEqual(result, { candidate: { pharmacy_id: pharmacyId } });
 });
 
-test("requires process-only credentials and an HTTPS Supabase project origin", async () => {
+test("requires process-only credentials and an HTTPS Worker operator origin", async () => {
   await assert.rejects(
-    runGeocodeAdmin(["inspect", "--pharmacy-id", pharmacyId], { environment: { NEXT_PUBLIC_SUPABASE_URL: environment.NEXT_PUBLIC_SUPABASE_URL } }),
-    /DAWANEAR_ADMIN_TOKEN/,
+    runGeocodeAdmin(["inspect", "--pharmacy-id", pharmacyId], { environment: { MED250_OPERATOR_ORIGIN: environment.MED250_OPERATOR_ORIGIN } }),
+    /MED250_ADMIN_TOKEN/,
   );
   assert.throws(
-    () => resolveGeocodeEndpoint({ SUPABASE_URL: "http://localhost:54321" }),
-    /HTTPS \*\.supabase\.co/,
+    () => resolveGeocodeEndpoint({ MED250_OPERATOR_ORIGIN: "http://localhost:8787" }),
+    /HTTPS origin/,
   );
 });

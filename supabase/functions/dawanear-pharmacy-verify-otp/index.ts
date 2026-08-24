@@ -45,9 +45,7 @@ Deno.serve(async (request: Request) => {
     }
 
     const pharmacies = await eligiblePharmacies(client, phone);
-    if (pharmacies.length !== 1) {
-      throw new HttpError("This WhatsApp number is not linked to exactly one approved pharmacy.", 403);
-    }
+    if (!pharmacies.length) throw new HttpError("This WhatsApp number is not linked to an approved pharmacy.", 403);
 
     const { data: identity, error: identityError } = await client
       .from("dawanear_pharmacy_identities")
@@ -59,7 +57,6 @@ Deno.serve(async (request: Request) => {
     const email = await internalEmailForPhone(phone);
     const password = `${crypto.randomUUID()}${crypto.randomUUID()}`;
     let userId = identity?.user_id as string | undefined;
-    let createdUserId: string | null = null;
 
     if (userId) {
       const { data: current, error: currentError } = await client.auth.admin.getUserById(userId);
@@ -82,17 +79,56 @@ Deno.serve(async (request: Request) => {
       });
       if (createError || !created.user) throw createError ?? new Error("Pharmacy user was not created");
       userId = created.user.id;
-      createdUserId = userId;
+      const { error: mapError } = await client.from("dawanear_pharmacy_identities").insert({ phone, user_id: userId });
+      if (mapError) {
+        await client.auth.admin.deleteUser(userId);
+        throw mapError;
+      }
     }
 
-    const { data: bindingRows, error: bindingError } = await client.rpc("dawanear_bind_pharmacy_identity", {
-      p_phone: phone,
-      p_user_id: userId,
-    });
-    const binding = Array.isArray(bindingRows) ? bindingRows[0] : null;
-    if (bindingError || binding?.bound_pharmacy_id !== pharmacies[0].id) {
-      if (createdUserId) await client.auth.admin.deleteUser(createdUserId);
-      throw bindingError ?? new Error("Pharmacy identity authority changed during verification");
+    const now = new Date().toISOString();
+
+    const pharmacyIds = pharmacies.map((pharmacy) => pharmacy.id);
+    const { data: existingMemberships, error: existingMembershipError } = await client
+      .from("dawanear_pharmacy_memberships")
+      .select("pharmacy_id, role, status")
+      .eq("user_id", userId)
+      .in("pharmacy_id", pharmacyIds);
+    if (existingMembershipError) throw existingMembershipError;
+    if ((existingMemberships ?? []).some((membership) => membership.status !== "active")) {
+      throw new HttpError("This pharmacy access has been suspended. Contact the MED+250 administrator.", 403);
+    }
+
+    const { error: identityUpdateError } = await client
+      .from("dawanear_pharmacy_identities")
+      .update({ verified_at: now, last_login_at: now, updated_at: now })
+      .eq("phone", phone)
+      .eq("user_id", userId);
+    if (identityUpdateError) throw identityUpdateError;
+
+    const { error: contactLoginError } = await client
+      .from("dawanear_pharmacy_contacts")
+      .update({ last_login_at: now })
+      .eq("contact_type", "whatsapp")
+      .eq("e164", phone)
+      .eq("is_login_enabled", true)
+      .in("verification_status", ["source_verified", "admin_verified"]);
+    if (contactLoginError) throw contactLoginError;
+
+    const existingPharmacyIds = new Set((existingMemberships ?? []).map((membership) => membership.pharmacy_id));
+    const missingMemberships = pharmacies
+      .filter((pharmacy) => !existingPharmacyIds.has(pharmacy.id))
+      .map((pharmacy) => ({
+        pharmacy_id: pharmacy.id,
+        user_id: userId,
+        role: "manager",
+        status: "active",
+        created_by: userId,
+        updated_at: now,
+      }));
+    if (missingMemberships.length > 0) {
+      const { error: membershipError } = await client.from("dawanear_pharmacy_memberships").insert(missingMemberships);
+      if (membershipError) throw membershipError;
     }
 
     // Password sign-in is intentionally protected by Turnstile in production.

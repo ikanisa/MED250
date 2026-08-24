@@ -1,4 +1,5 @@
 import { pathToFileURL } from "node:url";
+import { callWorkerOperator, resolveWorkerOperatorEndpoint } from "./worker-operator-client.mjs";
 
 const commands = new Set(["list", "inspect", "start-review", "compliance-review", "approve", "reject", "unpublish"]);
 const decisions = new Map([
@@ -78,28 +79,15 @@ export function buildMarketplaceProductPayload(argv) {
 }
 
 export function resolveMarketplaceProductEndpoint(environment = process.env) {
-  const rawUrl = String(environment.SUPABASE_URL || environment.NEXT_PUBLIC_SUPABASE_URL || "").trim();
-  if (!rawUrl) throw new Error("SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL is required.");
-  const base = new URL(rawUrl);
-  if (base.protocol !== "https:" || !base.hostname.endsWith(".supabase.co")) {
-    throw new Error("The Supabase URL must be an HTTPS *.supabase.co origin.");
-  }
-  return new URL("/functions/v1/review-marketplace-products", base);
+  return resolveWorkerOperatorEndpoint("/api/internal/operator/products", environment);
 }
 
 export async function runMarketplaceProductAdmin(argv, { environment = process.env, fetchImpl = fetch } = {}) {
-  const adminToken = String(environment.MED250_ADMIN_TOKEN || environment.DAWANEAR_ADMIN_TOKEN || "").trim();
-  if (!adminToken) throw new Error("MED250_ADMIN_TOKEN is required.");
-  const response = await fetchImpl(resolveMarketplaceProductEndpoint(environment), {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-MED250-Admin-Token": adminToken },
-    body: JSON.stringify(buildMarketplaceProductPayload(argv)),
+  return callWorkerOperator("/api/internal/operator/products", buildMarketplaceProductPayload(argv), {
+    environment,
+    fetchImpl,
+    responseLabel: "Marketplace reviewer",
   });
-  const text = await response.text();
-  let result;
-  try { result = text ? JSON.parse(text) : {}; } catch { result = { error: "Reviewer returned non-JSON output." }; }
-  if (!response.ok) throw new Error(`${result?.error ?? `Reviewer returned HTTP ${response.status}.`} (HTTP ${response.status})`);
-  return result;
 }
 
 function help() {
@@ -112,7 +100,7 @@ function help() {
     "  npm run ops:marketplace-products -- approve ... [--compliance-evidence-url <https-url>]",
     "  npm run ops:marketplace-products -- reject|unpublish ...",
     "",
-    "Required environment: SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL) and MED250_ADMIN_TOKEN.",
+    "Required environment: MED250_OPERATOR_ORIGIN and MED250_ADMIN_TOKEN.",
     "Products are central catalogue records; pharmacies are the only sellers and provide offers.",
   ].join("\n");
 }

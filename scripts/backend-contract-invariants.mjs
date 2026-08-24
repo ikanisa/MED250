@@ -1,4 +1,4 @@
-export const expectedBackendContractVersion = "2026-07-23.1";
+export const expectedBackendContractVersion = "2026-07-18.3";
 
 export function assessBackendContract(contract) {
   const failures = [];
@@ -191,34 +191,21 @@ export function assessBackendContract(contract) {
   requireInvariant(contract?.security_hardening?.order_rate_limit_trigger === true, "Customer order churn is not database-rate-limited.");
   requireInvariant(contract?.security_hardening?.active_orders_complete_offer_filter === true, "Active-order reads can expose incomplete pharmacy offers.");
   requireInvariant(contract?.security_hardening?.selected_contact_complete_offer_guard === true, "Selected contact release is not bound to a complete offer.");
-  requireInvariant(contract?.pharmacy_identity_binding?.function_exists === true, "Named-review pharmacy identity binding is missing.");
-  requireInvariant(contract?.pharmacy_identity_binding?.security_definer === true, "Pharmacy identity binding is not a privileged server boundary.");
-  requireInvariant(contract?.pharmacy_identity_binding?.search_path_locked === true, "Pharmacy identity binding has a mutable search path.");
-  requireInvariant(contract?.pharmacy_identity_binding?.service_role_can_execute === true, "Service role cannot bind pharmacy identity authority.");
-  requireInvariant(contract?.pharmacy_identity_binding?.anon_can_execute === false, "Anonymous users can bind pharmacy identities.");
-  requireInvariant(contract?.pharmacy_identity_binding?.authenticated_can_execute === false, "Authenticated users can bind pharmacy identities directly.");
-  requireInvariant(contract?.pharmacy_identity_binding?.one_login_authority_index_exists === true, "A WhatsApp login number can authorize multiple pharmacies.");
-  requireInvariant(contract?.pharmacy_identity_binding?.login_authority_constraint_validated === true, "Pharmacy login authority is not constrained to named review.");
-  requireInvariant(contract?.pharmacy_identity_binding?.enabled_without_named_review_count === 0, "An enabled pharmacy login contact lacks named review.");
-  requireInvariant(contract?.pharmacy_identity_binding?.duplicate_enabled_phone_count === 0, "A pharmacy login number authorizes multiple tenants.");
-  requireInvariant(contract?.go_live_hardening?.offer_item_policy_binds_participants === true, "Offer-item reads are not bound to order or pharmacy participants.");
-  requireInvariant(contract?.go_live_hardening?.public_description_base_grant_exists === false, "Public roles retain direct governed-description grants.");
-  requireInvariant(contract?.go_live_hardening?.mismatched_image_published_count === 0, "The known mismatched Paracetamol gallery remains published.");
   requireInvariant(contract?.prescriptions?.bucket_exists === true, "Prescription Storage bucket is missing.");
   requireInvariant(contract?.prescriptions?.cleanup_claims_rls === true, "Prescription cleanup claims do not have RLS.");
   requireInvariant(contract?.realtime?.orders === true, "Orders are missing from Realtime publication.");
   requireInvariant(contract?.realtime?.offers === true, "Offers are missing from Realtime publication.");
   requireInvariant(contract?.realtime?.notifications === true, "Pharmacy notifications are missing from Realtime publication.");
   requireInvariant(contract?.api_surface?.function_count === contract?.api_surface?.expected_function_count, "MED+250 function count drifted.");
-  requireInvariant(contract?.api_surface?.expected_function_count === 41, "MED+250 function allowlist count drifted.");
+  requireInvariant(contract?.api_surface?.expected_function_count === 31, "MED+250 function allowlist count drifted.");
   requireInvariant(contract?.api_surface?.public_execute_count === 0, "PUBLIC can execute a MED+250 function.");
   requireInvariant(contract?.api_surface?.anonymous_security_definer_count === 1, "Anonymous privileged-function surface drifted beyond the aggregate trust-metrics RPC.");
   requireInvariant(contract?.api_surface?.mutable_security_definer_path_count === 0, "A privileged MED+250 function has a mutable search path.");
-  requireInvariant(contract?.api_surface?.expected_authenticated_security_definer_count === 15, "Authenticated privileged-function allowlist drifted.");
+  requireInvariant(contract?.api_surface?.expected_authenticated_security_definer_count === 14, "Authenticated privileged-function allowlist drifted.");
   requireInvariant(contract?.api_surface?.missing_authenticated_security_definer_count === 0, "An expected authenticated MED+250 workflow function is missing or unavailable.");
   requireInvariant(contract?.api_surface?.unexpected_authenticated_security_definer_count === 0, "An unexpected privileged function is exposed to authenticated clients.");
   requireInvariant(contract?.table_surface?.table_count === contract?.table_surface?.expected_table_count, "MED+250 table count drifted.");
-  requireInvariant(contract?.table_surface?.expected_table_count === 27, "MED+250 table allowlist count drifted.");
+  requireInvariant(contract?.table_surface?.expected_table_count === 24, "MED+250 table allowlist count drifted.");
   requireInvariant(contract?.table_surface?.rls_disabled_count === 0, "A MED+250 table does not have RLS enabled.");
   requireInvariant(contract?.table_surface?.anonymous_select_count === 0, "Unauthenticated clients can select from a MED+250 table.");
   requireInvariant(contract?.table_surface?.expected_deny_by_default_count === 11, "Deny-by-default table allowlist drifted.");

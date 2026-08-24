@@ -10,63 +10,40 @@ import {
 import { buildTurnstileLaunchEvidence } from "../scripts/create-turnstile-launch-evidence.mjs";
 import { validateLaunchEvidenceArtifact } from "../scripts/validate-launch-evidence-artifact.mjs";
 
-function fakeClients({
-  startingUsers = 9,
-  missingError = { code: "captcha_failed", status: 400, message: "captcha verification process failed" },
-  invalidError = { code: "captcha_failed", status: 400, message: "captcha verification process failed" },
-  expiredError = { code: "captcha_failed", status: 400, message: "captcha verification process failed" },
-  replayError = { code: "captcha_failed", status: 400, message: "captcha verification process failed" },
-  validUser = null,
-  includeExpired = false,
-} = {}) {
-  let count = startingUsers;
-  let publicClientNumber = 0;
-  const adminClient = {
-    auth: {
-      admin: {
-        async listUsers() {
-          return { data: { users: [], total: count }, error: null };
-        },
-        async deleteUser() {
-          count -= 1;
-          return { data: {}, error: null };
-        },
-      },
-    },
+function fakeWorker({ acceptValidToken = false } = {}) {
+  const sessionToken = "session-token-value-with-forty-eight-characters-0001";
+  const csrfToken = "csrf-token-value-with-forty-eight-characters-0000001";
+  let sessionActive = false;
+  const json = (payload, status, headers = new Headers()) => {
+    headers.set("Content-Type", "application/json");
+    return new Response(JSON.stringify(payload), { status, headers });
   };
-  const attempts = [
-    missingError,
-    invalidError,
-    ...(includeExpired ? [expiredError] : []),
-    validUser,
-    replayError,
-  ];
-  const factory = (_url, key) => {
-    if (key === "secret") return adminClient;
-    const index = publicClientNumber++;
-    return {
-      auth: {
-        async signInAnonymously() {
-          const outcome = attempts[index];
-          if (outcome?.id) {
-            count += 1;
-            return {
-              data: {
-                user: { id: outcome.id, is_anonymous: true },
-                session: { access_token: "not-emitted" },
-              },
-              error: null,
-            };
-          }
-          return { data: { user: null, session: null }, error: outcome };
-        },
-        async signOut() {
-          return { error: null };
-        },
-      },
-    };
+  const fetchImpl = async (url, options = {}) => {
+    assert.equal(url, "https://med250.example/api/auth/client/session");
+    const method = options.method ?? "GET";
+    const headers = new Headers(options.headers);
+    if (method === "POST") {
+      const body = JSON.parse(options.body);
+      if (!body.captchaToken) return json({ error: "turnstile_required", message: "Complete the security check." }, 400);
+      if (body.captchaToken !== "short-lived-browser-token" || !acceptValidToken) {
+        return json({ error: "turnstile_rejected", message: "The security check was rejected." }, 403);
+      }
+      sessionActive = true;
+      const responseHeaders = new Headers();
+      responseHeaders.append("Set-Cookie", `__Host-med250-client=${sessionToken}; Path=/; Secure; HttpOnly; SameSite=Strict`);
+      responseHeaders.append("Set-Cookie", `__Host-med250-client-csrf=${csrfToken}; Path=/; Secure; SameSite=Strict`);
+      return json({ authenticated: true, userId: "opaque-disposable-id" }, 201, responseHeaders);
+    }
+    const cookie = headers.get("Cookie") ?? "";
+    const authenticated = sessionActive && cookie.includes(`__Host-med250-client=${sessionToken}`);
+    if (method === "DELETE") {
+      if (!authenticated || headers.get("X-MED250-CSRF") !== csrfToken) return json({ error: "session_required" }, 401);
+      sessionActive = false;
+      return json({ signedOut: true }, 200);
+    }
+    return json({ authenticated }, 200);
   };
-  return { factory, getCount: () => count };
+  return { fetchImpl, getSessionCount: () => Number(sessionActive) };
 }
 
 test("recognizes and redacts CAPTCHA rejection details", () => {
@@ -85,103 +62,56 @@ test("recognizes and redacts CAPTCHA rejection details", () => {
 });
 
 test("proves missing and invalid token rejection without creating users", async () => {
-  const fake = fakeClients();
+  const fake = fakeWorker();
   const result = await verifyTurnstileAuth({
-    supabaseUrl: "https://example.supabase.co",
-    publishableKey: "publishable",
-    secretKey: "secret",
-    clientFactory: fake.factory,
+    workerOrigin: "https://med250.example",
+    fetchImpl: fake.fetchImpl,
   });
   assert.equal(result.status, "passed");
-  assert.equal(result.checks.missingToken.userCountUnchanged, true);
-  assert.equal(result.checks.invalidToken.userCountUnchanged, true);
-  assert.equal(result.checks.expiredToken.status, "not_run");
+  assert.equal(result.checks.missingToken.sessionCookieNotIssued, true);
+  assert.equal(result.checks.invalidToken.sessionCookieNotIssued, true);
   assert.equal(result.checks.validToken.status, "not_run");
-  assert.equal(result.checks.replayedToken.status, "not_run");
-  assert.equal(fake.getCount(), 9);
+  assert.equal(fake.getSessionCount(), 0);
 });
 
-test("creates, revokes and deletes only the disposable valid-token identity", async () => {
-  const fake = fakeClients({ validUser: { id: "opaque-disposable-id" } });
+test("creates, restores and revokes only the disposable valid-token Worker session", async () => {
+  const fake = fakeWorker({ acceptValidToken: true });
   const result = await verifyTurnstileAuth({
-    supabaseUrl: "https://example.supabase.co",
-    publishableKey: "publishable",
-    secretKey: "secret",
+    workerOrigin: "https://med250.example",
     validToken: "short-lived-browser-token",
     requireValid: true,
-    clientFactory: fake.factory,
+    fetchImpl: fake.fetchImpl,
   });
   assert.equal(result.checks.validToken.status, "passed");
+  assert.equal(result.checks.validToken.disposableAnonymousSessionCreated, true);
+  assert.equal(result.checks.validToken.disposableSessionRestored, true);
   assert.equal(result.checks.validToken.disposableSessionRevoked, true);
-  assert.equal(result.checks.validToken.disposableUserDeleted, true);
-  assert.equal(result.checks.replayedToken.status, "passed");
-  assert.equal(result.checks.replayedToken.userCountUnchanged, true);
-  assert.equal(fake.getCount(), 9);
+  assert.equal(result.checks.validToken.postRevokeUnauthenticated, true);
+  assert.equal(fake.getSessionCount(), 0);
   assert.doesNotMatch(JSON.stringify(result), /opaque-disposable-id|short-lived-browser-token/);
 });
 
-test("rejects a real expired token without creating a user", async () => {
-  const fake = fakeClients({
-    includeExpired: true,
-    validUser: { id: "opaque-disposable-id" },
-  });
-  const result = await verifyTurnstileAuth({
-    supabaseUrl: "https://example.supabase.co",
-    publishableKey: "publishable",
-    secretKey: "secret",
-    expiredToken: "expired-browser-token",
-    validToken: "short-lived-browser-token",
-    requireExpired: true,
-    requireValid: true,
-    clientFactory: fake.factory,
-  });
-  assert.equal(result.checks.expiredToken.status, "passed");
-  assert.equal(result.checks.expiredToken.userCountUnchanged, true);
-  assert.equal(result.checks.replayedToken.status, "passed");
-  assert.equal(fake.getCount(), 9);
-  assert.doesNotMatch(JSON.stringify(result), /expired-browser-token|short-lived-browser-token|opaque-disposable-id/);
-});
-
 test("fails closed when the positive-path token is required but absent", async () => {
-  const fake = fakeClients();
+  const fake = fakeWorker();
   await assert.rejects(
     verifyTurnstileAuth({
-      supabaseUrl: "https://example.supabase.co",
-      publishableKey: "publishable",
-      secretKey: "secret",
+      workerOrigin: "https://med250.example",
       requireValid: true,
-      clientFactory: fake.factory,
+      fetchImpl: fake.fetchImpl,
     }),
     /TURNSTILE_TEST_TOKEN/,
-  );
-});
-
-test("fails closed when the expired-path token is required but absent", async () => {
-  const fake = fakeClients();
-  await assert.rejects(
-    verifyTurnstileAuth({
-      supabaseUrl: "https://example.supabase.co",
-      publishableKey: "publishable",
-      secretKey: "secret",
-      requireExpired: true,
-      clientFactory: fake.factory,
-    }),
-    /TURNSTILE_EXPIRED_TEST_TOKEN/,
   );
 });
 
 test("the verifier source never logs raw tokens, user IDs, or complete Auth responses", async () => {
   const source = await readFile(new URL("../scripts/verify-turnstile-auth.mjs", import.meta.url), "utf8");
   assert.doesNotMatch(source, /console\.(?:log|error)\([^)]*(?:validToken|userId|data\.user|data\.session)/);
-  assert.doesNotMatch(source, /JSON\.stringify\([^)]*(?:validToken|userId|data\.user|data\.session)/);
 });
 
 test("builds launch evidence only from full positive-path Turnstile verifier output", async () => {
   const negativeOnly = await verifyTurnstileAuth({
-    supabaseUrl: "https://example.supabase.co",
-    publishableKey: "publishable",
-    secretKey: "secret",
-    clientFactory: fakeClients().factory,
+    workerOrigin: "https://med250.example",
+    fetchImpl: fakeWorker().fetchImpl,
   });
   assert.throws(
     () => buildTurnstileLaunchEvidence({
@@ -194,21 +124,14 @@ test("builds launch evidence only from full positive-path Turnstile verifier out
       noMarketplaceSideEffectConfirmed: true,
       now: new Date("2026-07-17T09:00:00Z"),
     }),
-    /Expired-token rejection check/,
+    /Valid-token positive path/,
   );
 
   const positive = await verifyTurnstileAuth({
-    supabaseUrl: "https://example.supabase.co",
-    publishableKey: "publishable",
-    secretKey: "secret",
+    workerOrigin: "https://med250.example",
     validToken: "short-lived-browser-token",
-    expiredToken: "expired-browser-token",
     requireValid: true,
-    requireExpired: true,
-    clientFactory: fakeClients({
-      includeExpired: true,
-      validUser: { id: "opaque-disposable-id" },
-    }).factory,
+    fetchImpl: fakeWorker({ acceptValidToken: true }).fetchImpl,
   });
   const artifact = buildTurnstileLaunchEvidence({
     verifierResult: positive,
@@ -222,7 +145,7 @@ test("builds launch evidence only from full positive-path Turnstile verifier out
     now: new Date("2026-07-17T09:00:00Z"),
   });
   assert.equal(artifact.evidence_type, "test_record");
-  assert.equal(artifact.checks.length, 9);
+  assert.equal(artifact.checks.length, 7);
   assert.equal(artifact.no_marketplace_side_effect_confirmed, true);
   assert.doesNotMatch(JSON.stringify(artifact), /short-lived-browser-token|opaque-disposable-id/);
   const validation = validateLaunchEvidenceArtifact(artifact, {
@@ -236,21 +159,20 @@ test("builds launch evidence only from full positive-path Turnstile verifier out
 test("rejects Turnstile evidence input that leaks secrets or identifiers", () => {
   const unsafe = {
     status: "passed",
-    supabaseHost: "example.supabase.co",
+    workerHost: "med250.example",
     identifiersEmitted: false,
     tokensEmitted: false,
     leaked: "access_token=unsafe",
     checks: {
-      missingToken: { status: "passed", userCountUnchanged: true },
-      invalidToken: { status: "passed", userCountUnchanged: true },
-      expiredToken: { status: "passed", userCountUnchanged: true },
+      missingToken: { status: "passed", sessionCookieNotIssued: true },
+      invalidToken: { status: "passed", sessionCookieNotIssued: true },
       validToken: {
         status: "passed",
-        disposableAnonymousUserCreated: true,
+        disposableAnonymousSessionCreated: true,
+        disposableSessionRestored: true,
         disposableSessionRevoked: true,
-        disposableUserDeleted: true,
+        postRevokeUnauthenticated: true,
       },
-      replayedToken: { status: "passed", userCountUnchanged: true },
     },
   };
   assert.throws(

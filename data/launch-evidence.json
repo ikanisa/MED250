@@ -6,10 +6,7 @@
     "MED250_GATE_GPS_READY": {
       "title": "Authoritative pharmacy GPS readiness",
       "owner": "MED+250 operations",
-      "required_evidence_types": [
-        "operations_snapshot",
-        "review_ledger"
-      ],
+      "required_evidence_types": ["operations_snapshot", "review_ledger"],
       "status": "pending",
       "acceptance": "The approved operating pharmacy set has authoritative premises coordinates with reviewer identity and durable source evidence, and strict operational health reports dispatch-ready coverage.",
       "evidence": [
@@ -28,10 +25,7 @@
     "MED250_GATE_WHATSAPP_READY": {
       "title": "Pharmacy WhatsApp readiness",
       "owner": "MED+250 operations",
-      "required_evidence_types": [
-        "operations_snapshot",
-        "review_ledger"
-      ],
+      "required_evidence_types": ["operations_snapshot", "review_ledger"],
       "status": "pending",
       "acceptance": "The approved operating pharmacy set has current, pharmacy-authorised login-enabled WhatsApp contacts and the strict operational-health check passes.",
       "evidence": [
@@ -50,9 +44,7 @@
     "MED250_GATE_DUPLICATE_REGISTER_REVIEWED": {
       "title": "Duplicate-register review",
       "owner": "MED+250 register data reviewer",
-      "required_evidence_types": [
-        "review_ledger"
-      ],
+      "required_evidence_types": ["review_ledger"],
       "status": "pending",
       "acceptance": "The strict duplicate-register verifier passes with named, timestamped decisions for every synchronized product and pharmacy duplicate group.",
       "evidence": [],
@@ -63,26 +55,23 @@
     "MED250_GATE_SECURITY_HARDENING_DEPLOYED": {
       "title": "Security-hardening migration deployment",
       "owner": "MED+250 backend owner",
-      "required_evidence_types": [
-        "deployment_receipt",
-        "test_record"
-      ],
+      "required_evidence_types": ["deployment_receipt", "test_record"],
       "status": "pending",
-      "acceptance": "The 2026-07-23.1 marketplace hardening migration is deployed first to controlled staging and then to production using approved credentials. Negative authorization, locking, public-description privilege, media-hold, rollback, aggregate backend-contract, and operational-health checks pass for the exact immutable application release.",
+      "acceptance": "The forward security migrations and contract refresh are deployed using rotated credentials, and the privileged backend verifier returns contract 2026-07-18.3 with the runtime and DDL product-image governance guards, aggregate public trust-metric boundary, fail-closed product-description workflow, and all invariants passing.",
       "evidence": [
         {
           "type": "deployment_receipt",
-          "reference": "docs/launch/evidence/security-hardening-deployment-2026-07-29.json",
-          "sha256": "6e1655e535bdd3add8642e40a4d557214bca8742026f55acd642cb17c625a964",
-          "recorded_at": "2026-07-29T14:32:30Z",
-          "summary": "The reviewed MED+250 hardening, contract-performance, and allowlist-reconciliation migrations were applied directly to the linked production database under the product owner's no-staging instruction. The provider migration history and aggregate contract were verified after deployment without retaining row data or credentials."
+          "reference": "docs/launch/evidence/security-hardening-deployment-2026-07-18.json",
+          "sha256": "dcfdeac982b75a11240db1bfd4a2150ff9c15833055eb1f9485cf0938896b3a3",
+          "recorded_at": "2026-07-18T17:24:14Z",
+          "summary": "Current production receipt for backend contract 2026-07-18.3 reconciliation, description governance, trust controls, catalogue corrections, and notification-outbox index deployment."
         },
         {
           "type": "test_record",
-          "reference": "docs/launch/evidence/security-hardening-test-2026-07-29.json",
-          "sha256": "e69ffb27de89f71a318fbef0b48a97140d6e13a90e9e3a22d19580560ab58def",
-          "recorded_at": "2026-07-29T14:36:30Z",
-          "summary": "Read-only production reconciliation, negative authorization probes, the complete regression suite, dependency audits, lint, and Supabase advisors verify the deployed MED+250 backend boundary. Operational health remains deliberately critical because no pharmacy login authority is enabled before named review."
+          "reference": "docs/launch/evidence/security-hardening-test-2026-07-18.json",
+          "sha256": "9d01de4bc5949cb5024ae159192c0c1abb429132c902a688d4dbba8b597d784b",
+          "recorded_at": "2026-07-18T17:28:30Z",
+          "summary": "Current production governance queries, post-deploy advisors, lint, targeted database tests, and the complete 302-test application suite passed."
         }
       ],
       "approved_by": null,
@@ -92,26 +81,23 @@
     "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED": {
       "title": "Revised Edge Function deployment",
       "owner": "MED+250 backend owner",
-      "required_evidence_types": [
-        "deployment_receipt",
-        "test_record"
-      ],
+      "required_evidence_types": ["deployment_receipt", "test_record"],
       "status": "pending",
-      "acceptance": "The revised dawanear-pharmacy-verify-otp function bound to the 2026-07-23.1 reviewed phone-to-tenant RPC is deployed first to controlled staging and then to production. Created-user cleanup, duplicate-phone rejection, revoked and suspended authority, cross-tenant isolation, concurrency locking, origin validation, and the protected boundaries of all other production Edge Functions pass for the exact immutable release.",
+      "acceptance": "The reviewed OTP, cleanup, geocoding, marketplace-review, contact-review and product-description-review Edge Function versions are deployed and their protected-access boundaries pass.",
       "evidence": [
         {
           "type": "deployment_receipt",
-          "reference": "docs/launch/evidence/edge-functions-deployment-2026-07-29.json",
-          "sha256": "a739beaa3792d9f0ee961354ccf1b5c125d7f0bf4c4f14d0f02039d4c51f7921",
-          "recorded_at": "2026-07-29T14:33:00Z",
-          "summary": "The reviewed pharmacy OTP verifier was deployed directly to the linked production Supabase project under the product owner's no-staging instruction. The provider inventory reports version 13 ACTIVE with the reviewed custom origin and OTP authentication boundary."
+          "reference": "docs/launch/evidence/edge-functions-deployment-2026-07-18.json",
+          "sha256": "2fec968b290b47c6d1f1390f327f9a57ce6b3f49db4eb93712b6d67dd8a8c74c",
+          "recorded_at": "2026-07-18T17:19:45Z",
+          "summary": "Current production receipt for the newly deployed product-description reviewer, exact deployed source retrieval, custom authentication boundary, and contract headers."
         },
         {
           "type": "test_record",
-          "reference": "docs/launch/evidence/edge-functions-test-2026-07-29.json",
-          "sha256": "7b0fe0a7d4c7f1343533afbc3b5eed0f542ab65a86a018f6bf28cea4d0c32b08",
-          "recorded_at": "2026-07-29T14:34:00Z",
-          "summary": "Privacy-safe production probes verify the revised OTP endpoint fails closed for hostile origins, unsupported methods, and malformed phone input. No real phone, OTP, user, pharmacy, order, or protected response data was used or retained."
+          "reference": "docs/launch/evidence/edge-functions-test-2026-07-18.json",
+          "sha256": "ebfd598a100390952c29fb09c99a11c1e7035b4b7b5591aad1731548da1dc7c8",
+          "recorded_at": "2026-07-18T17:19:45Z",
+          "summary": "Current product-description reviewer denial probe, response hardening, one-product workflow review, and complete reviewer regression tests passed."
         }
       ],
       "approved_by": null,
@@ -121,31 +107,18 @@
     "MED250_GATE_TURNSTILE_SERVER_VERIFIED": {
       "title": "Turnstile server verification",
       "owner": "MED+250 security owner",
-      "required_evidence_types": [
-        "test_record"
-      ],
-      "status": "confirmed",
+      "required_evidence_types": ["test_record"],
+      "status": "pending",
       "acceptance": "Supabase Auth validates production Turnstile tokens and controlled tests prove invalid or missing tokens cannot create new customer identities.",
-      "evidence": [
-        {
-          "type": "test_record",
-          "reference": "docs/launch/evidence/turnstile-positive-path-test-2026-07-30.json",
-          "sha256": "e5b5ba9ad2c79abedcf72a6fa20ddea2333852f8761ba85be2b91a4981c6ce62",
-          "recorded_at": "2026-07-30T13:26:00Z",
-          "summary": "The controlled production Turnstile verifier rejected missing, invalid, expired and replayed responses, accepted one real widget response, created exactly one disposable anonymous identity, revoked and deleted it, and retained no tokens or identifiers."
-        }
-      ],
-      "approved_by": "Codex production verifier",
-      "approved_role": "Automated security verification",
-      "approved_at": "2026-07-30T13:26:00Z"
+      "evidence": [],
+      "approved_by": null,
+      "approved_role": null,
+      "approved_at": null
     },
     "MED250_GATE_AUTH_RATE_LIMITS_APPROVED": {
       "title": "Anonymous-auth rate-limit approval",
       "owner": "MED+250 security owner",
-      "required_evidence_types": [
-        "signed_approval",
-        "test_record"
-      ],
+      "required_evidence_types": ["signed_approval", "test_record"],
       "status": "pending",
       "acceptance": "Project-wide anonymous-auth limits are approved after impact review and controlled tests prove intended customers can order without weakening abuse controls.",
       "evidence": [],
@@ -156,10 +129,7 @@
     "MED250_GATE_PRESCRIPTION_RETENTION_APPROVED": {
       "title": "Prescription-retention approval",
       "owner": "MED+250 privacy owner",
-      "required_evidence_types": [
-        "signed_approval",
-        "test_record"
-      ],
+      "required_evidence_types": ["signed_approval", "test_record"],
       "status": "pending",
       "acceptance": "The privacy owner approves the implemented retention periods and cleanup schedule, and a controlled cleanup run produces a healthy, non-stale aggregate signal.",
       "evidence": [
@@ -178,10 +148,7 @@
     "MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED": {
       "title": "Cloudflare account verification",
       "owner": "MED+250 infrastructure owner",
-      "required_evidence_types": [
-        "account_verification",
-        "signed_approval"
-      ],
+      "required_evidence_types": ["account_verification", "signed_approval"],
       "status": "pending",
       "acceptance": "The intended Cloudflare account, least-privilege deploy token, Worker names, protected environments and route ownership are verified with a redacted account record.",
       "evidence": [],
@@ -192,26 +159,23 @@
     "MED250_GATE_DOMAIN_DNS_VERIFIED": {
       "title": "Production domain and DNS verification",
       "owner": "MED+250 infrastructure owner",
-      "required_evidence_types": [
-        "domain_verification",
-        "test_record"
-      ],
+      "required_evidence_types": ["domain_verification", "test_record"],
       "status": "pending",
-      "acceptance": "med-250.com resolves through the intended Cloudflare account, TLS is healthy, the Worker custom-domain route is attached and the deployment verifier passes in live mode against the exact approved release revision.",
+      "acceptance": "med250.gikundiro.com resolves through the intended Cloudflare account, TLS is healthy, the Worker custom-domain route is attached and the deployment verifier passes in live mode.",
       "evidence": [
         {
           "type": "domain_verification",
-          "reference": "docs/launch/evidence/domain-verification-2026-07-29.json",
-          "sha256": "a68aa3e849bb7ce9006066fb405a764cd1ac9a3a246513af9325f7f86241b78a",
-          "recorded_at": "2026-07-29T14:43:23.371Z",
-          "summary": "The canonical production domain resolves over HTTPS and the exact-revision deployment verifier passed 10 live routes against the current release revision."
+          "reference": "docs/launch/evidence/domain-verification-2026-07-20.json",
+          "sha256": "80f304f77cfbee602f134bec07f82bbfd517ea7129c0117050926d49774154e9",
+          "recorded_at": "2026-07-20T16:26:57.716Z",
+          "summary": "Current canonical-domain DNS, HTTPS, ten-route, security-header, robots, sitemap, manifest, service-worker, offline page, and exact-revision checks passed."
         },
         {
           "type": "test_record",
-          "reference": "docs/launch/evidence/domain-deployment-test-2026-07-29.json",
-          "sha256": "29065f8dca61084860795afd4f1133c2d12a4f05b07f7577bf58cbfa36cfaecb",
-          "recorded_at": "2026-07-29T14:43:23.371Z",
-          "summary": "The canonical live domain passed 10 live routes against the current production release revision with no verifier errors."
+          "reference": "docs/launch/evidence/domain-deployment-test-2026-07-20.json",
+          "sha256": "d3cb225ef5859451bb631880aa42c1ce6dbed4ddfd0359ea36699830057ea813",
+          "recorded_at": "2026-07-20T16:26:57.716Z",
+          "summary": "Current exact-revision production route verification passed all ten canonical live routes with no verifier errors."
         }
       ],
       "approved_by": null,
@@ -221,10 +185,7 @@
     "MED250_GATE_PHYSICAL_UAT_PASSED": {
       "title": "Controlled physical-device UAT",
       "owner": "MED+250 QA owner",
-      "required_evidence_types": [
-        "signed_approval",
-        "test_record"
-      ],
+      "required_evidence_types": ["signed_approval", "test_record"],
       "status": "pending",
       "acceptance": "Named test identities pass GPS consent, WhatsApp OTP, dispatch, realtime confirmation, selection, WhatsApp, MoMo, expiry, cancellation and prescription-access scenarios without contacting unintended pharmacies.",
       "evidence": [],

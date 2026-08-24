@@ -7,7 +7,10 @@ import { marketplaceMessage } from "../lib/marketplace-messages";
 const VISIT_COUNT_KEY = "med250-pwa-visit-count-v1";
 const VISIT_SESSION_KEY = "med250-pwa-visit-session-v1";
 const DISMISSED_UNTIL_KEY = "med250-pwa-dismissed-until-v1";
+const UPDATE_DISMISSED_UNTIL_KEY = "med250-pwa-update-dismissed-until-v1";
 const DISMISSAL_PERIOD_MS = 30 * 24 * 60 * 60 * 1000;
+const UPDATE_DISMISSAL_PERIOD_MS = 6 * 60 * 60 * 1000;
+const UPDATE_CHECK_INTERVAL_MS = 60 * 60 * 1000;
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -33,13 +36,36 @@ function isPrivateWorkflow() {
   return parameters.get("pharmacy-portal") === "open" || Boolean(parameters.get("request"));
 }
 
+function isSensitiveWorkflowActive() {
+  return isPrivateWorkflow() || document.documentElement.hasAttribute("data-sensitive-workflow");
+}
+
 export default function PwaManager() {
   const [repeatVisitor, setRepeatVisitor] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showIosGuidance, setShowIosGuidance] = useState(false);
   const [updateRegistration, setUpdateRegistration] = useState<ServiceWorkerRegistration | null>(null);
+  const [workflowActive, setWorkflowActive] = useState(false);
   const [installing, setInstalling] = useState(false);
   const reloadingForUpdate = useRef(false);
+  const lastUpdateCheckAt = useRef(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    const syncWorkflowState = () => {
+      const active = isSensitiveWorkflowActive();
+      queueMicrotask(() => { if (!cancelled) setWorkflowActive(active); });
+    };
+    syncWorkflowState();
+    const observer = new MutationObserver(syncWorkflowState);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-sensitive-workflow"] });
+    window.addEventListener("popstate", syncWorkflowState);
+    return () => {
+      cancelled = true;
+      observer.disconnect();
+      window.removeEventListener("popstate", syncWorkflowState);
+    };
+  }, []);
 
   useEffect(() => {
     if (isStandalone() || isPrivateWorkflow()) return;
@@ -89,27 +115,38 @@ export default function PwaManager() {
     if (process.env.NODE_ENV !== "production" || !("serviceWorker" in navigator) || !window.isSecureContext) return undefined;
     let cancelled = false;
     let registrationCleanup: (() => void) | undefined;
-    const hadController = Boolean(navigator.serviceWorker.controller);
+    let visibilityCleanup: (() => void) | undefined;
     const onControllerChange = () => {
-      if (!hadController && !reloadingForUpdate.current) return;
-      reloadingForUpdate.current = true;
+      if (!reloadingForUpdate.current) return;
       window.location.reload();
     };
     navigator.serviceWorker.addEventListener("controllerchange", onControllerChange);
     const register = () => {
       void navigator.serviceWorker.register("/sw.js", { scope: "/" }).then((registration) => {
         if (cancelled) return;
-        if (registration.waiting && navigator.serviceWorker.controller) setUpdateRegistration(registration);
+        const showUpdate = () => {
+          if (cancelled) return;
+          let dismissedUntil = 0;
+          try { dismissedUntil = Number(window.localStorage.getItem(UPDATE_DISMISSED_UNTIL_KEY) ?? "0"); } catch { /* restricted storage */ }
+          if (dismissedUntil <= Date.now()) setUpdateRegistration(registration);
+        };
+        if (registration.waiting && navigator.serviceWorker.controller) showUpdate();
         const onUpdateFound = () => {
           const worker = registration.installing;
           if (!worker) return;
           worker.addEventListener("statechange", () => {
-            if (worker.state === "installed" && navigator.serviceWorker.controller) setUpdateRegistration(registration);
+            if (worker.state === "installed" && navigator.serviceWorker.controller) showUpdate();
           });
         };
         registration.addEventListener("updatefound", onUpdateFound);
         registrationCleanup = () => registration.removeEventListener("updatefound", onUpdateFound);
-        void registration.update();
+        const checkForUpdate = () => {
+          if (document.visibilityState !== "visible" || Date.now() - lastUpdateCheckAt.current < UPDATE_CHECK_INTERVAL_MS) return;
+          lastUpdateCheckAt.current = Date.now();
+          void registration.update().catch(() => undefined);
+        };
+        document.addEventListener("visibilitychange", checkForUpdate);
+        visibilityCleanup = () => document.removeEventListener("visibilitychange", checkForUpdate);
       }).catch(() => {
         // The marketplace remains fully usable when service-worker registration is unavailable.
       });
@@ -118,18 +155,14 @@ export default function PwaManager() {
       requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
       cancelIdleCallback?: (handle: number) => void;
     };
-    let idleHandle: number | undefined;
-    const registrationDelay = window.setTimeout(() => {
-      idleHandle = idleWindow.requestIdleCallback
-        ? idleWindow.requestIdleCallback(register, { timeout: 1_000 })
-        : window.setTimeout(register, 1_000);
-    }, 1_000);
+    const idleHandle = idleWindow.requestIdleCallback
+      ? idleWindow.requestIdleCallback(register, { timeout: 2_000 })
+      : window.setTimeout(register, 1_000);
     return () => {
       cancelled = true;
       registrationCleanup?.();
+      visibilityCleanup?.();
       navigator.serviceWorker.removeEventListener("controllerchange", onControllerChange);
-      window.clearTimeout(registrationDelay);
-      if (idleHandle == null) return;
       if (idleWindow.cancelIdleCallback && idleWindow.requestIdleCallback) idleWindow.cancelIdleCallback(idleHandle);
       else window.clearTimeout(idleHandle);
     };
@@ -156,20 +189,30 @@ export default function PwaManager() {
   }
 
   function applyUpdate() {
+    if (workflowActive) return;
     const waitingWorker = updateRegistration?.waiting;
     if (!waitingWorker) return;
     reloadingForUpdate.current = true;
     waitingWorker.postMessage({ type: "SKIP_WAITING" });
   }
 
-  if (updateRegistration) return <aside className="pwa-prompt pwa-update" role="status" aria-live="polite">
+  function dismissUpdatePrompt() {
+    try {
+      window.localStorage.setItem(UPDATE_DISMISSED_UNTIL_KEY, String(Date.now() + UPDATE_DISMISSAL_PERIOD_MS));
+    } catch {
+      // Dismiss for the current render when persistent storage is unavailable.
+    }
+    setUpdateRegistration(null);
+  }
+
+  if (updateRegistration && !workflowActive) return <aside className="pwa-prompt pwa-update" role="status" aria-live="polite">
     <span className="pwa-prompt-icon" aria-hidden="true"><RefreshCw size={20} /></span>
-    <div><b>{marketplaceMessage("inventory.f35614ad51ad")}</b><p>{marketplaceMessage("inventory.89d439bc7e4f")}</p></div>
+    <div><b>{marketplaceMessage("inventory.f35614ad51ad")}</b><p>{marketplaceMessage("pwa.update_body")}</p></div>
     <button className="pwa-primary" type="button" onClick={applyUpdate}>{marketplaceMessage("inventory.c1c1009d3f37")}</button>
-    <button className="pwa-close" type="button" onClick={() => setUpdateRegistration(null)} aria-label={marketplaceMessage("inventory.6a124bc383db")}><X size={18} /></button>
+    <button className="pwa-close" type="button" onClick={dismissUpdatePrompt} aria-label={marketplaceMessage("inventory.6a124bc383db")}><X size={18} /></button>
   </aside>;
 
-  if (!repeatVisitor || (!installPrompt && !showIosGuidance)) return null;
+  if (workflowActive || !repeatVisitor || (!installPrompt && !showIosGuidance)) return null;
 
   return <aside className="pwa-prompt" aria-labelledby="pwa-install-title">
     <span className="pwa-prompt-icon" aria-hidden="true">{showIosGuidance ? <Share size={20} /> : <Download size={20} />}</span>

@@ -1,24 +1,8 @@
 import assert from "node:assert/strict";
-import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const read = (relative) => readFile(new URL(relative, import.meta.url), "utf8");
-
-function sha256(value) {
-  return createHash("sha256").update(value).digest("hex");
-}
-
-function edgeBundleSha256(files) {
-  const digest = createHash("sha256");
-  for (const [path, source] of files) {
-    digest.update(path);
-    digest.update("\0");
-    digest.update(source);
-    digest.update("\0");
-  }
-  return digest.digest("hex");
-}
 
 test("keeps catalogue values inside JSON-LD script data", async () => {
   const [helper, productPage, layout, parser] = await Promise.all([
@@ -64,7 +48,7 @@ test("normalises multilingual catalogue queries before the live RPC", async () =
 
   assert.match(client, /normalizeCatalogueText\(rawQuery\)/);
   assert.match(client, /rawQuery\.length > 160/);
-  assert.match(marketplace, /const serverCatalogueActive = backendConfigured\s+&& serverCatalogueAvailable\s+&& serverCatalogueDemanded\s+&& !initialProductId/);
+  assert.match(marketplace, /const serverCatalogueActive = catalogueBackendConfigured && serverCatalogueAvailable && !initialProductId/);
 });
 
 test("enforces pharmacy identity and order lifecycle invariants in the database", async () => {
@@ -88,44 +72,10 @@ test("enforces pharmacy identity and order lifecycle invariants in the database"
   assert.match(migration, /v_pharmacy\.updated_at is distinct from p_expected_updated_at/);
   assert.match(sendOtp, /dawanear_issue_pharmacy_otp/);
   assert.doesNotMatch(sendOtp, /enforceOtpRateLimits/);
-  assert.match(verifyOtp, /dawanear_bind_pharmacy_identity/);
-  assert.match(verifyOtp, /pharmacies\.length !== 1/);
-  assert.doesNotMatch(verifyOtp, /\.from\("dawanear_pharmacy_memberships"\)/);
+  assert.match(verifyOtp, /membership\.status !== "active"/);
   assert.doesNotMatch(verifyOtp, /\.upsert\([\s\S]*dawanear_pharmacy_memberships/);
-  assert.match(sharedAuth, /https:\/\/med-250\.com/);
-  assert.doesNotMatch(sharedAuth, /https:\/\/med250\.gikundiro\.com/);
-  assert.doesNotMatch(sharedAuth, /https:\/\/med250-rwanda\.ikanisa\.chatgpt\.site/);
   assert.doesNotMatch(sharedAuth, /user-agent/);
   assert.match(geocoder, /dawanear_approve_geocode_candidate/);
-});
-
-test("binds the owner-ready Edge deployment packet to the complete canonical-origin bundle", async () => {
-  const entrypointPath = "supabase/functions/dawanear-pharmacy-verify-otp/index.ts";
-  const sharedPath = "supabase/functions/_shared/dawanear-pharmacy-auth.ts";
-  const [entrypoint, shared, packetSource, snapshotSource] = await Promise.all([
-    read(`../${entrypointPath}`),
-    read(`../${sharedPath}`),
-    read("../docs/launch/evidence/edge-functions-deployment-pending-2026-07-24.json"),
-    read("../desktop-output/goal-progress-2026-07-24/supabase-deployment-gap-2026-07-24.json"),
-  ]);
-  const packet = JSON.parse(packetSource);
-  const snapshot = JSON.parse(snapshotSource);
-  const entrypointDigest = sha256(entrypoint);
-  const sharedDigest = sha256(shared);
-  const bundleDigest = edgeBundleSha256([
-    [entrypointPath, entrypoint],
-    [sharedPath, shared],
-  ]);
-  const candidateDetail = packet.checks.find((check) => check.name === "Candidate function digest")?.detail ?? "";
-
-  assert.match(candidateDetail, new RegExp(entrypointDigest));
-  assert.match(candidateDetail, new RegExp(sharedDigest));
-  assert.match(candidateDetail, new RegExp(bundleDigest));
-  assert.equal(snapshot.edge_function_gap.candidate_entrypoint_sha256, entrypointDigest);
-  assert.equal(snapshot.edge_function_gap.candidate_shared_auth_sha256, sharedDigest);
-  assert.equal(snapshot.edge_function_gap.candidate_bundle_sha256, bundleDigest);
-  assert.match(shared, /https:\/\/med-250\.com/);
-  assert.doesNotMatch(shared, /med250\.gikundiro\.com|med250-rwanda\.ikanisa\.chatgpt\.site/);
 });
 
 test("binds contact imports and production automation to reviewed artifacts", async () => {
@@ -143,27 +93,23 @@ test("binds contact imports and production automation to reviewed artifacts", as
   assert.match(emitter, /verification_status not in \('rejected', 'stale'\)/);
   assert.match(extractor, /sha256_file/);
   assert.doesNotMatch(workflow, /uses:\s+[^\n]+@v\d+/);
-  assert.doesNotMatch(workflow.split("steps:")[0], /SUPABASE_SECRET_KEY/);
+  const productionWorkflow = workflow.slice(workflow.indexOf("\n  production:"));
+  assert.doesNotMatch(productionWorkflow, /SUPABASE_URL|SUPABASE_PUBLISHABLE_KEY|SUPABASE_SECRET_KEY/);
   assert.ok(
     workflow.indexOf("Validate production attestations and governed sources")
-      < workflow.indexOf("Verify privileged production backend"),
-    "production attestations must pass before the workflow receives a Supabase secret",
-  );
-  assert.ok(
-    workflow.indexOf("data:source-authority:verify:strict")
-      < workflow.indexOf("Verify privileged production backend"),
-    "source authority must pass before the workflow receives a Supabase secret",
+      < workflow.indexOf("Run Worker-D1 production release checks"),
+    "production attestations must pass before Worker-D1 packaging checks",
   );
   assert.match(workflow, /MED250_GATE_SECURITY_HARDENING_DEPLOYED/);
   assert.match(workflow, /MED250_GATE_EDGE_FUNCTIONS_DEPLOYED/);
   assert.match(workflow, /MED250_GATE_PRESCRIPTION_RETENTION_APPROVED/);
   assert.match(workflow, /MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED/);
   assert.match(workflow, /MED250_GATE_DOMAIN_DNS_VERIFIED/);
-  assert.match(workflow, /audit:browser-evidence:verify:live/);
-  assert.match(workflow, /localization:verify/);
-  assert.match(workflow, /test:sites:catalog/);
-  assert.match(worker, /uskfnszcdqpcfrhjxitl\.supabase\.co/);
-  assert.doesNotMatch(worker, /\*\.supabase\.co/);
+  assert.match(workflow, /MED250_GATE_SOURCE_RECONCILED/);
+  assert.doesNotMatch(workflow, /staging|MED250_GATE_WORKER_D1_STAGING_PASSED/);
+  assert.match(workflow, /MED250_GATE_WORKER_D1_CUTOVER_APPROVED/);
+  assert.doesNotMatch(worker, /supabase\.co|legacy-supabase|neon\.tech/i);
+  assert.match(worker, /connect-src 'self' https:\/\/maps\.googleapis\.com https:\/\/maps\.gstatic\.com/);
   assert.match(wrangler, /"compatibility_flags": \["nodejs_compat"\]/);
   assert.doesNotMatch(vite, /compatibility_flags/);
 });

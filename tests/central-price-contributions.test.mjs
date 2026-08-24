@@ -33,8 +33,9 @@ test("pharmacy client validates input and maps a central contribution receipt", 
   assert.match(client, /export async function contributeCentralPrice/);
   assert.match(client, /requirePermanentPharmacyUser\("Could not record the central price contribution"\)/);
   assert.match(client, /requireInteger\(input\.priceRwf, "Price", 1, 100_000_000\)/);
-  assert.match(client, /client\.rpc\("dawanear_contribute_central_price"/);
-  assert.match(client, /becameLowest: booleanValue\(row, false, "became_lowest"\)/);
+  assert.match(client, /med250ApiJson\("\/api\/pharmacy\/prices"/);
+  assert.match(client, /becameLowest: booleanValue\(payload, false, "becameLowest"\)/);
+  assert.doesNotMatch(client, /\.rpc\(|Supabase|supabase/);
 });
 
 test("pharmacy portal exposes the full searchable catalogue in lazy batches of twenty", async () => {

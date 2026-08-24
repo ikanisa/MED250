@@ -82,7 +82,7 @@ contract_is_current() {
     return 2
   fi
   print -r -- "$response" | /usr/bin/jq -e '
-      .contract_version == "2026-07-23.1" and
+      .contract_version == "2026-07-18.3" and
       .product_images.publication_mode == "automated_provenance" and
       .product_images.target_image_count == 23977 and
       .product_images.rights_verified_required == false and

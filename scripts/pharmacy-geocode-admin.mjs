@@ -1,4 +1,5 @@
 import { pathToFileURL } from "node:url";
+import { callWorkerOperator, resolveWorkerOperatorEndpoint } from "./worker-operator-client.mjs";
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const commands = new Set(["generate", "inspect", "approve"]);
@@ -71,39 +72,15 @@ export function buildGeocodePayload(argv) {
 }
 
 export function resolveGeocodeEndpoint(environment = process.env) {
-  const rawUrl = String(environment.SUPABASE_URL || environment.NEXT_PUBLIC_SUPABASE_URL || "").trim();
-  if (!rawUrl) throw new Error("SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL is required in the process environment.");
-  const base = new URL(rawUrl);
-  if (base.protocol !== "https:" || !base.hostname.endsWith(".supabase.co")) {
-    throw new Error("The Supabase URL must be an HTTPS *.supabase.co origin.");
-  }
-  return new URL("/functions/v1/geocode-pharmacies", base);
+  return resolveWorkerOperatorEndpoint("/api/internal/operator/geocode", environment);
 }
 
 export async function runGeocodeAdmin(argv, { environment = process.env, fetchImpl = fetch } = {}) {
-  const adminToken = String(environment.DAWANEAR_ADMIN_TOKEN || "").trim();
-  if (!adminToken) throw new Error("DAWANEAR_ADMIN_TOKEN is required in the process environment.");
-  const payload = buildGeocodePayload(argv);
-  const response = await fetchImpl(resolveGeocodeEndpoint(environment), {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-DawaNear-Admin-Token": adminToken,
-    },
-    body: JSON.stringify(payload),
+  return callWorkerOperator("/api/internal/operator/geocode", buildGeocodePayload(argv), {
+    environment,
+    fetchImpl,
+    responseLabel: "Geocoder",
   });
-  const responseText = await response.text();
-  let result;
-  try {
-    result = responseText ? JSON.parse(responseText) : {};
-  } catch {
-    result = { error: "The geocoder returned a non-JSON response." };
-  }
-  if (!response.ok) {
-    const message = typeof result?.error === "string" ? result.error : `Geocoder returned HTTP ${response.status}.`;
-    throw new Error(`${message} (HTTP ${response.status})`);
-  }
-  return result;
 }
 
 function help() {
@@ -113,7 +90,7 @@ function help() {
     "  npm run ops:geocode -- inspect --pharmacy-id <uuid>",
     "  npm run ops:geocode -- approve --pharmacy-id <uuid> --google-place-id <id> --reviewed-by <name> --review-note <evidence>",
     "",
-    "Required process environment: SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL) and DAWANEAR_ADMIN_TOKEN.",
+    "Required process environment: MED250_OPERATOR_ORIGIN and MED250_ADMIN_TOKEN.",
     "Approval always affects exactly one staged candidate; batch approval is unsupported.",
   ].join("\n");
 }

@@ -5,7 +5,7 @@
   "evidence_type": "signed_approval",
   "status": "pending",
   "title": "MED+250 Cloudflare account and deployment-control approval",
-  "summary": "Owner-ready infrastructure decision for the intended Cloudflare account, canonical production Worker, protected environments, med-250.com route ownership and a non-billable least-privilege deployment credential.",
+  "summary": "Owner-ready infrastructure decision for the intended Cloudflare account, production Worker, protected environments, custom-domain ownership and least-privilege deployment credential. The paired account record remains blocked by broad OAuth permissions.",
   "recorded_at": "2026-07-16T14:08:21+02:00",
   "recorded_by": "MED+250 infrastructure readiness review",
   "recorded_role": "Release evidence preparer",
@@ -14,7 +14,7 @@
     {
       "name": "Completed account verification",
       "status": "blocked",
-      "detail": "The paired account-verification artifact remains pending because fresh redacted account, route, release, rollback and least-privilege checks are not complete."
+      "detail": "The paired account-verification artifact remains pending because the current interactive OAuth session has broad unrelated write permissions."
     },
     {
       "name": "Intended account and Worker ownership",
@@ -48,7 +48,7 @@
     }
   ],
   "account_verification_reference": "docs/launch/evidence/cloudflare-account-verification-pending-2026-07-16.json",
-  "account_verification_sha256": "8a70caf4884423b18f41dda8338162d5a3c70d0fd17d1034033c097e47628564",
+  "account_verification_sha256": "acab00848593ff22ca094bc934151b63f91bf2737607183133b744493d4dcb62",
   "decision": null,
   "approved_by": null,
   "approved_role": null,

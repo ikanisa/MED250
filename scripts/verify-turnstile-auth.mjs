@@ -1,202 +1,184 @@
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
-import { createClient } from "@supabase/supabase-js";
+const SESSION_COOKIE = "__Host-med250-client";
+const CSRF_COOKIE = "__Host-med250-client-csrf";
+const MAX_RESPONSE_BYTES = 64 * 1024;
 
-function requiredEnvironment(name, alternatives = []) {
-  for (const candidate of [name, ...alternatives]) {
-    const value = process.env[candidate]?.trim();
-    if (value) return value;
-  }
-  throw new Error(`${[name, ...alternatives].join(" or ")} is required in the process environment`);
+function requiredEnvironment(name) {
+  const value = process.env[name]?.trim();
+  if (value) return value;
+  throw new Error(`${name} is required in the process environment`);
 }
 
-function verifiedSupabaseOrigin(value) {
-  const origin = new URL(value);
-  if (origin.protocol !== "https:" || !origin.hostname.endsWith(".supabase.co")) {
-    throw new Error("The Supabase URL must be an HTTPS *.supabase.co origin");
+function verifiedWorkerOrigin(value) {
+  const origin = new URL(String(value ?? ""));
+  if (origin.protocol !== "https:" || origin.username || origin.password || origin.pathname !== "/") {
+    throw new Error("The MED250 Worker origin must be an HTTPS origin without credentials or a path");
   }
   return origin.origin;
 }
 
-function authClient(url, key) {
-  return createClient(url, key, {
-    auth: {
-      autoRefreshToken: false,
-      detectSessionInUrl: false,
-      persistSession: false,
-    },
-  });
-}
-
 export function isCaptchaRejection(error) {
-  const code = String(error?.code ?? "").toLowerCase();
+  const code = String(error?.code ?? error?.error ?? "").toLowerCase();
   const message = String(error?.message ?? "").toLowerCase();
-  return code.includes("captcha") || message.includes("captcha");
+  return code.includes("turnstile") || code.includes("captcha") || message.includes("turnstile") || message.includes("captcha");
 }
 
 export function safeAuthError(error) {
   return {
     status: Number.isInteger(error?.status) ? error.status : null,
-    code: typeof error?.code === "string" ? error.code : null,
+    code: typeof error?.code === "string"
+      ? error.code
+      : typeof error?.error === "string"
+        ? error.error
+        : null,
     captchaRelated: isCaptchaRejection(error),
   };
 }
 
-async function userCount(adminClient) {
-  const { data, error } = await adminClient.auth.admin.listUsers({ page: 1, perPage: 1 });
-  if (error) throw new Error(`Could not count Auth users: ${error.code || error.status || "unknown error"}`);
-  if (!Number.isInteger(data?.total)) throw new Error("Supabase Auth returned no aggregate user count");
-  return data.total;
-}
-
-async function removeDisposableUser(publicClient, adminClient, userId) {
-  const signOut = await publicClient.auth.signOut({ scope: "global" });
-  if (signOut.error) {
-    throw new Error(`Could not revoke the disposable session: ${signOut.error.code || signOut.error.status || "unknown error"}`);
-  }
-  const deletion = await adminClient.auth.admin.deleteUser(userId);
-  if (deletion.error) {
-    throw new Error(`Could not delete the disposable Auth user: ${deletion.error.code || deletion.error.status || "unknown error"}`);
+async function safeJson(response) {
+  const text = await response.text();
+  if (Buffer.byteLength(text, "utf8") > MAX_RESPONSE_BYTES) throw new Error("The Worker returned an oversized authentication response");
+  try {
+    const value = JSON.parse(text);
+    return typeof value === "object" && value !== null && !Array.isArray(value) ? value : {};
+  } catch {
+    return {};
   }
 }
 
-async function rejectedAttempt({
-  label,
-  publicClient,
-  adminClient,
-  captchaToken,
-  expectedCount,
-}) {
-  const { data, error } = await publicClient.auth.signInAnonymously(
-    captchaToken ? { options: { captchaToken } } : undefined,
-  );
-  if (!error && data?.user?.id) {
-    await removeDisposableUser(publicClient, adminClient, data.user.id);
-    throw new Error(`${label} unexpectedly created an anonymous user`);
+function setCookieValues(response) {
+  if (typeof response.headers.getSetCookie === "function") return response.headers.getSetCookie();
+  const combined = response.headers.get("set-cookie");
+  return combined ? [combined] : [];
+}
+
+function cookieValue(response, name) {
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pattern = new RegExp(`(?:^|,\\s*|;\\s*)${escaped}=([^;,\\s]+)`);
+  for (const header of setCookieValues(response)) {
+    const match = header.match(pattern);
+    if (match) return match[1];
   }
-  if (!error || !isCaptchaRejection(error)) {
-    throw new Error(`${label} was not rejected by CAPTCHA validation`);
+  return "";
+}
+
+function requestHeaders(origin, additions = {}) {
+  return {
+    Accept: "application/json",
+    Origin: origin,
+    "Sec-Fetch-Site": "same-origin",
+    ...additions,
+  };
+}
+
+async function rejectedAttempt({ label, origin, captchaToken, expectedCode, expectedStatus, fetchImpl }) {
+  const response = await fetchImpl(`${origin}/api/auth/client/session`, {
+    method: "POST",
+    headers: requestHeaders(origin, { "Content-Type": "application/json" }),
+    body: JSON.stringify(captchaToken ? { captchaToken } : {}),
+    redirect: "error",
+  });
+  const payload = await safeJson(response);
+  const safe = safeAuthError({ ...payload, status: response.status });
+  if (response.status !== expectedStatus || safe.code !== expectedCode || !safe.captchaRelated) {
+    throw new Error(`${label} was not rejected by the MED250 Worker Turnstile boundary`);
   }
-  const observedCount = await userCount(adminClient);
-  if (observedCount !== expectedCount) {
-    throw new Error(`${label} changed the aggregate Auth user count`);
+  if (cookieValue(response, SESSION_COOKIE) || cookieValue(response, CSRF_COOKIE)) {
+    throw new Error(`${label} unexpectedly issued a browser session`);
+  }
+  return { status: "passed", rejection: safe, sessionCookieNotIssued: true };
+}
+
+async function verifyPositivePath({ origin, validToken, fetchImpl }) {
+  const createdResponse = await fetchImpl(`${origin}/api/auth/client/session`, {
+    method: "POST",
+    headers: requestHeaders(origin, { "Content-Type": "application/json" }),
+    body: JSON.stringify({ captchaToken: validToken }),
+    redirect: "error",
+  });
+  const created = await safeJson(createdResponse);
+  const session = cookieValue(createdResponse, SESSION_COOKIE);
+  const csrf = cookieValue(createdResponse, CSRF_COOKIE);
+  if (createdResponse.status !== 201 || created.authenticated !== true || !session || !csrf) {
+    throw new Error("Valid Turnstile evidence did not create the disposable MED250 browser session");
+  }
+  const cookieHeader = `${SESSION_COOKIE}=${session}; ${CSRF_COOKIE}=${csrf}`;
+  const restoredResponse = await fetchImpl(`${origin}/api/auth/client/session`, {
+    headers: requestHeaders(origin, { Cookie: cookieHeader }),
+    redirect: "error",
+  });
+  const restored = await safeJson(restoredResponse);
+  if (!restoredResponse.ok || restored.authenticated !== true) {
+    throw new Error("The disposable MED250 browser session could not be restored");
+  }
+  const revokedResponse = await fetchImpl(`${origin}/api/auth/client/session`, {
+    method: "DELETE",
+    headers: requestHeaders(origin, { Cookie: cookieHeader, "X-MED250-CSRF": csrf }),
+    redirect: "error",
+  });
+  const revoked = await safeJson(revokedResponse);
+  if (!revokedResponse.ok || revoked.signedOut !== true) {
+    throw new Error("The disposable MED250 browser session could not be revoked");
+  }
+  const finalResponse = await fetchImpl(`${origin}/api/auth/client/session`, {
+    headers: requestHeaders(origin, { Cookie: cookieHeader }),
+    redirect: "error",
+  });
+  const final = await safeJson(finalResponse);
+  if (!finalResponse.ok || final.authenticated !== false) {
+    throw new Error("The revoked MED250 browser session remained authenticated");
   }
   return {
     status: "passed",
-    rejection: safeAuthError(error),
-    userCountUnchanged: true,
+    disposableAnonymousSessionCreated: true,
+    disposableSessionRestored: true,
+    disposableSessionRevoked: true,
+    postRevokeUnauthenticated: true,
   };
 }
 
 export async function verifyTurnstileAuth({
-  supabaseUrl,
-  publishableKey,
-  secretKey,
+  workerOrigin,
   validToken = "",
-  expiredToken = "",
   requireValid = false,
-  requireExpired = false,
-  clientFactory = authClient,
+  fetchImpl = fetch,
 } = {}) {
-  const url = verifiedSupabaseOrigin(supabaseUrl);
-  const adminClient = clientFactory(url, secretKey);
-  const initialUserCount = await userCount(adminClient);
+  const origin = verifiedWorkerOrigin(workerOrigin);
   const missingToken = await rejectedAttempt({
     label: "Missing Turnstile token",
-    publicClient: clientFactory(url, publishableKey),
-    adminClient,
+    origin,
     captchaToken: "",
-    expectedCount: initialUserCount,
+    expectedCode: "turnstile_required",
+    expectedStatus: 400,
+    fetchImpl,
   });
   const invalidToken = await rejectedAttempt({
     label: "Invalid Turnstile token",
-    publicClient: clientFactory(url, publishableKey),
-    adminClient,
+    origin,
     captchaToken: "med250-invalid-turnstile-token",
-    expectedCount: initialUserCount,
+    expectedCode: "turnstile_rejected",
+    expectedStatus: 403,
+    fetchImpl,
   });
-
-  const cleanedExpiredToken = expiredToken.trim();
-  if (requireExpired && !cleanedExpiredToken) {
-    throw new Error("TURNSTILE_EXPIRED_TEST_TOKEN is required for the controlled expired-token test");
-  }
-  let expiredTokenResult = {
-    status: "not_run",
-    userCountUnchanged: true,
-  };
-  if (cleanedExpiredToken) {
-    expiredTokenResult = await rejectedAttempt({
-      label: "Expired Turnstile token",
-      publicClient: clientFactory(url, publishableKey),
-      adminClient,
-      captchaToken: cleanedExpiredToken,
-      expectedCount: initialUserCount,
-    });
-  }
-
   const cleanedValidToken = validToken.trim();
   if (requireValid && !cleanedValidToken) {
     throw new Error("TURNSTILE_TEST_TOKEN is required for the controlled positive-path test");
   }
-
-  let validTokenResult = {
-    status: "not_run",
-    disposableAnonymousUserCreated: false,
-    disposableSessionRevoked: false,
-    disposableUserDeleted: false,
-  };
-  let replayedTokenResult = {
-    status: "not_run",
-    userCountUnchanged: true,
-  };
-  if (cleanedValidToken) {
-    const publicClient = clientFactory(url, publishableKey);
-    const { data, error } = await publicClient.auth.signInAnonymously({
-      options: { captchaToken: cleanedValidToken },
-    });
-    if (error || !data?.user?.id || !data?.session || data.user.is_anonymous !== true) {
-      throw new Error(`Valid Turnstile token did not create the disposable anonymous session: ${error?.code || error?.status || "invalid response"}`);
-    }
-    let replayError;
-    try {
-      replayedTokenResult = await rejectedAttempt({
-        label: "Replayed Turnstile token",
-        publicClient: clientFactory(url, publishableKey),
-        adminClient,
-        captchaToken: cleanedValidToken,
-        expectedCount: initialUserCount + 1,
-      });
-    } catch (error) {
-      replayError = error;
-    }
-    await removeDisposableUser(publicClient, adminClient, data.user.id);
-    const finalUserCount = await userCount(adminClient);
-    if (finalUserCount !== initialUserCount) {
-      throw new Error("Disposable Turnstile test identity cleanup did not restore the aggregate Auth user count");
-    }
-    if (replayError) throw replayError;
-    validTokenResult = {
-      status: "passed",
-      disposableAnonymousUserCreated: true,
-      disposableSessionRevoked: true,
-      disposableUserDeleted: true,
-    };
-  }
-
+  const validTokenResult = cleanedValidToken
+    ? await verifyPositivePath({ origin, validToken: cleanedValidToken, fetchImpl })
+    : {
+        status: "not_run",
+        disposableAnonymousSessionCreated: false,
+        disposableSessionRestored: false,
+        disposableSessionRevoked: false,
+        postRevokeUnauthenticated: false,
+      };
   return {
-    status: (
-      (requireValid && validTokenResult.status !== "passed")
-      || (requireExpired && expiredTokenResult.status !== "passed")
-    ) ? "failed" : "passed",
-    supabaseHost: new URL(url).hostname,
-    checks: {
-      missingToken,
-      invalidToken,
-      expiredToken: expiredTokenResult,
-      validToken: validTokenResult,
-      replayedToken: replayedTokenResult,
-    },
+    status: requireValid && validTokenResult.status !== "passed" ? "failed" : "passed",
+    workerHost: new URL(origin).hostname,
+    checks: { missingToken, invalidToken, validToken: validTokenResult },
     identifiersEmitted: false,
     tokensEmitted: false,
   };
@@ -204,16 +186,9 @@ export async function verifyTurnstileAuth({
 
 async function main() {
   const result = await verifyTurnstileAuth({
-    supabaseUrl: requiredEnvironment("SUPABASE_URL", ["NEXT_PUBLIC_SUPABASE_URL"]),
-    publishableKey: requiredEnvironment("SUPABASE_PUBLISHABLE_KEY", [
-      "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
-      "NEXT_PUBLIC_SUPABASE_ANON_KEY",
-    ]),
-    secretKey: requiredEnvironment("SUPABASE_SECRET_KEY", ["SUPABASE_SERVICE_ROLE_KEY"]),
+    workerOrigin: requiredEnvironment("MED250_OPERATOR_ORIGIN"),
     validToken: process.env.TURNSTILE_TEST_TOKEN ?? "",
-    expiredToken: process.env.TURNSTILE_EXPIRED_TEST_TOKEN ?? "",
     requireValid: process.argv.includes("--require-valid"),
-    requireExpired: process.argv.includes("--require-expired"),
   });
   console.log(JSON.stringify(result, null, 2));
   if (result.status !== "passed") process.exitCode = 1;

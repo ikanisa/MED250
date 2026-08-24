@@ -1,72 +1,52 @@
 import { pathToFileURL } from "node:url";
 
-import {
-  assessBackendContract,
-  expectedBackendContractVersion,
-} from "./backend-contract-invariants.mjs";
+import { validateWorkerOrigin } from "./verify-live-catalogue.mjs";
+import { evaluateWorkerD1Health } from "./verify-worker-d1-health.mjs";
 
-export function resolveBackendContractEndpoint(environment = process.env) {
-  const rawUrl = String(environment.SUPABASE_URL || environment.NEXT_PUBLIC_SUPABASE_URL || "").trim();
-  if (!rawUrl) throw new Error("SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL is required.");
-  let base;
-  try { base = new URL(rawUrl); }
-  catch { throw new Error("The Supabase URL must be an HTTPS *.supabase.co origin."); }
-  if (
-    base.protocol !== "https:"
-    || !base.hostname.endsWith(".supabase.co")
-    || base.username
-    || base.password
-    || base.search
-    || base.hash
-    || !new Set(["", "/"]).has(base.pathname)
-  ) {
-    throw new Error("The Supabase URL must be an HTTPS *.supabase.co origin.");
-  }
-  return new URL("/rest/v1/rpc/dawanear_backend_contract", base);
+const MAX_RESPONSE_BYTES = 64 * 1024;
+
+function configuredOrigin(environment) {
+  return String(
+    environment.MED250_DEPLOYMENT_ORIGIN
+    || environment.NEXT_PUBLIC_MED250_DEPLOYMENT_ORIGIN
+    || environment.NEXT_PUBLIC_SITE_URL
+    || "",
+  ).trim();
 }
 
-export async function verifyBackendContract({
-  environment = process.env,
-  fetchImpl = fetch,
-} = {}) {
-  const secretKey = String(environment.SUPABASE_SECRET_KEY || environment.SUPABASE_SERVICE_ROLE_KEY || "").trim();
-  if (!secretKey) throw new Error("SUPABASE_SECRET_KEY or SUPABASE_SERVICE_ROLE_KEY is required in the process environment.");
+export function resolveBackendContractEndpoint(environment = process.env) {
+  const origin = configuredOrigin(environment);
+  if (!origin) throw new Error("A MED250 Cloudflare Worker origin is required.");
+  return new URL("/api/internal/health", validateWorkerOrigin(origin));
+}
+
+export async function verifyBackendContract({ environment = process.env, fetchImpl = fetch } = {}) {
+  const healthToken = String(environment.MED250_HEALTH_PROBE_TOKEN || "").trim();
+  if (healthToken.length < 32 || healthToken.length > 256) {
+    throw new Error("MED250_HEALTH_PROBE_TOKEN must be a 32-256 byte process secret.");
+  }
   const response = await fetchImpl(resolveBackendContractEndpoint(environment), {
-    method: "POST",
-    headers: {
-      apikey: secretKey,
-      Authorization: `Bearer ${secretKey}`,
-      "Content-Type": "application/json",
-    },
-    body: "{}",
+    method: "GET",
+    headers: { Authorization: `Bearer ${healthToken}`, Accept: "application/json" },
     redirect: "error",
     signal: AbortSignal.timeout(15_000),
   });
-  if (!response.ok) throw new Error(`Backend contract RPC returned HTTP ${response.status}.`);
-  let contract;
-  try { contract = await response.json(); }
-  catch { throw new Error("Backend contract RPC did not return valid JSON."); }
-  const failures = assessBackendContract(contract);
-  return {
-    status: failures.length ? "failed" : "passed",
-    expectedVersion: expectedBackendContractVersion,
-    observedVersion: contract?.contract_version ?? null,
-    generatedAt: contract?.generated_at ?? null,
-    failures,
-    contract,
-  };
+  if (!response.ok) throw new Error(`Worker-D1 health contract returned HTTP ${response.status}.`);
+  const raw = await response.text();
+  if (Buffer.byteLength(raw, "utf8") > MAX_RESPONSE_BYTES) throw new Error("Worker-D1 health contract exceeded the response size bound.");
+  let snapshot;
+  try { snapshot = JSON.parse(raw); }
+  catch { throw new Error("Worker-D1 health contract did not return valid JSON."); }
+  return evaluateWorkerD1Health(snapshot);
 }
 
 async function main() {
   try {
     const result = await verifyBackendContract();
     console.log(JSON.stringify(result, null, 2));
-    if (result.failures.length) process.exitCode = 1;
+    if (result.status !== "healthy") process.exitCode = 1;
   } catch (error) {
-    console.error(JSON.stringify({
-      status: "configuration_error",
-      error: error instanceof Error ? error.message : "Backend verification failed.",
-    }, null, 2));
+    console.error(JSON.stringify({ status: "configuration_error", error: error instanceof Error ? error.message : "Backend verification failed." }, null, 2));
     process.exitCode = 2;
   }
 }

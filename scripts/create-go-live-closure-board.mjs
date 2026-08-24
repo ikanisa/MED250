@@ -9,17 +9,17 @@ import {
 import { buildGoLiveReadinessReport } from "./report-go-live-readiness.mjs";
 
 const CLOSURE_ORDER = [
-  "MED250_GATE_TURNSTILE_SERVER_VERIFIED",
-  "MED250_GATE_PHYSICAL_UAT_PASSED",
+  "MED250_GATE_DUPLICATE_REGISTER_REVIEWED",
+  "MED250_GATE_GPS_READY",
+  "MED250_GATE_WHATSAPP_READY",
   "MED250_GATE_SECURITY_HARDENING_DEPLOYED",
   "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED",
-  "MED250_GATE_DOMAIN_DNS_VERIFIED",
-  "MED250_GATE_GPS_READY",
-  "MED250_GATE_DUPLICATE_REGISTER_REVIEWED",
+  "MED250_GATE_TURNSTILE_SERVER_VERIFIED",
   "MED250_GATE_AUTH_RATE_LIMITS_APPROVED",
   "MED250_GATE_PRESCRIPTION_RETENTION_APPROVED",
   "MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED",
-  "MED250_GATE_WHATSAPP_READY",
+  "MED250_GATE_DOMAIN_DNS_VERIFIED",
+  "MED250_GATE_PHYSICAL_UAT_PASSED",
 ];
 
 const GATE_GUIDANCE = {
@@ -73,35 +73,29 @@ const GATE_GUIDANCE = {
   },
   MED250_GATE_SECURITY_HARDENING_DEPLOYED: {
     workstream: "backend",
-    closure_focus: "Verify the exact reviewed hardening migration directly in production, retain redacted evidence, and preserve the tested rollback path.",
+    closure_focus: "Review the complete backend hardening evidence and record real backend-owner approval.",
     next_actions: [
-      "Verify the deployed production migration against the reviewed migration digest and aggregate backend contract.",
-      "Pass the negative authorization, locking, privilege, media-hold, operational-health, and transaction-rollback checks directly against the authorised production target.",
-      "Retain only redacted deployment and test evidence, with no row data, identifiers, or credentials.",
-      "Redeploy only when a verified production defect or contract drift requires a change.",
+      "Regenerate the approval packet and inspect every referenced deployment/test artifact.",
+      "Confirm the evidence still satisfies the backend contract and hardening acceptance criterion.",
+      "Record named backend-owner approval without changing evidence facts.",
     ],
     commands: [
-      "npm run launch:evidence:handoff",
+      "npm run launch:approval:packet",
       "npm run backend:verify",
-      "npm run launch:evidence:record -- --artifact docs/launch/evidence/security-hardening-deployment-YYYY-MM-DD.json --replace",
-      "npm run launch:evidence:record -- --artifact docs/launch/evidence/security-hardening-test-YYYY-MM-DD.json --replace",
       "npm run launch:gate:approve -- --gate MED250_GATE_SECURITY_HARDENING_DEPLOYED --approved-by \"Named backend owner\" --approved-role \"Backend owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\"",
     ],
   },
   MED250_GATE_EDGE_FUNCTIONS_DEPLOYED: {
     workstream: "backend",
-    closure_focus: "Verify the exact revised OTP Edge Function directly in production, retain redacted evidence, and preserve the tested rollback path.",
+    closure_focus: "Review the complete Edge Function deployment evidence and record real backend-owner approval.",
     next_actions: [
-      "Verify the active production function version against the reviewed source digest.",
-      "Pass origin, eligibility, authority, isolation, concurrency, and no-side-effect probes directly against the authorised production target.",
-      "Retain only redacted deployment and test evidence, with no phone numbers, OTPs, identifiers, or credentials.",
-      "Redeploy only when a verified production defect or contract drift requires a change.",
+      "Regenerate the approval packet and inspect every referenced Edge Function deployment/test artifact.",
+      "Confirm the active function versions and protected-access boundaries still match the intended release.",
+      "Record named backend-owner approval without changing evidence facts.",
     ],
     commands: [
-      "npm run launch:evidence:handoff",
+      "npm run launch:approval:packet",
       "npm run backend:verify:description-reviewer -- --product-id \"$MED250_DESCRIPTION_REVIEWER_PROBE_PRODUCT_ID\" --expected-updated-at \"$MED250_DESCRIPTION_REVIEWER_PROBE_EXPECTED_UPDATED_AT\"",
-      "npm run launch:evidence:record -- --artifact docs/launch/evidence/edge-functions-deployment-YYYY-MM-DD.json --replace",
-      "npm run launch:evidence:record -- --artifact docs/launch/evidence/edge-functions-test-YYYY-MM-DD.json --replace",
       "npm run launch:gate:approve -- --gate MED250_GATE_EDGE_FUNCTIONS_DEPLOYED --approved-by \"Named backend owner\" --approved-role \"Backend owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\"",
     ],
   },
@@ -247,34 +241,23 @@ function evidenceState(gateName, gate, handoffGate) {
   };
 }
 
-function outstandingItems(gateName, gate, readinessGate, evidence, report) {
-  const items = [];
-  const machineVerified = ["closed_by_machine_evidence", "runtime_verification_required"].includes(readinessGate?.disposition);
-  if (evidence.missing_types.length) items.push(`Missing required evidence type(s): ${evidence.missing_types.join(", ")}.`);
-  if (!machineVerified && !approvalComplete(gate)) items.push("Missing named accountable-owner approval metadata.");
+function blockerSummary(gateName, gate, readinessGate, evidence, report) {
+  const blockers = [];
+  if (evidence.missing_types.length) blockers.push(`Missing required evidence type(s): ${evidence.missing_types.join(", ")}.`);
+  if (!approvalComplete(gate)) blockers.push("Missing named accountable-owner approval metadata.");
   if (gateName === "MED250_GATE_DUPLICATE_REGISTER_REVIEWED") {
-    items.push(`${report.duplicateRegister.decisionCounts.pending} duplicate-register group(s) remain pending in data/imports/duplicate-register-review.csv.`);
+    blockers.push(`${report.duplicateRegister.decisionCounts.pending} duplicate-register group(s) remain pending in data/imports/duplicate-register-review.csv.`);
   }
   if (gateName === "MED250_GATE_PHYSICAL_UAT_PASSED") {
-    items.push(`${report.physicalUat.statusCounts.pending} physical-device UAT scenario(s) remain pending in data/physical-device-uat.json.`);
+    blockers.push(`${report.physicalUat.statusCounts.pending} physical-device UAT scenario(s) remain pending in data/physical-device-uat.json.`);
   }
   if (readinessGate?.readiness === "approval_pending") {
-    items.push("Machine evidence is present; owner review and approval remain deliberately separate.");
+    blockers.push("Machine evidence is present; owner review and approval remain deliberately separate.");
   }
   if (readinessGate?.staleReleaseEvidence) {
-    items.push("Release-bound evidence is stale against the current repository checkout; rerun the exact-revision live verifier before approval.");
+    blockers.push("Release-bound evidence is stale against the current repository checkout; rerun the exact-revision live verifier before approval.");
   }
-  return [...new Set(items)];
-}
-
-function blockerSummary(gateName, gate, readinessGate, evidence, report) {
-  if (readinessGate?.disposition !== "transaction_blocker") return [];
-  return outstandingItems(gateName, gate, readinessGate, evidence, report);
-}
-
-function followUpSummary(gateName, gate, readinessGate, evidence, report) {
-  if (!["non_blocking_follow_up", "runtime_verification_required"].includes(readinessGate?.disposition)) return [];
-  return outstandingItems(gateName, gate, readinessGate, evidence, report);
+  return [...new Set(blockers)];
 }
 
 export function buildGoLiveClosureBoard({ manifest, handoff, readinessReport }) {
@@ -291,26 +274,6 @@ export function buildGoLiveClosureBoard({ manifest, handoff, readinessReport }) 
       const handoffGate = handoffByGate.get(gateName);
       const readinessGate = readinessByGate.get(gateName);
       const evidence = evidenceState(gateName, gate, handoffGate);
-      const disposition = readinessGate?.disposition ?? "unknown";
-      const approvalRequired = ![
-        "closed_by_machine_evidence",
-        "runtime_verification_required",
-        "superseded_by_dispatch_portal_separation",
-      ].includes(disposition);
-      const closedByMachine = disposition === "closed_by_machine_evidence";
-      const superseded = disposition === "superseded_by_dispatch_portal_separation";
-      const nextActions = closedByMachine
-        ? ["Preserve the current machine evidence and rerun the relevant verifier only after a backend, Edge Function, DNS, routing, or release-contract change."]
-        : superseded
-          ? ["No closure action is required. Dispatch eligibility and pharmacy-portal authority are governed separately."]
-          : guidance.next_actions;
-      const commands = closedByMachine
-        ? guidance.commands.filter((command) => /backend:verify|domain:dns:verify|deployment:verify/.test(command))
-        : superseded
-          ? []
-          : approvalRequired
-            ? guidance.commands
-            : guidance.commands.filter((command) => !command.includes("launch:gate:approve"));
       return {
         gate: gateName,
         title: gate.title,
@@ -318,34 +281,29 @@ export function buildGoLiveClosureBoard({ manifest, handoff, readinessReport }) 
         workstream: guidance.workstream,
         current_status: gate.status,
         readiness: readinessGate?.readiness ?? "unknown",
-        disposition,
-        blocking: disposition === "transaction_blocker",
-        blocking_scope: disposition === "transaction_blocker" ? "marketplace_transaction" : "none",
         closure_focus: guidance.closure_focus,
         acceptance: gate.acceptance,
         evidence,
         approval: {
-          required: approvalRequired,
+          required: true,
           complete: approvalComplete(gate),
           approved_by: gate.approved_by,
           approved_role: gate.approved_role,
           approved_at: gate.approved_at,
         },
         blockers: blockerSummary(gateName, gate, readinessGate, evidence, readinessReport),
-        follow_up_items: followUpSummary(gateName, gate, readinessGate, evidence, readinessReport),
-        next_actions: nextActions,
-        commands,
+        next_actions: guidance.next_actions,
+        commands: guidance.commands,
         safety_rules: COMMON_SAFETY_RULES,
       };
     })
     .sort(byGateOrder);
 
   const ownerWorkstreams = gates.reduce((workstreams, gate) => {
-    workstreams[gate.workstream] ??= { owners: [], gates: [], blocker_count: 0, follow_up_item_count: 0 };
+    workstreams[gate.workstream] ??= { owners: [], gates: [], blocker_count: 0 };
     if (!workstreams[gate.workstream].owners.includes(gate.owner)) workstreams[gate.workstream].owners.push(gate.owner);
     workstreams[gate.workstream].gates.push(gate.gate);
-    workstreams[gate.workstream].blocker_count += gate.blocking ? 1 : 0;
-    workstreams[gate.workstream].follow_up_item_count += gate.follow_up_items.length;
+    workstreams[gate.workstream].blocker_count += gate.blockers.length;
     return workstreams;
   }, {});
 
@@ -355,149 +313,24 @@ export function buildGoLiveClosureBoard({ manifest, handoff, readinessReport }) 
     classification: "go-live closure board; execution aid only, not evidence or approval",
     production_ready: readinessReport.productionReady,
     summary: {
-      site_production_ready: readinessReport.siteProductionReady,
-      marketplace_transaction_ready: readinessReport.marketplaceTransactionReady,
-      transaction_blocker_count: readinessReport.transactionBlockers.length,
-      non_blocking_follow_up_count: readinessReport.nonBlockingFollowUp.length,
       gate_count: readinessReport.launchEvidence.gateCount,
-      source_authority_production_authorized: readinessReport.sourceAuthority.productionAuthorized,
       confirmed_gates: readinessReport.gateReadiness.confirmed,
       approval_pending_gates: readinessReport.gateReadiness.approvalPending,
       prepared_evidence_pending_gates: readinessReport.gateReadiness.preparedEvidencePending,
       missing_evidence_gates: readinessReport.gateReadiness.missingEvidence,
       stale_release_evidence_gates: readinessReport.gateReadiness.staleReleaseEvidence,
-      machine_verified_gates: readinessReport.gateReadiness.machineVerified,
-      runtime_verification_required_gates: readinessReport.gateReadiness.runtimeVerificationRequired,
-      superseded_gates: readinessReport.gateReadiness.superseded,
       duplicate_register_pending_groups: readinessReport.duplicateRegister.decisionCounts.pending,
-      product_content_pending_entries: readinessReport.productContentReview.pendingCount,
-      product_content_blocking_corrections: readinessReport.productContentReview.blockingCorrectionCount,
       physical_uat_pending_scenarios: readinessReport.physicalUat.statusCounts.pending,
-      rendered_audit_passed_scenarios: readinessReport.renderedProductionAudit.statusCounts.passed,
-      rendered_audit_current_revision: readinessReport.renderedProductionAudit.releaseRevisionCurrent,
-      rendered_audit_strict_valid: readinessReport.renderedProductionAudit.valid,
-      legacy_redirect_passed_probes: readinessReport.legacyDomainRedirect.passedProbeCount,
-      legacy_redirect_required_probes: readinessReport.legacyDomainRedirect.probeCount,
-      legacy_redirect_valid: readinessReport.legacyDomainRedirect.valid,
       prepared_handoff_artifacts: readinessReport.handoff.preparedPendingArtifactCount,
       required_handoff_artifacts: readinessReport.handoff.missingEvidenceArtifactCount,
     },
     closure_order: CLOSURE_ORDER,
     owner_workstreams: ownerWorkstreams,
-    prerequisites: {
-      source_authority: {
-        owner: "Named MED+250 data owner",
-        artifact: "data/source-authority-decision.json",
-        disposition: "non_blocking_fail_closed_follow_up",
-        status: readinessReport.sourceAuthority.status,
-        decision: readinessReport.sourceAuthority.decision,
-        production_authorized: readinessReport.sourceAuthority.productionAuthorized,
-        blocker: null,
-        follow_up: readinessReport.sourceAuthority.productionAuthorized
-          ? null
-          : "Restore and verify the exact original controlled bundle, or record an explicitly bounded replacement decision with named owner authority and approved durable storage. Recovered or unapproved content remains unpublished.",
-        commands: [
-          "npm run data:source-authority:verify",
-          "npm run data:source-authority:record -- --decision <restore_original|approve_replacement|reject> <owner-and-scope-fields> --confirm",
-          "npm run data:source-authority:verify:strict",
-        ],
-        safety_rules: [
-          "Never relabel the reconstructed public catalogue as the missing original source.",
-          "Never store the restored private bundle path, credentials, or private source bytes in Git.",
-          "Only the named MED+250 data owner can supply the authority decision and approved storage evidence.",
-        ],
-      },
-      product_content_review: {
-        owner: "Named regulatory or clinical data reviewer",
-        artifact: "data/imports/product-content-review-pending-2026-07-18.json",
-        disposition: "non_blocking_fail_closed_follow_up",
-        valid: readinessReport.productContentReview.valid,
-        pending_entries: readinessReport.productContentReview.pendingCount,
-        blocking_corrections: readinessReport.productContentReview.blockingCorrectionCount,
-        review_source_path: readinessReport.productContentReview.reviewSourcePath,
-        review_source_sha256: readinessReport.productContentReview.reviewSourceSha256,
-        blocker: null,
-        follow_up: readinessReport.productContentReview.valid
-          ? null
-          : `${readinessReport.productContentReview.pendingCount} product-content decision(s) remain pending and ${readinessReport.productContentReview.blockingCorrectionCount} correction-required decision(s) remain open. Pending descriptions remain hidden.`,
-        commands: [
-          "npm run data:content-review:next",
-          "npm run data:content-review:decide -- --dataset <approved-source-dataset-path> <one-accountable-decision>",
-          "npm run data:content-review:verify -- --strict",
-        ],
-        safety_rules: [
-          "Only a named regulatory or clinical data reviewer may make product-content decisions.",
-          "Do not infer missing clinical facts or approve a source exception without authoritative Rwanda FDA evidence.",
-          "A correction-required decision remains production-blocking until the source is corrected and the packet is regenerated.",
-        ],
-      },
-      rendered_production_audit: {
-        owner: "Named MED+250 QA owner",
-        artifact: "data/audit-browser-evidence.json",
-        disposition: "historical_evidence_replaced_by_current_physical_uat_gate",
-        valid: readinessReport.renderedProductionAudit.valid,
-        status: readinessReport.renderedProductionAudit.status,
-        execution_status: readinessReport.renderedProductionAudit.executionStatus,
-        origin: readinessReport.renderedProductionAudit.origin,
-        required_origin: readinessReport.renderedProductionAudit.canonicalOrigin,
-        evidence_release_revision: readinessReport.renderedProductionAudit.releaseRevision,
-        current_release_revision_source: "Resolve from git rev-parse HEAD at execution time and verify it against the live X-MED250-Release-Revision header.",
-        release_revision_current: readinessReport.renderedProductionAudit.releaseRevisionCurrent,
-        passed_scenarios: readinessReport.renderedProductionAudit.statusCounts.passed,
-        required_scenarios: readinessReport.renderedProductionAudit.scenarioCount,
-        capture_count: readinessReport.renderedProductionAudit.captureCount,
-        blocker: null,
-        follow_up: readinessReport.renderedProductionAudit.valid
-          ? null
-          : "The prior 16-scenario rendered audit is historical. Record current rendered and physical-device evidence through MED250_GATE_PHYSICAL_UAT_PASSED.",
-        commands: [
-          "npm run deployment:verify -- --url https://med-250.com --mode live --expected-revision <exact-lowercase-40-character-git-sha>",
-          "npm run catalogue:verify:live",
-          "npm run audit:browser-evidence:verify",
-          "npm run audit:browser-evidence:verify:live",
-        ],
-        safety_rules: [
-          "Do not relabel historical med250.gikundiro.com screenshots or receipts as med-250.com evidence.",
-          "Do not approve browser evidence captured against a different Git revision from the deployed candidate.",
-          "Retain only privacy-safe screenshots and receipts with no customer, pharmacy-login, prescription, credential, token, or precise-location data.",
-          "Only a named QA owner can supply the final rendered-production approval.",
-        ],
-      },
-      legacy_domain_redirect: {
-        owner: "Named MED+250 infrastructure owner with Gikundiro Cloudflare zone authority",
-        artifact: "docs/launch/evidence/legacy-domain-redirect-2026-08-01.json",
-        valid: readinessReport.legacyDomainRedirect.valid,
-        status: readinessReport.legacyDomainRedirect.status,
-        legacy_origin: readinessReport.legacyDomainRedirect.legacyOrigin,
-        canonical_origin: readinessReport.legacyDomainRedirect.canonicalOrigin,
-        captured_at: readinessReport.legacyDomainRedirect.capturedAt,
-        verifier_current: readinessReport.legacyDomainRedirect.verifierCurrent,
-        passed_probes: readinessReport.legacyDomainRedirect.passedProbeCount,
-        required_probes: readinessReport.legacyDomainRedirect.probeCount,
-        blocker: readinessReport.legacyDomainRedirect.valid
-          ? null
-          : "The historical hostname does not satisfy the redirect-only contract. Configure DNS and TLS under accountable zone-owner control, then require exact path-and-query-preserving 301/308 redirects to med-250.com with no cookies.",
-        commands: [
-          "npm run domain:legacy-redirect:verify",
-          "npm run domain:legacy-redirect:verify -- --evidence-output <new-privacy-safe-receipt-path>",
-          "npm run launch:go-live:status",
-        ],
-        safety_rules: [
-          "Do not attach med250.gikundiro.com as a second ordering origin or emit canonical metadata for it.",
-          "Do not add the historical hostname to Supabase, OTP, CORS, or public Sites allowed origins.",
-          "Do not store Cloudflare credentials, zone identifiers, account identifiers, or private approval material in the receipt.",
-          "Only the named Gikundiro zone owner may authorize DNS, certificate, or redirect-rule changes.",
-        ],
-      },
-    },
     instructions: [
-      "Close only the genuine transaction blockers first: production Turnstile proof and owner-observed physical-device transaction UAT.",
-      "Keep source authority, duplicate-register, product-content, privacy, account and other owner reviews in the non-blocking fail-closed follow-up queue.",
-      "Never expose unresolved duplicate records, unapproved descriptions, or recovered content while those follow-ups remain pending.",
-      "Keep med250.gikundiro.com redirect-only; it must never become a second ordering origin.",
-      "Machine-verified backend, Edge Function and domain gates need no additional approval unless their deployed contract changes.",
+      "Work through gates in closure_order unless an accountable owner explicitly changes the sequence.",
+      "Complete row-level reviews and physical UAT before attempting final live release approval.",
       "After every completed artifact, run npm run launch:evidence:verify and npm run launch:go-live:status.",
-      "Do not treat legacy strict launch evidence as a blanket blocker under the direct-live fail-closed production contract.",
+      "Run npm run launch:evidence:verify:live only when every gate is ready for strict release.",
     ],
     gates,
   };
@@ -531,8 +364,7 @@ async function main() {
       output: outputPath,
       gate_count: board.summary.gate_count,
       production_ready: board.production_ready,
-      blocker_count: board.summary.transaction_blocker_count,
-      non_blocking_follow_up_count: board.summary.non_blocking_follow_up_count,
+      blocker_count: board.gates.reduce((total, gate) => total + gate.blockers.length, 0),
     }, null, 2));
   } else {
     process.stdout.write(serialized);

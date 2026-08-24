@@ -18,19 +18,6 @@ const REQUIRED_ROUTES = Object.freeze([
   "/offline.html",
 ]);
 const WORKER_ROUTES = Object.freeze(REQUIRED_ROUTES.slice(0, 7));
-const PREVIEW_EXCLUDED_ROUTES = new Set(["/product/AMZ-B004L5JCZ4"]);
-
-function requiredRoutesForMode(mode) {
-  return mode === "preview"
-    ? REQUIRED_ROUTES.filter((route) => !PREVIEW_EXCLUDED_ROUTES.has(route))
-    : REQUIRED_ROUTES;
-}
-
-function workerRoutesForMode(mode) {
-  return mode === "preview"
-    ? WORKER_ROUTES.filter((route) => !PREVIEW_EXCLUDED_ROUTES.has(route))
-    : WORKER_ROUTES;
-}
 
 function normalizedHeaders(headers) {
   if (headers instanceof Headers) return Object.fromEntries(headers.entries());
@@ -41,7 +28,7 @@ export function assessDeploymentEvidence({ origin, mode, records, expectedRevisi
   const errors = [];
   const hostname = new URL(origin).hostname;
   if (mode === "live" && !/^[a-f0-9]{40}$/.test(expectedRevision)) {
-    errors.push("/: live verification requires the exact lowercase 40-character Git release revision");
+    errors.push(`/: ${mode} verification requires the exact lowercase 40-character Git release revision`);
   }
   if (mode === "live" && hostname === "med250-rwanda.ikanisa.chatgpt.site") {
     errors.push("/: the public Sites origin is catalog-only and cannot be verified as a live ordering origin");
@@ -55,7 +42,7 @@ export function assessDeploymentEvidence({ origin, mode, records, expectedRevisi
   }]));
 
   if (expectedRevision) {
-    for (const route of workerRoutesForMode(mode)) {
+    for (const route of WORKER_ROUTES) {
       const observed = byRoute.get(route)?.headers["x-med250-release-revision"] ?? null;
       if (observed !== expectedRevision) {
         errors.push(`${route}: X-MED250-Release-Revision does not match the expected release (${expectedRevision})`);
@@ -63,7 +50,7 @@ export function assessDeploymentEvidence({ origin, mode, records, expectedRevisi
     }
   }
 
-  for (const route of requiredRoutesForMode(mode)) {
+  for (const route of REQUIRED_ROUTES) {
     const record = byRoute.get(route);
     if (!record) {
       errors.push(`${route}: no response was captured`);
@@ -79,7 +66,8 @@ export function assessDeploymentEvidence({ origin, mode, records, expectedRevisi
     const requiredHeaders = {
       "cross-origin-opener-policy": "same-origin",
       "cross-origin-resource-policy": "same-site",
-      "permissions-policy": "camera=(), geolocation=(self), microphone=()",
+      "permissions-policy":
+        "accelerometer=(), browsing-topics=(), camera=(), geolocation=(self), gyroscope=(), microphone=(), payment=(), usb=()",
       "referrer-policy": "strict-origin-when-cross-origin",
       "x-content-type-options": "nosniff",
       "x-frame-options": "DENY",
@@ -103,10 +91,11 @@ export function assessDeploymentEvidence({ origin, mode, records, expectedRevisi
     if (!home.body.includes("MED+250") || !home.body.includes("Health and everyday care") || !home.body.includes("Found at the nearest Pharmacy")) {
       errors.push("/: marketplace identity or primary proposition is missing");
     }
-    if (mode === "preview" && home.headers["x-robots-tag"] !== "noindex, nofollow") {
-      errors.push("/: preview deployment is not protected by X-Robots-Tag");
+    const protectedMode = mode === "preview";
+    if (protectedMode && home.headers["x-robots-tag"] !== "noindex, nofollow") {
+      errors.push(`/: ${mode} deployment is not protected by X-Robots-Tag`);
     }
-    if (mode !== "preview" && home.headers["x-robots-tag"]) errors.push(`/: ${mode} deployment is unexpectedly blocked from indexing`);
+    if (!protectedMode && home.headers["x-robots-tag"]) errors.push(`/: ${mode} deployment is unexpectedly blocked from indexing`);
   }
 
   const robots = byRoute.get("/robots.txt")?.body ?? "";
@@ -125,22 +114,26 @@ export function assessDeploymentEvidence({ origin, mode, records, expectedRevisi
   } catch {
     errors.push("/manifest.webmanifest: response is not valid JSON");
   }
-  if (!serviceWorker.includes('const OFFLINE_URL = "/offline.html"') || !serviceWorker.includes('url.pathname.startsWith("/api/")')) {
-    errors.push("/sw.js: safe offline navigation or API exclusion is missing");
-  }
+  const sensitiveWorkerExclusions = [
+    '/api/auth/',
+    '/api/orders',
+    '/api/pharmacy/',
+    '/api/internal/',
+    '/api/twilio/',
+  ];
   if (
-    !serviceWorker.includes('const CACHE_NAME = "med250-static-v2"')
-    || !serviceWorker.includes('["script", "style"].includes(request.destination)')
-    || !serviceWorker.includes("event.respondWith(fetch(request).then")
+    !serviceWorker.includes('const OFFLINE_URL = "/offline.html"')
+    || !serviceWorker.includes('isPrivatePath(url)')
+    || sensitiveWorkerExclusions.some((path) => !serviceWorker.includes(`url.pathname.startsWith("${path}")`))
   ) {
-    errors.push("/sw.js: release assets are not protected from stale cache-first delivery");
+    errors.push("/sw.js: safe offline navigation or API exclusion is missing");
   }
   if (!offlinePage.includes("You are offline") || !offlinePage.includes("never show a request as sent while you are offline")) {
     errors.push("/offline.html: explicit non-transactional offline state is missing");
   }
   if (mode === "preview") {
-    if (!/User-Agent:\s*\*[\s\S]*Disallow:\s*\//i.test(robots)) errors.push("/robots.txt: preview does not disallow crawling");
-    if (/<url>/i.test(sitemap)) errors.push("/sitemap.xml: preview unexpectedly publishes URLs");
+    if (!/User-Agent:\s*\*[\s\S]*Disallow:\s*\//i.test(robots)) errors.push(`/robots.txt: ${mode} does not disallow crawling`);
+    if (/<url>/i.test(sitemap)) errors.push(`/sitemap.xml: ${mode} unexpectedly publishes URLs`);
   } else {
     if (!/User-Agent:\s*\*[\s\S]*Allow:\s*\//i.test(robots)) errors.push("/robots.txt: live deployment does not allow public routes");
     if (!robots.includes(`${origin}/sitemap.xml`)) errors.push("/robots.txt: sitemap origin does not match the deployment");
@@ -175,7 +168,7 @@ export function parseArguments(values) {
   if (!parsed.url) throw new Error("--url is required.");
   if (!new Set(["preview", "catalog", "live"]).has(parsed.mode)) throw new Error("--mode must be preview, catalog, or live.");
   if (parsed.mode === "live" && !/^[a-f0-9]{40}$/.test(parsed.expectedRevision)) {
-    throw new Error("Live verification requires --expected-revision with the exact lowercase 40-character Git release revision.");
+    throw new Error(`${parsed.mode === "live" ? "Live" : "Staging"} verification requires --expected-revision with the exact lowercase 40-character Git release revision.`);
   }
   if (parsed.mode !== "live" && parsed.expectedRevision && !/^[A-Za-z0-9._-]{7,64}$/.test(parsed.expectedRevision)) {
     throw new Error("--expected-revision must be 7-64 letters, numbers, dots, underscores, or hyphens.");
@@ -303,15 +296,12 @@ async function boundedResponseText(response, limit = 2 * 1024 * 1024) {
 
 async function fetchDeploymentRoute(origin, route, sitesBypassToken = "") {
   let target = new URL(route, origin);
-  target.searchParams.set("__med250_deployment_probe", crypto.randomUUID());
   for (let redirect = 0; redirect <= 3; redirect += 1) {
     if (target.origin !== origin) throw new Error(`${route}: redirect left the deployment origin`);
     await assertPublicHostname(target.hostname);
     const response = await fetch(target, {
       headers: {
         Accept: route.endsWith(".txt") || route.endsWith(".xml") || route.endsWith(".js") ? "text/plain,*/*" : "text/html,*/*",
-        "Cache-Control": "no-cache",
-        Pragma: "no-cache",
         ...(sitesBypassToken ? { "OAI-Sites-Authorization": `Bearer ${sitesBypassToken}` } : {}),
       },
       redirect: "manual",
@@ -330,7 +320,7 @@ async function main() {
   const origin = validateDeploymentOrigin(args.url, args.mode);
   const sitesBypassToken = (process.env.SITES_BYPASS_BEARER_TOKEN ?? "").trim();
   await assertPublicHostname(new URL(origin).hostname);
-  const records = await Promise.all(requiredRoutesForMode(args.mode).map(async (route) => {
+  const records = await Promise.all(REQUIRED_ROUTES.map(async (route) => {
     const response = await fetchDeploymentRoute(origin, route, sitesBypassToken);
     const body = await boundedResponseText(response);
     return {

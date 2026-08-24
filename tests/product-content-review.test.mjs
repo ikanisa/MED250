@@ -8,40 +8,23 @@ import test from "node:test";
 
 import {
   DEFAULT_DATASET_PATH,
-  DEFAULT_RECOVERED_VALIDATION_DATASET_PATH,
   applyProductContentReviewDecision,
-  assessCurrentProductContentReview,
   assessProductContentReview,
   buildProductContentReviewPacket,
   deriveProductContentReviewPopulation,
   nextPendingProductContentReview,
 } from "../scripts/import-data/product-content-review.mjs";
 
-let datasetPath = DEFAULT_DATASET_PATH;
-let datasetSource;
-try {
-  datasetSource = await readFile(new URL(`../${DEFAULT_DATASET_PATH}`, import.meta.url), "utf8");
-} catch (error) {
-  if (error?.code !== "ENOENT") throw error;
-  datasetPath = DEFAULT_RECOVERED_VALIDATION_DATASET_PATH;
-  datasetSource = await readFile(
-    new URL(`../${DEFAULT_RECOVERED_VALIDATION_DATASET_PATH}`, import.meta.url),
-    "utf8",
-  );
-}
+const datasetSource = await readFile(new URL(`../${DEFAULT_DATASET_PATH}`, import.meta.url), "utf8");
 const dataset = JSON.parse(datasetSource);
-const datasetBoundExpected = buildProductContentReviewPacket(dataset, {
-  sourcePath: datasetPath,
+const expected = buildProductContentReviewPacket(dataset, {
+  sourcePath: DEFAULT_DATASET_PATH,
   sourceSha256: createHash("sha256").update(datasetSource).digest("hex"),
 });
 const committed = JSON.parse(await readFile(
   new URL("../data/imports/product-content-review-pending-2026-07-18.json", import.meta.url),
   "utf8",
 ));
-const expected = structuredClone(datasetBoundExpected);
-if (datasetPath === DEFAULT_RECOVERED_VALIDATION_DATASET_PATH) {
-  expected.source = structuredClone(committed.source);
-}
 
 test("builds the complete source-bound product-content review population", () => {
   const population = deriveProductContentReviewPopulation(dataset);
@@ -62,18 +45,6 @@ test("keeps the committed owner packet synchronized and pending without inventin
   assert.equal(result.blockingCorrectionCount, 0);
   assert.equal(result.decisionCounts.pending, 72);
   assert.equal(JSON.stringify(committed).includes('"recommendation"'), false);
-});
-
-test("keeps the current 72-entry review in the strict production-readiness result", async () => {
-  const result = await assessCurrentProductContentReview({
-    strict: true,
-    now: new Date("2026-07-24T12:00:00+02:00"),
-  });
-  assert.equal(result.valid, false);
-  assert.equal(result.pendingCount, 72);
-  assert.equal(result.blockingCorrectionCount, 0);
-  assert.equal(result.errors.filter((error) => /still pending/.test(error)).length, 72);
-  assert.equal(result.originalSourceRetentionSatisfied, false);
 });
 
 test("fails strict review until every owner decision is complete", () => {
@@ -177,12 +148,11 @@ test("presents one pending source-bound review with only its allowed owner decis
 test("the owner CLI updates one record atomically and leaves no lock or temporary file", async () => {
   const directory = await mkdtemp(join(tmpdir(), "med250-product-content-review-"));
   const output = join(directory, "review.json");
-  await writeFile(output, `${JSON.stringify(datasetBoundExpected, null, 2)}\n`, "utf8");
-  const key = datasetBoundExpected.short_or_pack_like_titles[0].key;
+  await writeFile(output, `${JSON.stringify(committed, null, 2)}\n`, "utf8");
+  const key = committed.short_or_pack_like_titles[0].key;
   const result = spawnSync(process.execPath, [
     "scripts/import-data/product-content-review.mjs",
     "decide",
-    "--dataset", datasetPath,
     "--output", output,
     "--key", key,
     "--decision", "approved_source_title",

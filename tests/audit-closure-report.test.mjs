@@ -4,7 +4,6 @@ import test from "node:test";
 
 import {
   auditClosureBindings,
-  assessUnavailableContentReviewSource,
   assessTechnicalClosureEvidence,
   buildAuditClosureReport,
 } from "../scripts/report-audit-closure.mjs";
@@ -23,7 +22,6 @@ const [register, browserLedger, launchManifest, physicalUat, localizationRegistr
   readJson("docs/audit/live-baseline-2026-07-18/18-live-related-products-5ef50a.json"),
 ]);
 const technicalAssessment = assessTechnicalClosureEvidence({ sitesCatalogReceipt, liveRelatedReceipt });
-const pendingProductContentReview = await readJson("data/imports/product-content-review-pending-2026-07-18.json");
 
 const contentReviewAssessment = {
   valid: false,
@@ -42,38 +40,8 @@ function build(overrides = {}) {
     localizationRegistry: overrides.localizationRegistry ?? localizationRegistry,
     contentReviewAssessment: overrides.contentReviewAssessment ?? contentReviewAssessment,
     technicalEvidence: overrides.technicalEvidence ?? technicalAssessment.signals,
-    technicalEvidenceErrors: overrides.technicalEvidenceErrors ?? [],
   });
 }
-
-test("keeps a missing historical review source non-blocking and fail-closed", () => {
-  const assessment = assessUnavailableContentReviewSource(pendingProductContentReview);
-  assert.equal(assessment.valid, false);
-  assert.equal(assessment.sourceAvailable, false);
-  assert.equal(assessment.sourceStatus, "unavailable_non_blocking_fail_closed");
-  assert.equal(assessment.expectedEntryCount, 72);
-  assert.equal(assessment.reviewedEntryCount, 72);
-  assert.equal(assessment.pendingCount, 72);
-  assert.equal(assessment.blockingCorrectionCount, 0);
-  assert.deepEqual(assessment.errors, []);
-});
-
-test("reports stale historical technical evidence without crashing or promoting it", () => {
-  const report = build({
-    technicalEvidenceErrors: ["Technical receipt source digest drifted for scripts/verify-deployed-site.mjs."],
-  });
-  assert.equal(report.systems.technicalEvidence.status, "stale_or_unavailable");
-  assert.equal(report.systems.technicalEvidence.errorCount, 1);
-  assert.equal(report.strictReady, false);
-  assert.equal(
-    report.items.find(({ id }) => id === "P0-3").signals.find(({ id }) => id === "sites-catalog-boundary").satisfied,
-    false,
-  );
-  assert.equal(
-    report.items.find(({ id }) => id === "P1-2").signals.find(({ id }) => id === "live-related-products").satisfied,
-    false,
-  );
-});
 
 test("binds every audit finding and strategic decision to an owner-ready closure queue", () => {
   const expectedIds = [...register.findings, ...register.strategic_items].map(({ id }) => id);
@@ -96,10 +64,10 @@ test("binds every audit finding and strategic decision to an owner-ready closure
     verificationLimitCount: 4,
     auditedSurfaceCount: 12,
   });
-  assert.equal(report.releaseGateQueue.length, 10);
-  assert.equal(report.releaseGateQueue.find(({ name }) => name === "MED250_GATE_DOMAIN_DNS_VERIFIED").approvalRequired, false);
-  assert.equal(report.releaseGateQueue.find(({ name }) => name === "MED250_GATE_SECURITY_HARDENING_DEPLOYED").approvalRequired, false);
-  assert.equal(report.releaseGateQueue.find(({ name }) => name === "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED").approvalRequired, false);
+  assert.equal(report.releaseGateQueue.length, 11);
+  assert.equal(report.releaseGateQueue.find(({ name }) => name === "MED250_GATE_DOMAIN_DNS_VERIFIED").approvalRequired, true);
+  assert.equal(report.releaseGateQueue.find(({ name }) => name === "MED250_GATE_SECURITY_HARDENING_DEPLOYED").approvalRequired, true);
+  assert.equal(report.releaseGateQueue.find(({ name }) => name === "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED").approvalRequired, true);
   assert.equal(report.ownerQueues.reduce((total, queue) => total + queue.itemCount, 0), 19);
 
   const declined = report.items.find(({ id }) => id === "P2-2");
@@ -120,13 +88,13 @@ test("reports the exact current cross-system state without promoting partial wor
   });
   assert.deepEqual(report.systems.launchEvidence, {
     gateCount: 11,
-    confirmedGateCount: 1,
-    pendingGateCount: 10,
+    confirmedGateCount: 0,
+    pendingGateCount: 11,
   });
   assert.deepEqual(report.systems.physicalUat, {
     status: "pending",
     scenarioCount: 12,
-    passedScenarioCount: 8,
+    passedScenarioCount: 0,
   });
   assert.equal(report.systems.localization.status, "awaiting_qualified_translation");
   assert.equal(report.systems.productContentReview.pendingCount, 72);

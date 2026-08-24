@@ -92,8 +92,8 @@ test("builds a bounded withdrawal and rejects incomplete or silently assumed app
 
 test("keeps the admin token process-only and sends one protected review request", async () => {
   const environment = {
-    SUPABASE_URL: "https://uskfnszcdqpcfrhjxitl.supabase.co",
-    MED250_ADMIN_TOKEN: "test-admin-token",
+    MED250_OPERATOR_ORIGIN: "https://staging.med-250.com",
+    MED250_ADMIN_TOKEN: "test-description-admin-token-32!!",
   };
   let captured;
   const result = await runProductDescriptionAdmin(["inspect", "--product-id", productId], {
@@ -104,16 +104,16 @@ test("keeps the admin token process-only and sends one protected review request"
     },
   });
   assert.equal(result.product.id, productId);
-  assert.equal(captured.url, "https://uskfnszcdqpcfrhjxitl.supabase.co/functions/v1/review-product-descriptions");
-  assert.equal(captured.init.headers["X-MED250-Admin-Token"], environment.MED250_ADMIN_TOKEN);
+  assert.equal(captured.url, "https://staging.med-250.com/api/internal/operator/descriptions");
+  assert.equal(captured.init.headers.Authorization, `Bearer ${environment.MED250_ADMIN_TOKEN}`);
   assert.deepEqual(JSON.parse(captured.init.body), { action: "inspect", product_id: productId });
   await assert.rejects(
-    runProductDescriptionAdmin(["inspect", "--product-id", productId], { environment: { SUPABASE_URL: environment.SUPABASE_URL } }),
+    runProductDescriptionAdmin(["inspect", "--product-id", productId], { environment: { MED250_OPERATOR_ORIGIN: environment.MED250_OPERATOR_ORIGIN } }),
     /MED250_ADMIN_TOKEN/,
   );
   assert.throws(
-    () => resolveProductDescriptionReviewEndpoint({ SUPABASE_URL: "http://localhost:54321" }),
-    /HTTPS \*\.supabase\.co/,
+    () => resolveProductDescriptionReviewEndpoint({ MED250_OPERATOR_ORIGIN: "http://localhost:8787" }),
+    /HTTPS origin/,
   );
 });
 

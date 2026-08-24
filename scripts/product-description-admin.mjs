@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
+import { callWorkerOperator, resolveWorkerOperatorEndpoint } from "./worker-operator-client.mjs";
 
 const commands = new Set(["inspect", "approve", "withdraw"]);
 const productIdPattern = /^(?:rwanda-fda-hm-[0-9]{4}|AMZ-[A-Z0-9]{10})$/;
@@ -129,13 +130,7 @@ export async function buildProductDescriptionReviewPayload(argv, { readFileImpl 
 }
 
 export function resolveProductDescriptionReviewEndpoint(environment = process.env) {
-  const rawUrl = String(environment.SUPABASE_URL || environment.NEXT_PUBLIC_SUPABASE_URL || "").trim();
-  if (!rawUrl) throw new Error("SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL is required.");
-  const base = new URL(rawUrl);
-  if (base.protocol !== "https:" || !base.hostname.endsWith(".supabase.co")) {
-    throw new Error("The Supabase URL must be an HTTPS *.supabase.co origin.");
-  }
-  return new URL("/functions/v1/review-product-descriptions", base);
+  return resolveWorkerOperatorEndpoint("/api/internal/operator/descriptions", environment);
 }
 
 export async function runProductDescriptionAdmin(argv, {
@@ -143,20 +138,12 @@ export async function runProductDescriptionAdmin(argv, {
   fetchImpl = fetch,
   readFileImpl = readFile,
 } = {}) {
-  const adminToken = String(environment.MED250_ADMIN_TOKEN || environment.DAWANEAR_ADMIN_TOKEN || "").trim();
-  if (!adminToken) throw new Error("MED250_ADMIN_TOKEN is required.");
   const payload = await buildProductDescriptionReviewPayload(argv, { readFileImpl });
-  const response = await fetchImpl(resolveProductDescriptionReviewEndpoint(environment), {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-MED250-Admin-Token": adminToken },
-    body: JSON.stringify(payload),
+  return callWorkerOperator("/api/internal/operator/descriptions", payload, {
+    environment,
+    fetchImpl,
+    responseLabel: "Description reviewer",
   });
-  const responseText = await response.text();
-  let result;
-  try { result = responseText ? JSON.parse(responseText) : {}; }
-  catch { result = { error: "Description reviewer returned non-JSON output." }; }
-  if (!response.ok) throw new Error(`${result?.error ?? `Description reviewer returned HTTP ${response.status}.`} (HTTP ${response.status})`);
-  return result;
 }
 
 function help() {
@@ -166,7 +153,7 @@ function help() {
     "  npm run ops:product-descriptions -- approve --product-id <product-id> --expected-updated-at <inspect timestamp> --description-file <reviewed text file> --source-file <exact source bytes> --source-name <name> --source-url <https-url> --rights-basis <basis> --rights-reference <durable reference> --rights-verified yes --clinical-review-status <approved|not_required> --reviewed-by <name> --reviewed-role <role> --reviewed-at <timestamp with timezone> --review-note <rationale>",
     "  npm run ops:product-descriptions -- withdraw --product-id <product-id> --expected-updated-at <inspect timestamp> --reviewed-by <name> --reviewed-role <role> --reviewed-at <timestamp with timezone> --review-note <reason>",
     "",
-    "Required process environment: SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL) and MED250_ADMIN_TOKEN.",
+    "Required process environment: MED250_OPERATOR_ORIGIN and MED250_ADMIN_TOKEN.",
     "Approval reads the description and exact source from files, computes the source SHA-256 locally, and affects exactly one product.",
   ].join("\n");
 }
