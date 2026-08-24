@@ -114,7 +114,18 @@ export function assessDeploymentEvidence({ origin, mode, records, expectedRevisi
   } catch {
     errors.push("/manifest.webmanifest: response is not valid JSON");
   }
-  if (!serviceWorker.includes('const OFFLINE_URL = "/offline.html"') || !serviceWorker.includes('url.pathname.startsWith("/api/")')) {
+  const sensitiveWorkerExclusions = [
+    '/api/auth/',
+    '/api/orders',
+    '/api/pharmacy/',
+    '/api/internal/',
+    '/api/twilio/',
+  ];
+  if (
+    !serviceWorker.includes('const OFFLINE_URL = "/offline.html"')
+    || !serviceWorker.includes('isPrivatePath(url)')
+    || sensitiveWorkerExclusions.some((path) => !serviceWorker.includes(`url.pathname.startsWith("${path}")`))
+  ) {
     errors.push("/sw.js: safe offline navigation or API exclusion is missing");
   }
   if (!offlinePage.includes("You are offline") || !offlinePage.includes("never show a request as sent while you are offline")) {

@@ -58,7 +58,7 @@ function records(origin, mode) {
           : route === "/manifest.webmanifest"
             ? JSON.stringify({ id: "/", scope: "/", display: "standalone", description: "Send availability requests to eligible pharmacies." })
             : route === "/sw.js"
-              ? 'const OFFLINE_URL = "/offline.html"; url.pathname.startsWith("/api/");'
+              ? 'const OFFLINE_URL = "/offline.html"; function isPrivatePath(url) { return url.pathname.startsWith("/api/auth/") || url.pathname.startsWith("/api/orders") || url.pathname.startsWith("/api/pharmacy/") || url.pathname.startsWith("/api/internal/") || url.pathname.startsWith("/api/twilio/"); } if (isPrivatePath(url)) return;'
               : route === "/offline.html"
                 ? "<h1>You are offline</h1><p>MED+250 will never show a request as sent while you are offline.</p>"
                 : "ok",
