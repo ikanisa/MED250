@@ -14,7 +14,31 @@ const SHA256 = /^[a-f0-9]{64}$/;
 const PRODUCT_ID = /^[A-Za-z0-9-]{1,80}$/;
 const R2_KEY = /^catalogue\/[A-Za-z0-9-]{1,80}\/[a-f0-9]{64}-[1-6]\.webp$/;
 const PROJECT_REF = /^[a-z0-9]{20}$/;
+const RIGHTS_POLICY_ID = /^[a-z0-9-]{12,120}$/;
 const MAX_IMAGE_BYTES = 12 * 1024 * 1024;
+const PARTNER_RIGHTS_CONFIRMED_AT = "2026-08-24T00:00:00.000Z";
+const PARTNER_RIGHTS_VERIFIED_BY = "MED+250 product owner";
+const PARTNER_PORTFOLIO_POLICY_ID = "partner-portfolio-20260824";
+const PARTNER_RIGHTS_POLICIES = [
+  {
+    id: "partner-amazon-20260824",
+    name: "Amazon",
+    domains: ["amazon.ae", "amazon.ca", "amazon.co.uk", "amazon.co.za", "amazon.com", "amazon.com.au", "amazon.com.br", "amazon.de", "amazon.in", "amazon.sa", "amazon.sg", "media-amazon.com", "ssl-images-amazon.com"],
+  },
+  {
+    id: "partner-walmart-20260824",
+    name: "Walmart",
+    domains: ["walmart.ca", "walmart.com", "walmart.com.mx", "walmartimages.com"],
+  },
+  {
+    id: "partner-ebay-20260824",
+    name: "eBay",
+    domains: ["ebay.com", "ebayimg.com"],
+  },
+];
+// Shard orchestration may run up to three non-overlapping production streams.
+// Keep each stream bounded so aggregate Cloudflare API pressure stays modest.
+const R2_CONCURRENCY = 8;
 
 export class MediaRecoveryError extends Error {
   constructor(code, message) {
@@ -97,6 +121,44 @@ function manifestCore(manifest) {
   return core;
 }
 
+function partnerRightsPolicy(sourceDomain) {
+  const domain = String(sourceDomain ?? "").trim().toLowerCase().replace(/\.$/, "");
+  return PARTNER_RIGHTS_POLICIES.find((policy) => policy.domains.some(
+    (suffix) => domain === suffix || domain.endsWith(`.${suffix}`),
+  )) ?? null;
+}
+
+function verifiedRights(image, productId, position) {
+  const partner = partnerRightsPolicy(image.source_domain);
+  if (partner) {
+    return {
+      rights_basis: `Rights verified under MED+250 confirmed ${partner.name} partner authorization; exact source URLs, content hash, and recovery receipt retained.`,
+      rights_verified: true,
+      rights_policy_id: partner.id,
+      rights_verified_by: PARTNER_RIGHTS_VERIFIED_BY,
+      rights_verified_at: PARTNER_RIGHTS_CONFIRMED_AT,
+    };
+  }
+  if (image.rights_verified !== true) {
+    throw new MediaRecoveryError("rights_unverified", `Image rights are not verified for ${productId}/${position}.`);
+  }
+  const policyId = stringValue(image.rights_policy_id, `rights_policy_id ${productId}/${position}`, 120);
+  if (!RIGHTS_POLICY_ID.test(policyId)) {
+    throw new MediaRecoveryError("rights_unverified", `Image rights policy is invalid for ${productId}/${position}.`);
+  }
+  const verifiedAt = stringValue(image.rights_verified_at, `rights_verified_at ${productId}/${position}`, 80);
+  if (!Number.isFinite(Date.parse(verifiedAt))) {
+    throw new MediaRecoveryError("rights_unverified", `Image rights verification time is invalid for ${productId}/${position}.`);
+  }
+  return {
+    rights_basis: stringValue(image.rights_basis, `rights_basis ${productId}/${position}`, 500),
+    rights_verified: true,
+    rights_policy_id: policyId,
+    rights_verified_by: stringValue(image.rights_verified_by, `rights_verified_by ${productId}/${position}`, 160),
+    rights_verified_at: verifiedAt,
+  };
+}
+
 export function validateSourceManifest(manifest) {
   objectValue(manifest, "Recovery manifest");
   if (manifest.schema_version !== 1) throw new MediaRecoveryError("invalid_manifest", "Recovery manifest schema_version must be 1.");
@@ -125,7 +187,11 @@ function governedImage(image, productId, position) {
   const expectedKey = `catalogue/${productId}/${image.content_sha256}-${position}.webp`;
   if (image.r2_key !== expectedKey) throw new MediaRecoveryError("invalid_manifest", `Image key is not canonical for ${productId}/${position}.`);
   const localPath = stringValue(image.exact_cache_path, `exact_cache_path ${productId}/${position}`, 1_000);
-  if (!localPath.startsWith("data/product-images/cache/")) {
+  if (
+    !localPath.startsWith("data/product-images/cache/")
+    && !localPath.startsWith("work/catalogue-media-rebuild/")
+    && !localPath.startsWith("work/catalogue-media-acquisition/")
+  ) {
     throw new MediaRecoveryError("unsafe_path", `Image cache path is outside the retained media cache for ${productId}/${position}.`);
   }
   const perceptualHash = image.perceptual_hash === null ? null : String(image.perceptual_hash ?? "").toLowerCase();
@@ -136,6 +202,7 @@ function governedImage(image, productId, position) {
   if (!Number.isFinite(qualityScore) || qualityScore < 0 || qualityScore > 100) {
     throw new MediaRecoveryError("invalid_manifest", `Quality score is invalid for ${productId}/${position}.`);
   }
+  const rights = verifiedRights(image, productId, position);
   return {
     product_id: productId,
     position,
@@ -150,7 +217,7 @@ function governedImage(image, productId, position) {
     source_image_url: stringValue(image.source_image_url, `source_image_url ${productId}/${position}`),
     source_domain: stringValue(image.source_domain, `source_domain ${productId}/${position}`, 255),
     source_kind: stringValue(image.source_kind, `source_kind ${productId}/${position}`, 120),
-    rights_basis: stringValue(image.rights_basis, `rights_basis ${productId}/${position}`, 500),
+    ...rights,
     width: integerValue(image.width, `width ${productId}/${position}`, 1, 10_000),
     height: integerValue(image.height, `height ${productId}/${position}`, 1, 10_000),
     quality_score: qualityScore,
@@ -179,21 +246,43 @@ function importSql(bundle, receiptManifest) {
   // non-public rows first, create the immutable receipt only after all rows are
   // present, then approve the receipt-bound rows. Every step is idempotent, so
   // an interrupted import is safe to resume and cannot expose partial media.
+  // The portfolio authorization is deliberately exact-asset scoped. Register
+  // only the checksum-bound objects in this operator-confirmed bundle before
+  // the image rows are staged; the D1 rights trigger rejects any mismatch in
+  // product, position, hash, or source domain.
   for (const image of bundle.objects) {
-    statements.push(`INSERT INTO med250_product_images (product_id, position, r2_key, legacy_public_url, source_page_url, source_image_url, source_domain, source_kind, rights_basis, width, height, quality_score, content_sha256, perceptual_hash, background_removed, approved, checked_at, recovery_receipt_id, created_at) VALUES (${[
+    if (image.rights_policy_id !== PARTNER_PORTFOLIO_POLICY_ID) continue;
+    statements.push(`INSERT OR IGNORE INTO med250_media_rights_policy_assets (policy_id, product_id, position, content_sha256, source_domain, registered_by, registered_at) VALUES (${[
+      sqlString(PARTNER_PORTFOLIO_POLICY_ID), sqlString(image.product_id), sqlNumber(image.position),
+      sqlString(image.content_sha256), sqlString(image.source_domain.toLowerCase()),
+      sqlString(image.rights_verified_by), sqlString(image.rights_verified_at),
+    ].join(", ")});`);
+  }
+  for (const image of bundle.objects) {
+    statements.push(`INSERT INTO med250_product_images (product_id, position, r2_key, legacy_public_url, source_page_url, source_image_url, source_domain, source_kind, rights_basis, rights_verified, rights_policy_id, rights_verified_by, rights_verified_at, width, height, quality_score, content_sha256, perceptual_hash, background_removed, approved, checked_at, recovery_receipt_id, created_at) VALUES (${[
       sqlString(image.product_id), sqlNumber(image.position), sqlString(image.r2_key), sqlString(image.legacy_public_url),
       sqlString(image.source_page_url), sqlString(image.source_image_url), sqlString(image.source_domain), sqlString(image.source_kind),
-      sqlString(image.rights_basis), sqlNumber(image.width), sqlNumber(image.height), sqlNumber(image.quality_score),
+      sqlString(image.rights_basis), "1", sqlString(image.rights_policy_id), sqlString(image.rights_verified_by), sqlString(image.rights_verified_at),
+      sqlNumber(image.width), sqlNumber(image.height), sqlNumber(image.quality_score),
       sqlString(image.content_sha256), sqlString(image.perceptual_hash), "1", "0", sqlString(image.checked_at),
       "NULL", sqlString(timestamp),
-    ].join(", ")}) ON CONFLICT(product_id, position) DO UPDATE SET r2_key=excluded.r2_key, legacy_public_url=excluded.legacy_public_url, source_page_url=excluded.source_page_url, source_image_url=excluded.source_image_url, source_domain=excluded.source_domain, source_kind=excluded.source_kind, rights_basis=excluded.rights_basis, width=excluded.width, height=excluded.height, quality_score=excluded.quality_score, content_sha256=excluded.content_sha256, perceptual_hash=excluded.perceptual_hash, background_removed=1, approved=0, checked_at=excluded.checked_at, recovery_receipt_id=NULL WHERE med250_product_images.approved = 0;`);
+    ].join(", ")}) ON CONFLICT(product_id, position) DO UPDATE SET r2_key=excluded.r2_key, legacy_public_url=excluded.legacy_public_url, source_page_url=excluded.source_page_url, source_image_url=excluded.source_image_url, source_domain=excluded.source_domain, source_kind=excluded.source_kind, rights_basis=excluded.rights_basis, rights_verified=1, rights_policy_id=excluded.rights_policy_id, rights_verified_by=excluded.rights_verified_by, rights_verified_at=excluded.rights_verified_at, width=excluded.width, height=excluded.height, quality_score=excluded.quality_score, content_sha256=excluded.content_sha256, perceptual_hash=excluded.perceptual_hash, background_removed=1, approved=0, checked_at=excluded.checked_at, recovery_receipt_id=NULL WHERE med250_product_images.approved = 0;`);
   }
-  const exactRows = bundle.objects.map((image) => `(
-    product_id = ${sqlString(image.product_id)} AND position = ${sqlNumber(image.position)}
-    AND r2_key = ${sqlString(image.r2_key)} AND content_sha256 = ${sqlString(image.content_sha256)}
-    AND background_removed = 1
-  )`).join(" OR ");
-  statements.push(`INSERT OR IGNORE INTO med250_catalogue_media_recovery_receipts (id, source_project_ref, source_snapshot_sha256, import_snapshot_sha256, source_manifest, gallery_count, image_count, byte_count, target, imported_at)
+  const expectedRows = JSON.stringify(bundle.objects.map((image) => ({
+    product_id: image.product_id,
+    position: image.position,
+    r2_key: image.r2_key,
+    content_sha256: image.content_sha256,
+  })));
+  statements.push(`WITH expected AS (
+  SELECT
+    json_extract(value, '$.product_id') AS product_id,
+    json_extract(value, '$.position') AS position,
+    json_extract(value, '$.r2_key') AS r2_key,
+    json_extract(value, '$.content_sha256') AS content_sha256
+  FROM json_each(${sqlString(expectedRows)})
+)
+INSERT OR IGNORE INTO med250_catalogue_media_recovery_receipts (id, source_project_ref, source_snapshot_sha256, import_snapshot_sha256, source_manifest, gallery_count, image_count, byte_count, target, imported_at)
 SELECT ${[
     receiptId,
     bundle.source_project_ref,
@@ -206,12 +295,15 @@ SELECT ${[
     bundle.target,
     timestamp,
   ].map(sqlString).join(", ")}
-WHERE (SELECT count(*) FROM med250_product_images WHERE ${exactRows}) = ${bundle.image_count};`);
+WHERE (SELECT count(*) FROM med250_product_images image JOIN expected USING (product_id, position)
+  WHERE image.r2_key = expected.r2_key AND image.content_sha256 = expected.content_sha256
+    AND image.background_removed = 1 AND image.rights_verified = 1) = ${bundle.image_count};`);
   for (const image of bundle.objects) {
     statements.push(`UPDATE med250_product_images SET approved = 1, recovery_receipt_id = ${sqlString(receiptId)}
 WHERE product_id = ${sqlString(image.product_id)} AND position = ${sqlNumber(image.position)}
   AND r2_key = ${sqlString(image.r2_key)} AND content_sha256 = ${sqlString(image.content_sha256)}
-  AND background_removed = 1
+  AND background_removed = 1 AND rights_verified = 1
+  AND rights_policy_id = ${sqlString(image.rights_policy_id)}
   AND EXISTS (SELECT 1 FROM med250_catalogue_media_recovery_receipts WHERE id = ${sqlString(receiptId)});`);
   }
   return `${statements.join("\n")}\n`;
@@ -325,13 +417,44 @@ async function wranglerCommand(args, maximum = 16 * 1024 * 1024) {
   return execFileAsync(wrangler, args, { cwd: root, maxBuffer: maximum, encoding: "utf8" });
 }
 
+function commandOutput(error) {
+  return `${error?.stdout ?? ""}\n${error?.stderr ?? ""}\n${error?.message ?? ""}`;
+}
+
+async function wranglerR2CommandWithRetry(args, attempts = 10) {
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      return await wranglerCommand(args);
+    } catch (error) {
+      const output = commandOutput(error);
+      const rateLimited = /429|too many requests|rate.?limit/i.test(output);
+      const transientAuth = /401:\s*unauthorized|authentication error/i.test(output);
+      const transientGateway = /\b5\d\d:\s|error code 5\d\d|api gateway/i.test(output);
+      const transientNetwork = /fetch failed|connectivity issue|econnreset|etimedout|socket hang up/i.test(output);
+      const retryLimit = transientAuth
+        ? Math.min(attempts, 3)
+        : transientGateway || transientNetwork
+          ? Math.min(attempts, 6)
+          : attempts;
+      if ((!rateLimited && !transientAuth && !transientGateway && !transientNetwork) || attempt + 1 >= retryLimit) throw error;
+      const backoff = transientAuth
+        ? 2_000 * (attempt + 1)
+        : transientGateway || transientNetwork
+          ? Math.min(30_000, 3_000 * (2 ** attempt))
+          : Math.min(60_000, 5_000 * (2 ** attempt));
+      await delay(backoff + Math.floor(Math.random() * 1_000));
+    }
+  }
+  throw new MediaRecoveryError("r2_rate_limited", "Cloudflare R2 retry budget was exhausted.");
+}
+
 async function remoteObjectHash(bucket, record, temporaryDirectory) {
   const destination = join(temporaryDirectory, sha256(record.r2_key));
   await rm(destination, { force: true });
   try {
-    await wranglerCommand(["r2", "object", "get", `${bucket}/${record.r2_key}`, "--remote", "--file", destination]);
+    await wranglerR2CommandWithRetry(["r2", "object", "get", `${bucket}/${record.r2_key}`, "--remote", "--file", destination]);
   } catch (error) {
-    const output = `${error?.stdout ?? ""}\n${error?.stderr ?? ""}\n${error?.message ?? ""}`;
+    const output = commandOutput(error);
     if (/specified key does not exist/i.test(output)) return null;
     throw new MediaRecoveryError("r2_readback_command_failed", `R2 could not read ${record.r2_key}: ${output.trim().slice(0, 1_000)}`);
   }
@@ -352,35 +475,48 @@ async function remoteObjectHashWithRetry(bucket, record, temporaryDirectory, att
   return null;
 }
 
+async function forEachConcurrent(values, concurrency, operation) {
+  let cursor = 0;
+  const workers = Array.from({ length: Math.min(concurrency, values.length) }, async () => {
+    while (cursor < values.length) {
+      const index = cursor;
+      cursor += 1;
+      await operation(values[index], index);
+    }
+  });
+  await Promise.all(workers);
+}
+
 async function uploadObjects(bundle, verified) {
   const temporary = await mkdtemp(join(tmpdir(), "med250-r2-verify-"));
   try {
     // Keys are content-addressed by the locally verified SHA-256. Upload before
     // GET so a remote API negative-cache entry cannot hide the new object.
-    for (const record of verified) {
-      await wranglerCommand([
+    await forEachConcurrent(verified, R2_CONCURRENCY, async (record) => {
+      await wranglerR2CommandWithRetry([
         "r2", "object", "put", `${bundle.bucket_name}/${record.r2_key}`,
         "--remote", "--force", "--file", record.absolute_path,
         "--content-type", record.content_type,
         "--cache-control", "public, max-age=31536000, immutable",
         "--content-disposition", "inline",
       ]);
-    }
-    for (let index = 0; index < verified.length; index += 1) {
-      const record = verified[index];
+    });
+    let verifiedCount = 0;
+    await forEachConcurrent(verified, R2_CONCURRENCY, async (record) => {
       const readback = await remoteObjectHashWithRetry(bundle.bucket_name, record, temporary);
       if (!readback || readback.sha256 !== record.content_sha256 || readback.byteCount !== record.byte_count) {
         throw new MediaRecoveryError("r2_readback_mismatch", `R2 readback failed for ${record.r2_key}: expected ${record.content_sha256}/${record.byte_count}, received ${readback?.sha256 ?? "missing"}/${readback?.byteCount ?? 0}.`);
       }
-      if ((index + 1) % 100 === 0) process.stderr.write(`Verified ${index + 1}/${verified.length} immutable R2 objects.\n`);
-    }
+      verifiedCount += 1;
+      if (verifiedCount % 100 === 0) process.stderr.write(`Verified ${verifiedCount}/${verified.length} immutable R2 objects.\n`);
+    });
   } finally {
     await rm(temporary, { recursive: true, force: true });
   }
 }
 
 function d1ReadbackCommand(bundle) {
-  return `SELECT r.id, r.gallery_count, r.image_count, r.byte_count, count(i.r2_key) AS approved_images FROM med250_catalogue_media_recovery_receipts r LEFT JOIN med250_product_images i ON i.recovery_receipt_id = r.id AND i.approved = 1 WHERE r.id = ${sqlString(bundle.receipt_id)} GROUP BY r.id, r.gallery_count, r.image_count, r.byte_count;`;
+  return `SELECT r.id, r.gallery_count, r.image_count, r.byte_count, count(i.r2_key) AS approved_images FROM med250_catalogue_media_recovery_receipts r LEFT JOIN med250_product_images i ON i.recovery_receipt_id = r.id AND i.approved = 1 AND i.rights_verified = 1 WHERE r.id = ${sqlString(bundle.receipt_id)} GROUP BY r.id, r.gallery_count, r.image_count, r.byte_count;`;
 }
 
 async function d1Readback(bundle) {
@@ -402,18 +538,25 @@ async function d1Readback(bundle) {
 }
 
 function d1PreflightCommand(bundle) {
-  const identities = bundle.objects.map((record) => `(
-    product_id = ${sqlString(record.product_id)} AND position = ${sqlNumber(record.position)}
-  )`).join(" OR ");
-  const conflicts = bundle.objects.map((record) => `(
-    product_id = ${sqlString(record.product_id)} AND position = ${sqlNumber(record.position)}
-    AND (coalesce(r2_key, '') <> ${sqlString(record.r2_key)} OR coalesce(content_sha256, '') <> ${sqlString(record.content_sha256)})
-  )`).join(" OR ");
-  const productIds = [...new Set(bundle.objects.map((record) => record.product_id))];
-  return `SELECT
-    (SELECT count(*) FROM med250_catalogue_products WHERE id IN (${productIds.map(sqlString).join(", ")})) AS product_count,
-    (SELECT count(*) FROM med250_product_images WHERE ${identities}) AS existing_image_count,
-    (SELECT count(*) FROM med250_product_images WHERE ${conflicts}) AS conflicting_image_count,
+  const expected = bundle.objects.map((record) => ({
+    product_id: record.product_id,
+    position: record.position,
+    r2_key: record.r2_key,
+    content_sha256: record.content_sha256,
+  }));
+  return `WITH expected AS (
+    SELECT
+      json_extract(value, '$.product_id') AS product_id,
+      json_extract(value, '$.position') AS position,
+      json_extract(value, '$.r2_key') AS r2_key,
+      json_extract(value, '$.content_sha256') AS content_sha256
+    FROM json_each(${sqlString(JSON.stringify(expected))})
+  )
+  SELECT
+    (SELECT count(*) FROM med250_catalogue_products WHERE id IN (SELECT DISTINCT product_id FROM expected)) AS product_count,
+    (SELECT count(*) FROM med250_product_images image JOIN expected USING (product_id, position)) AS existing_image_count,
+    (SELECT count(*) FROM med250_product_images image JOIN expected USING (product_id, position)
+      WHERE coalesce(image.r2_key, '') <> expected.r2_key OR coalesce(image.content_sha256, '') <> expected.content_sha256) AS conflicting_image_count,
     (SELECT count(*) FROM med250_catalogue_media_recovery_receipts WHERE id = ${sqlString(bundle.receipt_id)}) AS receipt_count;`;
 }
 

@@ -92,6 +92,7 @@ export class OperationalHealthRepository {
       staleInbound, activeOrders, waitingOrders, expiredRequestMedia, expiredPrescriptionMedia,
       staleRequestMedia, stalePrescriptionMedia, expiredGrants, dashboardSnapshots,
       dashboardRows, pharmacyReceipts, catalogueReceipts, catalogueMediaReceipts,
+      approvedProductImages, activeRightsVerifiedImages, rightsPendingImages, approvedWithoutRights,
     ] = await Promise.all([
       this.count("med250_pharmacies WHERE licence_status = 'current'"),
       this.count("med250_pharmacies WHERE licence_status = 'current' AND latitude IS NOT NULL AND longitude IS NOT NULL"),
@@ -136,13 +137,20 @@ export class OperationalHealthRepository {
       this.count("med250_pharmacy_registry_import_receipts"),
       this.count("med250_catalogue_import_receipts"),
       this.count("med250_catalogue_media_recovery_receipts"),
+      this.count("med250_product_images WHERE approved = 1"),
+      this.count(`med250_product_images image WHERE image.approved = 1 AND image.rights_verified = 1
+        AND EXISTS (SELECT 1 FROM med250_media_rights_policies policy WHERE policy.id = image.rights_policy_id
+          AND policy.status = 'active' AND policy.effective_at <= ?
+          AND (policy.expires_at IS NULL OR policy.expires_at > ?))`, [at, at]),
+      this.count("med250_product_images WHERE rights_verified = 0"),
+      this.count("med250_product_images WHERE approved = 1 AND rights_verified = 0"),
     ]);
     const staleWork = stalePending + staleClaimed + staleEnqueued + staleSending;
     const expiredNotDeleted = expiredRequestMedia + expiredPrescriptionMedia;
     const staleProcessing = staleRequestMedia + stalePrescriptionMedia;
     const critical = !migrationsCurrent || dispatchReady === 0 || verifiedLogin === 0
       || providerUnknown > 0 || deadLetter > 0 || staleWork > 0 || staleInbound > 0
-      || expiredNotDeleted > 0 || staleProcessing > 0;
+      || expiredNotDeleted > 0 || staleProcessing > 0 || approvedWithoutRights > 0;
     const degraded = failed24h > 0 || retry > 0 || callbackFailures24h > 0 || waitingOrders > 0 || expiredGrants > 0;
     return validatedSnapshot({
       contract_version: HEALTH_CONTRACT, generated_at: at, status: critical ? "critical" : degraded ? "degraded" : "healthy",
@@ -154,6 +162,12 @@ export class OperationalHealthRepository {
       inbound: { stale_unprocessed: staleInbound },
       orders: { active: activeOrders, waiting_without_confirmation_over_30m: waitingOrders },
       private_media: { expired_not_deleted: expiredNotDeleted, stale_processing: staleProcessing, expired_active_grants: expiredGrants },
+      catalogue_media: {
+        approved_images: approvedProductImages,
+        active_rights_verified_images: activeRightsVerifiedImages,
+        rights_pending_images: rightsPendingImages,
+        approved_without_rights: approvedWithoutRights,
+      },
       recovery: { dashboard_snapshots: dashboardSnapshots, dashboard_rows: dashboardRows, pharmacy_registry_receipts: pharmacyReceipts, catalogue_receipts: catalogueReceipts, catalogue_media_receipts: catalogueMediaReceipts },
     });
   }

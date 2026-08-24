@@ -11,6 +11,7 @@ import {
   runStatement,
   type D1Row,
 } from "../../db/index.ts";
+import { ACTIVE_PUBLIC_PRODUCT_IMAGE_SQL } from "./product-image-rights.ts";
 import { dispatchToNearestPharmacies } from "./dispatch-repository.ts";
 
 const HEX_64 = /^[0-9a-f]{64}$/;
@@ -207,7 +208,8 @@ export class OrderRepository {
              product.dosage_form, product.pack_size, product.prescription_status,
              product.regulatory_status, product.is_active, product.is_orderable,
              (select image.r2_key from med250_product_images image
-               where image.product_id = product.id and image.position = 1 and image.approved = 1
+               where image.product_id = product.id and image.position = 1
+                 and ${ACTIVE_PUBLIC_PRODUCT_IMAGE_SQL}
                limit 1) as image_r2_key
       from med250_catalogue_products product
       where product.id in (${inClause(productIds.length)})

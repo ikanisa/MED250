@@ -25,6 +25,8 @@ test("applies every canonical migration to an isolated local D1 database", async
     "0006_inbound_failure_evidence.sql",
     "0007_operator_contact_evidence.sql",
     "0008_dashboard_recovery_reconciliation.sql",
+    "0009_product_image_rights_gate.sql",
+    "0010_expand_product_image_partner_portfolio.sql",
   ]);
 
   await execFileAsync(wrangler, [
@@ -38,8 +40,8 @@ test("applies every canonical migration to an isolated local D1 database", async
     "--command", "SELECT expected_migration, expected_applied_count FROM med250_runtime_contract WHERE contract_key = 'worker_runtime'",
   ], { cwd: root });
   const result = JSON.parse(stdout);
-  assert.equal(result[0].results[0].expected_migration, "0008_dashboard_recovery_reconciliation");
-  assert.equal(result[0].results[0].expected_applied_count, 8);
+  assert.equal(result[0].results[0].expected_migration, "0010_expand_product_image_partner_portfolio");
+  assert.equal(result[0].results[0].expected_applied_count, 10);
 
   const initial = await readFile(new URL("../db/d1/migrations/0001_initial.sql", import.meta.url), "utf8");
   assert.match(initial, /med250_known_pharmacy_numbers/);

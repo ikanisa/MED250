@@ -6,6 +6,7 @@ import {
   parseJsonArray,
   type D1Row,
 } from "../../db/index.ts";
+import { ACTIVE_PUBLIC_PRODUCT_IMAGE_SQL } from "./product-image-rights.ts";
 
 export type CatalogueSearch = {
   query: string;
@@ -198,11 +199,11 @@ const PUBLIC_COLUMNS = `
   product.expiry_date,
   (select '/api/catalogue/media/' || product.id || '/' || image.position
      from med250_product_images image
-    where image.product_id = product.id and image.approved = 1
+    where image.product_id = product.id and ${ACTIVE_PUBLIC_PRODUCT_IMAGE_SQL}
     order by image.position limit 1) as image_url,
   coalesce((select json_group_array('/api/catalogue/media/' || product.id || '/' || ordered.position)
      from (select position from med250_product_images image
-            where image.product_id = product.id and image.approved = 1
+            where image.product_id = product.id and ${ACTIVE_PUBLIC_PRODUCT_IMAGE_SQL}
             order by position) ordered), '[]') as image_urls,
   product.is_orderable,
   product.source_name,
@@ -366,7 +367,7 @@ export class CatalogueRepository {
       from med250_product_images image
       join med250_catalogue_products product on product.id = image.product_id
       where image.product_id in (${inClause(requested.length)})
-        and image.position = 1 and image.approved = 1 and product.is_active = 1
+        and image.position = 1 and ${ACTIVE_PUBLIC_PRODUCT_IMAGE_SQL} and product.is_active = 1
       order by case image.product_id ${order} else ${requested.length} end
     `, [...requested, ...requested]);
   }
@@ -378,7 +379,8 @@ export class CatalogueRepository {
       from med250_product_images image
       join med250_catalogue_products product on product.id = image.product_id
       where image.product_id = ? and image.position = ?
-        and image.approved = 1 and product.is_active = 1 and product.publication_status = 'approved'
+        and ${ACTIVE_PUBLIC_PRODUCT_IMAGE_SQL}
+        and product.is_active = 1 and product.publication_status = 'approved'
       limit 1
     `, [productId, position]);
     if (!row) return null;
