@@ -1,0 +1,34 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_PRESCRIPTION_RETENTION_APPROVED",
+  "evidence_type": "test_record",
+  "status": "complete",
+  "title": "Production prescription retention cleanup execution",
+  "summary": "The protected scheduled cleanup entry point completed successfully and a fresh aggregate privacy-safe production check confirmed that the maintenance signal remains healthy and current.",
+  "recorded_at": "2026-07-16T13:43:37Z",
+  "recorded_by": "Codex automated verifier",
+  "recorded_role": "Release verification agent",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Protected invocation",
+      "status": "passed",
+      "detail": "The private database scheduler helper queued the production cleanup invocation without exposing protected credential material."
+    },
+    {
+      "name": "Cleanup result",
+      "status": "passed",
+      "detail": "The latest maintenance record completed successfully with zero processing errors, zero expired claims, zero active claims and a complete orphan scan."
+    },
+    {
+      "name": "Aggregate privacy",
+      "status": "passed",
+      "detail": "The operational-health result exposed aggregate maintenance counts only and contained no prescription or customer identifiers."
+    }
+  ],
+  "executed_by": "Codex automated verifier",
+  "executor_role": "Release verification agent",
+  "started_at": "2026-07-16T12:15:02Z",
+  "completed_at": "2026-07-16T12:15:04Z"
+}

@@ -1,0 +1,50 @@
+[INFO] 2026-07-17 08:24:58,000 [RapidOCR] base.py:23: Using engine_name: onnxruntime
+[INFO] 2026-07-17 08:24:58,056 [RapidOCR] download_file.py:60: File exists and is valid: /Volumes/PRO-G40/MED250/.venv-product-images/lib/python3.12/site-packages/rapidocr/models/PP-OCRv6_det_small.onnx
+[INFO] 2026-07-17 08:24:58,056 [RapidOCR] main.py:63: Using /Volumes/PRO-G40/MED250/.venv-product-images/lib/python3.12/site-packages/rapidocr/models/PP-OCRv6_det_small.onnx
+[INFO] 2026-07-17 08:24:58,138 [RapidOCR] base.py:23: Using engine_name: onnxruntime
+[INFO] 2026-07-17 08:24:58,139 [RapidOCR] download_file.py:60: File exists and is valid: /Volumes/PRO-G40/MED250/.venv-product-images/lib/python3.12/site-packages/rapidocr/models/ch_ppocr_mobile_v2.0_cls_mobile.onnx
+[INFO] 2026-07-17 08:24:58,157 [RapidOCR] main.py:63: Using /Volumes/PRO-G40/MED250/.venv-product-images/lib/python3.12/site-packages/rapidocr/models/ch_ppocr_mobile_v2.0_cls_mobile.onnx
+[INFO] 2026-07-17 08:24:58,206 [RapidOCR] base.py:23: Using engine_name: onnxruntime
+[INFO] 2026-07-17 08:24:58,306 [RapidOCR] download_file.py:60: File exists and is valid: /Volumes/PRO-G40/MED250/.venv-product-images/lib/python3.12/site-packages/rapidocr/models/PP-OCRv6_rec_small.onnx
+[INFO] 2026-07-17 08:24:58,306 [RapidOCR] main.py:63: Using /Volumes/PRO-G40/MED250/.venv-product-images/lib/python3.12/site-packages/rapidocr/models/PP-OCRv6_rec_small.onnx
+[1/1] incomplete rwanda-fda-hm-0878: 0/5 images
+{
+  "started_at": "2026-07-17T06:24:53+00:00",
+  "dataset": "/Volumes/PRO-G40/MED250/outputs/019f66ce-d480-7a90-9bb7-ee6e417b5ce7/corrected/research/corrected-catalog-dataset-2026-07-15.json",
+  "selected_products": 1,
+  "published": 0,
+  "ready": 0,
+  "incomplete": 1,
+  "deferred": 0,
+  "skipped": 0,
+  "failures": [
+    {
+      "product_id": "rwanda-fda-hm-0878",
+      "name": "RENEDOL TABLETS",
+      "publication_target_count": 5,
+      "final_target_count": 5,
+      "candidate_count": 6,
+      "validated_image_count": 0,
+      "retry_count": 1,
+      "failure_policy_key": "2026-07-17.36:retry-tier-0",
+      "failed_candidate_urls": [
+        "https://www.rene.co.ug/wp-content/uploads/2025/06/renedol-s.png-processed.jpg",
+        "https://www.rene.co.ug/wp-content/uploads/2025/06/renedol-s.png-processed-600x600.jpg",
+        "https://www.rene.co.ug/wp-content/uploads/2025/06/renedol-s.png-processed-300x300.jpg",
+        "https://www.rene.co.ug/wp-content/uploads/2025/06/renedol-s.png-processed-150x150.jpg",
+        "https://www.rene.co.ug/wp-content/uploads/2025/06/renedol-s.png-processed-768x768.jpg",
+        "https://www.rene.co.ug/wp-content/uploads/2025/06/renedol-s.png-processed-100x100.jpg"
+      ],
+      "images": [],
+      "errors": [
+        "https://www.rene.co.ug/wp-content/uploads/2025/06/renedol-s.png-processed.jpg: OCR detected a product strength or pack size that does not match 500 mg 10x10 or 1000 tablets",
+        "https://www.rene.co.ug/wp-content/uploads/2025/06/renedol-s.png-processed-600x600.jpg: OCR detected a product strength or pack size that does not match 500 mg 10x10 or 1000 tablets",
+        "https://www.rene.co.ug/wp-content/uploads/2025/06/renedol-s.png-processed-300x300.jpg: Image resolution is too low: 300x300",
+        "https://www.rene.co.ug/wp-content/uploads/2025/06/renedol-s.png-processed-150x150.jpg: Image resolution is too low: 150x150",
+        "https://www.rene.co.ug/wp-content/uploads/2025/06/renedol-s.png-processed-768x768.jpg: OCR detected a product strength or pack size that does not match 500 mg 10x10 or 1000 tablets",
+        "https://www.rene.co.ug/wp-content/uploads/2025/06/renedol-s.png-processed-100x100.jpg: Image resolution is too low: 100x100"
+      ]
+    }
+  ],
+  "finished_at": "2026-07-17T06:25:07+00:00"
+}

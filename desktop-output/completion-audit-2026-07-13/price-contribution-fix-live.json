@@ -1,0 +1,30 @@
+{
+  "verified_at": "2026-07-13T21:30:19.343138+00:00",
+  "project_ref": "uskfnszcdqpcfrhjxitl",
+  "migration": "fix_price_contribution_conflict_target",
+  "function": "public.dawanear_contribute_price(uuid,text,integer)",
+  "named_conflict_target": "dawanear_pharmacy_prices_pharmacy_id_product_id_key",
+  "permissions": {
+    "public_execute": false,
+    "anon_execute": false,
+    "authenticated_execute": true
+  },
+  "live_uat": {
+    "first_contribution_rwf": 2500,
+    "second_contribution_rwf": 4500,
+    "rejected_contribution_rwf": 6000,
+    "final_range_min_rwf": 2500,
+    "final_range_max_rwf": 4500,
+    "contributors": 2,
+    "rejected_update_rolled_back": true,
+    "persistence": "rolled_back"
+  },
+  "backend_contract": {
+    "version": "2026-07-13.7",
+    "functions": "24/24",
+    "tables": "19/19",
+    "public_execute_count": 0,
+    "missing_authenticated_security_definer_count": 0,
+    "unexpected_authenticated_security_definer_count": 0
+  }
+}

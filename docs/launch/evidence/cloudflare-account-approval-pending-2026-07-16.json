@@ -1,0 +1,64 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED",
+  "evidence_type": "signed_approval",
+  "status": "pending",
+  "title": "MED+250 Cloudflare account and deployment-control approval",
+  "summary": "Owner-ready infrastructure decision for the intended Cloudflare account, production Worker, protected environments, custom-domain ownership and least-privilege deployment credential. The paired account record remains blocked by broad OAuth permissions.",
+  "recorded_at": "2026-07-16T14:08:21+02:00",
+  "recorded_by": "MED+250 infrastructure readiness review",
+  "recorded_role": "Release evidence preparer",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Completed account verification",
+      "status": "blocked",
+      "detail": "The paired account-verification artifact remains pending because the current interactive OAuth session has broad unrelated write permissions."
+    },
+    {
+      "name": "Intended account and Worker ownership",
+      "status": "pending",
+      "detail": "The named infrastructure owner must confirm the redacted production account, production Worker, preview Worker, custom domain and protected deployment environments are the intended assets."
+    },
+    {
+      "name": "Least-privilege deployment credential",
+      "status": "blocked",
+      "detail": "A replacement credential limited to the MED+250 Worker, required route and assets, and read-only zone inspection has not yet been verified."
+    },
+    {
+      "name": "Old broad access revoked",
+      "status": "pending",
+      "detail": "The infrastructure owner has not yet retained redacted proof that the broad interactive credential is removed from the release path and no longer authorises deployment."
+    },
+    {
+      "name": "Protected environment ownership",
+      "status": "pending",
+      "detail": "Named ownership and change authority for preview and production environments, secrets, variables, approval rules and rollback access have not yet been approved."
+    },
+    {
+      "name": "Routing-owner and domain boundary",
+      "status": "pending",
+      "detail": "The owner must confirm the direct production Worker is the sole routing owner for the active hostname and that no Sites project or second Worker competes for it."
+    },
+    {
+      "name": "Named infrastructure-owner signature",
+      "status": "pending",
+      "detail": "The accountable infrastructure owner has not yet recorded the final decision, conditions, named approver, role and timezone-qualified approval timestamp."
+    }
+  ],
+  "account_verification_reference": "docs/launch/evidence/cloudflare-account-verification-pending-2026-07-16.json",
+  "account_verification_sha256": "acab00848593ff22ca094bc934151b63f91bf2737607183133b744493d4dcb62",
+  "decision": null,
+  "approved_by": null,
+  "approved_role": null,
+  "approved_at": null,
+  "completion_instructions": [
+    "Create and install the least-privilege MED+250 deployment credential and remove the broad interactive credential from the release path.",
+    "Complete and strictly validate the paired account-verification artifact with named verification and least_privilege_confirmed set to true.",
+    "Confirm account, Worker, environment, secret, variable, route, custom-domain, approval and rollback ownership.",
+    "Confirm the completed account-verification digest and update this artifact if that record changed.",
+    "Set every check to passed, set decision to approved, add the named approver, role and timezone-qualified timestamp, and set status to complete.",
+    "Validate both completed artifacts strictly and add them to the launch registry only with their exact SHA-256 digests."
+  ]
+}

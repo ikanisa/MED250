@@ -1,0 +1,203 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "med250-marketplace-preview",
+  "compatibility_date": "2026-08-23",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "./worker/index.ts",
+  "workers_dev": true,
+  "vars": {
+    "MED250_RELEASE_MODE": "preview",
+    "MED250_BACKEND_MODE": "worker-d1"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "med250-local",
+      "database_id": "00000000-0000-4000-8000-000000000001",
+      "migrations_dir": "db/d1/migrations"
+    }
+  ],
+  "assets": {
+    "directory": "dist/client",
+    "not_found_handling": "none",
+    "binding": "ASSETS"
+  },
+  "images": { "binding": "IMAGES" },
+  "triggers": { "crons": ["*/1 * * * *"] },
+  "r2_buckets": [
+    {
+      "binding": "PRIVATE_MEDIA",
+      "bucket_name": "med250-private-media-local"
+    }
+  ],
+  "queues": {
+    "producers": [
+      {
+        "binding": "DISPATCH_QUEUE",
+        "queue": "med250-whatsapp-dispatch-local"
+      }
+    ],
+    "consumers": [
+      {
+        "queue": "med250-whatsapp-dispatch-local",
+        "max_batch_size": 10,
+        "max_batch_timeout": 5,
+        "max_retries": 5,
+        "retry_delay": 10,
+        "dead_letter_queue": "med250-whatsapp-dispatch-dlq-local",
+        "max_concurrency": 3
+      },
+      {
+        "queue": "med250-whatsapp-dispatch-dlq-local",
+        "max_batch_size": 10,
+        "max_batch_timeout": 5,
+        "max_retries": 3,
+        "retry_delay": 60,
+        "max_concurrency": 1
+      }
+    ]
+  },
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "invocation_logs": true
+    },
+    "traces": { "enabled": true, "head_sampling_rate": 0.05 }
+  },
+  "env": {
+    "gikundiro": {
+      "name": "med250-marketplace-gikundiro",
+      "workers_dev": false,
+      "preview_urls": false,
+      "routes": [
+        { "pattern": "med-250.com", "custom_domain": true }
+      ],
+      "vars": {
+        "MED250_RELEASE_MODE": "live",
+        "MED250_BACKEND_MODE": "worker-d1",
+        "NEXT_PUBLIC_MED250_DEPLOYMENT_MODE": "live",
+        "NEXT_PUBLIC_MED250_INDEXING_MODE": "public",
+        "NEXT_PUBLIC_MED250_DEPLOYMENT_ORIGIN": "https://med-250.com",
+        "NEXT_PUBLIC_MARKETPLACE_MODE": "live",
+        "NEXT_PUBLIC_SITE_URL": "https://med-250.com",
+        "NEXT_PUBLIC_MED250_OBSERVABILITY": "cloud"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "med250-production",
+          "database_id": "87faa538-bfde-4b23-ae21-c0770436552a",
+          "migrations_dir": "db/d1/migrations"
+        }
+      ],
+      "assets": {
+        "directory": "dist/client",
+        "not_found_handling": "none",
+        "binding": "ASSETS"
+      },
+      "images": { "binding": "IMAGES" },
+      "triggers": { "crons": ["*/1 * * * *"] },
+      "r2_buckets": [
+        {
+          "binding": "PRIVATE_MEDIA",
+          "bucket_name": "med250-private-media-production"
+        }
+      ],
+      "queues": {
+        "producers": [
+          {
+            "binding": "DISPATCH_QUEUE",
+            "queue": "med250-whatsapp-dispatch-production"
+          }
+        ],
+        "consumers": [
+          {
+            "queue": "med250-whatsapp-dispatch-production",
+            "max_batch_size": 10,
+            "max_batch_timeout": 5,
+            "max_retries": 5,
+            "retry_delay": 10,
+            "dead_letter_queue": "med250-whatsapp-dispatch-dlq-production",
+            "max_concurrency": 5
+          },
+          {
+            "queue": "med250-whatsapp-dispatch-dlq-production",
+            "max_batch_size": 10,
+            "max_batch_timeout": 5,
+            "max_retries": 3,
+            "retry_delay": 60,
+            "max_concurrency": 1
+          }
+        ]
+      }
+    },
+    "production": {
+      "name": "med250-marketplace-gikundiro",
+      "workers_dev": false,
+      "preview_urls": false,
+      "routes": [
+        { "pattern": "med-250.com", "custom_domain": true }
+      ],
+      "vars": {
+        "MED250_RELEASE_MODE": "live",
+        "MED250_BACKEND_MODE": "worker-d1",
+        "NEXT_PUBLIC_MED250_DEPLOYMENT_MODE": "live",
+        "NEXT_PUBLIC_MED250_INDEXING_MODE": "public",
+        "NEXT_PUBLIC_MED250_DEPLOYMENT_ORIGIN": "https://med-250.com",
+        "NEXT_PUBLIC_MARKETPLACE_MODE": "live",
+        "NEXT_PUBLIC_SITE_URL": "https://med-250.com",
+        "NEXT_PUBLIC_MED250_OBSERVABILITY": "cloud"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "med250-production",
+          "database_id": "87faa538-bfde-4b23-ae21-c0770436552a",
+          "migrations_dir": "db/d1/migrations"
+        }
+      ],
+      "assets": {
+        "directory": "dist/client",
+        "not_found_handling": "none",
+        "binding": "ASSETS"
+      },
+      "images": { "binding": "IMAGES" },
+      "triggers": { "crons": ["*/1 * * * *"] },
+      "r2_buckets": [
+        {
+          "binding": "PRIVATE_MEDIA",
+          "bucket_name": "med250-private-media-production"
+        }
+      ],
+      "queues": {
+        "producers": [
+          {
+            "binding": "DISPATCH_QUEUE",
+            "queue": "med250-whatsapp-dispatch-production"
+          }
+        ],
+        "consumers": [
+          {
+            "queue": "med250-whatsapp-dispatch-production",
+            "max_batch_size": 10,
+            "max_batch_timeout": 5,
+            "max_retries": 5,
+            "retry_delay": 10,
+            "dead_letter_queue": "med250-whatsapp-dispatch-dlq-production",
+            "max_concurrency": 5
+          },
+          {
+            "queue": "med250-whatsapp-dispatch-dlq-production",
+            "max_batch_size": 10,
+            "max_batch_timeout": 5,
+            "max_retries": 3,
+            "retry_delay": 60,
+            "max_concurrency": 1
+          }
+        ]
+      }
+    }
+  }
+}

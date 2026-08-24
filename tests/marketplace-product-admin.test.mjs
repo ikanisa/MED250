@@ -1,0 +1,67 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import test from "node:test";
+
+import {
+  buildMarketplaceProductPayload,
+  resolveMarketplaceProductEndpoint,
+  runMarketplaceProductAdmin,
+} from "../scripts/marketplace-product-admin.mjs";
+
+const id = "AMZ-B004L5JCZ4";
+const updatedAt = "2026-07-15T18:00:00.000Z";
+const common = ["--product-id", id, "--expected-updated-at", updatedAt, "--reviewed-by", "Marketplace catalogue", "--evidence-note", "Reviewed the central catalogue identity and pharmacy fulfilment model."];
+
+test("builds bounded single-product moderation payloads", () => {
+  assert.deepEqual(buildMarketplaceProductPayload(["list", "--limit", "100"]), {
+    action: "list", status: "research_candidate", category: "", limit: 100,
+  });
+  assert.deepEqual(buildMarketplaceProductPayload(["inspect", "--product-id", id]), { action: "inspect", product_id: id });
+  assert.equal(buildMarketplaceProductPayload(["start-review", ...common]).action, "start_review");
+  const approval = buildMarketplaceProductPayload([
+    "approve", ...common,
+    "--compliance-evidence-url", "https://evidence.example/compliance/1",
+  ]);
+  assert.equal(approval.product_id, id);
+  assert.equal(approval.action, "approve");
+  assert.equal(buildMarketplaceProductPayload(["approve", ...common]).seller_evidence_url, undefined);
+  assert.throws(() => buildMarketplaceProductPayload(["list", "--limit", "101"]), /1 to 100/);
+});
+
+test("keeps the marketplace admin token process-only", async () => {
+  const environment = { MED250_OPERATOR_ORIGIN: "https://staging.med-250.com", MED250_ADMIN_TOKEN: "test-marketplace-admin-token-32!" };
+  let captured;
+  await runMarketplaceProductAdmin(["inspect", "--product-id", id], {
+    environment,
+    fetchImpl: async (url, init) => {
+      captured = { url: String(url), init };
+      return new Response(JSON.stringify({ product: { id } }), { status: 200 });
+    },
+  });
+  assert.equal(captured.url, "https://staging.med-250.com/api/internal/operator/products");
+  assert.equal(captured.init.headers.Authorization, `Bearer ${environment.MED250_ADMIN_TOKEN}`);
+  assert.equal(JSON.parse(captured.init.body).product_id, id);
+  await assert.rejects(runMarketplaceProductAdmin(["inspect", "--product-id", id], { environment: { MED250_OPERATOR_ORIGIN: environment.MED250_OPERATOR_ORIGIN } }), /MED250_ADMIN_TOKEN/);
+  assert.throws(() => resolveMarketplaceProductEndpoint({ MED250_OPERATOR_ORIGIN: "http://localhost:8787" }), /HTTPS origin/);
+});
+
+test("protects the Edge reviewer and prohibits batch approval", async () => {
+  const [edge, config, migration] = await Promise.all([
+    readFile(new URL("../supabase/functions/review-marketplace-products/index.ts", import.meta.url), "utf8"),
+    readFile(new URL("../supabase/config.toml", import.meta.url), "utf8"),
+    readFile(new URL("../supabase/migrations/20260716062012_central_catalogue_pharmacy_sellers.sql", import.meta.url), "utf8"),
+  ]);
+  assert.match(edge, /secretMatches/);
+  assert.match(edge, /MED250_ADMIN_TOKEN/);
+  assert.match(edge, /X-MED250-Admin-Token/);
+  assert.match(edge, /dawanear_review_marketplace_product/);
+  assert.match(edge, /p_product_id: productId/);
+  assert.doesNotMatch(edge, /batch.*approve/i);
+  assert.match(config, /\[functions\.review-marketplace-products\][\s\S]*verify_jwt = false/);
+  assert.match(migration, /dawanear_marketplace_product_reviews_immutable/);
+  assert.match(migration, /product_seller_columns_absent/);
+  assert.doesNotMatch(migration, /p_seller_evidence_url/);
+  assert.match(migration, /p_expected_updated_at/);
+  assert.match(migration, /grant execute[\s\S]*to service_role/);
+  assert.doesNotMatch(migration, /grant execute[\s\S]*to (anon|authenticated)/i);
+});

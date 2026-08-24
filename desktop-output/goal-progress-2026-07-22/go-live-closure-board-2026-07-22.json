@@ -1,0 +1,833 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "classification": "go-live closure board; execution aid only, not evidence or approval",
+  "production_ready": false,
+  "summary": {
+    "gate_count": 11,
+    "confirmed_gates": 0,
+    "approval_pending_gates": 2,
+    "prepared_evidence_pending_gates": 8,
+    "missing_evidence_gates": 0,
+    "stale_release_evidence_gates": 1,
+    "duplicate_register_pending_groups": 51,
+    "physical_uat_pending_scenarios": 12,
+    "prepared_handoff_artifacts": 11,
+    "required_handoff_artifacts": 11
+  },
+  "closure_order": [
+    "MED250_GATE_DUPLICATE_REGISTER_REVIEWED",
+    "MED250_GATE_GPS_READY",
+    "MED250_GATE_WHATSAPP_READY",
+    "MED250_GATE_SECURITY_HARDENING_DEPLOYED",
+    "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED",
+    "MED250_GATE_TURNSTILE_SERVER_VERIFIED",
+    "MED250_GATE_AUTH_RATE_LIMITS_APPROVED",
+    "MED250_GATE_PRESCRIPTION_RETENTION_APPROVED",
+    "MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED",
+    "MED250_GATE_DOMAIN_DNS_VERIFIED",
+    "MED250_GATE_PHYSICAL_UAT_PASSED"
+  ],
+  "owner_workstreams": {
+    "register-data": {
+      "owners": [
+        "MED+250 register data reviewer"
+      ],
+      "gates": [
+        "MED250_GATE_DUPLICATE_REGISTER_REVIEWED"
+      ],
+      "blocker_count": 3
+    },
+    "operations": {
+      "owners": [
+        "MED+250 operations"
+      ],
+      "gates": [
+        "MED250_GATE_GPS_READY",
+        "MED250_GATE_WHATSAPP_READY"
+      ],
+      "blocker_count": 4
+    },
+    "backend": {
+      "owners": [
+        "MED+250 backend owner"
+      ],
+      "gates": [
+        "MED250_GATE_SECURITY_HARDENING_DEPLOYED",
+        "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED"
+      ],
+      "blocker_count": 4
+    },
+    "security": {
+      "owners": [
+        "MED+250 security owner"
+      ],
+      "gates": [
+        "MED250_GATE_TURNSTILE_SERVER_VERIFIED",
+        "MED250_GATE_AUTH_RATE_LIMITS_APPROVED"
+      ],
+      "blocker_count": 4
+    },
+    "privacy": {
+      "owners": [
+        "MED+250 privacy owner"
+      ],
+      "gates": [
+        "MED250_GATE_PRESCRIPTION_RETENTION_APPROVED"
+      ],
+      "blocker_count": 2
+    },
+    "infrastructure": {
+      "owners": [
+        "MED+250 infrastructure owner"
+      ],
+      "gates": [
+        "MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED",
+        "MED250_GATE_DOMAIN_DNS_VERIFIED"
+      ],
+      "blocker_count": 4
+    },
+    "qa": {
+      "owners": [
+        "MED+250 QA owner"
+      ],
+      "gates": [
+        "MED250_GATE_PHYSICAL_UAT_PASSED"
+      ],
+      "blocker_count": 3
+    }
+  },
+  "instructions": [
+    "Work through gates in closure_order unless an accountable owner explicitly changes the sequence.",
+    "Complete row-level reviews and physical UAT before attempting final live release approval.",
+    "After every completed artifact, run npm run launch:evidence:verify and npm run launch:go-live:status.",
+    "Run npm run launch:evidence:verify:live only when every gate is ready for strict release."
+  ],
+  "gates": [
+    {
+      "gate": "MED250_GATE_DUPLICATE_REGISTER_REVIEWED",
+      "title": "Duplicate-register review",
+      "owner": "MED+250 register data reviewer",
+      "workstream": "register-data",
+      "current_status": "pending",
+      "readiness": "prepared_evidence_pending",
+      "closure_focus": "Resolve every synchronized duplicate official identifier without deleting or rewriting source rows to force a pass.",
+      "acceptance": "The strict duplicate-register verifier passes with named, timestamped decisions for every synchronized product and pharmacy duplicate group.",
+      "evidence": {
+        "required_types": [
+          "review_ledger"
+        ],
+        "supplied": [],
+        "missing_types": [
+          "review_ledger"
+        ],
+        "prepared_pending": [
+          {
+            "type": "review_ledger",
+            "reference": "docs/launch/evidence/duplicate-register-review-ledger-pending-2026-07-16.json",
+            "sha256": "c4caaff554d7846ba1db7c45426687bee265b82e3547be4cbc5e30bbbab4c205",
+            "byte_length": 3975,
+            "template_valid": true,
+            "unresolved_check_count": 2,
+            "completion_instruction_count": 6
+          }
+        ],
+        "unprepared_types": [],
+        "ci_launch_gate_variable": "MED250_GATE_DUPLICATE_REGISTER_REVIEWED"
+      },
+      "approval": {
+        "required": true,
+        "complete": false,
+        "approved_by": null,
+        "approved_role": null,
+        "approved_at": null
+      },
+      "blockers": [
+        "Missing required evidence type(s): review_ledger.",
+        "Missing named accountable-owner approval metadata.",
+        "51 duplicate-register group(s) remain pending in data/imports/duplicate-register-review.csv."
+      ],
+      "next_actions": [
+        "Regenerate the duplicate source-comparison packet.",
+        "Have a named register data reviewer decide all 51 duplicate groups in the controlled CSV ledger.",
+        "Run the strict duplicate verifier and build the redacted review-ledger artifact only after it passes.",
+        "Record the artifact and gate approval through the guarded registry helper."
+      ],
+      "commands": [
+        "npm run data:duplicates:packet",
+        "npm run data:duplicates:verify -- --strict",
+        "npm run data:duplicates:evidence:build -- --date YYYY-MM-DD --reviewed-by \"Named register data reviewer\" --reviewer-role \"Register data reviewer\" --reviewed-at \"YYYY-MM-DDTHH:mm:ss+02:00\"",
+        "npm run launch:evidence:record -- --artifact docs/launch/evidence/duplicate-register-review-ledger-YYYY-MM-DD.json --replace --confirm --approved-by \"Named register data reviewer\" --approved-role \"Register data reviewer\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\""
+      ],
+      "safety_rules": [
+        "Do not mark a gate confirmed until every required evidence type is recorded and the accountable owner has approved it.",
+        "Do not store credentials, tokens, phone numbers, OTPs, customer identifiers, email addresses, prescription contents, exact customer coordinates, or unredacted account identifiers.",
+        "Use pending artifacts only as completion workbooks; do not add them to data/launch-evidence.json until they are complete and pass validation.",
+        "Keep prepared-evidence and approval work separate; an automated result cannot sign for an accountable owner."
+      ]
+    },
+    {
+      "gate": "MED250_GATE_GPS_READY",
+      "title": "Authoritative pharmacy GPS readiness",
+      "owner": "MED+250 operations",
+      "workstream": "operations",
+      "current_status": "pending",
+      "readiness": "prepared_evidence_pending",
+      "closure_focus": "Approve only authoritative pharmacy premises coordinates for the intended responder scope.",
+      "acceptance": "The approved operating pharmacy set has authoritative premises coordinates with reviewer identity and durable source evidence, and strict operational health reports dispatch-ready coverage.",
+      "evidence": {
+        "required_types": [
+          "operations_snapshot",
+          "review_ledger"
+        ],
+        "supplied": [
+          {
+            "type": "operations_snapshot",
+            "reference": "docs/launch/evidence/gps-operational-health-2026-07-16.json",
+            "recorded_at": "2026-07-16T13:43:37Z",
+            "sha256": "98eade6bf6be83e1a4f558bb3729dfde03a5df5c329be640298983c6a09acde4"
+          }
+        ],
+        "missing_types": [
+          "review_ledger"
+        ],
+        "prepared_pending": [
+          {
+            "type": "review_ledger",
+            "reference": "docs/launch/evidence/gps-readiness-review-ledger-pending-2026-07-16.json",
+            "sha256": "7395c111b11d8d960df78070f5be65d0e69f78a41013c5c524e4b3de10c4abba",
+            "byte_length": 4264,
+            "template_valid": true,
+            "unresolved_check_count": 2,
+            "completion_instruction_count": 6
+          }
+        ],
+        "unprepared_types": [],
+        "ci_launch_gate_variable": "MED250_GATE_GPS_READY"
+      },
+      "approval": {
+        "required": true,
+        "complete": false,
+        "approved_by": null,
+        "approved_role": null,
+        "approved_at": null
+      },
+      "blockers": [
+        "Missing required evidence type(s): review_ledger.",
+        "Missing named accountable-owner approval metadata."
+      ],
+      "next_actions": [
+        "Regenerate the GPS and WhatsApp operations review index.",
+        "Complete the controlled private GPS row-level review ledger for every active pharmacy record.",
+        "Reconcile the approved GPS scope with actual routing and dispatch eligibility.",
+        "Run strict operational health, then build and record the redacted aggregate review-ledger artifact with accountable operations approval."
+      ],
+      "commands": [
+        "npm run ops:readiness:packet",
+        "npm run ops:health:strict",
+        "npm run ops:readiness:evidence:build -- --input desktop-output/goal-progress-YYYY-MM-DD/gps-readiness-review-result.json --date YYYY-MM-DD",
+        "npm run launch:evidence:record -- --artifact docs/launch/evidence/gps-readiness-review-ledger-YYYY-MM-DD.json --replace --confirm --approved-by \"Named operations owner\" --approved-role \"Operations owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\""
+      ],
+      "safety_rules": [
+        "Do not mark a gate confirmed until every required evidence type is recorded and the accountable owner has approved it.",
+        "Do not store credentials, tokens, phone numbers, OTPs, customer identifiers, email addresses, prescription contents, exact customer coordinates, or unredacted account identifiers.",
+        "Use pending artifacts only as completion workbooks; do not add them to data/launch-evidence.json until they are complete and pass validation.",
+        "Keep prepared-evidence and approval work separate; an automated result cannot sign for an accountable owner."
+      ]
+    },
+    {
+      "gate": "MED250_GATE_WHATSAPP_READY",
+      "title": "Pharmacy WhatsApp readiness",
+      "owner": "MED+250 operations",
+      "workstream": "operations",
+      "current_status": "pending",
+      "readiness": "prepared_evidence_pending",
+      "closure_focus": "Approve only pharmacy-authorised WhatsApp identities for the intended responder scope.",
+      "acceptance": "The approved operating pharmacy set has current, pharmacy-authorised login-enabled WhatsApp contacts and the strict operational-health check passes.",
+      "evidence": {
+        "required_types": [
+          "operations_snapshot",
+          "review_ledger"
+        ],
+        "supplied": [
+          {
+            "type": "operations_snapshot",
+            "reference": "docs/launch/evidence/whatsapp-operational-health-2026-07-16.json",
+            "recorded_at": "2026-07-16T13:43:37Z",
+            "sha256": "1608a4a9d63b327d78b1cd2ebc8ce5e895a4115d12c56e9574db16cc93d0e6f9"
+          }
+        ],
+        "missing_types": [
+          "review_ledger"
+        ],
+        "prepared_pending": [
+          {
+            "type": "review_ledger",
+            "reference": "docs/launch/evidence/whatsapp-readiness-review-ledger-pending-2026-07-16.json",
+            "sha256": "7afabcf594627b49633d24cab9f8a4c9a1325965273c8b8ffddde29aeed6edf1",
+            "byte_length": 4581,
+            "template_valid": true,
+            "unresolved_check_count": 2,
+            "completion_instruction_count": 7
+          }
+        ],
+        "unprepared_types": [],
+        "ci_launch_gate_variable": "MED250_GATE_WHATSAPP_READY"
+      },
+      "approval": {
+        "required": true,
+        "complete": false,
+        "approved_by": null,
+        "approved_role": null,
+        "approved_at": null
+      },
+      "blockers": [
+        "Missing required evidence type(s): review_ledger.",
+        "Missing named accountable-owner approval metadata."
+      ],
+      "next_actions": [
+        "Regenerate the GPS and WhatsApp operations review index.",
+        "Complete the controlled private WhatsApp row-level review ledger for every active pharmacy record.",
+        "Reconcile the approved WhatsApp responder scope with login-enabled portal access and routing.",
+        "Run strict operational health, then build and record the redacted aggregate review-ledger artifact with accountable operations approval."
+      ],
+      "commands": [
+        "npm run ops:readiness:packet",
+        "npm run ops:health:strict",
+        "npm run ops:readiness:evidence:build -- --input desktop-output/goal-progress-YYYY-MM-DD/whatsapp-readiness-review-result.json --date YYYY-MM-DD",
+        "npm run launch:evidence:record -- --artifact docs/launch/evidence/whatsapp-readiness-review-ledger-YYYY-MM-DD.json --replace --confirm --approved-by \"Named operations owner\" --approved-role \"Operations owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\""
+      ],
+      "safety_rules": [
+        "Do not mark a gate confirmed until every required evidence type is recorded and the accountable owner has approved it.",
+        "Do not store credentials, tokens, phone numbers, OTPs, customer identifiers, email addresses, prescription contents, exact customer coordinates, or unredacted account identifiers.",
+        "Use pending artifacts only as completion workbooks; do not add them to data/launch-evidence.json until they are complete and pass validation.",
+        "Keep prepared-evidence and approval work separate; an automated result cannot sign for an accountable owner."
+      ]
+    },
+    {
+      "gate": "MED250_GATE_SECURITY_HARDENING_DEPLOYED",
+      "title": "Security-hardening migration deployment",
+      "owner": "MED+250 backend owner",
+      "workstream": "backend",
+      "current_status": "pending",
+      "readiness": "approval_pending",
+      "closure_focus": "Review the complete backend hardening evidence and record real backend-owner approval.",
+      "acceptance": "The forward security migrations and contract refresh are deployed using rotated credentials, and the privileged backend verifier returns contract 2026-07-18.3 with the runtime and DDL product-image governance guards, aggregate public trust-metric boundary, fail-closed product-description workflow, and all invariants passing.",
+      "evidence": {
+        "required_types": [
+          "deployment_receipt",
+          "test_record"
+        ],
+        "supplied": [
+          {
+            "type": "deployment_receipt",
+            "reference": "docs/launch/evidence/security-hardening-deployment-2026-07-18.json",
+            "recorded_at": "2026-07-18T17:24:14Z",
+            "sha256": "dcfdeac982b75a11240db1bfd4a2150ff9c15833055eb1f9485cf0938896b3a3"
+          },
+          {
+            "type": "test_record",
+            "reference": "docs/launch/evidence/security-hardening-test-2026-07-18.json",
+            "recorded_at": "2026-07-18T17:28:30Z",
+            "sha256": "9d01de4bc5949cb5024ae159192c0c1abb429132c902a688d4dbba8b597d784b"
+          }
+        ],
+        "missing_types": [],
+        "prepared_pending": [],
+        "unprepared_types": [],
+        "ci_launch_gate_variable": "MED250_GATE_SECURITY_HARDENING_DEPLOYED"
+      },
+      "approval": {
+        "required": true,
+        "complete": false,
+        "approved_by": null,
+        "approved_role": null,
+        "approved_at": null
+      },
+      "blockers": [
+        "Missing named accountable-owner approval metadata.",
+        "Machine evidence is present; owner review and approval remain deliberately separate."
+      ],
+      "next_actions": [
+        "Regenerate the approval packet and inspect every referenced deployment/test artifact.",
+        "Confirm the evidence still satisfies the backend contract and hardening acceptance criterion.",
+        "Record named backend-owner approval without changing evidence facts."
+      ],
+      "commands": [
+        "npm run launch:approval:packet",
+        "npm run backend:verify",
+        "npm run launch:gate:approve -- --gate MED250_GATE_SECURITY_HARDENING_DEPLOYED --approved-by \"Named backend owner\" --approved-role \"Backend owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\""
+      ],
+      "safety_rules": [
+        "Do not mark a gate confirmed until every required evidence type is recorded and the accountable owner has approved it.",
+        "Do not store credentials, tokens, phone numbers, OTPs, customer identifiers, email addresses, prescription contents, exact customer coordinates, or unredacted account identifiers.",
+        "Use pending artifacts only as completion workbooks; do not add them to data/launch-evidence.json until they are complete and pass validation.",
+        "Keep prepared-evidence and approval work separate; an automated result cannot sign for an accountable owner."
+      ]
+    },
+    {
+      "gate": "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED",
+      "title": "Revised Edge Function deployment",
+      "owner": "MED+250 backend owner",
+      "workstream": "backend",
+      "current_status": "pending",
+      "readiness": "approval_pending",
+      "closure_focus": "Review the complete Edge Function deployment evidence and record real backend-owner approval.",
+      "acceptance": "The reviewed OTP, cleanup, geocoding, marketplace-review, contact-review and product-description-review Edge Function versions are deployed and their protected-access boundaries pass.",
+      "evidence": {
+        "required_types": [
+          "deployment_receipt",
+          "test_record"
+        ],
+        "supplied": [
+          {
+            "type": "deployment_receipt",
+            "reference": "docs/launch/evidence/edge-functions-deployment-2026-07-18.json",
+            "recorded_at": "2026-07-18T17:19:45Z",
+            "sha256": "2fec968b290b47c6d1f1390f327f9a57ce6b3f49db4eb93712b6d67dd8a8c74c"
+          },
+          {
+            "type": "test_record",
+            "reference": "docs/launch/evidence/edge-functions-test-2026-07-18.json",
+            "recorded_at": "2026-07-18T17:19:45Z",
+            "sha256": "ebfd598a100390952c29fb09c99a11c1e7035b4b7b5591aad1731548da1dc7c8"
+          }
+        ],
+        "missing_types": [],
+        "prepared_pending": [],
+        "unprepared_types": [],
+        "ci_launch_gate_variable": "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED"
+      },
+      "approval": {
+        "required": true,
+        "complete": false,
+        "approved_by": null,
+        "approved_role": null,
+        "approved_at": null
+      },
+      "blockers": [
+        "Missing named accountable-owner approval metadata.",
+        "Machine evidence is present; owner review and approval remain deliberately separate."
+      ],
+      "next_actions": [
+        "Regenerate the approval packet and inspect every referenced Edge Function deployment/test artifact.",
+        "Confirm the active function versions and protected-access boundaries still match the intended release.",
+        "Record named backend-owner approval without changing evidence facts."
+      ],
+      "commands": [
+        "npm run launch:approval:packet",
+        "npm run backend:verify:description-reviewer -- --product-id \"$MED250_DESCRIPTION_REVIEWER_PROBE_PRODUCT_ID\" --expected-updated-at \"$MED250_DESCRIPTION_REVIEWER_PROBE_EXPECTED_UPDATED_AT\"",
+        "npm run launch:gate:approve -- --gate MED250_GATE_EDGE_FUNCTIONS_DEPLOYED --approved-by \"Named backend owner\" --approved-role \"Backend owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\""
+      ],
+      "safety_rules": [
+        "Do not mark a gate confirmed until every required evidence type is recorded and the accountable owner has approved it.",
+        "Do not store credentials, tokens, phone numbers, OTPs, customer identifiers, email addresses, prescription contents, exact customer coordinates, or unredacted account identifiers.",
+        "Use pending artifacts only as completion workbooks; do not add them to data/launch-evidence.json until they are complete and pass validation.",
+        "Keep prepared-evidence and approval work separate; an automated result cannot sign for an accountable owner."
+      ]
+    },
+    {
+      "gate": "MED250_GATE_TURNSTILE_SERVER_VERIFIED",
+      "title": "Turnstile server verification",
+      "owner": "MED+250 security owner",
+      "workstream": "security",
+      "current_status": "pending",
+      "readiness": "prepared_evidence_pending",
+      "closure_focus": "Prove the production widget positive path while keeping invalid/missing-token rejection intact.",
+      "acceptance": "Supabase Auth validates production Turnstile tokens and controlled tests prove invalid or missing tokens cannot create new customer identities.",
+      "evidence": {
+        "required_types": [
+          "test_record"
+        ],
+        "supplied": [],
+        "missing_types": [
+          "test_record"
+        ],
+        "prepared_pending": [
+          {
+            "type": "test_record",
+            "reference": "docs/launch/evidence/turnstile-positive-path-test-pending-2026-07-16.json",
+            "sha256": "5e4d07c89f7df5ba2a42dff2d741832b1f9b1386b17475c4849d155d0dad6dc0",
+            "byte_length": 3654,
+            "template_valid": true,
+            "unresolved_check_count": 5,
+            "completion_instruction_count": 5
+          }
+        ],
+        "unprepared_types": [],
+        "ci_launch_gate_variable": "MED250_GATE_TURNSTILE_SERVER_VERIFIED"
+      },
+      "approval": {
+        "required": true,
+        "complete": false,
+        "approved_by": null,
+        "approved_role": null,
+        "approved_at": null
+      },
+      "blockers": [
+        "Missing required evidence type(s): test_record.",
+        "Missing named accountable-owner approval metadata."
+      ],
+      "next_actions": [
+        "Run the real production Turnstile widget positive-path test with one disposable anonymous identity.",
+        "Delete or revoke the disposable identity and verify aggregate user count returns to the approved baseline.",
+        "Build the redacted test artifact from the retained verifier result and record security-owner approval."
+      ],
+      "commands": [
+        "npm run security:turnstile:verify -- --require-valid",
+        "npm run security:turnstile:evidence:build -- --input desktop-output/goal-progress-YYYY-MM-DD/turnstile-verifier-result.json --date YYYY-MM-DD --executed-by \"Named security tester\" --executor-role \"Security owner\" --started-at \"YYYY-MM-DDTHH:mm:ss+02:00\" --completed-at \"YYYY-MM-DDTHH:mm:ss+02:00\" --no-marketplace-side-effect-confirmed",
+        "npm run launch:evidence:record -- --artifact docs/launch/evidence/turnstile-positive-path-test-YYYY-MM-DD.json --replace --confirm --approved-by \"Named security owner\" --approved-role \"Security owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\""
+      ],
+      "safety_rules": [
+        "Do not mark a gate confirmed until every required evidence type is recorded and the accountable owner has approved it.",
+        "Do not store credentials, tokens, phone numbers, OTPs, customer identifiers, email addresses, prescription contents, exact customer coordinates, or unredacted account identifiers.",
+        "Use pending artifacts only as completion workbooks; do not add them to data/launch-evidence.json until they are complete and pass validation.",
+        "Keep prepared-evidence and approval work separate; an automated result cannot sign for an accountable owner."
+      ]
+    },
+    {
+      "gate": "MED250_GATE_AUTH_RATE_LIMITS_APPROVED",
+      "title": "Anonymous-auth rate-limit approval",
+      "owner": "MED+250 security owner",
+      "workstream": "security",
+      "current_status": "pending",
+      "readiness": "prepared_evidence_pending",
+      "closure_focus": "Approve the shared Supabase anonymous-auth limits only after impact testing intended access and excess-attempt rejection.",
+      "acceptance": "Project-wide anonymous-auth limits are approved after impact review and controlled tests prove intended customers can order without weakening abuse controls.",
+      "evidence": {
+        "required_types": [
+          "signed_approval",
+          "test_record"
+        ],
+        "supplied": [],
+        "missing_types": [
+          "signed_approval",
+          "test_record"
+        ],
+        "prepared_pending": [
+          {
+            "type": "signed_approval",
+            "reference": "docs/launch/evidence/auth-rate-limit-approval-pending-2026-07-16.json",
+            "sha256": "d12a2ba58394168c0b49304d1626e6199672fffdd0c8915126769a2fede14145",
+            "byte_length": 3365,
+            "template_valid": true,
+            "unresolved_check_count": 6,
+            "completion_instruction_count": 5
+          },
+          {
+            "type": "test_record",
+            "reference": "docs/launch/evidence/auth-rate-limit-test-pending-2026-07-16.json",
+            "sha256": "a097f876ddadcd3f802091170cc47198e819c80cbfbfe4cd04573e0b923da2ef",
+            "byte_length": 3936,
+            "template_valid": true,
+            "unresolved_check_count": 7,
+            "completion_instruction_count": 6
+          }
+        ],
+        "unprepared_types": [],
+        "ci_launch_gate_variable": "MED250_GATE_AUTH_RATE_LIMITS_APPROVED"
+      },
+      "approval": {
+        "required": true,
+        "complete": false,
+        "approved_by": null,
+        "approved_role": null,
+        "approved_at": null
+      },
+      "blockers": [
+        "Missing required evidence type(s): signed_approval, test_record.",
+        "Missing named accountable-owner approval metadata."
+      ],
+      "next_actions": [
+        "Complete the controlled rate-limit test with fresh real widget responses.",
+        "Confirm excess anonymous identity creation is rejected and intended customers still complete ordering.",
+        "Remove disposable identities and record the project-wide security-owner approval."
+      ],
+      "commands": [
+        "npm run security:turnstile:verify -- --require-valid",
+        "npm run security:auth-rate-limit:evidence:build -- --input desktop-output/goal-progress-YYYY-MM-DD/auth-rate-limit-result.json --date YYYY-MM-DD --executed-by \"Named security tester\" --executor-role \"Security owner\" --started-at \"YYYY-MM-DDTHH:mm:ss+02:00\" --completed-at \"YYYY-MM-DDTHH:mm:ss+02:00\" --approved-by \"Named security owner\" --approved-role \"Security owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\" --next-review-at \"YYYY-MM-DDTHH:mm:ss+02:00\" --change-authority \"Named security owner with shared-project owner notice\" --rollback-criteria \"Restore the prior project setting if aggregate Auth health or legitimate customer access regresses\" --legitimate-peak-profile \"Privacy-safe expected anonymous customer session demand for the launch window\" --abuse-risk-decision \"Selected limit balances launch demand with automated abuse resistance\" --monitoring-decision \"Aggregate Auth and Worker health monitoring remains active through launch and first review\"",
+        "npm run launch:evidence:record -- --artifact docs/launch/evidence/auth-rate-limit-test-YYYY-MM-DD.json --replace",
+        "npm run launch:evidence:record -- --artifact docs/launch/evidence/auth-rate-limit-approval-YYYY-MM-DD.json --replace --confirm --approved-by \"Named security owner\" --approved-role \"Security owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\""
+      ],
+      "safety_rules": [
+        "Do not mark a gate confirmed until every required evidence type is recorded and the accountable owner has approved it.",
+        "Do not store credentials, tokens, phone numbers, OTPs, customer identifiers, email addresses, prescription contents, exact customer coordinates, or unredacted account identifiers.",
+        "Use pending artifacts only as completion workbooks; do not add them to data/launch-evidence.json until they are complete and pass validation.",
+        "Keep prepared-evidence and approval work separate; an automated result cannot sign for an accountable owner."
+      ]
+    },
+    {
+      "gate": "MED250_GATE_PRESCRIPTION_RETENTION_APPROVED",
+      "title": "Prescription-retention approval",
+      "owner": "MED+250 privacy owner",
+      "workstream": "privacy",
+      "current_status": "pending",
+      "readiness": "prepared_evidence_pending",
+      "closure_focus": "Approve the implemented prescription retention periods and cleanup schedule against privacy-owner criteria.",
+      "acceptance": "The privacy owner approves the implemented retention periods and cleanup schedule, and a controlled cleanup run produces a healthy, non-stale aggregate signal.",
+      "evidence": {
+        "required_types": [
+          "signed_approval",
+          "test_record"
+        ],
+        "supplied": [
+          {
+            "type": "test_record",
+            "reference": "docs/launch/evidence/prescription-retention-test-2026-07-16.json",
+            "recorded_at": "2026-07-16T13:43:37Z",
+            "sha256": "7ed3d3dff07e1bfcd37550fb7ff2074e50346b8f4221d69be93d3d54946db525"
+          }
+        ],
+        "missing_types": [
+          "signed_approval"
+        ],
+        "prepared_pending": [
+          {
+            "type": "signed_approval",
+            "reference": "docs/launch/evidence/prescription-retention-approval-pending-2026-07-16.json",
+            "sha256": "ac1d8a085a4248f88d1e9de180d296cd368cc9a483d4292149d3ce87e2e6c8be",
+            "byte_length": 3397,
+            "template_valid": true,
+            "unresolved_check_count": 2,
+            "completion_instruction_count": 6
+          }
+        ],
+        "unprepared_types": [],
+        "ci_launch_gate_variable": "MED250_GATE_PRESCRIPTION_RETENTION_APPROVED"
+      },
+      "approval": {
+        "required": true,
+        "complete": false,
+        "approved_by": null,
+        "approved_role": null,
+        "approved_at": null
+      },
+      "blockers": [
+        "Missing required evidence type(s): signed_approval.",
+        "Missing named accountable-owner approval metadata."
+      ],
+      "next_actions": [
+        "Review the retention policy and existing controlled cleanup test record.",
+        "Build the signed approval artifact with the privacy owner decisions.",
+        "Record approval only after the owner accepts the retention periods, cleanup cadence, monitoring and incident conditions."
+      ],
+      "commands": [
+        "npm run privacy:prescription-retention:evidence:build -- --date YYYY-MM-DD --approved-by \"Named privacy owner\" --approved-role \"Privacy owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\" --next-review-at \"YYYY-MM-DDTHH:mm:ss+02:00\" --legal-basis-decision \"Privacy-safe legal basis decision\" --controller-processor-decision \"Privacy-safe controller and processor decision\" --transfer-decision \"Privacy-safe transfer and evidence-storage decision\" --notification-decision \"Privacy-safe notification assessment decision\" --incident-contacts-decision \"Controlled staff register contains accountable privacy and security incident roles\" --retention-decision \"The implemented 24-hour and 30-day prescription retention periods are accepted\" --pharmacy-handling-decision \"Selected pharmacy staff handling requirements are accepted\" --review-conditions \"Review is required after material workflow, storage, retention, incident or legal-obligation changes\"",
+        "npm run launch:evidence:record -- --artifact docs/launch/evidence/prescription-retention-approval-YYYY-MM-DD.json --replace --confirm --approved-by \"Named privacy owner\" --approved-role \"Privacy owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\""
+      ],
+      "safety_rules": [
+        "Do not mark a gate confirmed until every required evidence type is recorded and the accountable owner has approved it.",
+        "Do not store credentials, tokens, phone numbers, OTPs, customer identifiers, email addresses, prescription contents, exact customer coordinates, or unredacted account identifiers.",
+        "Use pending artifacts only as completion workbooks; do not add them to data/launch-evidence.json until they are complete and pass validation.",
+        "Keep prepared-evidence and approval work separate; an automated result cannot sign for an accountable owner."
+      ]
+    },
+    {
+      "gate": "MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED",
+      "title": "Cloudflare account verification",
+      "owner": "MED+250 infrastructure owner",
+      "workstream": "infrastructure",
+      "current_status": "pending",
+      "readiness": "prepared_evidence_pending",
+      "closure_focus": "Prove the intended Cloudflare account, route ownership, protected environments and least-privilege deployment credential.",
+      "acceptance": "The intended Cloudflare account, least-privilege deploy token, Worker names, protected environments and route ownership are verified with a redacted account record.",
+      "evidence": {
+        "required_types": [
+          "account_verification",
+          "signed_approval"
+        ],
+        "supplied": [],
+        "missing_types": [
+          "account_verification",
+          "signed_approval"
+        ],
+        "prepared_pending": [
+          {
+            "type": "account_verification",
+            "reference": "docs/launch/evidence/cloudflare-account-verification-pending-2026-07-16.json",
+            "sha256": "acab00848593ff22ca094bc934151b63f91bf2737607183133b744493d4dcb62",
+            "byte_length": 2172,
+            "template_valid": true,
+            "unresolved_check_count": 2,
+            "completion_instruction_count": 0
+          },
+          {
+            "type": "signed_approval",
+            "reference": "docs/launch/evidence/cloudflare-account-approval-pending-2026-07-16.json",
+            "sha256": "a98fb0e9eda526e4efb9ffb24bb71130291a0c4a46b2e638d0e5c9dbcfe92307",
+            "byte_length": 3731,
+            "template_valid": true,
+            "unresolved_check_count": 7,
+            "completion_instruction_count": 6
+          }
+        ],
+        "unprepared_types": [],
+        "ci_launch_gate_variable": "MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED"
+      },
+      "approval": {
+        "required": true,
+        "complete": false,
+        "approved_by": null,
+        "approved_role": null,
+        "approved_at": null
+      },
+      "blockers": [
+        "Missing required evidence type(s): account_verification, signed_approval.",
+        "Missing named accountable-owner approval metadata."
+      ],
+      "next_actions": [
+        "Replace any broad release-path access with a credential scoped to the MED+250 Worker, route, assets and read-only zone inspection.",
+        "Build the redacted account-verification artifact without exposing account identifiers or tokens.",
+        "Build the infrastructure approval artifact and record the gate only after least privilege is true."
+      ],
+      "commands": [
+        "wrangler whoami",
+        "npm run infra:cloudflare-account:evidence:build -- --input desktop-output/goal-progress-YYYY-MM-DD/cloudflare-account-result.json --date YYYY-MM-DD --verified-by \"Named infrastructure verifier\" --verifier-role \"Infrastructure owner\" --verified-at \"YYYY-MM-DDTHH:mm:ss+02:00\" --approved-by \"Named infrastructure owner\" --approved-role \"Infrastructure owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\" --next-review-at \"YYYY-MM-DDTHH:mm:ss+02:00\" --account-ownership-decision \"Redacted account, production Worker and preview Worker are intended MED+250 release assets\" --credential-scope-decision \"Replacement release credential is limited to MED+250 deployment needs and read-only zone inspection\" --release-path-decision \"Broad interactive access is removed from the release path and cannot deploy production\" --environment-ownership-decision \"Protected production and preview environments have named ownership, approval rules, secrets and variables\" --routing-boundary-decision \"The direct production Worker route is the sole active owner of the production hostname\" --rollback-decision \"Rollback authority and emergency release access are assigned to the infrastructure owner group\"",
+        "npm run launch:evidence:record -- --artifact docs/launch/evidence/cloudflare-account-verification-YYYY-MM-DD.json --replace",
+        "npm run launch:evidence:record -- --artifact docs/launch/evidence/cloudflare-account-approval-YYYY-MM-DD.json --replace --confirm --approved-by \"Named infrastructure owner\" --approved-role \"Infrastructure owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\""
+      ],
+      "safety_rules": [
+        "Do not mark a gate confirmed until every required evidence type is recorded and the accountable owner has approved it.",
+        "Do not store credentials, tokens, phone numbers, OTPs, customer identifiers, email addresses, prescription contents, exact customer coordinates, or unredacted account identifiers.",
+        "Use pending artifacts only as completion workbooks; do not add them to data/launch-evidence.json until they are complete and pass validation.",
+        "Keep prepared-evidence and approval work separate; an automated result cannot sign for an accountable owner."
+      ]
+    },
+    {
+      "gate": "MED250_GATE_DOMAIN_DNS_VERIFIED",
+      "title": "Production domain and DNS verification",
+      "owner": "MED+250 infrastructure owner",
+      "workstream": "infrastructure",
+      "current_status": "pending",
+      "readiness": "stale_release_evidence",
+      "closure_focus": "Review the fresh live domain evidence and record infrastructure-owner approval.",
+      "acceptance": "med250.gikundiro.com resolves through the intended Cloudflare account, TLS is healthy, the Worker custom-domain route is attached and the deployment verifier passes in live mode.",
+      "evidence": {
+        "required_types": [
+          "domain_verification",
+          "test_record"
+        ],
+        "supplied": [
+          {
+            "type": "domain_verification",
+            "reference": "docs/launch/evidence/domain-verification-2026-07-20.json",
+            "recorded_at": "2026-07-20T16:26:57.716Z",
+            "sha256": "80f304f77cfbee602f134bec07f82bbfd517ea7129c0117050926d49774154e9"
+          },
+          {
+            "type": "test_record",
+            "reference": "docs/launch/evidence/domain-deployment-test-2026-07-20.json",
+            "recorded_at": "2026-07-20T16:26:57.716Z",
+            "sha256": "d3cb225ef5859451bb631880aa42c1ce6dbed4ddfd0359ea36699830057ea813"
+          }
+        ],
+        "missing_types": [],
+        "prepared_pending": [],
+        "unprepared_types": [],
+        "ci_launch_gate_variable": "MED250_GATE_DOMAIN_DNS_VERIFIED"
+      },
+      "approval": {
+        "required": true,
+        "complete": false,
+        "approved_by": null,
+        "approved_role": null,
+        "approved_at": null
+      },
+      "blockers": [
+        "Missing named accountable-owner approval metadata.",
+        "Release-bound evidence is stale against the current repository checkout; rerun the exact-revision live verifier before approval."
+      ],
+      "next_actions": [
+        "Rerun DNS and live deployment verification if any Worker, route, DNS or repository revision changed.",
+        "Confirm med250.gikundiro.com is attached only to the intended Cloudflare Worker route.",
+        "Record named infrastructure-owner approval against the current domain and deployment evidence."
+      ],
+      "commands": [
+        "npm run domain:dns:verify",
+        "npm run deployment:verify -- --url https://med250.gikundiro.com --mode live --expected-revision <exact-lowercase-40-character-git-sha> --evidence-output desktop-output/goal-progress-YYYY-MM-DD/domain-deployment-receipt.json",
+        "npm run domain:evidence:refresh -- --deployment-evidence desktop-output/goal-progress-YYYY-MM-DD/domain-deployment-receipt.json --expected-revision git --date YYYY-MM-DD",
+        "npm run launch:gate:approve -- --gate MED250_GATE_DOMAIN_DNS_VERIFIED --approved-by \"Named infrastructure owner\" --approved-role \"Infrastructure owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\""
+      ],
+      "safety_rules": [
+        "Do not mark a gate confirmed until every required evidence type is recorded and the accountable owner has approved it.",
+        "Do not store credentials, tokens, phone numbers, OTPs, customer identifiers, email addresses, prescription contents, exact customer coordinates, or unredacted account identifiers.",
+        "Use pending artifacts only as completion workbooks; do not add them to data/launch-evidence.json until they are complete and pass validation.",
+        "Keep prepared-evidence and approval work separate; an automated result cannot sign for an accountable owner."
+      ]
+    },
+    {
+      "gate": "MED250_GATE_PHYSICAL_UAT_PASSED",
+      "title": "Controlled physical-device UAT",
+      "owner": "MED+250 QA owner",
+      "workstream": "qa",
+      "current_status": "pending",
+      "readiness": "prepared_evidence_pending",
+      "closure_focus": "Execute all physical-device UAT scenarios with opaque approved identities and no unintended pharmacy contact.",
+      "acceptance": "Named test identities pass GPS consent, WhatsApp OTP, dispatch, realtime confirmation, selection, WhatsApp, MoMo, expiry, cancellation and prescription-access scenarios without contacting unintended pharmacies.",
+      "evidence": {
+        "required_types": [
+          "signed_approval",
+          "test_record"
+        ],
+        "supplied": [],
+        "missing_types": [
+          "signed_approval",
+          "test_record"
+        ],
+        "prepared_pending": [
+          {
+            "type": "signed_approval",
+            "reference": "docs/launch/evidence/physical-device-uat-approval-pending-2026-07-16.json",
+            "sha256": "4f7ff02776f27b3b00af4607bb3aadc06d5ae66d01dd4404e94825270fa87f6c",
+            "byte_length": 3395,
+            "template_valid": true,
+            "unresolved_check_count": 7,
+            "completion_instruction_count": 5
+          },
+          {
+            "type": "test_record",
+            "reference": "docs/launch/evidence/physical-device-uat-test-pending-2026-07-16.json",
+            "sha256": "764ea78ae4c63eae68fc6a180fcf31c5826ffcd3d75c8e2202d702b4656d0f01",
+            "byte_length": 4743,
+            "template_valid": true,
+            "unresolved_check_count": 12,
+            "completion_instruction_count": 6
+          }
+        ],
+        "unprepared_types": [],
+        "ci_launch_gate_variable": "MED250_GATE_PHYSICAL_UAT_PASSED"
+      },
+      "approval": {
+        "required": true,
+        "complete": false,
+        "approved_by": null,
+        "approved_role": null,
+        "approved_at": null
+      },
+      "blockers": [
+        "Missing required evidence type(s): signed_approval, test_record.",
+        "Missing named accountable-owner approval metadata.",
+        "12 physical-device UAT scenario(s) remain pending in data/physical-device-uat.json."
+      ],
+      "next_actions": [
+        "Regenerate the physical-device UAT packet.",
+        "Execute all 12 scenarios on approved physical devices with redacted evidence references.",
+        "Update the governed UAT ledger, then build the paired test/approval artifacts from the strict ledger.",
+        "Run strict UAT verification, then record QA-owner approval."
+      ],
+      "commands": [
+        "npm run uat:packet",
+        "npm run uat:verify:live",
+        "npm run uat:evidence:build -- --date YYYY-MM-DD",
+        "npm run launch:evidence:record -- --artifact docs/launch/evidence/physical-device-uat-test-YYYY-MM-DD.json --replace",
+        "npm run launch:evidence:record -- --artifact docs/launch/evidence/physical-device-uat-approval-YYYY-MM-DD.json --replace --confirm --approved-by \"Named QA owner\" --approved-role \"QA owner\" --approved-at \"YYYY-MM-DDTHH:mm:ss+02:00\""
+      ],
+      "safety_rules": [
+        "Do not mark a gate confirmed until every required evidence type is recorded and the accountable owner has approved it.",
+        "Do not store credentials, tokens, phone numbers, OTPs, customer identifiers, email addresses, prescription contents, exact customer coordinates, or unredacted account identifiers.",
+        "Use pending artifacts only as completion workbooks; do not add them to data/launch-evidence.json until they are complete and pass validation.",
+        "Keep prepared-evidence and approval work separate; an automated result cannot sign for an accountable owner."
+      ]
+    }
+  ]
+}

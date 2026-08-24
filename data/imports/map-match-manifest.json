@@ -1,0 +1,8 @@
+{
+  "generated_at": "2026-07-12T11:51:32.621Z",
+  "fda_pharmacies": 766,
+  "unique_google_places": 156,
+  "automatically_matched": 80,
+  "needs_review": 686,
+  "note": "Name matching never marks GPS as verified. Google Places detail lookup and human review remain required."
+}

@@ -1,0 +1,271 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "captured_at": "2026-07-16T11:57:59Z",
+  "objective_complete": false,
+  "public_origin": "https://med250.gikundiro.com",
+  "release_decision": "conditional_hold",
+  "summary": "All currently authorised machine-executable implementation, deployment, database, catalogue, security, privacy-cleanup, DNS, performance, and verification work passes. The strict production release remains incomplete because accountable human approvals, authoritative duplicate decisions, credential-rotation evidence, one controlled Turnstile positive-path test, anonymous-auth rate-limit approval, and physical-device UAT are not complete.",
+  "automated_verification": {
+    "release_check": "passed",
+    "automated_tests": {
+      "passed": 164,
+      "failed": 0
+    },
+    "lint": "passed",
+    "dependency_security_audit": {
+      "status": "passed",
+      "known_vulnerabilities": 0,
+      "node_minimum_failure_severity": "moderate",
+      "python_exact_pin_count": 10,
+      "python_advisory_source": "OSV"
+    },
+    "data_validation": "passed_with_governed_duplicate_review_warnings",
+    "catalogue_quality": "passed",
+    "product_image_tests": {
+      "passed": 15,
+      "failed": 0
+    },
+    "python_pipeline_tests": {
+      "passed": 43,
+      "failed": 0
+    },
+    "performance_budget": {
+      "status": "passed",
+      "javascript_transfer_bytes": 204821,
+      "css_transfer_bytes": 26637,
+      "marketplace_javascript_transfer_bytes": 99302,
+      "initial_visual_asset_bytes": 73183
+    },
+    "wrangler_preview_dry_run": "passed",
+    "production_build_and_dry_run": "passed",
+    "live_deployment_routes": {
+      "status": "passed",
+      "route_count": 7
+    },
+    "domain_dns": "passed",
+    "git_diff_check": "passed"
+  },
+  "catalogue": {
+    "source_product_count": 4680,
+    "source_medicine_count": 2480,
+    "amazon_first_consumer_candidate_count": 2405,
+    "approved_live_consumer_product_count": 2200,
+    "rejected_consumer_candidate_count": 205,
+    "amazon_taxonomy_pair_count": 25,
+    "active_orderable_medicine_count": 2459,
+    "active_orderable_total_count": 4659,
+    "central_indicative_price_count": 128,
+    "amazon_price_count": 0,
+    "pharmacy_specific_catalogue_price_count": 0,
+    "public_stock_support": false,
+    "seller_model": "Only pharmacies participate as fulfilment sellers. Products and indicative prices are central; pharmacies privately confirm availability and may optionally add a non-final estimate during customer interaction."
+  },
+  "backend": {
+    "contract_version": "2026-07-16.10",
+    "migration_ledger": "aligned_at_last_privileged_verification",
+    "publication_audit_constraint": "active",
+    "product_image_governance": {
+      "unsafe_public_rows": 0,
+      "partial_galleries": 0,
+      "retained_unverified_rows": 51,
+      "storage_objects": 0,
+      "latest_removed_storage_objects": 21,
+      "cumulative_removed_storage_objects": 69,
+      "runtime_guard": "active",
+      "ddl_guard": "active_and_rejection_tested"
+    },
+    "edge_functions": {
+      "status": "deployed_and_protected",
+      "count": 6
+    },
+    "prescription_cleanup": {
+      "schedule": "every_6_hours",
+      "last_controlled_result": "healthy"
+    },
+    "database_advisors": {
+      "med_performance_warnings": 0,
+      "shared_project_security_total": 95,
+      "shared_project_security_warnings": 74,
+      "shared_project_performance_total": 109,
+      "med_security_warnings": 37,
+      "med_security_info": 10,
+      "remaining_security_notes": "Documented intentional GraphQL, authenticated RPC, anonymous-sign-in, and deny-by-default controls; password breach screening remains disabled in the current project configuration."
+    },
+    "authentication_configuration": {
+      "turnstile_enabled": true,
+      "turnstile_provider": "turnstile",
+      "anonymous_users_enabled": true,
+      "anonymous_user_rate_limit": 30,
+      "jwt_exp_seconds": 3600,
+      "refresh_token_rotation_enabled": true,
+      "missing_token_test": "passed_without_user_count_change",
+      "invalid_token_test": "passed_without_user_count_change",
+      "valid_widget_test": "pending_owner_controlled_execution"
+    }
+  },
+  "operations_snapshot": {
+    "active_pharmacies": 769,
+    "gps_ready_pharmacies": 93,
+    "pharmacies_with_whatsapp": 300,
+    "login_enabled_whatsapp_contacts": 338,
+    "pharmacies_with_phone": 340,
+    "quarantined_browser_phone_candidates": 0,
+    "dispatch_ready_pharmacies": 300,
+    "whatsapp_delivery_failures_24h": 0,
+    "strict_health_findings": 0
+  },
+  "strict_gate_state": {
+    "launch_evidence": {
+      "pending": 15,
+      "confirmed": 0
+    },
+    "duplicate_register_groups": {
+      "pending": 51,
+      "product_registration_groups": 6,
+      "pharmacy_professional_registration_groups": 45
+    },
+    "physical_uat_scenarios": {
+      "pending": 12,
+      "passed": 0
+    }
+  },
+  "cloudflare_account_audit": {
+    "authenticated": true,
+    "visible_account_count": 1,
+    "credential_type": "interactive_oauth",
+    "reported_permission_count": 29,
+    "least_privilege_confirmed": false,
+    "production_deployment_visible": true,
+    "production_custom_domain": "med250.gikundiro.com",
+    "pending_artifact": "docs/launch/evidence/cloudflare-account-verification-pending-2026-07-16.json"
+  },
+  "data_reuse_audit": {
+    "status": "pending_owner_review",
+    "source_class_count": 9,
+    "pending_source_classes": 6,
+    "blocked_source_classes": 3,
+    "source_digest_count": 32,
+    "amazon_price_count": 0,
+    "rwanda_observed_central_price_count": 128,
+    "pending_artifact": "docs/launch/evidence/data-reuse-review-ledger-pending-2026-07-16.json",
+    "blockers": [
+      "Retain exact raw Rwanda FDA register snapshots and record their SHA-256 digests.",
+      "Replace the Rwanda FDA duty-roster source-digest placeholder with exact PDF digests.",
+      "Place the local Amazon catalogue-research snapshot under an approved durable retention arrangement."
+    ]
+  },
+  "pharmacy_operations_procedure": {
+    "status": "pending_operations_lead_approval",
+    "procedure": "docs/launch/PHARMACY_OPERATIONS_SOP.md",
+    "procedure_sha256": "7719c4975ce29b06e10c29865156e39c9abcf5c05ae635a65858b09f50379624",
+    "pending_artifact": "docs/launch/evidence/pharmacy-operations-approval-pending-2026-07-16.json",
+    "technical_scope_documented": [
+      "pharmacy-only participation and central catalogue boundaries",
+      "nearby ranking and national responder fallback",
+      "private item-by-item availability confirmation",
+      "optional private non-final pharmacy estimates",
+      "customer selection and WhatsApp handoff",
+      "prescription access and retention boundaries",
+      "cancellation, completion and expiry",
+      "contact, location, monitoring and incident procedures"
+    ],
+    "remaining_owner_action": "Assign named operating and escalation roles, confirm the procedure is operationally usable for the intended pharmacy set, and sign the redacted approval artifact."
+  },
+  "pharmacy_readiness_review_ledgers": {
+    "gps": {
+      "status": "pending_record_level_review",
+      "active_pharmacies": 769,
+      "approved_records": 93,
+      "pending_records": 676,
+      "artifact": "docs/launch/evidence/gps-readiness-review-ledger-pending-2026-07-16.json"
+    },
+    "whatsapp": {
+      "status": "pending_record_level_review",
+      "active_pharmacies": 769,
+      "approved_pharmacies": 300,
+      "approved_login_contacts": 338,
+      "pending_pharmacies": 469,
+      "artifact": "docs/launch/evidence/whatsapp-readiness-review-ledger-pending-2026-07-16.json"
+    },
+    "privacy_boundary": "Precise coordinates and contact values remain in controlled private ledgers; release artifacts contain only aggregate counts and immutable source digests."
+  },
+  "prescription_retention_policy": {
+    "status": "pending_privacy_owner_approval",
+    "policy": "docs/launch/PRESCRIPTION_RETENTION_POLICY.md",
+    "policy_sha256": "70a77a1e721b94348125032bcd529e9a89baa3f6cfda907ee3b8070e1d47b88f",
+    "test_artifact": "docs/launch/evidence/prescription-retention-test-2026-07-16.json",
+    "test_sha256": "14925d74e8d1bc2e996e0fa2efcc488426f6a3c3766fc82d9226abc0203fd90c",
+    "pending_artifact": "docs/launch/evidence/prescription-retention-approval-pending-2026-07-16.json",
+    "remaining_owner_action": "Approve the periods and safeguards, assign incident roles, record applicable legal conditions, and sign the redacted approval."
+  },
+  "remaining_accountable_actions": [
+    {
+      "priority": 1,
+      "owner": "MED+250 security owner",
+      "action": "Revoke and rotate every previously exposed Supabase service, database, personal, and deployment credential; replace the broad Cloudflare OAuth session with a least-privilege MED+250 deploy credential; attach redacted deployment receipts and signed approval.",
+      "closes": [
+        "MED250_GATE_CREDENTIALS_ROTATED",
+        "MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED"
+      ]
+    },
+    {
+      "priority": 2,
+      "owner": "MED+250 regulatory data reviewer",
+      "action": "Review the generated source-comparison packet and record a named, timestamped, reasoned decision for all 51 duplicate groups without inferring a decision from matching identifiers alone.",
+      "closes": [
+        "MED250_GATE_DUPLICATE_REGISTER_REVIEWED"
+      ]
+    },
+    {
+      "priority": 3,
+      "owner": "MED+250 operations",
+      "action": "Complete the controlled row-level GPS and pharmacy-authorised WhatsApp reviews, then finish docs/launch/evidence/gps-readiness-review-ledger-pending-2026-07-16.json and docs/launch/evidence/whatsapp-readiness-review-ledger-pending-2026-07-16.json. Reconcile the approved scopes with actual routing and portal access. Do not invent coordinates, contacts, stock, or pharmacy-specific prices.",
+      "closes": [
+        "MED250_GATE_GPS_READY",
+        "MED250_GATE_WHATSAPP_READY"
+      ]
+    },
+    {
+      "priority": 4,
+      "owner": "MED+250 security owner",
+      "action": "Use a controlled browser to obtain a real production Turnstile token, create only a disposable anonymous auth identity without sending an availability request, delete the identity, and record a redacted positive-path test. Then review and test anonymous-auth rate limits and sign both security gates.",
+      "closes": [
+        "MED250_GATE_TURNSTILE_SERVER_VERIFIED",
+        "MED250_GATE_AUTH_RATE_LIMITS_APPROVED"
+      ]
+    },
+    {
+      "priority": 5,
+      "owner": "MED+250 QA owner and named physical-device operators",
+      "action": "Execute all 12 controlled physical-device scenarios using approved customer, pharmacy, and unrelated-pharmacy test identities. Retain redacted results and obtain named QA approval; do not contact an unintended pharmacy.",
+      "closes": [
+        "MED250_GATE_PHYSICAL_UAT_PASSED"
+      ]
+    },
+    {
+      "priority": 6,
+      "owner": "MED+250 operations lead, legal/compliance owner, data owner, privacy owner, backend owner, and infrastructure owner",
+      "action": "Review the exact gate acceptance criteria and existing evidence, provide the missing signed approvals and review ledgers, and name each approver with role and timezone-qualified timestamp. The operations lead must complete docs/launch/evidence/pharmacy-operations-approval-pending-2026-07-16.json after assigning the named roles. The data owner must complete docs/launch/evidence/data-reuse-review-ledger-pending-2026-07-16.json and resolve its three raw-snapshot or durable-retention blockers before signing. The privacy owner must complete docs/launch/evidence/prescription-retention-approval-pending-2026-07-16.json after approving legal conditions and incident roles. Backend and domain evidence is already complete but still requires accountable approval.",
+      "closes": [
+        "MED250_GATE_PHARMACY_OPERATIONS_APPROVED",
+        "MED250_GATE_REGULATORY_APPROVED",
+        "MED250_GATE_DATA_REUSE_APPROVED",
+        "MED250_GATE_SECURITY_HARDENING_DEPLOYED",
+        "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED",
+        "MED250_GATE_PRESCRIPTION_RETENTION_APPROVED",
+        "MED250_GATE_DOMAIN_DNS_VERIFIED"
+      ]
+    }
+  ],
+  "final_machine_sequence_after_evidence": [
+    "npm run launch:evidence:verify:live",
+    "npm run data:duplicates:verify -- --strict",
+    "npm run uat:verify:live",
+    "npm run backend:verify",
+    "npm run ops:health:strict",
+    "npm run release:check:live",
+    "npm run deployment:verify -- --url https://med250.gikundiro.com --mode live"
+  ],
+  "safety_conclusion": "Do not fabricate approvals, duplicate decisions, physical-device results, pharmacy data, stock, prices, or a positive Turnstile result. The public catalogue is active, but formal production approval remains on hold until every strict evidence gate is genuinely confirmed and the live release check passes."
+}

@@ -1,0 +1,53 @@
+{
+  "captured_at": "2026-07-13",
+  "status": "external_authentication_required",
+  "mutation_performed": false,
+  "cli": {
+    "wrangler_version": "4.110.0",
+    "authenticated": false,
+    "authentication_evidence": "wrangler whoami reported that no Cloudflare account is authenticated"
+  },
+  "repository_release_boundary": {
+    "preview_worker": "med250-marketplace-preview",
+    "preview_release_mode": "preview",
+    "production_worker": "med250-marketplace",
+    "production_release_mode": "live",
+    "production_workers_dev": false,
+    "production_routes": [
+      "med250.rw/*",
+      "www.med250.rw/*"
+    ],
+    "local_production_deploy_selects_environment": true,
+    "github_production_deploy_selects_environment": true,
+    "github_preview_deploy_uses_default_preview_worker": true
+  },
+  "production_artifact": {
+    "build_status": "passed",
+    "artifact_assertions": "3/3 passed",
+    "strict_dry_run": "passed",
+    "upload_kib": 3190.57,
+    "gzip_kib": 629.01,
+    "deployed": false
+  },
+  "account_checks_not_run": [
+    "Cloudflare account access and deployment scope",
+    "med250.rw zone ownership and active DNS records",
+    "existing preview and production Worker state",
+    "route conflict and custom-domain attachment",
+    "protected GitHub environment variables and secrets",
+    "Cloudflare Images entitlement",
+    "runtime logs, alerts and field performance",
+    "post-deployment route, header and indexing verification"
+  ],
+  "next_authorised_actions": [
+    "Authenticate Wrangler or provide the protected CI credentials through the approved environment",
+    "Run read-only account, zone, Worker and route inspection",
+    "Configure the med250-preview and med250-production protected environments",
+    "Deploy and verify the preview Worker before any production DNS cutover"
+  ],
+  "references": [
+    "https://developers.cloudflare.com/workers/wrangler/environments/",
+    "https://developers.cloudflare.com/workers/wrangler/commands/general/",
+    "https://developers.cloudflare.com/workers/ci-cd/external-cicd/github-actions/"
+  ]
+}

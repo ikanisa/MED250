@@ -1,0 +1,53 @@
+[
+  {
+    "product_id": "rwanda-fda-hm-0451",
+    "source_page_url": "https://biodeallaboratories.com/pharmaceuticals/human-health/mycodeal_spray/",
+    "source_kind": "manufacturer",
+    "rights_basis": "Exact Mycodeal bifonazole 1% solution packshot from the official Biodeal Laboratories WordPress media library; deterministically enlarged from the 500 x 500 original with Lanczos resampling and stored as an immutable source artifact; source page and original image URL retained for traceability; reuse rights not independently verified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 126,
+    "width": 1600,
+    "height": 1600,
+    "source_original_image_url": "https://biodeallaboratories.com/wp-content/uploads/2025/07/mycodeal_spray.jpg",
+    "source_transform": "Lanczos resize from 500 x 500 to 1600 x 1600; no generated or altered product content",
+    "title": "Mycodeal Bifonazole Solution 1% 15 ml Biodeal Laboratories",
+    "images": [
+      "https://uskfnszcdqpcfrhjxitl.supabase.co/storage/v1/object/public/product-images/source-artifacts/v1/rwanda-fda-hm-0451/069fc343d342440e787e78e92b73bea92fe6072bba7b8818f1d4c56fe701ddae-mycodeal-solution-official-lanczos.png"
+    ]
+  },
+  {
+    "product_id": "rwanda-fda-hm-1457",
+    "source_page_url": "https://biodeallaboratories.com/pharmaceuticals/human-health/rayzium/",
+    "source_kind": "manufacturer",
+    "rights_basis": "Exact Rayzium esomeprazole 40 mg 30-tablet packshot from the official Biodeal Laboratories WordPress media library; deterministically enlarged from the 500 x 500 original with Lanczos resampling and stored as an immutable source artifact; source page and original image URL retained for traceability; reuse rights not independently verified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 126,
+    "width": 1600,
+    "height": 1600,
+    "source_original_image_url": "https://biodeallaboratories.com/wp-content/uploads/2025/07/rayzium.jpg",
+    "source_transform": "Lanczos resize from 500 x 500 to 1600 x 1600; no generated or altered product content",
+    "title": "Rayzium Esomeprazole 40 mg 30 Tablets Biodeal Laboratories",
+    "images": [
+      "https://uskfnszcdqpcfrhjxitl.supabase.co/storage/v1/object/public/product-images/source-artifacts/v1/rwanda-fda-hm-1457/2c502bde9b3f58cd85fd2e37f669a3a159935a77ad735d9d8024e138aabbaf4b-rayzium-40mg-official-lanczos.png"
+    ]
+  },
+  {
+    "product_id": "rwanda-fda-hm-1704",
+    "source_page_url": "https://biodeallaboratories.com/pharmaceuticals/human-health/emeton/",
+    "source_kind": "manufacturer",
+    "rights_basis": "Exact Emeton metoclopramide oral syrup 60 ml packshot from the official Biodeal Laboratories WordPress media library; deterministically enlarged from the 500 x 500 original with Lanczos resampling and stored as an immutable source artifact; source page and original image URL retained for traceability; reuse rights not independently verified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 126,
+    "width": 1600,
+    "height": 1600,
+    "source_original_image_url": "https://biodeallaboratories.com/wp-content/uploads/2025/07/emeton.jpg",
+    "source_transform": "Lanczos resize from 500 x 500 to 1600 x 1600; no generated or altered product content",
+    "title": "Emeton Metoclopramide Oral Syrup 60 ml Biodeal Laboratories",
+    "images": [
+      "https://uskfnszcdqpcfrhjxitl.supabase.co/storage/v1/object/public/product-images/source-artifacts/v1/rwanda-fda-hm-1704/c30f43751e52017efaa13f3969fe31b36ca71b0793ff6848b670dfd307b52b4d-emeton-syrup-official-lanczos.png"
+    ]
+  }
+]

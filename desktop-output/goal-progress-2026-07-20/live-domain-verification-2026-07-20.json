@@ -1,0 +1,186 @@
+{
+  "schemaVersion": "1.0",
+  "capturedAt": "2026-07-20T16:26:57.716Z",
+  "status": "passed",
+  "origin": "https://med250.gikundiro.com",
+  "mode": "live",
+  "observedReleaseRevision": "37d8c1c0e0c8ac2d15eea436d2f9037c20e2814c",
+  "expectedReleaseRevision": "37d8c1c0e0c8ac2d15eea436d2f9037c20e2814c",
+  "releaseRevisionExpectation": "matched",
+  "routeCount": 10,
+  "routes": [
+    {
+      "route": "/",
+      "status": 200,
+      "finalOrigin": "https://med250.gikundiro.com",
+      "headers": {
+        "content-security-policy": "default-src 'self'; base-uri 'self'; connect-src 'self' https://uskfnszcdqpcfrhjxitl.supabase.co wss://uskfnszcdqpcfrhjxitl.supabase.co https://maps.googleapis.com https://maps.gstatic.com; font-src 'self' data:; form-action 'self'; frame-ancestors 'none'; img-src 'self' data: blob: https://uskfnszcdqpcfrhjxitl.supabase.co https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.gstatic.com; manifest-src 'self'; media-src 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://maps.googleapis.com https://maps.gstatic.com https://static.cloudflareinsights.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; frame-src https://challenges.cloudflare.com; upgrade-insecure-requests; worker-src 'self' blob:",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-site",
+        "permissions-policy": "camera=(), geolocation=(self), microphone=()",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "server-timing": "app;dur=0.0, cfEdge;dur=195,cfOrigin;dur=0,cfWorker;dur=71",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-med250-release-revision": "37d8c1c0e0c8ac2d15eea436d2f9037c20e2814c",
+        "x-request-id": "59005750-0f10-44f1-9d64-b2d02c2e8be3"
+      },
+      "bodyBytes": 109381,
+      "bodySha256": "c154d09b635fe82253279df8feabe0f395c0ccdaeaa6bd33974dc07ccb615e20"
+    },
+    {
+      "route": "/categories",
+      "status": 200,
+      "finalOrigin": "https://med250.gikundiro.com",
+      "headers": {
+        "content-security-policy": "default-src 'self'; base-uri 'self'; connect-src 'self' https://uskfnszcdqpcfrhjxitl.supabase.co wss://uskfnszcdqpcfrhjxitl.supabase.co https://maps.googleapis.com https://maps.gstatic.com; font-src 'self' data:; form-action 'self'; frame-ancestors 'none'; img-src 'self' data: blob: https://uskfnszcdqpcfrhjxitl.supabase.co https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.gstatic.com; manifest-src 'self'; media-src 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://maps.googleapis.com https://maps.gstatic.com https://static.cloudflareinsights.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; frame-src https://challenges.cloudflare.com; upgrade-insecure-requests; worker-src 'self' blob:",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-site",
+        "permissions-policy": "camera=(), geolocation=(self), microphone=()",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "server-timing": "app;dur=939.0, cfEdge;dur=280,cfOrigin;dur=0,cfWorker;dur=1473",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-med250-release-revision": "37d8c1c0e0c8ac2d15eea436d2f9037c20e2814c",
+        "x-request-id": "1c84a7aa-6eeb-4b3a-b5a0-de3e396abbbc"
+      },
+      "bodyBytes": 103618,
+      "bodySha256": "bd31a9db275e514b9e51d3d71a0588f3076497b0fa8f6652619e81e4f52df3cf"
+    },
+    {
+      "route": "/category/medicines",
+      "status": 200,
+      "finalOrigin": "https://med250.gikundiro.com",
+      "headers": {
+        "content-security-policy": "default-src 'self'; base-uri 'self'; connect-src 'self' https://uskfnszcdqpcfrhjxitl.supabase.co wss://uskfnszcdqpcfrhjxitl.supabase.co https://maps.googleapis.com https://maps.gstatic.com; font-src 'self' data:; form-action 'self'; frame-ancestors 'none'; img-src 'self' data: blob: https://uskfnszcdqpcfrhjxitl.supabase.co https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.gstatic.com; manifest-src 'self'; media-src 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://maps.googleapis.com https://maps.gstatic.com https://static.cloudflareinsights.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; frame-src https://challenges.cloudflare.com; upgrade-insecure-requests; worker-src 'self' blob:",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-site",
+        "permissions-policy": "camera=(), geolocation=(self), microphone=()",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "server-timing": "app;dur=1374.0, cfEdge;dur=210,cfOrigin;dur=0,cfWorker;dur=1658",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-med250-release-revision": "37d8c1c0e0c8ac2d15eea436d2f9037c20e2814c",
+        "x-request-id": "01b18999-e901-44bd-afa0-b911f593ef59"
+      },
+      "bodyBytes": 95332,
+      "bodySha256": "a6afd87217c5ce329e6960a2ca5806018fd36abc8a51751a07dcff26201b0764"
+    },
+    {
+      "route": "/product/rwanda-fda-hm-0734",
+      "status": 200,
+      "finalOrigin": "https://med250.gikundiro.com",
+      "headers": {
+        "content-security-policy": "default-src 'self'; base-uri 'self'; connect-src 'self' https://uskfnszcdqpcfrhjxitl.supabase.co wss://uskfnszcdqpcfrhjxitl.supabase.co https://maps.googleapis.com https://maps.gstatic.com; font-src 'self' data:; form-action 'self'; frame-ancestors 'none'; img-src 'self' data: blob: https://uskfnszcdqpcfrhjxitl.supabase.co https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.gstatic.com; manifest-src 'self'; media-src 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://maps.googleapis.com https://maps.gstatic.com https://static.cloudflareinsights.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; frame-src https://challenges.cloudflare.com; upgrade-insecure-requests; worker-src 'self' blob:",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-site",
+        "permissions-policy": "camera=(), geolocation=(self), microphone=()",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "server-timing": "app;dur=615.0, cfEdge;dur=200,cfOrigin;dur=0,cfWorker;dur=723",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-med250-release-revision": "37d8c1c0e0c8ac2d15eea436d2f9037c20e2814c",
+        "x-request-id": "842116c2-cdf7-459a-99de-d8babd72b1c8"
+      },
+      "bodyBytes": 43516,
+      "bodySha256": "c700e0c9b93f8c492ff8c85ac5d1be8f4407ca6defe4658ee9d4dad4e1b06796"
+    },
+    {
+      "route": "/product/AMZ-B004L5JCZ4",
+      "status": 200,
+      "finalOrigin": "https://med250.gikundiro.com",
+      "headers": {
+        "content-security-policy": "default-src 'self'; base-uri 'self'; connect-src 'self' https://uskfnszcdqpcfrhjxitl.supabase.co wss://uskfnszcdqpcfrhjxitl.supabase.co https://maps.googleapis.com https://maps.gstatic.com; font-src 'self' data:; form-action 'self'; frame-ancestors 'none'; img-src 'self' data: blob: https://uskfnszcdqpcfrhjxitl.supabase.co https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.gstatic.com; manifest-src 'self'; media-src 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://maps.googleapis.com https://maps.gstatic.com https://static.cloudflareinsights.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; frame-src https://challenges.cloudflare.com; upgrade-insecure-requests; worker-src 'self' blob:",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-site",
+        "permissions-policy": "camera=(), geolocation=(self), microphone=()",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "server-timing": "app;dur=743.0, cfEdge;dur=239,cfOrigin;dur=0,cfWorker;dur=845",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-med250-release-revision": "37d8c1c0e0c8ac2d15eea436d2f9037c20e2814c",
+        "x-request-id": "972c7ba3-5230-43ac-9662-ed4dc150ee42"
+      },
+      "bodyBytes": 75224,
+      "bodySha256": "ae9c63951c380d4c56d7cc086d24a9cd9e1538f32f734ed46958c926c5146270"
+    },
+    {
+      "route": "/robots.txt",
+      "status": 200,
+      "finalOrigin": "https://med250.gikundiro.com",
+      "headers": {
+        "content-security-policy": "default-src 'self'; base-uri 'self'; connect-src 'self' https://uskfnszcdqpcfrhjxitl.supabase.co wss://uskfnszcdqpcfrhjxitl.supabase.co https://maps.googleapis.com https://maps.gstatic.com; font-src 'self' data:; form-action 'self'; frame-ancestors 'none'; img-src 'self' data: blob: https://uskfnszcdqpcfrhjxitl.supabase.co https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.gstatic.com; manifest-src 'self'; media-src 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://maps.googleapis.com https://maps.gstatic.com https://static.cloudflareinsights.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; frame-src https://challenges.cloudflare.com; upgrade-insecure-requests; worker-src 'self' blob:",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-site",
+        "permissions-policy": "camera=(), geolocation=(self), microphone=()",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "server-timing": "app;dur=0.0",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-med250-release-revision": "37d8c1c0e0c8ac2d15eea436d2f9037c20e2814c",
+        "x-request-id": "67e5c64d-b2de-4339-976f-b0db20509515"
+      },
+      "bodyBytes": 161,
+      "bodySha256": "69ae1f331239681439f8b41677d656532a2612a017b2855006920e4a1fb0dcc6"
+    },
+    {
+      "route": "/sitemap.xml",
+      "status": 200,
+      "finalOrigin": "https://med250.gikundiro.com",
+      "headers": {
+        "content-security-policy": "default-src 'self'; base-uri 'self'; connect-src 'self' https://uskfnszcdqpcfrhjxitl.supabase.co wss://uskfnszcdqpcfrhjxitl.supabase.co https://maps.googleapis.com https://maps.gstatic.com; font-src 'self' data:; form-action 'self'; frame-ancestors 'none'; img-src 'self' data: blob: https://uskfnszcdqpcfrhjxitl.supabase.co https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.gstatic.com; manifest-src 'self'; media-src 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://maps.googleapis.com https://maps.gstatic.com https://static.cloudflareinsights.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; frame-src https://challenges.cloudflare.com; upgrade-insecure-requests; worker-src 'self' blob:",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-site",
+        "permissions-policy": "camera=(), geolocation=(self), microphone=()",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "server-timing": "app;dur=0.0",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-med250-release-revision": "37d8c1c0e0c8ac2d15eea436d2f9037c20e2814c",
+        "x-request-id": "13f536fe-d9cf-404e-ad2d-f10e53298203"
+      },
+      "bodyBytes": 840233,
+      "bodySha256": "b2795f2cb214c6ff3346f519676c1e78980d1b86c77bd80c3751db7d5d7e02b8"
+    },
+    {
+      "route": "/manifest.webmanifest",
+      "status": 200,
+      "finalOrigin": "https://med250.gikundiro.com",
+      "headers": {
+        "server-timing": "cfCacheStatus;desc=\"HIT\", cfEdge;dur=86,cfOrigin;dur=0"
+      },
+      "bodyBytes": 635,
+      "bodySha256": "a97b8fd29d1a6447b0b9dffab689bcc37b9497983d4bf393a55c1c553a0cacfd"
+    },
+    {
+      "route": "/sw.js",
+      "status": 200,
+      "finalOrigin": "https://med250.gikundiro.com",
+      "headers": {},
+      "bodyBytes": 1507,
+      "bodySha256": "f963d281770f946b4539c2faac2b7eb3fe69c9ba93224d77874f1e0511ee265b"
+    },
+    {
+      "route": "/offline.html",
+      "status": 200,
+      "finalOrigin": "https://med250.gikundiro.com",
+      "headers": {
+        "server-timing": "cfCacheStatus;desc=\"HIT\", cfEdge;dur=92,cfOrigin;dur=0"
+      },
+      "bodyBytes": 1835,
+      "bodySha256": "da9fb3fd9417b2ab7315052319e5d7f026b2d0e4f997e990e608644e6432b9c0"
+    }
+  ],
+  "errors": [],
+  "verifier": {
+    "path": "scripts/verify-deployed-site.mjs",
+    "sha256": "631426afb7f6fb93b5cd6b3485c4b99092c5f9dbebff45f5128d517853502d11"
+  }
+}

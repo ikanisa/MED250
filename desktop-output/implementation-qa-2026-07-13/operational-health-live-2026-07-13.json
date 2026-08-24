@@ -1,0 +1,55 @@
+{
+  "captured_at": "2026-07-13T20:45:02.43177+00:00",
+  "project": "uskfnszcdqpcfrhjxitl",
+  "privacy": {
+    "aggregate_only": true,
+    "contains_customer_identifiers": false,
+    "contains_pharmacy_identifiers": false,
+    "contains_health_or_location_data": false
+  },
+  "catalogue": {
+    "active_products": 2459,
+    "orderable_products": 2459,
+    "products_with_current_prices": 0,
+    "price_contributing_pharmacies": 0
+  },
+  "pharmacies": {
+    "active": 769,
+    "marketplace_approved": 769,
+    "gps_ready": 0,
+    "dispatch_ready": 0,
+    "with_phone": 267,
+    "with_whatsapp": 267,
+    "login_enabled_whatsapp_contacts": 288
+  },
+  "orders_last_24_hours": {
+    "created": 0,
+    "dispatched": 0,
+    "confirmed": 0
+  },
+  "pharmacy_auth_last_24_hours": {
+    "otp_challenges": 2,
+    "otp_sent": 0,
+    "otp_failed": 0,
+    "unregistered_numbers_suppressed": 2,
+    "pharmacy_logins": 0
+  },
+  "prescription_cleanup": {
+    "last_status": "never_run",
+    "stale": true,
+    "active_claims": 0,
+    "expired_claims": 0,
+    "cron_jobs_found": 0,
+    "schedule_note": "No schedule is installed until retention periods are approved in the production privacy policy."
+  },
+  "access": {
+    "anon_can_execute": false,
+    "authenticated_can_execute": false,
+    "service_role_can_execute": true
+  },
+  "deployment": {
+    "migration": "med250_operational_health",
+    "cleanup_edge_function_version": 2,
+    "cleanup_edge_function_status": "ACTIVE"
+  }
+}

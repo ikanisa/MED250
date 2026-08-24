@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "captured_at": "2026-07-18T17:24:14Z",
+  "release_revision": "5ef50a296941056bd17e614dff7b35290742f50a",
+  "project_ref": "uskfnszcdqpcfrhjxitl",
+  "status": "passed_with_positive_path_credential_gate",
+  "database_reconciliation": {
+    "backend_contract_version": "2026-07-18.3",
+    "expected_function_count": 31,
+    "expected_table_count": 24,
+    "retired_non_product_public_count": 0,
+    "retired_non_product_safely_rejected_count": 2,
+    "retired_non_product_rejection_audit_count": 2,
+    "trust_metric_function_exists": true,
+    "trust_metric_approval_table_rls": true,
+    "trust_metric_incomplete_approval_count": 0,
+    "trust_metric_live_snapshot": {
+      "generated_at": "2026-07-18T17:24:13.944781Z",
+      "aggregate_only": true,
+      "contains_pharmacy_identity": false,
+      "contains_customer_or_health_data": false,
+      "ready_pharmacy_count_value": null,
+      "ready_pharmacy_count_suppressed_reason": "approval_required",
+      "typical_response_minutes_value": null,
+      "typical_response_minutes_suppressed_reason": "approval_required"
+    },
+    "multilingual_normalization": {
+      "douleur": "paracetamol",
+      "ububabare": "paracetamol",
+      "umuriro": "paracetamol",
+      "source_ranked_rpc_exists": true
+    },
+    "product_description_governance": {
+      "governance_column_count": 13,
+      "evidence_constraint_validated": true,
+      "review_guard_enabled": true,
+      "audit_guard_enabled": true,
+      "review_table_exists": true,
+      "review_table_rls": true,
+      "immutable_reviews": true,
+      "review_rpc_exists": true,
+      "service_role_can_review": true,
+      "anon_can_review": false,
+      "authenticated_can_review": false,
+      "approved_incomplete_count": 0,
+      "public_leak_count": 0,
+      "approved_without_current_audit_count": 0
+    },
+    "member_pharmacy_profile": {
+      "function_exists": true,
+      "authenticated_can_execute": true,
+      "anon_can_execute": false,
+      "google_maps_url_returned": true,
+      "license_expiry_returned": true
+    }
+  },
+  "edge_function": {
+    "slug": "review-product-descriptions",
+    "deployment_id": "ab8b6ed9-75ae-4c82-b847-d9d0db8ec036",
+    "version": 1,
+    "status": "ACTIVE",
+    "verify_jwt": false,
+    "custom_authentication": "constant_time_dedicated_admin_token",
+    "bundle_sha256": "9a9316389429a1ed9f8316fa3e8a2cd9a98d38cb11218326b29d33fb70194eae",
+    "unauthenticated_probe": {
+      "status": 403,
+      "cache_control": "no-store",
+      "x_content_type_options": "nosniff",
+      "backend_contract_header": "2026-07-18.3",
+      "reviewer_contract_header": "product-description-reviewer-2026-07-18.1"
+    },
+    "authenticated_positive_path": "pending_protected_admin_credential_and_control_identity"
+  },
+  "performance_remediation": {
+    "migration": "supabase/migrations/20260718172000_index_whatsapp_outbox_foreign_keys.sql",
+    "offer_id_index_exists_and_valid": true,
+    "pharmacy_id_index_exists_and_valid": true,
+    "remaining_med250_unindexed_foreign_keys": 0
+  },
+  "advisor_assessment": {
+    "new_actionable_security_defects": 0,
+    "intentional_rls_no_policy_tables": "deny_by_default_contract_allowlist",
+    "intentional_public_graphql_objects": "public_catalogue_contract_allowlist",
+    "intentional_security_definer_functions": "backend_contract_allowlist",
+    "anonymous_authentication": "turnstile_backed_customer_request_flow",
+    "unused_index_notices": "informational_no_deletion_without_workload_evidence"
+  },
+  "migration_history_note": "Six reviewed July 18 migration names are absent from the remote history ledger, but every scoped schema, privilege, trigger, data-correction, and contract effect was verified live. They were not replayed because two are data transitions and the description-review migration is intentionally non-idempotent."
+}

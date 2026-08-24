@@ -1,0 +1,45 @@
+project_id = "dawanear-marketplace"
+
+# These administrative functions perform their own constant-time secret check.
+# Disabling the gateway JWT check is required for cron/admin callers that send
+# only the dedicated custom token header. The handlers still reject every
+# request without the corresponding Edge Function secret.
+[functions.geocode-pharmacies]
+verify_jwt = false
+
+[functions.review-pharmacy-contacts]
+verify_jwt = false
+
+[functions.review-marketplace-products]
+verify_jwt = false
+
+[functions.review-product-descriptions]
+verify_jwt = false
+
+[functions.cleanup-prescriptions]
+verify_jwt = false
+
+# These are intentionally callable before a pharmacy session exists. Each
+# handler validates origin and input, rate-limits requests, and the verifier
+# exchanges a one-time WhatsApp code for a permanent Supabase session.
+[functions.dawanear-pharmacy-send-otp]
+verify_jwt = false
+
+[functions.dawanear-pharmacy-verify-otp]
+verify_jwt = false
+
+# Customer OTP functions require the signed-in browser session JWT and keep the
+# default gateway verification enabled.
+[functions.dawanear-customer-send-otp]
+verify_jwt = true
+
+[functions.dawanear-customer-verify-otp]
+verify_jwt = true
+
+# Cron authentication and Meta webhook signatures are verified inside these
+# handlers, so neither endpoint relies on a browser JWT.
+[functions.dispatch-whatsapp-notifications]
+verify_jwt = false
+
+[functions.whatsapp-webhook]
+verify_jwt = false

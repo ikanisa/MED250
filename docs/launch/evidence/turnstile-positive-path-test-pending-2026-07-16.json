@@ -1,0 +1,64 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_TURNSTILE_SERVER_VERIFIED",
+  "evidence_type": "test_record",
+  "status": "pending",
+  "title": "MED+250 production Turnstile positive-path test",
+  "summary": "Owner-ready controlled test record for the real production Turnstile widget. Missing and invalid evidence are already rejected, but the valid-widget identity creation and complete cleanup path still require a browser operator.",
+  "recorded_at": "2026-07-16T14:08:21+02:00",
+  "recorded_by": "MED+250 security readiness review",
+  "recorded_role": "Release evidence preparer",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Missing Turnstile evidence rejected",
+      "status": "passed",
+      "detail": "The existing controlled security test records that a missing Turnstile response is rejected without changing the aggregate Auth user count."
+    },
+    {
+      "name": "Invalid Turnstile evidence rejected",
+      "status": "passed",
+      "detail": "The existing controlled security test records that an invalid Turnstile response is rejected without changing the aggregate Auth user count."
+    },
+    {
+      "name": "Real production widget completed",
+      "status": "pending",
+      "detail": "An approved browser operator has not yet completed the real production widget and supplied its short-lived response only to the protected verifier process."
+    },
+    {
+      "name": "Disposable anonymous identity created",
+      "status": "pending",
+      "detail": "The protected verifier has not yet proven that one valid production widget response creates exactly one disposable anonymous customer session."
+    },
+    {
+      "name": "Disposable identity completely removed",
+      "status": "pending",
+      "detail": "The valid-path session revocation, Auth identity deletion and restoration of the aggregate pre-test user count remain unexecuted."
+    },
+    {
+      "name": "No marketplace side effect",
+      "status": "pending",
+      "detail": "The operator must confirm that the controlled Auth test created no cart, availability request, pharmacy message, prescription or marketplace data row."
+    },
+    {
+      "name": "Redacted verifier output retained",
+      "status": "pending",
+      "detail": "The final evidence must contain only the privacy-safe verifier result and must not contain the widget response, identity, session material or raw provider response."
+    }
+  ],
+  "review_reference": "docs/launch/SECURITY_OWNER_REVIEW.md",
+  "review_sha256": "f8a12334c222c552457d085500ea98f9e6dbbd63e2ee3d0d488592ae0d06c4ca",
+  "existing_negative_test_reference": "docs/launch/evidence/security-hardening-test-2026-07-16.json",
+  "executed_by": null,
+  "executor_role": null,
+  "started_at": null,
+  "completed_at": null,
+  "completion_instructions": [
+    "Complete the real production widget in a controlled browser without adding products or submitting an availability request.",
+    "Run npm run security:turnstile:verify -- --require-valid with the short-lived widget response and protected Supabase values supplied only through the operator process environment.",
+    "Confirm one disposable identity is created, its session is revoked, its Auth record is deleted, the aggregate user count is restored and no marketplace row or pharmacy contact is created.",
+    "Retain only the redacted verifier output, set every check to passed, add the executor, role and timezone-qualified start and completion timestamps, and set status to complete.",
+    "Validate the completed test strictly and add it to the launch registry only with its exact SHA-256 digest."
+  ]
+}

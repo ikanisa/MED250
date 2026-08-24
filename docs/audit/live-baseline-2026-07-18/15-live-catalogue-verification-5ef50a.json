@@ -1,0 +1,532 @@
+{
+  "schemaVersion": "1.0",
+  "capturedAt": "2026-07-18T16:33:31.102Z",
+  "origin": "https://uskfnszcdqpcfrhjxitl.supabase.co",
+  "rpc": "dawanear_search_marketplace_catalogue",
+  "status": "passed",
+  "expectedTotal": 4657,
+  "observedTotal": 4657,
+  "expectedPageCount": 39,
+  "capturedPageCount": 39,
+  "observedIdSha256": "31763863731aa2bb9fc314dabf84713839aa84ae9f7dd88dce2738d0f6e28974",
+  "duplicateIds": [],
+  "missingSourceIds": [],
+  "unexpectedLiveIds": [],
+  "boundaryProducts": {
+    "product25": "AMZ-B0CNG8CRRD",
+    "product120": "rwanda-fda-hm-0247",
+    "finalProduct": "rwanda-fda-hm-1580"
+  },
+  "errors": [],
+  "source": {
+    "path": "data/product-sitemap-index.json",
+    "sha256": "29a2c2015d42f61f03222eb250a418ae2293051bf60f4da8d46b39f11b2fe4be",
+    "productCount": 4657
+  },
+  "pages": [
+    {
+      "offset": 0,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "d8e15e07135d9be3e00f2cfb7d6e1bb44fdd0491460fbeebca67f8540b0b754c"
+    },
+    {
+      "offset": 120,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "27c734b66db761040331cf8ac8d665187ce91cdba803ac7d865b5723eadecdb6"
+    },
+    {
+      "offset": 240,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "f551bd9617f3357b7c69b852c117f42ef80b86ff788eb96d089abaf5f8fca333"
+    },
+    {
+      "offset": 360,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "f847e3c694a7ba0d287224ecdcb95b0c54d0cf3782d68a9dbfaf6fae9d74a5a0"
+    },
+    {
+      "offset": 480,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "f4e0172866ff78a0487e76144e3325678601a69942fc21f17d763ffee49ab6f2"
+    },
+    {
+      "offset": 600,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "164d3f7e808a9c373de2b2d3cc74a249c8fbec8491d11adf7b171aff84c630b0"
+    },
+    {
+      "offset": 720,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "c511952735dc51ddc86232ef54a9cc0786a2ad4b5c6134138d165bdfd17549c8"
+    },
+    {
+      "offset": 840,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "ab71a006f4207428122c31cc2cf249bd82e7afcd271e511d48389b6eaab7d2fa"
+    },
+    {
+      "offset": 960,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "59aa935d90a7d924b8d497c2477e6db0e6c7a4b2ca9223211cc6d6a7ade5ed2b"
+    },
+    {
+      "offset": 1080,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "d12bf1bc9cbfde5ec8121697a960570c311f5ca944c77e19c1788578baec59cc"
+    },
+    {
+      "offset": 1200,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "826625a97e3dfaa0d4466ffbede57d04391b0b159f7560582f7409442151a428"
+    },
+    {
+      "offset": 1320,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "ad271ec99a0e0edfb80d4671a104acaaa7bd28cd236d47da236bfce2f3e3b137"
+    },
+    {
+      "offset": 1440,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "e035b5bc8e4644fd7c46033112279cf2c4ccd86515d721f02c4eb66d2744ad9b"
+    },
+    {
+      "offset": 1560,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "1fd4411d0efea6fc498f8c1696343d00ffe24b6619e7ed9e66fab61bb9f28828"
+    },
+    {
+      "offset": 1680,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "0648f5ac7f1bb4d81bc44488cca8bf49e594a47314575f4b6e261105ff56da65"
+    },
+    {
+      "offset": 1800,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "9b21d9349b4897402628e370e9c1715e6d26e2311386e9a9c1d63e089e0e720b"
+    },
+    {
+      "offset": 1920,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "14a6ae081d7583055b8b7ccd675c8952a2a4595001270aee15c7d4d7aab4227f"
+    },
+    {
+      "offset": 2040,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "f9a233e8afaa1d7c179bbd21bd3ad5f41863e8447a88832ba0345b46ccfec760"
+    },
+    {
+      "offset": 2160,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "f5f06ed1a43fafe6a03e09cf8fb5c902c8ff1589c211acc63fc24dac129fea60"
+    },
+    {
+      "offset": 2280,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "e7cbd056f5639c0096252219dcc08a8317e579f8f096c5d46fc0255ed9233eb0"
+    },
+    {
+      "offset": 2400,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "00fd3fa1dd074dfdc6d1029dea2599e31f3d4b5e928d7dbc44335af8e9184ebf"
+    },
+    {
+      "offset": 2520,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "3889602f6310d28febb4815534598c6f539c2b1420d8b2f80d9ddd6b1ff4c93a"
+    },
+    {
+      "offset": 2640,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "f5ff51da2d50374e46217b98f298f80adf0aebb18f2b19701b70ac390ba9d808"
+    },
+    {
+      "offset": 2760,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "c693c2adb337cc955a5a5f3fca4b480e1bc0b9d06842c1f8c6b4ebd1e18dc4e3"
+    },
+    {
+      "offset": 2880,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "6ff242be3573499c4dbcbfa9551270f9076bba7b1d091d1465c4b15a242100b9"
+    },
+    {
+      "offset": 3000,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "5cafa52b34ad68660e7ecb99a3132f96c82f7f064ddfdf67ba7d419f52ad8f13"
+    },
+    {
+      "offset": 3120,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "8461c5ecee2a3ac0829793a6bbc14dc451143024471c530ba86d249be87d1a2c"
+    },
+    {
+      "offset": 3240,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "50fa26da8633f59bafe6d691cb6ee5546d6613725a6e32cd2eb47d2ba5c60ce8"
+    },
+    {
+      "offset": 3360,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "d7e45afc5a02879eecbcf19c9bc811d7de203c21da5da66ed8085366b3648d15"
+    },
+    {
+      "offset": 3480,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "ee9d747a1cb860f86da5386c79b5f9fb1f09c812a6fbf647b121d085b7406335"
+    },
+    {
+      "offset": 3600,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "cd2dd41b1f0d40a9354716e1f195e4c5cae9d7bd46a8d3165c09c728683ce64b"
+    },
+    {
+      "offset": 3720,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "ba7918ef41ec10a05432f637dea98702e969c8b71692d1d7664385bb8d5baea4"
+    },
+    {
+      "offset": 3840,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "e584996d9c50c4ad4199a27f96a69b68dbc23ce4abd1249854b16251f56d23e7"
+    },
+    {
+      "offset": 3960,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "4e708f21255b921ce3d9dfa44bb05f3e218478b7edc4a46873e99caa5ec45df2"
+    },
+    {
+      "offset": 4080,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "b325730ad08f623ad453d5d27dc76dd18123e85df22c74baa2015acb9d3b6e56"
+    },
+    {
+      "offset": 4200,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "aa4b2162e878b3284bc7311aec21345b1f530b2dd76e4360a1984a48301455a5"
+    },
+    {
+      "offset": 4320,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "5f7b7e59cbd8cc527560e1c7e05ec883de98b324ad72f3f719660a405e3a3c90"
+    },
+    {
+      "offset": 4440,
+      "rowCount": 120,
+      "total": 4657,
+      "bodySha256": "a1914b6ab92c505fe9b7361c8ce3f895ae3c3567996f04475cea99d3cab8defd"
+    },
+    {
+      "offset": 4560,
+      "rowCount": 97,
+      "total": 4657,
+      "bodySha256": "554e4958d1a8f84e9c75ed3457eda2f0409bbe003d09af4f0d54458fda6d8837"
+    }
+  ],
+  "departments": [
+    {
+      "department": "Medicines",
+      "total": 2459,
+      "sampleId": "rwanda-fda-hm-1581",
+      "bodySha256": "681db320eb6d0e1e634f9e37db4e9a9adb8a3a6e19ec182b12aa104a08b36ba8"
+    },
+    {
+      "department": "Beauty & Personal Care",
+      "total": 990,
+      "sampleId": "AMZ-B0GNQMMSZ3",
+      "bodySha256": "635422e3b42a91837e72a241b18322f7038d0c6cbffd6bd0d7bcc9690d2ef2a4"
+    },
+    {
+      "department": "Baby",
+      "total": 421,
+      "sampleId": "AMZ-B0DX1GFWJW",
+      "bodySha256": "ce09c59f9499f62feded6f6f0b1ae4857d9dafa6f7effbe813f8976c6e4f2f5f"
+    },
+    {
+      "department": "Health & Household",
+      "total": 787,
+      "sampleId": "AMZ-B09HHHZDW7",
+      "bodySha256": "c22fa328f1b71b98855a484331b69c1505c5438a7c8ef8e4c98c2cf7202b4c79"
+    }
+  ],
+  "searches": [
+    {
+      "id": "paracetamol",
+      "query": "paracetamol",
+      "expectedTokens": [
+        "paracetamol"
+      ],
+      "total": 135,
+      "bodySha256": "ac979f9092439dfc51613b6f7991fde72a69b9cb790bc41de06bed0f9db06a80",
+      "sample": [
+        {
+          "id": "rwanda-fda-hm-1594",
+          "brand": "PARACETAMOL",
+          "generic": "Paracetamol 125 mg",
+          "explanation": "Exact product name"
+        },
+        {
+          "id": "rwanda-fda-hm-0468",
+          "brand": "ABDOL-500",
+          "generic": "Paracetamol",
+          "explanation": "Exact active ingredient"
+        },
+        {
+          "id": "rwanda-fda-hm-0503",
+          "brand": "ANDOL-1000",
+          "generic": "Paracetamol",
+          "explanation": "Exact active ingredient"
+        },
+        {
+          "id": "rwanda-fda-hm-0504",
+          "brand": "ANDOL-500",
+          "generic": "Paracetamol",
+          "explanation": "Exact active ingredient"
+        },
+        {
+          "id": "rwanda-fda-hm-0990",
+          "brand": "CALPOL SUSPENSION",
+          "generic": "PARACETAMOL",
+          "explanation": "Exact active ingredient"
+        }
+      ]
+    },
+    {
+      "id": "zinc",
+      "query": "zinc",
+      "expectedTokens": [
+        "zinc"
+      ],
+      "total": 58,
+      "bodySha256": "2a2376efc6759de0a75174d1742533ea7fb3dc6708f762ab5921d64ed5d6aade",
+      "sample": [
+        {
+          "id": "rwanda-fda-hm-1208",
+          "brand": "ZINC OXIDE OINTMENT",
+          "generic": "Zinc Oxide USP 20% w/w",
+          "explanation": "Product name prefix"
+        },
+        {
+          "id": "rwanda-fda-hm-2312",
+          "brand": "ZINC SULFATE TABLETS USP 20MG",
+          "generic": "",
+          "explanation": "Product name prefix"
+        },
+        {
+          "id": "rwanda-fda-hm-0962",
+          "brand": "ZINC SULPHATE DISPERSIBLE TABLETTS",
+          "generic": "Zinc Sulfate Monohydrate",
+          "explanation": "Product name prefix"
+        },
+        {
+          "id": "rwanda-fda-hm-1468",
+          "brand": "ZINCOL TABLETS",
+          "generic": "Zinc (as sulphate), 20mg",
+          "explanation": "Product name prefix"
+        },
+        {
+          "id": "rwanda-fda-hm-0963",
+          "brand": "ZINCOS DISPERSIBLE TABLETS",
+          "generic": "Zinc Sulfate Monohydrate",
+          "explanation": "Product name prefix"
+        }
+      ]
+    },
+    {
+      "id": "omeprazole",
+      "query": "omeprazole",
+      "expectedTokens": [
+        "omeprazole"
+      ],
+      "total": 46,
+      "bodySha256": "1df94d58ad16707315bc99d2ee8ea2ace7d039993ea38b337a5529aac2e5618d",
+      "sample": [
+        {
+          "id": "rwanda-fda-hm-0173",
+          "brand": "LOKIT",
+          "generic": "OMEPRAZOLE",
+          "explanation": "Exact active ingredient"
+        },
+        {
+          "id": "rwanda-fda-hm-0839",
+          "brand": "OMEPRAGLOBE",
+          "generic": "OMEPRAZOLE",
+          "explanation": "Exact active ingredient"
+        },
+        {
+          "id": "rwanda-fda-hm-0935",
+          "brand": "UPRONE-40",
+          "generic": "OMEPRAZOLE",
+          "explanation": "Exact active ingredient"
+        },
+        {
+          "id": "rwanda-fda-hm-0970",
+          "brand": "ZOSEC CAPSULES",
+          "generic": "Omeprazole",
+          "explanation": "Exact active ingredient"
+        },
+        {
+          "id": "rwanda-fda-hm-1918",
+          "brand": "Omeprazole 20mg",
+          "generic": "Omeprazole 20mg",
+          "explanation": "Product name prefix"
+        }
+      ]
+    },
+    {
+      "id": "typo",
+      "query": "brinzolamde",
+      "expectedTokens": [
+        "brinzolamide"
+      ],
+      "total": 3,
+      "bodySha256": "f2f3d942194db544ab86c252da71b05ee09d3c947c7cf6d0ad0a7875e833c73b",
+      "sample": [
+        {
+          "id": "rwanda-fda-hm-1374",
+          "brand": "BRINZOX",
+          "generic": "Brinzolamide USP 1.0% w/v",
+          "explanation": "Close spelling match"
+        },
+        {
+          "id": "rwanda-fda-hm-0536",
+          "brand": "BRINZOX T",
+          "generic": "Brinzolamide USP, Timolol Maleate BP",
+          "explanation": "Close spelling match"
+        },
+        {
+          "id": "rwanda-fda-hm-2151",
+          "brand": "10 mg/mL brinzolamide / 5 mg/mL timolol",
+          "generic": "10 mg/mL brinzolamide / 5 mg/mL timolol",
+          "explanation": "Close spelling match"
+        }
+      ]
+    },
+    {
+      "id": "french",
+      "query": "douleur",
+      "expectedTokens": [
+        "paracetamol",
+        "ibuprofen",
+        "diclofenac"
+      ],
+      "total": 135,
+      "bodySha256": "ac979f9092439dfc51613b6f7991fde72a69b9cb790bc41de06bed0f9db06a80",
+      "sample": [
+        {
+          "id": "rwanda-fda-hm-1594",
+          "brand": "PARACETAMOL",
+          "generic": "Paracetamol 125 mg",
+          "explanation": "Exact product name"
+        },
+        {
+          "id": "rwanda-fda-hm-0468",
+          "brand": "ABDOL-500",
+          "generic": "Paracetamol",
+          "explanation": "Exact active ingredient"
+        },
+        {
+          "id": "rwanda-fda-hm-0503",
+          "brand": "ANDOL-1000",
+          "generic": "Paracetamol",
+          "explanation": "Exact active ingredient"
+        },
+        {
+          "id": "rwanda-fda-hm-0504",
+          "brand": "ANDOL-500",
+          "generic": "Paracetamol",
+          "explanation": "Exact active ingredient"
+        },
+        {
+          "id": "rwanda-fda-hm-0990",
+          "brand": "CALPOL SUSPENSION",
+          "generic": "PARACETAMOL",
+          "explanation": "Exact active ingredient"
+        }
+      ]
+    },
+    {
+      "id": "kinyarwanda",
+      "query": "ububabare",
+      "expectedTokens": [
+        "paracetamol",
+        "ibuprofen",
+        "diclofenac"
+      ],
+      "total": 135,
+      "bodySha256": "ac979f9092439dfc51613b6f7991fde72a69b9cb790bc41de06bed0f9db06a80",
+      "sample": [
+        {
+          "id": "rwanda-fda-hm-1594",
+          "brand": "PARACETAMOL",
+          "generic": "Paracetamol 125 mg",
+          "explanation": "Exact product name"
+        },
+        {
+          "id": "rwanda-fda-hm-0468",
+          "brand": "ABDOL-500",
+          "generic": "Paracetamol",
+          "explanation": "Exact active ingredient"
+        },
+        {
+          "id": "rwanda-fda-hm-0503",
+          "brand": "ANDOL-1000",
+          "generic": "Paracetamol",
+          "explanation": "Exact active ingredient"
+        },
+        {
+          "id": "rwanda-fda-hm-0504",
+          "brand": "ANDOL-500",
+          "generic": "Paracetamol",
+          "explanation": "Exact active ingredient"
+        },
+        {
+          "id": "rwanda-fda-hm-0990",
+          "brand": "CALPOL SUSPENSION",
+          "generic": "PARACETAMOL",
+          "explanation": "Exact active ingredient"
+        }
+      ]
+    }
+  ],
+  "verifier": {
+    "path": "scripts/verify-live-catalogue.mjs",
+    "sha256": "cc1e086d3d197919c7c3172fd6b43880e40e3d97711c1e66ee0be965ea4de395"
+  }
+}

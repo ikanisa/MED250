@@ -1,0 +1,83 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_WHATSAPP_READY",
+  "evidence_type": "review_ledger",
+  "status": "pending",
+  "title": "MED+250 pharmacy-authorised WhatsApp readiness review ledger",
+  "summary": "Redacted aggregate ledger for record-level pharmacy WhatsApp authority review. Three hundred active pharmacies currently have governed WhatsApp coverage through 338 enabled contacts; unresolved active pharmacies require direct or authoritative verification.",
+  "recorded_at": "2026-07-16T13:55:39+02:00",
+  "recorded_by": "MED+250 pharmacy evidence audit",
+  "recorded_role": "Release evidence preparer",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Authoritative registry population",
+      "status": "passed",
+      "detail": "The review population is bound to the 769-row current Rwanda FDA retail-pharmacy release file and the matching aggregate production health snapshot."
+    },
+    {
+      "name": "Governed WhatsApp coverage",
+      "status": "passed",
+      "detail": "The production snapshot reports 300 pharmacies with WhatsApp coverage and 338 login-enabled contacts accepted through source-verified or administrator-verified evidence."
+    },
+    {
+      "name": "No inferred WhatsApp authority",
+      "status": "passed",
+      "detail": "Public browser-observation candidates are quarantined and an ordinary public phone number or map listing is not automatically promoted to WhatsApp or login authority."
+    },
+    {
+      "name": "Full active-registry review",
+      "status": "blocked",
+      "detail": "Four hundred sixty-nine active pharmacy records do not yet have governed WhatsApp coverage. The operations owner must verify an authorized business identity or explicitly exclude each unresolved record from the intended responder scope."
+    },
+    {
+      "name": "Record-level owner decisions",
+      "status": "pending",
+      "detail": "A controlled private ledger must record one decision per active pharmacy with the evidence source, authority result, reviewer identity and timezone-qualified review timestamp."
+    }
+  ],
+  "reviewed_by": null,
+  "reviewer_role": null,
+  "reviewed_at": null,
+  "total_records": 769,
+  "pending_records": 469,
+  "blocked_records": 0,
+  "approved_pharmacies": 300,
+  "approved_login_contacts": 338,
+  "source_digests": {
+    "rwanda_fda_retail_pharmacy_registry": "977b4d35036d178b45191f98de55e574e848755f1153df252a7a621665b583a9",
+    "rwanda_fda_duty_roster_manifest": "145f62d4402666a7b46c947c019da0354e4eced8914b773d5ef5064e3736cf6c",
+    "rwanda_fda_duty_roster_matches": "05dbdbb8b279f3a1264d5a98afa2afe487e6e26d515e4baf68e48e2d8f1d3228",
+    "rwanda_fda_exact_review_promotions": "9a81e8c327cf7c399ea95cefe96bdc289efa9b8e5fd52b7841946835b4b53232",
+    "mmi_directory_manifest": "8690d490a0b14482cd6d2ba798c869d4825ce0ed168527f4238fad711ecb5469",
+    "mmi_promoted_contacts": "c7529cf0e942554410681e4ad9d42c190246556682c6c0aefd233a16af3d6eba",
+    "deployed_contact_enrichment_snapshot": "6e96d2ebf4e7e3ac5a376ac280ea51faa8d7c30307243011c93902fcdce9166a",
+    "production_whatsapp_health_snapshot": "5583ba89955037177c373f7874736bcc7529ba13fa2552929a3fdafc4134099a"
+  },
+  "private_review_fields": [
+    "registry entry key",
+    "production responder-scope decision",
+    "evidence source and version",
+    "pharmacy authority result",
+    "login-enabled result",
+    "decision",
+    "reviewer",
+    "reviewed timestamp",
+    "redacted rationale"
+  ],
+  "allowed_decisions": [
+    "approved_authorised_whatsapp",
+    "excluded_from_whatsapp_responder_scope",
+    "pending_direct_or_authoritative_verification"
+  ],
+  "completion_instructions": [
+    "Keep the row-level ledger in the controlled operations location because it contains pharmacy contact values.",
+    "Decide every active pharmacy record and make the intended WhatsApp responder scope match actual routing and portal access.",
+    "Do not infer WhatsApp authority from a public phone, Google Maps listing, shared number or unverified browser observation.",
+    "Quarantine conflicting contacts and require direct pharmacy or authoritative-source verification before enabling login.",
+    "Regenerate the aggregate production health snapshot after applying every approved or excluded decision.",
+    "Set pending_records and blocked_records to zero, add the named reviewer, role and timestamp, set every check to passed, and set status to complete.",
+    "Validate this redacted artifact strictly and add it to data/launch-evidence.json with its exact SHA-256 digest."
+  ]
+}

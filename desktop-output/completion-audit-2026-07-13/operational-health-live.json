@@ -1,0 +1,28 @@
+{
+  "generated_at": "2026-07-13T21:08:40.598912Z",
+  "privacy": {
+    "aggregate_only": true,
+    "contains_customer_identifiers": false,
+    "contains_pharmacy_identifiers": false,
+    "contains_health_or_location_data": false
+  },
+  "catalogue": {
+    "active_products": 2459,
+    "orderable_products": 2459,
+    "products_with_current_prices": 0,
+    "price_contributing_pharmacies": 0
+  },
+  "pharmacies": {
+    "active": 769,
+    "marketplace_approved": 769,
+    "with_phone": 267,
+    "with_whatsapp": 267,
+    "login_enabled_whatsapp_contacts": 288,
+    "gps_ready": 0,
+    "dispatch_ready": 0
+  },
+  "prescription_cleanup": {
+    "last_status": "never_run",
+    "stale": true
+  }
+}

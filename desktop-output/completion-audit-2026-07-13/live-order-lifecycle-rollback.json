@@ -1,0 +1,49 @@
+{
+  "verified_at": "2026-07-13T21:29:50.914819+00:00",
+  "project_ref": "uskfnszcdqpcfrhjxitl",
+  "status": "passed",
+  "persistence": "rolled_back",
+  "workflow": [
+    "automatic_marketplace_approval",
+    "eligibility_fail_closed",
+    "dispatch",
+    "idempotent_retry",
+    "membership_isolation",
+    "price_range_enforcement",
+    "customer_cancellation",
+    "no_response_recovery",
+    "selected_timeout_recovery",
+    "complete_confirmation",
+    "preselection_privacy",
+    "ownership_isolation",
+    "selection_contact_release",
+    "completion",
+    "notification_lifecycle"
+  ],
+  "post_rollback": {
+    "fixture_pharmacies": 0,
+    "fixture_contacts": 0,
+    "fixture_users": 0,
+    "fixture_prices": 0,
+    "fixture_orders": 0,
+    "fixture_offers": 0,
+    "fixture_notifications": 0
+  },
+  "price_contribution_function": {
+    "named_conflict_target": true,
+    "public_can_execute": false,
+    "anon_can_execute": false,
+    "authenticated_can_execute": true
+  },
+  "operational_state_after_rollback": {
+    "active_products": 2459,
+    "orderable_products": 2459,
+    "active_pharmacies": 769,
+    "marketplace_approved_pharmacies": 769,
+    "gps_ready_pharmacies": 0,
+    "dispatch_ready_pharmacies": 0,
+    "pharmacies_with_whatsapp": 267,
+    "login_enabled_whatsapp_contacts": 288,
+    "products_with_current_prices": 0
+  }
+}

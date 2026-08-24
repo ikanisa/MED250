@@ -1,0 +1,175 @@
+{
+  "schemaVersion": "1.0",
+  "capturedAt": "2026-07-18T17:02:15.919Z",
+  "status": "passed",
+  "origin": "https://med250-rwanda.ikanisa.chatgpt.site",
+  "mode": "catalog",
+  "observedReleaseRevision": null,
+  "expectedReleaseRevision": null,
+  "releaseRevisionExpectation": "not_supplied",
+  "routeCount": 10,
+  "routes": [
+    {
+      "route": "/",
+      "status": 200,
+      "finalOrigin": "https://med250-rwanda.ikanisa.chatgpt.site",
+      "headers": {
+        "content-security-policy": "default-src 'self'; base-uri 'self'; connect-src 'self' https://uskfnszcdqpcfrhjxitl.supabase.co wss://uskfnszcdqpcfrhjxitl.supabase.co https://maps.googleapis.com https://maps.gstatic.com; font-src 'self' data:; form-action 'self'; frame-ancestors 'none'; img-src 'self' data: blob: https://uskfnszcdqpcfrhjxitl.supabase.co https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.gstatic.com; manifest-src 'self'; media-src 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://maps.googleapis.com https://maps.gstatic.com https://static.cloudflareinsights.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; frame-src https://challenges.cloudflare.com; upgrade-insecure-requests; worker-src 'self' blob:",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-site",
+        "permissions-policy": "camera=(), geolocation=(self), microphone=()",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "server-timing": "app;dur=0.0",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-request-id": "9f9e58b7-007e-400f-941b-3e6d3e9186dd"
+      },
+      "bodyBytes": 110530,
+      "bodySha256": "370811860a5f27328b79a1f0725a4fabd6059e8ad762d81c76793e4fd00832f3"
+    },
+    {
+      "route": "/categories",
+      "status": 200,
+      "finalOrigin": "https://med250-rwanda.ikanisa.chatgpt.site",
+      "headers": {
+        "content-security-policy": "default-src 'self'; base-uri 'self'; connect-src 'self' https://uskfnszcdqpcfrhjxitl.supabase.co wss://uskfnszcdqpcfrhjxitl.supabase.co https://maps.googleapis.com https://maps.gstatic.com; font-src 'self' data:; form-action 'self'; frame-ancestors 'none'; img-src 'self' data: blob: https://uskfnszcdqpcfrhjxitl.supabase.co https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.gstatic.com; manifest-src 'self'; media-src 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://maps.googleapis.com https://maps.gstatic.com https://static.cloudflareinsights.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; frame-src https://challenges.cloudflare.com; upgrade-insecure-requests; worker-src 'self' blob:",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-site",
+        "permissions-policy": "camera=(), geolocation=(self), microphone=()",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "server-timing": "app;dur=507.0",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-request-id": "d563a928-0090-4981-83bb-a8d387e1ad12"
+      },
+      "bodyBytes": 104791,
+      "bodySha256": "d57979b8ebc6b78900e6c86a10d7b01e908c74f9500df749dea64d209ec8b81f"
+    },
+    {
+      "route": "/category/medicines",
+      "status": 200,
+      "finalOrigin": "https://med250-rwanda.ikanisa.chatgpt.site",
+      "headers": {
+        "content-security-policy": "default-src 'self'; base-uri 'self'; connect-src 'self' https://uskfnszcdqpcfrhjxitl.supabase.co wss://uskfnszcdqpcfrhjxitl.supabase.co https://maps.googleapis.com https://maps.gstatic.com; font-src 'self' data:; form-action 'self'; frame-ancestors 'none'; img-src 'self' data: blob: https://uskfnszcdqpcfrhjxitl.supabase.co https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.gstatic.com; manifest-src 'self'; media-src 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://maps.googleapis.com https://maps.gstatic.com https://static.cloudflareinsights.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; frame-src https://challenges.cloudflare.com; upgrade-insecure-requests; worker-src 'self' blob:",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-site",
+        "permissions-policy": "camera=(), geolocation=(self), microphone=()",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "server-timing": "app;dur=387.0",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-request-id": "afdfb27c-cd51-4d2a-93c4-95c8418901dd"
+      },
+      "bodyBytes": 97819,
+      "bodySha256": "7a2e86bc6084eca44eb7c451773b257616a74b4bdc3ac2207f8b8a93b8a0cf9e"
+    },
+    {
+      "route": "/product/rwanda-fda-hm-0734",
+      "status": 200,
+      "finalOrigin": "https://med250-rwanda.ikanisa.chatgpt.site",
+      "headers": {
+        "content-security-policy": "default-src 'self'; base-uri 'self'; connect-src 'self' https://uskfnszcdqpcfrhjxitl.supabase.co wss://uskfnszcdqpcfrhjxitl.supabase.co https://maps.googleapis.com https://maps.gstatic.com; font-src 'self' data:; form-action 'self'; frame-ancestors 'none'; img-src 'self' data: blob: https://uskfnszcdqpcfrhjxitl.supabase.co https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.gstatic.com; manifest-src 'self'; media-src 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://maps.googleapis.com https://maps.gstatic.com https://static.cloudflareinsights.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; frame-src https://challenges.cloudflare.com; upgrade-insecure-requests; worker-src 'self' blob:",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-site",
+        "permissions-policy": "camera=(), geolocation=(self), microphone=()",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "server-timing": "app;dur=381.0",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-request-id": "1672af8c-bae5-468d-9fad-3fdb14677e97"
+      },
+      "bodyBytes": 44774,
+      "bodySha256": "a5a9ab4cff033e4fe013dedf967cd946a62b243368595b71b5df9386504383cf"
+    },
+    {
+      "route": "/product/AMZ-B004L5JCZ4",
+      "status": 200,
+      "finalOrigin": "https://med250-rwanda.ikanisa.chatgpt.site",
+      "headers": {
+        "content-security-policy": "default-src 'self'; base-uri 'self'; connect-src 'self' https://uskfnszcdqpcfrhjxitl.supabase.co wss://uskfnszcdqpcfrhjxitl.supabase.co https://maps.googleapis.com https://maps.gstatic.com; font-src 'self' data:; form-action 'self'; frame-ancestors 'none'; img-src 'self' data: blob: https://uskfnszcdqpcfrhjxitl.supabase.co https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.gstatic.com; manifest-src 'self'; media-src 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://maps.googleapis.com https://maps.gstatic.com https://static.cloudflareinsights.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; frame-src https://challenges.cloudflare.com; upgrade-insecure-requests; worker-src 'self' blob:",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-site",
+        "permissions-policy": "camera=(), geolocation=(self), microphone=()",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "server-timing": "app;dur=393.0",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-request-id": "50d998e3-96a7-4c78-8d68-d460e9768066"
+      },
+      "bodyBytes": 76750,
+      "bodySha256": "f4d85ffbaef6b9a25448e9f195047c2b525fe35d35c950220e23f1a2602604e9"
+    },
+    {
+      "route": "/robots.txt",
+      "status": 200,
+      "finalOrigin": "https://med250-rwanda.ikanisa.chatgpt.site",
+      "headers": {
+        "content-security-policy": "default-src 'self'; base-uri 'self'; connect-src 'self' https://uskfnszcdqpcfrhjxitl.supabase.co wss://uskfnszcdqpcfrhjxitl.supabase.co https://maps.googleapis.com https://maps.gstatic.com; font-src 'self' data:; form-action 'self'; frame-ancestors 'none'; img-src 'self' data: blob: https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.gstatic.com; manifest-src 'self'; media-src 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://maps.googleapis.com https://maps.gstatic.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; frame-src https://challenges.cloudflare.com; upgrade-insecure-requests; worker-src 'self' blob:",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-site",
+        "permissions-policy": "camera=(), geolocation=(self), microphone=()",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "server-timing": "app;dur=0.0",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-request-id": "aaf35094-ca03-4e47-8187-8c3a84d034fd"
+      },
+      "bodyBytes": 189,
+      "bodySha256": "280e71a1bdc92a88c6b25a7a76171e44097e29ef8c3727c25ef376e625bc13e6"
+    },
+    {
+      "route": "/sitemap.xml",
+      "status": 200,
+      "finalOrigin": "https://med250-rwanda.ikanisa.chatgpt.site",
+      "headers": {
+        "content-security-policy": "default-src 'self'; base-uri 'self'; connect-src 'self' https://uskfnszcdqpcfrhjxitl.supabase.co wss://uskfnszcdqpcfrhjxitl.supabase.co https://maps.googleapis.com https://maps.gstatic.com; font-src 'self' data:; form-action 'self'; frame-ancestors 'none'; img-src 'self' data: blob: https://uskfnszcdqpcfrhjxitl.supabase.co https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.gstatic.com; manifest-src 'self'; media-src 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://maps.googleapis.com https://maps.gstatic.com https://static.cloudflareinsights.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; frame-src https://challenges.cloudflare.com; upgrade-insecure-requests; worker-src 'self' blob:",
+        "cross-origin-opener-policy": "same-origin",
+        "cross-origin-resource-policy": "same-site",
+        "permissions-policy": "camera=(), geolocation=(self), microphone=()",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "server-timing": "app;dur=0.0",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY",
+        "x-request-id": "ba8b6bf3-bfbc-4f56-928e-c0b4616fd12d"
+      },
+      "bodyBytes": 905543,
+      "bodySha256": "d9d31f0edd6069c3381aacdf9be6eb8f7d71af13a44eacfc91acd74f04d05149"
+    },
+    {
+      "route": "/manifest.webmanifest",
+      "status": 200,
+      "finalOrigin": "https://med250-rwanda.ikanisa.chatgpt.site",
+      "headers": {},
+      "bodyBytes": 635,
+      "bodySha256": "a97b8fd29d1a6447b0b9dffab689bcc37b9497983d4bf393a55c1c553a0cacfd"
+    },
+    {
+      "route": "/sw.js",
+      "status": 200,
+      "finalOrigin": "https://med250-rwanda.ikanisa.chatgpt.site",
+      "headers": {},
+      "bodyBytes": 1507,
+      "bodySha256": "f963d281770f946b4539c2faac2b7eb3fe69c9ba93224d77874f1e0511ee265b"
+    },
+    {
+      "route": "/offline.html",
+      "status": 200,
+      "finalOrigin": "https://med250-rwanda.ikanisa.chatgpt.site",
+      "headers": {},
+      "bodyBytes": 2250,
+      "bodySha256": "8c51088deddcd0ca0e5db3b46ebcdbfae5243e4123a6220b2e7120a8bd80451c"
+    }
+  ],
+  "errors": [],
+  "verifier": {
+    "path": "scripts/verify-deployed-site.mjs",
+    "sha256": "d338c476dc667b47eade5e8b3a929616a169b62f6cf4d761f301e84fedd1b51a"
+  }
+}

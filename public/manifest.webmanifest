@@ -1,0 +1,36 @@
+{
+  "name": "MED+250 Rwanda Pharmacy Marketplace",
+  "short_name": "MED+250",
+  "description": "Search pharmacy products and send availability requests to eligible pharmacies in Rwanda.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "lang": "en-RW",
+  "dir": "ltr",
+  "background_color": "#f6f8ff",
+  "theme_color": "#f6f8ff",
+  "categories": ["medical", "health", "shopping"],
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Browse all products",
+      "short_name": "All products",
+      "description": "Open the complete MED+250 product catalogue.",
+      "url": "/categories",
+      "icons": [{ "src": "/brand/app-icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Search medicines",
+      "short_name": "Medicines",
+      "description": "Search the current medicine register.",
+      "url": "/category/medicines",
+      "icons": [{ "src": "/brand/app-icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ],
+  "icons": [
+    { "src": "/brand/app-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/brand/app-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

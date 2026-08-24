@@ -1,0 +1,72 @@
+{
+  "generated_at": "2026-07-16T06:27:39.470Z",
+  "source": "https://www.mmi.gov.rw/partners/pharmacies",
+  "source_owner": "Rwanda Military Medical Insurance",
+  "source_pages": 14,
+  "extracted_contact_rows": 134,
+  "matched_contact_rows": 88,
+  "matched_pharmacies": 88,
+  "review_rows": 46,
+  "matching_rule": "Unique exact or >=0.85 name match with FDA district and sector evidence; ambiguous branches remain review-only.",
+  "registry_sha256": "977b4d35036d178b45191f98de55e574e848755f1153df252a7a621665b583a9",
+  "matched_sha256": "f9d4bb728ee108b376e50540a7730e9b838754b298bc83bbd980681837995a08",
+  "review_sha256": "fe447b0d94edf93e7efdba102f7766a49d0424df74f5217b945203c810efc392",
+  "page_digests": {
+    "1": {
+      "url": "https://www.mmi.gov.rw/partners/pharmacies",
+      "sha256": "afac452145790e7ec26477e2a42ec22313db125d13dde77a7daaecd434a20880"
+    },
+    "2": {
+      "url": "https://www.mmi.gov.rw/partners/pharmacies?tx_news_pi1%5Bcontroller%5D=News&tx_news_pi1%5BcurrentPage%5D=2&cHash=cb3ba28d85d6688fc9af769dc2d131cf",
+      "sha256": "4dc667958da6d636e670c6ac5483a6ba5834185ad8133a57efc2be27795e1296"
+    },
+    "3": {
+      "url": "https://www.mmi.gov.rw/partners/pharmacies?tx_news_pi1%5Bcontroller%5D=News&tx_news_pi1%5BcurrentPage%5D=3&cHash=da7283f6cd729a97e89c591c94e310fc",
+      "sha256": "a03ce06a842c40075bbbf9d77d4f4e8a786493a6fe2dc059a1fe9fb2a69018ee"
+    },
+    "4": {
+      "url": "https://www.mmi.gov.rw/partners/pharmacies?tx_news_pi1%5Bcontroller%5D=News&tx_news_pi1%5BcurrentPage%5D=4&cHash=af819f30de0cd834b0262e1cb00c9c11",
+      "sha256": "461f6481dcf9bad0e44ba2f8d2c1d7d9798415edb52c558396b0eb60008fff6a"
+    },
+    "5": {
+      "url": "https://www.mmi.gov.rw/partners/pharmacies?tx_news_pi1%5Bcontroller%5D=News&tx_news_pi1%5BcurrentPage%5D=5&cHash=73c89c5e515261ea360cc3cc6372f318",
+      "sha256": "f5f340014e5ba1dd36c7a5acea495c8225da6b6b7a5c601a470a64c18f76c5d9"
+    },
+    "6": {
+      "url": "https://www.mmi.gov.rw/partners/pharmacies?tx_news_pi1%5Bcontroller%5D=News&tx_news_pi1%5BcurrentPage%5D=6&cHash=64224734865548fd13d5cc8f5b23a505",
+      "sha256": "47613ac20adae3310336e7e5b4169d283b1ba5c92fbd1a30f1823a3b283ac90b"
+    },
+    "7": {
+      "url": "https://www.mmi.gov.rw/partners/pharmacies?tx_news_pi1%5Bcontroller%5D=News&tx_news_pi1%5BcurrentPage%5D=7&cHash=4b5654186942a224cb29095eb15c3bd4",
+      "sha256": "5337f56ea7b94fc4a2f72d28c27727e976f091b6267cc24666aa634933a22ef8"
+    },
+    "8": {
+      "url": "https://www.mmi.gov.rw/partners/pharmacies?tx_news_pi1%5Bcontroller%5D=News&tx_news_pi1%5BcurrentPage%5D=8&cHash=4756201fe07bcce4c0d990048d795942",
+      "sha256": "158998c038f806836f1974dccb85bcf004d968ef7cc4ec2c4f427055b2c831cf"
+    },
+    "9": {
+      "url": "https://www.mmi.gov.rw/partners/pharmacies?tx_news_pi1%5Bcontroller%5D=News&tx_news_pi1%5BcurrentPage%5D=9&cHash=c13b44e19ea49a4663bff3b1213f2c66",
+      "sha256": "5b04fa301277b3a591a9b727f78f9f2e9c6058d32225c6224648ab56c0498722"
+    },
+    "10": {
+      "url": "https://www.mmi.gov.rw/partners/pharmacies?tx_news_pi1%5Bcontroller%5D=News&tx_news_pi1%5BcurrentPage%5D=10&cHash=20062796121f6b71405e90a25d651a00",
+      "sha256": "041058b1e4acce0dc1c03c5583c1b63d7a9c220f3e43b1a9bea68e0d18ab357f"
+    },
+    "11": {
+      "url": "https://www.mmi.gov.rw/partners/pharmacies?tx_news_pi1%5Bcontroller%5D=News&tx_news_pi1%5BcurrentPage%5D=11&cHash=673911716afa33a833f26bcd03ee3df1",
+      "sha256": "715c33ab862b9555dce4b8788113646fa0b3b7cb29e1d5475950091dd1c4a4c1"
+    },
+    "12": {
+      "url": "https://www.mmi.gov.rw/partners/pharmacies?tx_news_pi1%5Bcontroller%5D=News&tx_news_pi1%5BcurrentPage%5D=12&cHash=d7211bdc24b02409e4367a40a7404bcc",
+      "sha256": "b1bb5594f35d65537c9ca577b34fb4a3e45c83a0c3b76d1a3696263376b1ebdb"
+    },
+    "13": {
+      "url": "https://www.mmi.gov.rw/partners/pharmacies?tx_news_pi1%5Bcontroller%5D=News&tx_news_pi1%5BcurrentPage%5D=13&cHash=30bc917df2ca0795451708f3ec4706f2",
+      "sha256": "e448a986c4e1e48839a53ef142d4a1b570c305416ea9d9a16536addfa02d8cfa"
+    },
+    "14": {
+      "url": "https://www.mmi.gov.rw/partners/pharmacies?tx_news_pi1%5Bcontroller%5D=News&tx_news_pi1%5BcurrentPage%5D=14&cHash=b4ed1aa76afc103eea72dbf0adb9b48b",
+      "sha256": "82286a65bc1a095e58c8bf405074b5f9eb0e2d33766a9f122b06001c6a27e961"
+    }
+  }
+}

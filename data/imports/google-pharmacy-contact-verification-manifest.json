@@ -1,0 +1,104 @@
+{
+  "generated_at": "2026-07-16T22:36:12+02:00",
+  "policy": {
+    "google_maps_role": "candidate_discovery_only",
+    "automatic_google_only_promotion": false,
+    "contact_type_promoted": "phone",
+    "whatsapp_or_login_enabled": false
+  },
+  "inputs": {
+    "candidate_audit_csv": "data/imports/google-pharmacy-contact-independent-verification.csv",
+    "candidate_audit_sha256": "78ae605c39f4db47219156e92cb40cbd5befb601269ea1301e3121746b4e17f7",
+    "candidate_rows": 26,
+    "independent_exact_match_rows": 3,
+    "possible_contradiction_rows": 6,
+    "no_independent_exact_evidence_rows": 17
+  },
+  "reviewed_outcomes": {
+    "promoted": [
+      {
+        "registry_entry_key": "retail-2026-05-71",
+        "pharmacy_name": "PHARMACY AMIRAH LTD",
+        "e164": "250784632776",
+        "reason": "Exact number repeated in two duty-pharmacy announcements by the official Ruhengeri Level 2 Teaching Hospital account; the hospital website links that account."
+      },
+      {
+        "registry_entry_key": "retail-2026-05-693",
+        "pharmacy_name": "DENA PHARMACY Ltd",
+        "e164": "250788406475",
+        "reason": "Exact number appears in the Rwanda Bar Association contracted-pharmacy document and the UBIPHARM Rwanda pharmacy directory."
+      }
+    ],
+    "already_verified_for_same_pharmacy": [
+      {
+        "registry_entry_key": "retail-2026-05-662",
+        "pharmacy_name": "PHARMACIE LE BON SAMARITAIN Ltd",
+        "e164": "250784484324",
+        "existing_source": "Rwanda FDA retail pharmacy duty roster July-September 2026"
+      }
+    ],
+    "rejected_authoritative_cross_pharmacy_or_branch_conflicts": [
+      {
+        "registry_entry_key": "retail-2026-05-339",
+        "pharmacy_name": "PHARMACIE TETA Ltd",
+        "e164": "250789192226",
+        "conflicts_with": "retail-2026-05-682 PHARMACIE TETA REMERA"
+      },
+      {
+        "registry_entry_key": "retail-2026-05-342",
+        "pharmacy_name": "PHARMACIE TETA Ltd",
+        "e164": "250789192226",
+        "conflicts_with": "retail-2026-05-682 PHARMACIE TETA REMERA"
+      },
+      {
+        "registry_entry_key": "retail-2026-05-566",
+        "pharmacy_name": "PHARMACIE IRIHO Limited",
+        "e164": "250788966865",
+        "conflicts_with": "retail-2026-05-393 BOVAN LTD"
+      },
+      {
+        "registry_entry_key": "retail-2026-05-718",
+        "pharmacy_name": "ISAPHAR PHARMACY Ltd",
+        "e164": "250788288858",
+        "conflicts_with": "retail-2026-05-719 RAMA PHARMACY Ltd"
+      }
+    ],
+    "held_without_promotion": 19
+  },
+  "ambiguous_registry_review": {
+    "manually_resolved_links_without_contact_or_map_promotion": [
+      {
+        "december_source_serial": "222",
+        "december_name": "BOND PHARMACY Ltd",
+        "current_registry_entry_key": "retail-2026-05-220",
+        "basis": "Exact name and professional registration match; locality changed."
+      },
+      {
+        "december_source_serial": "533",
+        "december_name": "APOTHECARY PHARMACY MASAKA",
+        "current_registry_entry_key": "retail-2026-05-536",
+        "basis": "Exact name, sector, and cell; December district value is inconsistent with Masaka's current district."
+      },
+      {
+        "december_source_serial": "596",
+        "december_name": "NANCY PHARMACY Ltd",
+        "current_registry_entry_key": "retail-2026-05-599",
+        "basis": "Strong name/OCR match and exact district, sector, and cell."
+      }
+    ],
+    "remaining_unresolved_rows": 24
+  },
+  "deployment": {
+    "migration_version": "20260716203323",
+    "migration_name": "import_independently_verified_pharmacy_phone_contacts",
+    "deployed": true,
+    "live_pharmacies": 769,
+    "live_contacts": 719,
+    "live_phone_contacts": 381,
+    "live_pharmacies_with_phone": 341,
+    "live_google_or_candidate_contacts": 0,
+    "live_pharmacies_with_google_maps_url": 769,
+    "live_direct_google_place_urls": 57,
+    "live_google_maps_search_urls": 712
+  }
+}

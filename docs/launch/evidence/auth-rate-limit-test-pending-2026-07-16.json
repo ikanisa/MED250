@@ -1,0 +1,69 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_AUTH_RATE_LIMITS_APPROVED",
+  "evidence_type": "test_record",
+  "status": "pending",
+  "title": "MED+250 anonymous-auth rate-limit controlled test",
+  "summary": "Owner-ready test record for intended anonymous customer access, agreed threshold enforcement, shared-project impact and complete cleanup. The current project setting is known, but the controlled threshold test has not been authorised or executed.",
+  "recorded_at": "2026-07-16T14:08:21+02:00",
+  "recorded_by": "MED+250 security readiness review",
+  "recorded_role": "Release evidence preparer",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Current anonymous-auth setting recorded",
+      "status": "passed",
+      "detail": "The existing protected security snapshot records anonymous identities enabled and an anonymous-user rate-limit value of 30."
+    },
+    {
+      "name": "Shared-project test window approved",
+      "status": "blocked",
+      "detail": "Owners of applications sharing the Supabase Auth project have not yet approved the test window, disposable identity volume, monitoring plan and rollback contact."
+    },
+    {
+      "name": "Intended customer session succeeds",
+      "status": "pending",
+      "detail": "The controlled test has not yet proven that an intended customer with a fresh real Turnstile response can obtain and use one anonymous session."
+    },
+    {
+      "name": "Approved threshold permits expected demand",
+      "status": "pending",
+      "detail": "The selected threshold has not yet been exercised against the approved legitimate-use profile for MED+250 and the other shared applications."
+    },
+    {
+      "name": "Excess creation attempts are rate limited",
+      "status": "pending",
+      "detail": "The controlled test has not yet proven that attempts beyond the approved threshold receive the expected rate-limit rejection without weakening CAPTCHA enforcement."
+    },
+    {
+      "name": "Disposable identities and sessions removed",
+      "status": "pending",
+      "detail": "The operator must revoke and delete every disposable test identity and prove the aggregate Auth user count returns to its pre-test value."
+    },
+    {
+      "name": "No marketplace or shared-application harm",
+      "status": "pending",
+      "detail": "The test must confirm no availability request, pharmacy notification, prescription, contact change, unresolved outage or shared-application regression occurred."
+    },
+    {
+      "name": "Privacy-safe monitoring reviewed",
+      "status": "pending",
+      "detail": "The security owner must inspect redacted provider and aggregate operational signals and confirm the repository artifact contains no identity, network, widget or session data."
+    }
+  ],
+  "review_reference": "docs/launch/SECURITY_OWNER_REVIEW.md",
+  "review_sha256": "f8a12334c222c552457d085500ea98f9e6dbbd63e2ee3d0d488592ae0d06c4ca",
+  "executed_by": null,
+  "executor_role": null,
+  "started_at": null,
+  "completed_at": null,
+  "completion_instructions": [
+    "Obtain shared-project owner approval for the exact test window, disposable identity volume, monitoring and rollback plan.",
+    "Record the aggregate Auth user count, prove intended access with fresh real widget responses, exercise the approved threshold and prove excess attempts are rate limited.",
+    "Keep CAPTCHA rejection and rate-limit rejection distinct, remove every disposable identity and session, and restore the aggregate pre-test count.",
+    "Confirm no marketplace request or shared-application regression occurred and retain only privacy-safe aggregate output.",
+    "Set every check to passed, add the executor, role and timezone-qualified start and completion timestamps, and set status to complete.",
+    "Validate the completed test strictly and add it to the launch registry only with its exact SHA-256 digest."
+  ]
+}

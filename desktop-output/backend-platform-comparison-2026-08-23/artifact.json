@@ -1,0 +1,463 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "MED250 sub-$25 backend decision",
+    "description": "Critical comparison of Cloudflare plus Neon, full Cloudflare, and other sub-$25 replacements after excluding Supabase Pro.",
+    "generatedAt": "2026-08-23T09:03:49Z",
+    "cards": [
+      {
+        "id": "backend_gravity",
+        "description": "Measured PostgreSQL/Supabase footprint in the local MED250 repository.",
+        "dataset": "backend_inventory",
+        "sourceId": "med250_inventory",
+        "metrics": [
+          { "label": "Unique created tables", "field": "tables", "format": "number" },
+          { "label": "SQL function definitions", "field": "sql_functions", "format": "number" },
+          { "label": "Edge Function directories", "field": "edge_functions", "format": "number" }
+        ]
+      },
+      {
+        "id": "recommended_cost",
+        "description": "Modeled Cloudflare plus Neon early-production platform baseline.",
+        "dataset": "recommended_cost_range",
+        "sourceId": "cost_model",
+        "metrics": [
+          { "label": "Low-load baseline", "field": "low", "format": "currency" },
+          { "label": "Typical Launch example", "field": "typical", "format": "currency" }
+        ]
+      }
+    ],
+    "charts": [
+      {
+        "id": "monthly_platform_cost",
+        "title": "Modeled early-production platform baseline",
+        "subtitle": "Sub-$25 candidates only; excludes WhatsApp fees, domains, taxes, overages, engineering, support, and migration labor.",
+        "headerMarkdown": "Lower nominal cost does not mean lower total migration or security risk.",
+        "type": "bar",
+        "dataset": "cost_scenarios",
+        "sourceId": "cost_model",
+        "valueFormat": "currency",
+        "encodings": {
+          "x": { "field": "option", "type": "nominal", "label": "Architecture" },
+          "y": { "field": "monthly_usd", "type": "quantitative", "label": "Monthly platform baseline", "format": "currency" },
+          "tooltip": [
+            { "field": "monthly_usd", "type": "quantitative", "label": "Modeled monthly baseline", "format": "currency" },
+            { "field": "basis", "type": "nominal", "label": "Basis" }
+          ]
+        }
+      }
+    ],
+    "tables": [
+      {
+        "id": "decision_matrix",
+        "title": "Budget-qualified MED250 decision matrix",
+        "subtitle": "Fixed $25 production plans are excluded before scoring; remaining scores are analyst judgment, not vendor benchmarks.",
+        "dataset": "decision_scores",
+        "sourceId": "decision_model",
+        "defaultSort": { "field": "score", "direction": "desc" },
+        "columns": [
+          { "field": "option", "label": "Option", "type": "text" },
+          { "field": "score", "label": "MED250 fit / 100", "format": "number" },
+          { "field": "production_baseline", "label": "Production baseline", "type": "text" },
+          { "field": "verdict", "label": "Verdict", "type": "text" }
+        ]
+      },
+      {
+        "id": "replacement_map",
+        "title": "Recommended Cloudflare plus Neon replacement map",
+        "subtitle": "A platform change is a service-by-service migration, not a database URL swap.",
+        "dataset": "replacement_map",
+        "sourceId": "architecture_model",
+        "columns": [
+          { "field": "current", "label": "Current Supabase capability", "type": "text" },
+          { "field": "target", "label": "Recommended target", "type": "text" },
+          { "field": "non_negotiable_control", "label": "Non-negotiable control", "type": "text" }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "med250_inventory",
+        "label": "MED250 repository inventory",
+        "path": "desktop-output/backend-platform-comparison-2026-08-23/source-notes.md"
+      },
+      {
+        "id": "cost_model",
+        "label": "Official pricing pages and modeled cost scenario",
+        "path": "desktop-output/backend-platform-comparison-2026-08-23/source-notes.md"
+      },
+      {
+        "id": "decision_model",
+        "label": "MED250 weighted decision model",
+        "path": "desktop-output/backend-platform-comparison-2026-08-23/source-notes.md"
+      },
+      {
+        "id": "architecture_model",
+        "label": "MED250 workload and replacement architecture",
+        "path": "desktop-output/backend-platform-comparison-2026-08-23/source-notes.md"
+      }
+    ],
+    "blocks": [
+      {
+        "id": "title",
+        "type": "markdown",
+        "body": "# MED250 sub-$25 backend decision\n\n**Revised critical comparative report · 23 August 2026**"
+      },
+      {
+        "id": "executive_summary",
+        "type": "markdown",
+        "body": "## Executive Summary\n\n- **Supabase Pro is excluded.** The revised decision assumes MED250 will not pay a $25 monthly Supabase subscription, even as the operating solution during migration.\n\n- **Adopt Cloudflare Workers + Neon Postgres.** It is the strongest sub-$25 architecture because it retains PostgreSQL while moving APIs, private media, queues, and edge delivery to Cloudflare. The modeled baseline is about $5 at low load and roughly $20 using Neon's typical Launch example.\n\n- **Use full Cloudflare D1 only if the budget is effectively capped at $5 and MED250 accepts a deliberate backend rewrite.** D1 is cheaper but loses PostgreSQL functions, RLS, extensions, and RPC compatibility.\n\n- **The immediate blocker is data extraction, not platform selection.** Local migrations can rebuild structure, but only a live export or backup can preserve current orders, identities, saved locations, media, and provider-event history."
+      },
+      {
+        "id": "key_findings_heading",
+        "type": "markdown",
+        "body": "## Key findings with visual evidence\n\nThe $25 constraint removes Supabase Pro, Nhost Pro, and Appwrite Pro before scoring. MED250's substantial PostgreSQL footprint then makes Cloudflare plus Neon the best remaining balance of cost and migration safety."
+      },
+      {
+        "id": "metrics",
+        "type": "metric-strip",
+        "cardIds": ["backend_gravity", "recommended_cost"]
+      },
+      {
+        "id": "cost_chart_intro",
+        "type": "markdown",
+        "sourceId": "cost_model",
+        "body": "### The viable fixed-cost range is $5–$20 per month\n\nThe modeled baseline starts at **$5/month** for full Cloudflare or Cloudflare plus Neon at low load. Cloudflare plus Neon moves toward roughly **$20/month** using Neon's typical Launch example and remains within the revised sub-$25 constraint."
+      },
+      {
+        "id": "cost_chart",
+        "type": "chart",
+        "chartId": "monthly_platform_cost"
+      },
+      {
+        "id": "cost_chart_takeaway",
+        "type": "markdown",
+        "sourceId": "cost_model",
+        "body": "**Interpretation.** Full Cloudflare wins the sticker-price comparison, but Cloudflare plus Neon is the recommended sub-$25 choice because it preserves PostgreSQL. Firebase is not charted because production cost is usage-variable; PocketBase is not charted because its own documentation warns against production-critical use before version 1.0."
+      },
+      {
+        "id": "score_intro",
+        "type": "markdown",
+        "sourceId": "decision_model",
+        "body": "### Budget gate first, MED250 fit second\n\nAny fixed **$25/month** production option is excluded before scoring. The remaining score weights PostgreSQL compatibility and security at **20 points each**, asynchronous WhatsApp dispatch at **15**, private media and realtime at **10 each**, predictable cost and migration effort at **10 each**, and Rwanda latency/data-location fit at **5**."
+      },
+      {
+        "id": "decision_table",
+        "type": "table",
+        "tableId": "decision_matrix"
+      },
+      {
+        "id": "decision_takeaway",
+        "type": "markdown",
+        "sourceId": "decision_model",
+        "body": "**Interpretation.** Cloudflare plus Neon is the strongest budget-qualified option. Full Cloudflare D1 is the lowest-cost fallback, but only if MED250 accepts a deliberate rewrite and proves equivalent authorization, recovery, and dispatch reliability. Pausing or freezing free-tier BaaS products are not acceptable substitutes for production."
+      },
+      {
+        "id": "critical_comparison_heading",
+        "type": "markdown",
+        "body": "## Critical comparative analysis\n\nThe following assessment applies the owner's hard sub-$25 budget constraint and treats Supabase only as a source system to exit."
+      },
+      {
+        "id": "supabase_case",
+        "type": "markdown",
+        "sourceId": "cost_model",
+        "body": "### 1. Supabase — exit source, not an operating option\n\nSupabase Pro is disqualified by the budget constraint. MED250 should use local migrations, functions, and any available backups to seed the replacement. If HTTP 402 blocks access, request a **read-only export or recovery path** from Supabase support without accepting the service as the ongoing backend.\n\n**Hard limitation:** repository code cannot reconstruct live rows, uploaded media, Auth identities, saved client locations, or provider-event history. Cutover cannot claim data completeness until those records are exported or their loss is explicitly accepted."
+      },
+      {
+        "id": "cloudflare_neon_case",
+        "type": "markdown",
+        "sourceId": "cost_model",
+        "body": "### 2. Cloudflare Workers + Neon Postgres — recommended replacement\n\n**Why it wins under the constraint:** Neon preserves PostgreSQL, while Workers becomes the controlled API boundary. R2 handles private media, Queues handles nearest-pharmacy fan-out and retries, Hyperdrive pools Postgres connections, and Durable Objects/WebSockets can support realtime coordination. Early platform cost can begin near **$5/month** at low load and move toward roughly **$20/month** using Neon's published Launch example. See [Workers pricing](https://developers.cloudflare.com/workers/platform/pricing/), [Hyperdrive compatibility](https://developers.cloudflare.com/hyperdrive/reference/supported-databases-and-features/), and [Neon pricing](https://neon.com/pricing).\n\n**Critical weakness:** this is still a real migration. Supabase Auth/RLS coupling, PostgREST behavior, Storage, Realtime, and Edge Functions must be replaced and regression-tested. Hyperdrive also does not support PostgreSQL session features such as `LISTEN/NOTIFY` or advisory locks."
+      },
+      {
+        "id": "cloudflare_d1_case",
+        "type": "markdown",
+        "sourceId": "architecture_model",
+        "body": "### 3. Full Cloudflare D1/R2/Workers — cheapest, but highest rewrite risk\n\n**Why it is attractive:** one vendor, an integrated edge runtime, free R2 egress, cheap queues, and a **$5/month** Workers Paid entry point.\n\n**Why it is not the default recommendation:** D1 is SQLite-based, capped at **10 GB per paid database**, and single-threaded. PostgreSQL functions, extensions, RPCs, triggers, and row-level security do not migrate as-is. MED250 would have to move authorization out of the database and prove there is no pharmacy/client data leakage. D1 placement hints do not currently offer an Africa primary location. See [D1 limits](https://developers.cloudflare.com/d1/platform/limits/) and [D1 data location](https://developers.cloudflare.com/d1/configuration/data-location/)."
+      },
+      {
+        "id": "other_options_case",
+        "type": "markdown",
+        "sourceId": "cost_model",
+        "body": "### 4. Other cheap or free options\n\n- **Nhost Free:** PostgreSQL-based, but it pauses after inactivity; its $25 production plan is excluded. Use only for experiments.\n- **Turso + Cloudflare:** budget-qualified at about **$10.99/month**, but still a SQLite/libSQL rewrite and a second vendor. D1 is the cleaner SQLite choice for a Cloudflare-first design.\n- **Appwrite Free:** the document model forces a relational/RPC redesign, and free projects can pause or freeze at limits. Its $25 production plan is excluded.\n- **Firebase/Firestore:** globally mature, but usage-variable pricing, document modeling, and loss of PostgreSQL behavior make it a poor fit.\n- **Self-hosted Supabase:** may appear to fit near $20 infrastructure, but resource overages and the operational burden can breach the budget. MED250 would own patching, backups, HA, observability, secrets, abuse response, and on-call.\n- **PocketBase:** excellent for prototypes and small non-critical tools, but its [official FAQ](https://pocketbase.io/faq/) says it is not recommended for production-critical use before version 1.0."
+      },
+      {
+        "id": "architecture_heading",
+        "type": "markdown",
+        "body": "## What the recommended architecture must replace\n\nFor MED250, the platform decision is inseparable from the WhatsApp order workflow and the server-side distinction between pharmacies and clients."
+      },
+      {
+        "id": "architecture_control",
+        "type": "markdown",
+        "sourceId": "architecture_model",
+        "body": "A normalized WhatsApp number that appears in the verified pharmacy registry receives the **pharmacy** role; every other inbound number is a **client** unless separately verified. The server—not the UI or message text—must enforce that role boundary. Client images and prescriptions remain private, saved-location reuse needs explicit consent, and only eligible pharmacies selected for that order may receive the client's number."
+      },
+      {
+        "id": "architecture_table",
+        "type": "table",
+        "tableId": "replacement_map"
+      },
+      {
+        "id": "recommended_next_steps",
+        "type": "markdown",
+        "sourceId": "decision_model",
+        "body": "## Recommended next steps\n\n1. **Request a Supabase export without adopting Pro as the operating plan.** Ask support for a read-only database/Auth/Storage recovery path. In parallel, inventory every live dataset that cannot be reconstructed from source.\n2. **Stand up the replacement at the $5 low-load baseline.** Use Workers Paid, Neon Free during migration, private R2, Queues, and Hyperdrive. Configure budget alerts before accepting traffic.\n3. **Migrate the PostgreSQL contract.** Replay reviewed migrations into Neon, replace Supabase Auth with verified WhatsApp phone sessions and explicit pharmacy/client roles, and move `.from()`/`.rpc()` traffic behind Workers.\n4. **Implement reliable dispatch.** Create the order and outbox transactionally, fan out through Queues to the nearest ten eligible pharmacies, and add idempotency, retries, dead-letter handling, provider callbacks, and audit logs.\n5. **Run equivalence tests from Rwanda.** Prove client image upload, saved/new location, nearest-ten selection, pharmacy-only data access, direct client response, recovery, and failure/retry behavior.\n6. **Cut over only after data and security sign-off.** If live Supabase records cannot be exported, stop and obtain an explicit data-loss decision; do not silently launch from an incomplete database."
+      },
+      {
+        "id": "further_questions",
+        "type": "markdown",
+        "body": "## Further questions\n\n- What is the maximum acceptable monthly backend spend below $25: $5, $10, or $20?\n- What are the current database size, monthly active users, media-storage growth, and peak orders per minute?\n- Which SQL functions and policies are actually active in production, rather than only present in migration history?\n- Can the current Supabase project export database, Auth, and Storage data despite HTTP 402?\n- Does MED250 require database-level RLS for regulatory assurance, or can a reviewed Worker authorization layer be accepted?\n- Is an EU data location acceptable for the current Rwanda service and privacy commitments?"
+      },
+      {
+        "id": "caveats",
+        "type": "markdown",
+        "sourceId": "cost_model",
+        "body": "## Caveats and assumptions\n\n- Supabase Pro, Nhost Pro, and Appwrite Pro are excluded because the owner rejected a $25 monthly operating plan.\n- Vendor prices and limits are a **23 August 2026** snapshot and must be rechecked before procurement.\n- The cost chart is a modeled early-production platform baseline, not an invoice or three-year TCO. It excludes WhatsApp fees, domains, taxes, overages, engineering, migration, monitoring add-ons, support, and on-call.\n- Repository counts describe migration history and client-call footprint; they do not prove the exact live database state.\n- No Rwanda load test, production query trace, storage forecast, MAU count, provider invoice, or confirmed Supabase export was available.\n- Configuration is not live evidence. Production readiness still requires a controlled end-to-end WhatsApp send, delivery callback, client-location flow, nearest-ten dispatch, pharmacy reply, audit record, and failure/retry test."
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "generatedAt": "2026-08-23T09:03:49Z",
+    "status": "ready",
+    "datasets": {
+      "backend_inventory": [
+        {
+          "tables": 36,
+          "sql_functions": 135,
+          "edge_functions": 16
+        }
+      ],
+      "recommended_cost_range": [
+        {
+          "low": 5,
+          "typical": 20
+        }
+      ],
+      "cost_scenarios": [
+        {
+          "option": "Full CF D1",
+          "monthly_usd": 5,
+          "basis": "Workers Paid minimum; early load assumed inside included allocations"
+        },
+        {
+          "option": "CF + Neon free",
+          "monthly_usd": 5,
+          "basis": "Workers Paid plus Neon Free while capacity remains sufficient"
+        },
+        {
+          "option": "CF + Turso",
+          "monthly_usd": 10.99,
+          "basis": "Workers Paid plus Turso Developer"
+        },
+        {
+          "option": "CF + Neon Launch",
+          "monthly_usd": 20,
+          "basis": "Workers Paid plus Neon's published typical intermittent 1 GB example"
+        },
+        {
+          "option": "Railway self-host",
+          "monthly_usd": 20,
+          "basis": "Railway Pro subscription minimum before resource overages"
+        }
+      ],
+      "decision_scores": [
+        {
+          "option": "Cloudflare + Neon Postgres",
+          "score": 90,
+          "production_baseline": "$5 low-load; about $20 typical example",
+          "migration": "Medium-high",
+          "critical_risk": "Auth/RLS/API replacement",
+          "verdict": "Adopt"
+        },
+        {
+          "option": "Self-hosted Supabase",
+          "score": 60,
+          "production_baseline": "$20+ infrastructure baseline",
+          "migration": "Medium",
+          "critical_risk": "Likely budget breach from operations and overages",
+          "verdict": "Reject without platform team"
+        },
+        {
+          "option": "Full Cloudflare D1/R2/Workers",
+          "score": 74,
+          "production_baseline": "$5/month early baseline",
+          "migration": "Very high",
+          "critical_risk": "SQLite/RLS/RPC rewrite",
+          "verdict": "Fallback if $5 is the hard cap"
+        },
+        {
+          "option": "Cloudflare + Turso",
+          "score": 68,
+          "production_baseline": "$10.99/month",
+          "migration": "Very high",
+          "critical_risk": "SQLite rewrite plus second vendor",
+          "verdict": "Not preferred over D1"
+        },
+        {
+          "option": "Firebase/Firestore",
+          "score": 58,
+          "production_baseline": "Usage-variable",
+          "migration": "Very high",
+          "critical_risk": "Document model and query billing",
+          "verdict": "Not recommended"
+        },
+        {
+          "option": "Nhost Free",
+          "score": 55,
+          "production_baseline": "$0 but pauses after inactivity",
+          "migration": "Medium",
+          "critical_risk": "Free tier is not dependable production",
+          "verdict": "Experiments only"
+        },
+        {
+          "option": "Appwrite Free",
+          "score": 52,
+          "production_baseline": "$0 with pause/freeze limits",
+          "migration": "High",
+          "critical_risk": "Document rewrite and hard free-tier limits",
+          "verdict": "Experiments only"
+        },
+        {
+          "option": "PocketBase",
+          "score": 47,
+          "production_baseline": "Self-hosted VPS usage",
+          "migration": "High",
+          "critical_risk": "Not production-critical before v1",
+          "verdict": "Reject for production"
+        }
+      ],
+      "replacement_map": [
+        {
+          "current": "PostgreSQL database and RPC",
+          "target": "Neon Postgres through Hyperdrive",
+          "non_negotiable_control": "Schema/function compatibility tests, transaction boundaries, connection limits"
+        },
+        {
+          "current": "Supabase Auth and RLS",
+          "target": "Worker sessions plus verified phone roles; optional Neon Auth",
+          "non_negotiable_control": "Server-side pharmacy allowlist, client default role, deny-by-default authorization"
+        },
+        {
+          "current": "Supabase Storage",
+          "target": "Private R2 buckets with short-lived signed access",
+          "non_negotiable_control": "Media type/size scanning, encryption, retention, auditable access"
+        },
+        {
+          "current": "Edge Functions",
+          "target": "Cloudflare Workers",
+          "non_negotiable_control": "Secret isolation, input validation, idempotency, provider signature checks"
+        },
+        {
+          "current": "Database webhooks/background work",
+          "target": "Transactional outbox plus Cloudflare Queues/Cron",
+          "non_negotiable_control": "Retries, dead-letter queue, deduplication, delivery-status reconciliation"
+        },
+        {
+          "current": "Realtime channels",
+          "target": "Durable Objects/WebSockets or bounded polling",
+          "non_negotiable_control": "Tenant/order isolation, resume behavior, backpressure"
+        },
+        {
+          "current": "Nearest-pharmacy dispatch",
+          "target": "Postgres geospatial query plus queue fan-out",
+          "non_negotiable_control": "Eligibility filter, deterministic top ten, distance audit, consented phone disclosure"
+        },
+        {
+          "current": "Platform backups and recovery",
+          "target": "Neon restore features plus R2 versioning/export runbook",
+          "non_negotiable_control": "Tested RPO/RTO, restore drill, provider-event replay"
+        }
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "med250_inventory",
+      "label": "MED250 repository inventory",
+      "path": "desktop-output/backend-platform-comparison-2026-08-23/source-notes.md",
+      "query": {
+        "engine": "repository-snapshot",
+        "sql": "SELECT 36 AS tables, 135 AS sql_functions, 16 AS edge_functions",
+        "language": "shell",
+        "description": "Reviewed find and ripgrep inventory of MED250 migrations, functions, policies, views, client calls, and D1 scaffold.",
+        "executed_at": "2026-08-23T09:03:49Z",
+        "filters": [
+          "Repository root: MED250",
+          "Counts describe tracked and working-tree source files, not live database introspection"
+        ],
+        "metric_definitions": [
+          "Unique created tables = distinct CREATE TABLE targets found across migration history",
+          "SQL function definitions = CREATE FUNCTION occurrences across migration history",
+          "Edge Function directories = first-level directories under supabase/functions"
+        ]
+      }
+    },
+    {
+      "id": "cost_model",
+      "label": "Official pricing pages and modeled cost scenario",
+      "path": "desktop-output/backend-platform-comparison-2026-08-23/source-notes.md",
+      "query": {
+        "engine": "document-review",
+        "sql": "SELECT * FROM (VALUES ('Full Cloudflare D1/R2/Workers', 5.00), ('Cloudflare + Neon (free/low load)', 5.00), ('Cloudflare + Turso Developer', 10.99), ('Cloudflare + Neon (typical Launch)', 20.00), ('Railway self-host baseline', 20.00)) AS cost_scenarios(option, monthly_usd) ORDER BY monthly_usd, option",
+        "language": "markdown",
+        "description": "Modeled early-production monthly platform baselines from official vendor pricing and limits pages listed in the source notes.",
+        "executed_at": "2026-08-23T09:03:49Z",
+        "filters": [
+          "USD monthly platform baseline",
+          "Fixed $25 monthly production plans excluded by owner budget constraint",
+          "Excludes WhatsApp fees, domains, taxes, overages, engineering, support, and migration labor",
+          "Firebase excluded from fixed-cost chart because production pricing is usage-variable",
+          "PocketBase excluded from fixed-cost chart because it is rejected for production-critical use"
+        ],
+        "metric_definitions": [
+          "Monthly baseline = published subscription minimums plus the stated vendor example where applicable",
+          "Cloudflare plus Neon low-load = Workers Paid minimum plus Neon Free",
+          "Cloudflare plus Neon typical = Workers Paid minimum plus Neon's published typical intermittent 1 GB Launch example"
+        ]
+      }
+    },
+    {
+      "id": "decision_model",
+      "label": "MED250 weighted decision model",
+      "path": "desktop-output/backend-platform-comparison-2026-08-23/source-notes.md",
+      "query": {
+        "engine": "analyst-model",
+        "sql": "SELECT * FROM (VALUES ('Cloudflare + Neon Postgres', 90), ('Full Cloudflare D1/R2/Workers', 74), ('Cloudflare + Turso', 68), ('Self-hosted Supabase', 60), ('Firebase/Firestore', 58), ('Nhost Free', 55), ('Appwrite Free', 52), ('PocketBase', 47)) AS decision_scores(option, score) ORDER BY score DESC",
+        "language": "markdown",
+        "description": "A transparent sub-$25 budget gate followed by a 100-point MED250-fit model combining repository compatibility, security, messaging reliability, media, realtime, cost, migration effort, and regional fit.",
+        "executed_at": "2026-08-23T09:03:49Z",
+        "metric_definitions": [
+          "Budget gate = exclude fixed $25 monthly production plans before scoring",
+          "PostgreSQL/migration compatibility: 20 points",
+          "Access-control safety: 20 points",
+          "Async WhatsApp dispatch: 15 points",
+          "Private media: 10 points",
+          "Realtime: 10 points",
+          "Predictable production cost: 10 points",
+          "Migration effort: 10 points",
+          "Rwanda latency/data-location fit: 5 points"
+        ]
+      }
+    },
+    {
+      "id": "architecture_model",
+      "label": "MED250 workload and replacement architecture",
+      "path": "desktop-output/backend-platform-comparison-2026-08-23/source-notes.md",
+      "query": {
+        "engine": "architecture-review",
+        "sql": "SELECT * FROM (VALUES ('PostgreSQL database and RPC', 'Neon Postgres through Hyperdrive'), ('Supabase Auth and RLS', 'Worker sessions plus verified phone roles'), ('Supabase Storage', 'Private R2 buckets'), ('Edge Functions', 'Cloudflare Workers'), ('Database webhooks/background work', 'Transactional outbox plus Cloudflare Queues/Cron'), ('Realtime channels', 'Durable Objects/WebSockets or bounded polling'), ('Nearest-pharmacy dispatch', 'Postgres geospatial query plus queue fan-out'), ('Platform backups and recovery', 'Neon restore features plus R2 versioning/export runbook')) AS replacement_map(current_capability, target_capability)",
+        "language": "markdown",
+        "description": "Service-by-service mapping for the MED250 client/pharmacy WhatsApp order workflow and backend replacement controls.",
+        "executed_at": "2026-08-23T09:03:49Z",
+        "filters": [
+          "Pharmacy role requires normalized phone number in verified pharmacy registry",
+          "All other inbound WhatsApp numbers default to client role",
+          "Dispatch fan-out limited to nearest ten eligible pharmacies"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "captured_at": "2026-07-14T10:24:10Z",
+  "classification": "read-only current-state audit; not a production approval",
+  "sites": {
+    "status": "active",
+    "latest_version": 8,
+    "url": "https://med250-rwanda.ikanisa.chatgpt.site",
+    "access_mode": "custom",
+    "allowed_user_count": 1,
+    "allowed_group_count": 0,
+    "owner_only": true,
+    "marketplace_mode": "preview",
+    "custom_domain_count": 2,
+    "custom_domains": [
+      {
+        "hostname": "med250.rw",
+        "status": "pending",
+        "provider_status": "pending",
+        "ssl_status": "pending_validation"
+      },
+      {
+        "hostname": "www.med250.rw",
+        "status": "pending",
+        "provider_status": "pending",
+        "ssl_status": "pending_validation"
+      }
+    ]
+  },
+  "production_domain": {
+    "apex": "med250.rw",
+    "apex_resolves": false,
+    "www": "www.med250.rw",
+    "www_resolves": false,
+    "https_verification": "not runnable because DNS does not resolve"
+  },
+  "cloudflare_cli": {
+    "wrangler_version": "4.110.0",
+    "authenticated": false
+  },
+  "supabase_public_probe": {
+    "settings_endpoint_status": 200,
+    "signup_disabled": false,
+    "captcha_configuration_publicly_provable": false,
+    "backend_contract_rpc_anonymous_status": 401,
+    "backend_contract_rpc_anonymous_denied": true,
+    "operational_health_rpc_anonymous_status": 401,
+    "operational_health_rpc_anonymous_denied": true,
+    "privileged_contract_version_publicly_provable": false
+  },
+  "release_decision": {
+    "private_preview": "version 8 deployed and verified across 7 routes with 0 errors",
+    "public_ordering": "disabled",
+    "search_indexing": "disabled",
+    "production_launch": "hold",
+    "pending_evidence_gates": 15
+  }
+}

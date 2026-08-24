@@ -1,0 +1,26 @@
+{
+  "schema_version": "2",
+  "captured_at": "2026-07-23T19:05:46+02:00",
+  "classification": "Cloudflare Worker production-domain cutover verification plan",
+  "worker_route": "med-250.com",
+  "hostnames": [
+    {
+      "hostname": "med-250.com",
+      "status": "active",
+      "records": [
+        {
+          "type": "A",
+          "name": "med-250.com",
+          "values": [],
+          "minimum_count": 1,
+          "purpose": "Cloudflare-proxied Worker production routing"
+        }
+      ]
+    }
+  ],
+  "verification_rules": [
+    "Require at least one public IPv4 answer without pinning Cloudflare anycast addresses.",
+    "Treat DNS verification as necessary but insufficient: deployment verification must separately prove TLS, routes, headers, robots and sitemap.",
+    "Do not mark the release gate confirmed until the infrastructure owner attaches a redacted domain-verification record and approval."
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_DOMAIN_DNS_VERIFIED",
+  "evidence_type": "test_record",
+  "status": "complete",
+  "title": "Exact-revision production route and catalogue verification",
+  "summary": "The canonical domain passed the ten-route deployment contract and the live source-bound catalogue reconciled all 4,657 products across 39 pages with no duplicate identifiers.",
+  "recorded_at": "2026-07-18T16:33:31.102Z",
+  "recorded_by": "Codex automated verifier",
+  "recorded_role": "Release verification agent",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Production route suite",
+      "status": "passed",
+      "detail": "All ten canonical routes passed against Git revision 5ef50a296941056bd17e614dff7b35290742f50a."
+    },
+    {
+      "name": "Catalogue pagination",
+      "status": "passed",
+      "detail": "The live catalogue reconciled exactly 4,657 governed products across all 39 source-ranked pages with zero duplicate identifiers."
+    },
+    {
+      "name": "Catalogue search reach",
+      "status": "passed",
+      "detail": "Every required English, French, and Kinyarwanda search case returned the expected governed catalogue population."
+    },
+    {
+      "name": "Browser evidence binding",
+      "status": "passed",
+      "detail": "All sixteen production browser scenarios and 56 immutable desktop and mobile captures are bound to the same deployment and catalogue receipts."
+    }
+  ],
+  "executed_by": "Codex automated verifier",
+  "executor_role": "Release verification agent",
+  "started_at": "2026-07-18T16:33:20Z",
+  "completed_at": "2026-07-18T16:33:31.102Z"
+}

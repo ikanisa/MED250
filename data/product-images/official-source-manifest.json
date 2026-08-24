@@ -1,0 +1,720 @@
+[
+  {
+    "product_id": "rwanda-fda-hm-0975",
+    "source_page_url": "https://www.accessdata.fda.gov/drugsatfda_docs/pepfar/216223PI.pdf",
+    "source_kind": "licensed_feed",
+    "rights_basis": "Official FDA package label render from 216223PI.pdf page 3; exact label pixels placed on a neutral transparent bottle silhouette; source document and deterministic transformation retained; reuse rights not independently verified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 300,
+    "width": 1400,
+    "height": 1400,
+    "title": "Abacavir, Dolutegravir and Lamivudine Tablets 600 mg/50 mg/300 mg 30 Tablets Laurus Labs Limited",
+    "images": [
+      "https://uskfnszcdqpcfrhjxitl.supabase.co/storage/v1/object/public/product-images/source-renders/fda/rwanda-fda-hm-0975.png"
+    ]
+  },
+  {
+    "product_id": "AMZ-B002NKN9R6",
+    "source_page_url": "https://nuby.mx/producto/biberon-dosificador-de-medicina-medi-nurser/",
+    "source_kind": "manufacturer",
+    "rights_basis": "Official Nuby Mexico product listing for Medi Nurser SKU 24171; Aqua variant and 15 ml graduations are visible in the source images; source URLs retained; reuse rights not independently verified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 300,
+    "width": 1000,
+    "height": 1000,
+    "title": "Nuby Medi-Nurser Medicine Bottle - Medicine and Vitamin Dispenser for Newborns - 15 ml - 0+ Months - BPA Free - Aqua",
+    "images": [
+      "https://nuby.mx/wp-content/uploads/2024/04/24171.jpg",
+      "https://nuby.mx/wp-content/uploads/2024/06/24171-biberon-disificador-de-medicamento-01.jpg",
+      "https://nuby.mx/wp-content/uploads/2024/06/24171-biberon-disificador-de-medicamento-03.jpg"
+    ]
+  },
+  {
+    "product_id": "AMZ-B0CTB79SN1",
+    "source_page_url": "https://alwaysdiscreet.com/en-us/incontinence-products/liners-and-pads/heavy-long-pads",
+    "source_kind": "manufacturer",
+    "rights_basis": "Official Always Discreet manufacturer product listing; embedded quantity variant identifies the 64-count Heavy Long 5-drop pack; exact source URL and transformation provenance retained; reuse rights not independently verified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 300,
+    "width": 1024,
+    "height": 1024,
+    "title": "Always Discreet Adult Incontinence Pads for Women, Drier, 5 Drop Long Length, Heavy Absorbency, Pads for Bladder Control Management, Bladder Leaks, & Postpartum Pads, 64ct",
+    "images": [
+      "https://images.ctfassets.net/qibzrltfp5a4/51OFqRpTwfpN8TmGUDbN5K/f61023e5fc2bd8181fc341b230d4cc68/00030772236352_C7N1_126815458.png"
+    ]
+  },
+  {
+    "product_id": "rwanda-fda-hm-0996",
+    "source_page_url": "https://biodeallaboratories.com/wp-content/uploads/2025/07/Biodeal-Human-Health-Catalogue_compressed.pdf",
+    "source_kind": "manufacturer",
+    "rights_basis": "Official Biodeal Laboratories 2025 catalogue page 7 and first-party media asset for COLDAMOL P SYRUP 100 ml (chlorpheniramine 2 mg, pseudoephedrine 10 mg, paracetamol 120 mg per 5 ml). Exact 500 x 500 asset resized to 1200 x 1200 without synthesized content; provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 300,
+    "width": 1200,
+    "height": 1200,
+    "title": "COLDAMOL-P Syrup 100 ml - Chlorpheniramine Maleate 2 mg, Paracetamol 120 mg, Pseudoephedrine HCl 10 mg per 5 ml - Biodeal Laboratories Limited",
+    "images": [
+      "https://uskfnszcdqpcfrhjxitl.supabase.co/storage/v1/object/public/product-images/source-renders/manufacturer/rwanda-fda-hm-0996.png"
+    ]
+  },
+  {
+    "product_id": "AMZ-B0GPY5YK3P",
+    "source_page_url": "https://alwaysdiscreet.com/en-us/incontinence-products/liners-and-pads/boutique-very-light-liners",
+    "source_kind": "manufacturer",
+    "rights_basis": "Official Always Discreet product page; embedded 32-count variant identifies Boutique Very Light 2-drop Long liners and provides the exact 1024 x 1024 pack asset. Source and transformation provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 300,
+    "width": 1024,
+    "height": 1024,
+    "title": "Always Discreet Boutique Adult Incontinence Panty Liners for Women, Very Light Absorbency, Long Length, 32 Count",
+    "images": [
+      "https://images.ctfassets.net/qibzrltfp5a4/onXY0bOb6xYxQEEOVcPgW/c3fc11a85879b47f03d193a93da7f815/00030772243053_C1N1_128211412.png"
+    ]
+  },
+  {
+    "product_id": "AMZ-B0GCG66YCT",
+    "source_page_url": "https://alwaysdiscreet.com/en-us/incontinence-products/maxi-protect/maximum-plus-incontinence-underwear-large",
+    "source_kind": "manufacturer",
+    "rights_basis": "Official Always Discreet product page; embedded 64-count variant identifies MaxiProtect Maximum Plus absorbency, size L, and provides the exact 1024 x 1024 pack asset. Source and transformation provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 300,
+    "width": 1024,
+    "height": 1024,
+    "title": "Always Discreet MaxiProtect Adult Diapers for Women, Maximum Plus Absorbency, Size L, 64 Count",
+    "images": [
+      "https://images.ctfassets.net/qibzrltfp5a4/4CA40hvahf1pmBkXKDY0SX/ae2bd5c1d7f8e0113ee583987f1c6669/80881974_ALW_DSCR_1_64_MAXI_PRO_L_4_6X_PI01_130114270.png"
+    ]
+  },
+  {
+    "product_id": "AMZ-B083M2LPGL",
+    "source_page_url": "https://www.walmart.com/ip/10128171834",
+    "source_kind": "specialist_retailer",
+    "rights_basis": "Exact Walmart product listing for Poise Ultra Thin 3-drop Light Regular, 144 count (3 packs of 48). Listing media includes the 144-count hero and three visible 48-pad packs; original source URLs and deterministic transformations retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 300,
+    "width": 1080,
+    "height": 1080,
+    "title": "Poise Ultra Thin Incontinence and Postpartum Pads, 3 Drop Light Absorbency, Regular Length, 144 Count (3 Packs of 48)",
+    "images": [
+      "https://i5.walmartimages.com/seo/Poise-Ultra-Thin-Incontinence-Pads-Postpartum-Incontinence-Pads-3-Drop-Light-Absorbency-Regular-Length-144-Count-3-Packs-48-Packaging-May-Vary_9063c420-33ff-472f-b136-0795c80ffe3b.e7d2930713300ab1ad700b0d4b31ebc9.jpeg",
+      "https://i5.walmartimages.com/asr/bb8aa796-9cd7-46dc-af13-8d9f739f5b0e.510a266784ab79fa60d4100048bbf8e4.jpeg",
+      "https://i5.walmartimages.com/asr/9a5628e5-4120-4c91-b5f8-cd3a0944f57d.293cb00eeec4a8bc1f59aa965921e000.jpeg",
+      "https://i5.walmartimages.com/asr/0d240c68-bf58-400f-9afe-0771785c744d.ae08401be236a06642f74d54b65fa544.jpeg",
+      "https://i5.walmartimages.com/asr/21ee8797-f181-465a-a95a-00aaf7a28b71.915458b396e660fe099c040e255e7e2c.jpeg",
+      "https://i5.walmartimages.com/asr/375c87fc-5d7e-4be2-b73b-83e466e3c034.071da3f276e745faf97afd9ba2caa53f.jpeg",
+      "https://i5.walmartimages.com/asr/4f5db9a2-da4b-445c-ad49-b6ecae6719a0.941e45dfaac24a6d4b70cb542e5444d0.jpeg"
+    ]
+  },
+  {
+    "product_id": "AMZ-B0B9NLF4FC",
+    "source_page_url": "https://www.bumkins.com/products/silicone-cup-with-straw-and-lid-sage",
+    "source_kind": "manufacturer",
+    "rights_basis": "Official Bumkins product listing for SKU SCL-SGE, the exact sage 7 oz/210 ml silicone straw cup with lid. Original 2000 x 2000 first-party assets and deterministic transformation provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 300,
+    "width": 2000,
+    "height": 2000,
+    "title": "Bumkins Baby and Toddler Cups, Sippy Cup with Straw, Spill Proof, Transition Cup for Babies Age 1 Year, Safely Sip from Lid or Straw, First Year Supplies, Platinum Silicone, Holds 7oz, Sage Green, SKU SCL-SGE",
+    "images": [
+      "https://www.bumkins.com/cdn/shop/products/SCL-SGE_1c902934-3510-4548-9df5-6aaddf1aea03.webp?v=1762528586",
+      "https://www.bumkins.com/cdn/shop/products/SCL-SGE-SCL-BLU-SCL-GRY-SCL-PNK-LS3.webp?v=1747937922",
+      "https://www.bumkins.com/cdn/shop/products/SCL-SGE-SSLB-CLR-U-43-GB-SGE-SFT-SGE-LS2.webp?v=1752512298",
+      "https://www.bumkins.com/cdn/shop/products/SCL-SGE-LS1.webp?v=1747937922",
+      "https://www.bumkins.com/cdn/shop/products/SCL-SGE.webp?v=1747937923",
+      "https://www.bumkins.com/cdn/shop/products/SCL-SGE-PACKAGING.webp?v=1747937924"
+    ]
+  },
+  {
+    "product_id": "AMZ-B0CTY1DTV5",
+    "source_page_url": "https://www.shopabunda.com/products/munchkin-16pc-baby-and-toddler-feeding-supplies-set-includes-plates-bowls-cups-and-utensils-stay-put-suction-bowls-for-babies-and-toddlers-3-pack-blue-green-purple",
+    "source_kind": "specialist_retailer",
+    "rights_basis": "Exact Abunda listing fulfilled by Amazon for the Munchkin 16-piece dining set bundled with three Stay Put suction bowls in blue, green, and purple. The gallery visibly includes both bundle components; original media and deterministic transformation provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 300,
+    "width": 1001,
+    "height": 1001,
+    "title": "Munchkin 16pc Baby and Toddler Feeding Supplies Set - Includes Plates, Bowls, Cups and Utensils & Stay Put Suction Bowls for Babies and Toddlers, 3 Pack, Blue/Green/Purple",
+    "images": [
+      "https://m.media-amazon.com/images/I/417tV7RxOsL.jpg",
+      "https://m.media-amazon.com/images/I/710jrvNWOmL.jpg",
+      "https://m.media-amazon.com/images/I/61DPTrP2snL.jpg",
+      "https://m.media-amazon.com/images/I/51X-lcRruOL.jpg",
+      "https://m.media-amazon.com/images/I/61Kg11BajyL.jpg"
+    ]
+  },
+  {
+    "product_id": "AMZ-B0CTY99H7M",
+    "source_page_url": "https://www.amazon.com/dp/B0CTY99H7M",
+    "source_kind": "marketplace_api",
+    "rights_basis": "Exact Amazon ASIN B0CTY99H7M bundle: Munchkin 16-piece feeding set plus two Snack Catcher cups in blue and green. Bundle media is combined with exact blue/green first-party Munchkin component assets; source URLs and deterministic transformation provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 300,
+    "width": 1001,
+    "height": 1001,
+    "title": "Munchkin 16pc Baby and Toddler Feeding Supplies Set - Includes Plates, Bowls, Cups and Utensils & Snack Catcher Toddler Snack Cups, 2 Pack, Blue/Green, ASIN B0CTY99H7M",
+    "images": [
+      "https://m.media-amazon.com/images/I/81+IOn1-wzS.jpg",
+      "https://m.media-amazon.com/images/I/41Zu5n+zw4L.jpg",
+      "https://m.media-amazon.com/images/I/61nT0eI59BL.jpg",
+      "https://cdn.shopify.com/s/files/1/0672/2122/5629/files/large-jpg-misc-cups__don-diaz_10121_rt_grn_v2.jpg?v=1720546088",
+      "https://cdn.shopify.com/s/files/1/0672/2122/5629/files/large-jpg-misc-cups__don-diaz_10121_rt_blu_v2.jpg?v=1720546088"
+    ]
+  },
+  {
+    "product_id": "AMZ-B071J9BFRN",
+    "source_page_url": "https://www.desertcart.mx/products/291843160-burt-s-bees-baby-unisex-beekeeper-wearable-blanket-organic-cotton-light",
+    "source_kind": "specialist_retailer",
+    "rights_basis": "Exact Desertcart/Amazon listing for ASIN B071J9BFRN, the Burt's Bees Baby Rugby Stripe Blossom lightweight 0.5 TOG Beekeeper in Large, model LY24697-BLM-LG. Original 2000px listing media and deterministic transformation provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 300,
+    "width": 2000,
+    "height": 2000,
+    "title": "Burt's Bees Baby Rugby Stripe Blossom Organic Beekeeper Wearable Blanket, Lightweight 0.5 TOG, Size Large 12-18 Months, SKU LY24697-BLM-LG, ASIN B071J9BFRN",
+    "images": [
+      "https://m.media-amazon.com/images/I/61qkUxz4xtL.jpg",
+      "https://m.media-amazon.com/images/I/71I-1idRjBL.jpg",
+      "https://m.media-amazon.com/images/I/71AHndql92L.jpg"
+    ]
+  },
+  {
+    "product_id": "AMZ-B0FK1VXBP9",
+    "source_page_url": "https://www.kosovo.ubuy.com/en/product/QWQR97IZO-dr-browns-nursing-pads-manual-breast-pump-set-8-count-washable-pads-softshape-pump-with-5-oz-bottle-and-level-1-nipple",
+    "source_kind": "specialist_retailer",
+    "rights_basis": "Exact Ubuy US-import listing for Amazon ASIN B0FK1VXBP9. The hero visibly contains both bundle components: Dr. Brown's 8-count reusable breast pads and SoftShape manual pump with 5 oz bottle, Level 1 nipple, cap, and cleaning brush; source and deterministic transformation provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 300,
+    "width": 1001,
+    "height": 1001,
+    "title": "Dr. Brown's Nursing Pads and Manual Breast Pump Set, 8 Count Washable Pads plus SoftShape Pump with 5 oz Bottle and Level 1 Nipple, ASIN B0FK1VXBP9",
+    "images": [
+      "https://m.media-amazon.com/images/I/51sKi5kbp9L.jpg"
+    ]
+  },
+  {
+    "product_id": "AMZ-B0CZKRFH37",
+    "source_page_url": "https://www.amazon.com/dp/B0CZKRFH37",
+    "source_kind": "marketplace_api",
+    "rights_basis": "Exact live Amazon ASIN B0CZKRFH37 listing resolved through a structured ASIN lookup. The hero visibly contains both green/blue 10 oz Miracle 360 cups and both blue/green divided Stay Put suction plates; source and deterministic transformation provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 300,
+    "width": 1001,
+    "height": 1001,
+    "title": "Munchkin Miracle 360 Sippy Cup 2 Pack and Stay Put Suction Toddler Plates, 10 Ounce Green/Blue and Blue/Green, ASIN B0CZKRFH37",
+    "images": [
+      "https://m.media-amazon.com/images/I/41a4f2dAp5L.jpg"
+    ]
+  },
+  {
+    "product_id": "AMZ-B0DSNY14ZW",
+    "source_page_url": "https://www.amazon.com/dp/B0DSNY14ZW",
+    "source_kind": "marketplace_api",
+    "rights_basis": "Exact structured Amazon ASIN B0DSNY14ZW listing and its 1024px primary asset for the JSEIAJB/NSUQOA bottle-cleaning brush variant E, green handle, 32 x 6.5 cm. Source and deterministic transformation provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 300,
+    "width": 1024,
+    "height": 1024,
+    "title": "JSEIAJB NSUQOA 5pcs Bottle Brush Children's Milk Feeding Cleaning Cup with Handle Household Kitchen Utensils, Variant E Green, 32 x 6.5 cm, ASIN B0DSNY14ZW",
+    "images": [
+      "https://m.media-amazon.com/images/I/311vYHRR40L.jpg"
+    ]
+  },
+  {
+    "product_id": "AMZ-B0DSPFHT19",
+    "source_page_url": "https://www.amazon.com/dp/B0DSPFHT19",
+    "source_kind": "marketplace_api",
+    "rights_basis": "Exact structured Amazon ASIN B0DSPFHT19 listing and its 1024px primary asset for the JSEIAJB/NSUQOA bottle-cleaning brush variant C. Source and deterministic transformation provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 300,
+    "width": 1024,
+    "height": 1024,
+    "title": "JSEIAJB NSUQOA 5pcs Bottle Brush Children's Milk Feeding Cleaning Cup with Handle Household Kitchen Utensils, Variant C, ASIN B0DSPFHT19",
+    "images": [
+      "https://m.media-amazon.com/images/I/31Cy22xX36L.jpg"
+    ]
+  },
+  {
+    "product_id": "AMZ-B0DSP69D46",
+    "source_page_url": "https://www.amazon.com/dp/B0DSP69D46",
+    "source_kind": "marketplace_api",
+    "rights_basis": "Exact structured Amazon ASIN B0DSP69D46 listing and its 1024px primary asset for the JSEIAJB/NSUQOA bottle-cleaning brush Black variant, 32 x 6.5 cm. Source and deterministic transformation provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 300,
+    "width": 1024,
+    "height": 1024,
+    "title": "JSEIAJB NSUQOA 5pcs Bottle Brush Children's Milk Feeding Cleaning Cup with Handle Household Kitchen Utensils, Black, 32 x 6.5 cm, ASIN B0DSP69D46",
+    "images": [
+      "https://m.media-amazon.com/images/I/31jxqEMBNTL.jpg"
+    ]
+  },
+  {
+    "product_id": "AMZ-B0DQC4FZ63",
+    "source_page_url": "https://www.amazon.com/dp/B0DQC4FZ63",
+    "source_kind": "marketplace_api",
+    "rights_basis": "Exact live Amazon ASIN B0DQC4FZ63 listing resolved through a structured lookup. The 1600px hero visibly contains two Moonkie 3-in-1 silicone sippy cups and three divided suction plates with their lids and accessories; source and deterministic transformation provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 300,
+    "width": 1600,
+    "height": 1600,
+    "title": "Moonkie Silicone Baby Sippy Cups 2-Pack and Suction Plates for Baby 3-Pack, 3-in-1 Training Cup with Straw Spout and Open Cup, BPA-Free, ASIN B0DQC4FZ63",
+    "images": [
+      "https://m.media-amazon.com/images/I/61dAHB2IXNL.jpg"
+    ]
+  },
+  {
+    "product_id": "AMZ-B08Q4GPCVG",
+    "source_page_url": "https://www.amazon.com/dp/B08Q4GPCVG",
+    "source_kind": "marketplace_api",
+    "rights_basis": "Exact live Amazon ASIN B08Q4GPCVG listing resolved through a structured lookup. The 2560px hero visibly contains the two Lulujo Mudcloth and Blackbirds cotton muslin swaddles; source and deterministic transformation provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 300,
+    "width": 2560,
+    "height": 2560,
+    "title": "Lulujo Baby Swaddle Blankets, Mudcloth and Blackbirds, 2-Count, 40 x 40 inches, ASIN B08Q4GPCVG",
+    "images": [
+      "https://m.media-amazon.com/images/I/81osKX7+DKL.jpg"
+    ]
+  },
+  {
+    "product_id": "AMZ-B09R7LF2SM",
+    "source_page_url": "https://www.amazon.com/dp/B09R7LF2SM",
+    "source_kind": "marketplace_api",
+    "rights_basis": "Exact live Amazon ASIN B09R7LF2SM listing resolved through a structured lookup. The 2560px hero visibly contains the two Lulujo Mushroom and Sand cotton muslin swaddles; source and deterministic transformation provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 300,
+    "width": 2560,
+    "height": 2560,
+    "title": "Lulujo Baby Swaddle Blankets, Mushroom and Sand, 2-Count, 40 x 40 inches, ASIN B09R7LF2SM",
+    "images": [
+      "https://m.media-amazon.com/images/I/81Yf2jFfpTL.jpg"
+    ]
+  },
+  {
+    "product_id": "AMZ-B09Y8QKHYB",
+    "source_page_url": "https://www.amazon.com/dp/B09Y8QKHYB",
+    "source_kind": "marketplace_api",
+    "rights_basis": "Exact live Amazon ASIN B09Y8QKHYB listing resolved through a structured lookup. The 1600px hero visibly contains the Biloban white oval bassinet mattress protector pair; the exact listing specifies the 21 x 24 inch Graco Pack 'n-Play Dome LX fit. Source and deterministic transformation provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 300,
+    "width": 1600,
+    "height": 1600,
+    "title": "Biloban Bassinet Mattress Protector Fits 21 x 24 Inch Graco Pack 'n-Play Dome LX, Ultra Soft Waterproof and Breathable, ASIN B09Y8QKHYB",
+    "images": [
+      "https://m.media-amazon.com/images/I/7184ZhVx7gL.jpg"
+    ]
+  },
+  {
+    "product_id": "AMZ-B092HY5X7W",
+    "source_page_url": "https://www.biloban.com/products/bassinet-sheets-fit-babybond-baby-bassinet-bedside-crib-2-pack-100-jersey-cotton",
+    "source_kind": "manufacturer",
+    "rights_basis": "Official Biloban manufacturer product listing for its BabyBond-compatible two-pack of 100% jersey cotton bassinet sheets in the matching gray-hearts and white-stars design. The catalogue product additionally names Newton and QUTANIX compatibility; source URLs and deterministic transformation provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 300,
+    "width": 1500,
+    "height": 1500,
+    "title": "Biloban Bassinet Sheets Compatible with BabyBond Baby Bassinet Bedside Crib, 2 Pack, 100% Jersey Cotton, Gray Hearts and White Stars",
+    "images": [
+      "https://www.biloban.com/cdn/shop/files/ecf35a87a67e82e2eee89038aac85709_411ecb9c-7649-446a-b0be-55daaea2b8f0.jpg?v=1695281610",
+      "https://www.biloban.com/cdn/shop/files/71QoB6tSkEL._AC_SL1500_f34f6013-373b-485c-bf8f-e675223d73ff.jpg?v=1695281610",
+      "https://www.biloban.com/cdn/shop/files/7186532cA5L._AC_SL1500_d10ef461-0b12-46ec-8ab2-75066702e51a.jpg?v=1695281610",
+      "https://www.biloban.com/cdn/shop/files/71YVzkcuv6L._AC_SL1500_638fd9d3-b725-4c93-a607-afe0f17cb825.jpg?v=1695281610",
+      "https://www.biloban.com/cdn/shop/files/71faw_15QL._AC_SL1500_d7431e11-bc2c-4814-b214-6eca9792df86.jpg?v=1695281610"
+    ]
+  },
+  {
+    "product_id": "AMZ-B0B922VGFL",
+    "source_page_url": "https://ctchealth.ca/product/poise-incontinence-overnight-extra-coverage-pads-22-count/",
+    "source_kind": "specialist_retailer",
+    "rights_basis": "Exact CTC Health listing for Poise Overnight Extra Coverage pads, UPC 036000549430 / model 10036000549437. The 1200px package image visibly confirms Fresh Protection, 8-drop extra coverage, overnight use, and 22 pads; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 300,
+    "width": 1200,
+    "height": 1200,
+    "title": "Poise Fresh Protection Overnight Incontinence Pads, 8 Drop Extra Coverage, 22 Pads, UPC 036000549430, ASIN B0B922VGFL",
+    "images": [
+      "https://ctchealth.ca/wp-content/uploads/2023/06/white-11114-1200x1200.jpg"
+    ]
+  },
+  {
+    "product_id": "AMZ-B08BQ8P1HV",
+    "source_page_url": "https://www.getrael.com/products/regular-organic-cotton-pads?variant=51779702391149",
+    "source_kind": "manufacturer",
+    "rights_basis": "Official Rael manufacturer listing and exact 2048px hero for the Regular 28 Count component of the catalogue's Regular 28 Count plus Overnight 20 Count day-and-night bundle. Source and deterministic transformation provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 300,
+    "width": 2048,
+    "height": 2048,
+    "title": "Rael Day and Night Bundle component: Organic Cotton Cover Regular Pads 28 Count plus Overnight Pads 20 Count, ASIN B08BQ8P1HV",
+    "images": [
+      "https://cdn.shopify.com/s/files/1/2246/3213/files/ORGANIC_COTTON_COVER_PADS_RAEL-RG-02_DTC_REGULAR_28_COUNT_POLY_FRONT_7a795294-22b5-44d3-98f3-4a87088d48f8.webp?v=1755193710"
+    ]
+  },
+  {
+    "product_id": "AMZ-B08BQ8P1HV",
+    "source_page_url": "https://www.getrael.com/products/overnight-organic-cotton-pads?variant=51773461102957",
+    "source_kind": "manufacturer",
+    "rights_basis": "Official Rael manufacturer listing and exact 2048px hero for the Overnight 20 Count component of the catalogue's Regular 28 Count plus Overnight 20 Count day-and-night bundle. Source and deterministic transformation provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 300,
+    "width": 2048,
+    "height": 2048,
+    "title": "Rael Day and Night Bundle component: Organic Cotton Cover Regular Pads 28 Count plus Overnight Pads 20 Count, ASIN B08BQ8P1HV",
+    "images": [
+      "https://cdn.shopify.com/s/files/1/2246/3213/files/ORGANIC_COTTON_COVER_PADS_RAEL-O-02_DTC_20_COUNT_OVERNIGHT_POLY_FRONT_f46234d6-fc05-4011-b79e-ae377d50db48.webp?v=1767909578"
+    ]
+  },
+  {
+    "product_id": "AMZ-B097TL25S1",
+    "source_page_url": "https://www.babysensemonitors.com/products/babysense-true-sleep",
+    "source_kind": "manufacturer",
+    "rights_basis": "Official Babysense manufacturer listing for True Sleep. The exact 1500px two-camera hero visibly contains the 5-inch HD split-screen parent unit, two PTZ cameras, Babysense 7 controller, and two under-mattress sensor pads matching ASIN B097TL25S1; source and deterministic transformation provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 300,
+    "width": 1500,
+    "height": 1500,
+    "title": "Babysense True Sleep Duo HD Video and Movement Baby Monitor Bundle, 5 Inch Split Screen, Two PTZ Cameras, Babysense 7 with Two Sensor Pads, ASIN B097TL25S1",
+    "images": [
+      "https://cdn.shopify.com/s/files/1/0427/9572/9059/files/babysense-true-sleep-video-baby-monitor-with-breathing-motion-detection-safety-alerts-1-or-2-cameras-969934.jpg?v=1751038438"
+    ]
+  },
+  {
+    "product_id": "AMZ-B09NF7JDQW",
+    "source_page_url": "https://www.walmart.com/ip/980521874",
+    "source_kind": "specialist_retailer",
+    "rights_basis": "Exact Walmart listing for Always Discreet 4-drop Moderate, Regular Length, 66 Count; exact 1118px listing media identifies the 66-pad variant. Provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 300,
+    "width": 1118,
+    "height": 1118,
+    "title": "Always Discreet Adult Incontinence Pads for Women, Drier, 4 Drop Regular Length, Moderate Absorbency, 66 Count, ASIN B09NF7JDQW",
+    "images": [
+      "https://i5.walmartimages.com/seo/Always-Discreet-Incontinence-Pads-Moderate-Absorbency-Regular-Length-66-CT_79aeef15-568c-4280-9027-efb193c06b40.a43b037e826366acc0c9a4841c147446.jpeg?odnBg=FFFFFF&odnHeight=1500&odnWidth=1500",
+      "https://i5.walmartimages.com/asr/f6bb97b4-dd06-4c40-8304-204478767bfc.e6993a37ed079ff341025da106a3e09f.jpeg?odnBg=FFFFFF&odnHeight=1500&odnWidth=1500",
+      "https://i5.walmartimages.com/asr/8b49f280-a0d9-42e9-a096-3d1a544830de.5376300187d2563899c65470522d3588.jpeg?odnBg=FFFFFF&odnHeight=1500&odnWidth=1500",
+      "https://i5.walmartimages.com/asr/01462991-ea36-40fc-a73f-8f939dc2b0d8.23a72fb05ef8b9437768a42af96cd116.jpeg?odnBg=FFFFFF&odnHeight=1500&odnWidth=1500"
+    ]
+  },
+  {
+    "product_id": "AMZ-B00LTK2SKK",
+    "source_page_url": "https://www.gosupps.com/always-discreet-incontinence-postpartum-pads-for-women-size-4-moderate-absorbency-regular-length-66-count-x-3-packs-198-count-total.html",
+    "source_kind": "specialist_retailer",
+    "rights_basis": "Exact GoSupps listing for Always Discreet 4-drop Moderate, Regular Length, 198 Count. High-resolution media visibly identifies 198 pads and three 66-count packs. Provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 300,
+    "width": 2560,
+    "height": 2560,
+    "title": "Always Discreet Adult Incontinence Pads for Women, Drier, 4 Drop Regular Length, Moderate Absorbency, 198 Count (3 Packs of 66), ASIN B00LTK2SKK",
+    "images": [
+      "https://www.gosupps.com/media/catalog/product/8/1/81y_dV7IUML.jpg",
+      "https://www.gosupps.com/media/catalog/product/8/1/81QmQEBCoVL._AC_SL1500_.jpg",
+      "https://www.gosupps.com/media/catalog/product/8/1/81T7yhoV6jL._AC_SL1500__1.jpg",
+      "https://www.gosupps.com/media/catalog/product/8/1/81EAgdalJqL._AC_SL1500__1.jpg"
+    ]
+  },
+  {
+    "product_id": "AMZ-B0BZTNMWZJ",
+    "source_page_url": "https://www.target.com/p/-/A-91103054",
+    "source_kind": "specialist_retailer",
+    "rights_basis": "Exact Target listing for Always Discreet Maximum, XL, 64 Count, UPC 030772109380. Exact 1500px hero visibly confirms XL/XXL sizes 20-26 and 64 underwear. Provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 300,
+    "width": 1500,
+    "height": 1500,
+    "title": "Always Discreet Adult Diapers for Women, Maximum Absorbency, Extra Large XL/XXL Sizes 20-26, 64 Count, ASIN B0BZTNMWZJ",
+    "images": [
+      "https://target.scene7.com/is/image/Target/GUEST_216d56f0-33f7-42b9-918e-436829a6138a?fmt=pjpeg&hei=1500&wid=1500",
+      "https://target.scene7.com/is/image/Target/GUEST_13f741c0-6906-4774-9eef-70982703e908?fmt=pjpeg&hei=1500&wid=1500",
+      "https://target.scene7.com/is/image/Target/GUEST_6d89e0dd-f433-4a19-8a19-9e0f5b69b19f?fmt=pjpeg&hei=1500&wid=1500",
+      "https://target.scene7.com/is/image/Target/GUEST_9ed7e269-7382-49fb-9817-5c2ed0290284?fmt=pjpeg&hei=1500&wid=1500"
+    ]
+  },
+  {
+    "product_id": "rwanda-fda-hm-1076",
+    "source_page_url": "https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=6fc0afca-4513-4c35-b594-6544aee29a44",
+    "source_kind": "licensed_feed",
+    "rights_basis": "Current DailyMed official Novartis label for LEQVIO, one 1.5 mL prefilled syringe containing 284 mg inclisiran, present as 300 mg inclisiran sodium. Provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 300,
+    "width": 879,
+    "height": 808,
+    "title": "LEQVIO inclisiran solution for injection, 300 mg inclisiran sodium equivalent to 284 mg inclisiran per 1.5 mL, one pre-filled syringe, Novartis",
+    "images": [
+      "https://dailymed.nlm.nih.gov/dailymed/image.cfm?name=leqvio-05.jpg&setid=6fc0afca-4513-4c35-b594-6544aee29a44"
+    ]
+  },
+  {
+    "product_id": "rwanda-fda-hm-1070",
+    "source_page_url": "https://ucl.co.ke/case-studies/flutrox-200/",
+    "source_kind": "manufacturer",
+    "rights_basis": "Exact Universal Corporation manufacturer listing for Flutrox 200, fluconazole USP 200 mg, 1 blister of 10 capsules. Provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 300,
+    "width": 500,
+    "height": 368,
+    "title": "Flutrox 200, fluconazole USP 200 mg capsules, 1 blister x 10 capsules, Universal Corporation Limited",
+    "images": [
+      "https://ucl.co.ke/wp-content/uploads/2025/10/Flutrox-200mg.jpg"
+    ]
+  },
+  {
+    "product_id": "rwanda-fda-hm-1090",
+    "source_page_url": "https://saymyanmar.com/product/61b7586cfcdc3c15c06267f2",
+    "source_kind": "specialist_retailer",
+    "rights_basis": "Exact pharmacy listing for SKDERM Cream 15 g with betamethasone 0.05%, clotrimazole 1.0%, and gentamicin 0.1%. Provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 300,
+    "width": 463,
+    "height": 317,
+    "title": "SKDERM Cream 15 g, betamethasone dipropionate 0.05%, clotrimazole 1.0%, gentamicin sulfate 0.1%",
+    "images": [
+      "https://saymyanmar.com/storage/public/say_image/1639405676.jpeg"
+    ]
+  },
+  {
+    "product_id": "rwanda-fda-hm-1070",
+    "source_page_url": "https://amsp.africa/product/flutrox-200mg-capsules-fluconazole-200mg/",
+    "source_kind": "specialist_retailer",
+    "rights_basis": "Exact Africa Medical Supplies Platform listing for Flutrox 200, fluconazole 200 mg, one blister of 10 capsules. Provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 305,
+    "width": 441,
+    "height": 438,
+    "title": "Flutrox 200, fluconazole 200 mg capsule pack, one blister of 10 capsules, Universal Corporation",
+    "images": [
+      "https://amsp.africa/wp-content/uploads/2020/09/Screenshot_1-8.jpg"
+    ]
+  },
+  {
+    "product_id": "rwanda-fda-hm-1090",
+    "source_page_url": "https://www.healthokaypharmacy.com/product/sk-derm-cream-15g/",
+    "source_kind": "specialist_retailer",
+    "rights_basis": "Exact Health Okay Pharmacy listing for SKDERM Cream 15 g with betamethasone, clotrimazole, and gentamicin. Provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 305,
+    "width": 600,
+    "height": 800,
+    "title": "SKDERM Cream 15 g, betamethasone dipropionate 0.05%, clotrimazole 1.0%, gentamicin sulfate 0.1%",
+    "images": [
+      "https://www.healthokaypharmacy.com/wp-content/uploads/2024/04/Skderm-15-600x800-1.png"
+    ]
+  },
+  {
+    "product_id": "AMZ-B0CKYCSXS7",
+    "source_page_url": "https://www.walmart.com/ip/5125910236",
+    "source_kind": "marketplace_api",
+    "rights_basis": "Exact Walmart ISBN 9798218287610 listing for Postpartum: The Expectations & Reality of the Fourth Trimester by Jessica Dawson. Original source image and listing provenance retained; reuse rights not independently verified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 190,
+    "width": 1676,
+    "height": 2592,
+    "title": "Postpartum: The Expectations & Reality of the Fourth Trimester by Jessica Dawson, paperback, ISBN 9798218287610",
+    "images": [
+      "https://i5.walmartimages.com/seo/Postpartum-Paperback-9798218287610_c9f67210-11bc-4a8a-aa0b-4305a4bfd55e.661283d35657db54960ee3792be7577a.jpeg"
+    ]
+  },
+  {
+    "product_id": "rwanda-fda-hm-1330",
+    "source_page_url": "https://lemon.sa/en/NPI/omacillin-500-mg-capsules-20-s",
+    "source_kind": "specialist_retailer",
+    "rights_basis": "Exact Lemon Pharmacy listing for OMACILLIN 500, amoxicillin 500 mg, 20 capsules, manufactured by National Pharmaceutical Industries. Original listing and image provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 320,
+    "width": 900,
+    "height": 900,
+    "title": "OMACILLIN 500, amoxicillin 500 mg, 20 capsules, National Pharmaceutical Industries",
+    "images": [
+      "https://lemon.sa/image/cache/catalog/pharmacy/products/medicine/OMACILLIN%20500MG%20CAP%2020%27S-900x900.jpg"
+    ]
+  },
+  {
+    "product_id": "rwanda-fda-hm-1330",
+    "source_page_url": "https://kuludonline.com/collections/antibiotics-1/products/omacillin-capsule-500-mg-20-cap",
+    "source_kind": "specialist_retailer",
+    "rights_basis": "Exact Kulud Pharmacy listing for OMACILLIN 500, amoxicillin 500 mg, 20 capsules, manufactured by National Pharmaceutical Industries. Original listing and image provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 315,
+    "width": 800,
+    "height": 800,
+    "title": "OMACILLIN 500, amoxicillin 500 mg, 20 capsules, National Pharmaceutical Industries",
+    "images": [
+      "https://kuludonline.com/cdn/shop/files/39238.jpg?v=1746786506"
+    ]
+  },
+  {
+    "product_id": "rwanda-fda-hm-1330",
+    "source_page_url": "https://www.carencurepharmacy.com/products/omacillin-500-mg-cap-20s",
+    "source_kind": "specialist_retailer",
+    "rights_basis": "Exact Care n Cure Pharmacy listing for OMACILLIN 500, amoxicillin 500 mg, 20 capsules, manufactured by National Pharmaceutical Industries. Original listing and image provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 310,
+    "width": 1500,
+    "height": 1500,
+    "title": "OMACILLIN 500, amoxicillin 500 mg, 20 capsules, National Pharmaceutical Industries",
+    "images": [
+      "https://www.carencurepharmacy.com/cdn/shop/files/Untitleddesign_37_80f88e49-2557-4d4d-88ee-1678de752b23.jpg?v=1777358547"
+    ]
+  },
+  {
+    "product_id": "rwanda-fda-hm-1329",
+    "source_page_url": "https://trungtamthuoc.com/thuoc-nusar-50",
+    "source_kind": "specialist_retailer",
+    "rights_basis": "Exact Central Pharmacy listing for NUSAR-50, losartan potassium 50 mg, three blisters of ten film-coated tablets, manufactured by Emcure Pharmaceuticals. Original listing and image provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 320,
+    "width": 950,
+    "height": 950,
+    "title": "NUSAR-50, losartan potassium 50 mg, 3 x 10 film-coated tablets, Emcure Pharmaceuticals",
+    "images": [
+      "https://trungtamthuoc.com/images/products/nusar-50-1-p6858.jpg",
+      "https://trungtamthuoc.com/images/products/nusar-50-2-e1651.jpg",
+      "https://trungtamthuoc.com/images/products/nusar-50-3-t7112.jpg",
+      "https://trungtamthuoc.com/images/products/nusar-50-4-i3825.jpg"
+    ]
+  },
+  {
+    "product_id": "rwanda-fda-hm-0138",
+    "source_page_url": "https://realpharma.ge/hidroferol/",
+    "source_kind": "specialist_retailer",
+    "rights_basis": "Exact Realpharma listing for HIDROFEROL 0.266 mg calcifediol soft capsules, ten-capsule pack by Faes Farma. Original listing and image provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 320,
+    "width": 800,
+    "height": 800,
+    "title": "HIDROFEROL 0.266 mg calcifediol soft capsules, 10 capsules, Faes Farma",
+    "images": [
+      "https://realpharma.ge/wp-content/uploads/2024/02/hidroferol-t2-web.webp"
+    ]
+  },
+  {
+    "product_id": "rwanda-fda-hm-0138",
+    "source_page_url": "https://www.farmaciascurie.cl/products/hidroferol-0-266mg-10-capsulas-blandas",
+    "source_kind": "specialist_retailer",
+    "rights_basis": "Exact Farmacias Curie listing for HIDROFEROL 0.266 mg calcifediol soft capsules, ten-capsule pack by Faes Farma. Original listing and image provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 315,
+    "width": 1050,
+    "height": 1050,
+    "title": "HIDROFEROL 0.266 mg calcifediol soft capsules, 10 capsules, Faes Farma",
+    "images": [
+      "https://www.farmaciascurie.cl/cdn/shop/files/591038.webp?v=1763068424&width=1920"
+    ]
+  },
+  {
+    "product_id": "rwanda-fda-hm-0138",
+    "source_page_url": "https://gpc.ge/en/details/medication/vitamins-and-minerals/hidroferol-kaps-0266-10?product=6335",
+    "source_kind": "specialist_retailer",
+    "rights_basis": "Exact GPC pharmacy listing for HIDROFEROL 0.266 mg calcifediol soft capsules, ten-capsule pack by Faes Farma. Original listing and image provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 310,
+    "width": 500,
+    "height": 500,
+    "title": "HIDROFEROL 0.266 mg calcifediol soft capsules, 10 capsules, Faes Farma",
+    "images": [
+      "https://cdn.gepha.com/cdn-cgi/image/width=1920,quality=100,format=auto,fit=scale-down/gpc/uploads/medicament_image/image/61978/image.png"
+    ]
+  },
+  {
+    "product_id": "rwanda-fda-hm-0171",
+    "source_page_url": "https://www.menfive.com/meningococcal_vaccine.html",
+    "source_kind": "manufacturer",
+    "rights_basis": "Exact MenFive manufacturer product page for the meningococcal A, C, Y, W, X polysaccharide conjugate vaccine, showing the freeze-dried vaccine vial and supplied sodium-chloride diluent. Original listing and image provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 330,
+    "width": 602,
+    "height": 739,
+    "title": "MenFive meningococcal A, C, Y, W, X polysaccharide conjugate vaccine, freeze-dried vaccine vial and diluent, Serum Institute of India",
+    "images": [
+      "https://www.menfive.com/images/MenFive_Vaccine.jpg"
+    ]
+  },
+  {
+    "product_id": "rwanda-fda-hm-0144",
+    "source_page_url": "https://trungtamthuoc.com/simulect-injiv-20mg",
+    "source_kind": "specialist_retailer",
+    "rights_basis": "Exact Central Pharmacy listing for Simulect 20 mg basiliximab powder and solvent for injection or infusion by Novartis, showing the carton, vial, and supplied solvent. Original listing and image provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 320,
+    "width": 950,
+    "height": 950,
+    "title": "Simulect 20 mg basiliximab powder and solvent for solution for injection or infusion, Novartis",
+    "images": [
+      "https://trungtamthuoc.com/images/products/simulect-20mg-1-l4046.jpg",
+      "https://trungtamthuoc.com/images/products/simulect-20mg-2-e1825.jpg",
+      "https://trungtamthuoc.com/images/products/simulect-20mg-4-t7276.jpg",
+      "https://trungtamthuoc.com/images/products/simulect-20mg-5-j4574.jpg",
+      "https://trungtamthuoc.com/images/products/simulect-20mg-6-p6557.jpg"
+    ]
+  },
+  {
+    "product_id": "rwanda-fda-hm-0179",
+    "source_page_url": "https://chemist180.com/products/productdetails/dobesil-h-30gm-cream",
+    "source_kind": "specialist_retailer",
+    "rights_basis": "Exact Chemist180 product image for Ochoa Dobesil-H cream 30 g, showing the registered calcium dobesilate, lidocaine, hydrocortisone acetate, and zinc oxide front pack. Original listing and image provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 320,
+    "width": 1406,
+    "height": 1084,
+    "title": "Dobesil-H cream, calcium dobesilate 0.5%, lidocaine 3%, hydrocortisone acetate 0.25%, zinc oxide 5%, 30 g, Ochoa Laboratories",
+    "images": [
+      "https://api.chemist180.com/api/media/image-resize/?path=Product%20Images%2F&name=DOBESIL_H_30GM_CREAM_chemist180.jpg&w=1200"
+    ]
+  },
+  {
+    "product_id": "rwanda-fda-hm-1330",
+    "source_page_url": "https://lemon.sa/en/NPI/omacillin-500-mg-capsules-20-s",
+    "source_kind": "specialist_retailer",
+    "rights_basis": "Exact Lemon Pharmacy listing for NPI Omacillin 500 mg amoxicillin capsules, showing the registered 20-capsule pack. Original listing and image provenance retained; reuse rights unverified.",
+    "rights_verified": false,
+    "page_primary_image": true,
+    "priority": 320,
+    "width": 1400,
+    "height": 1400,
+    "title": "Omacillin 500 mg amoxicillin capsules, 20 capsules, National Pharmaceutical Industries NPI",
+    "images": [
+      "https://lemon.sa/image/cache/catalog/pharmacy/products/medicine/OMACILLIN%20500MG%20CAP%2020%27S-1400x1400.jpg"
+    ]
+  }
+]

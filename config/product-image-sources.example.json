@@ -1,0 +1,16 @@
+{
+  "domains": {
+    "manufacturer.example": {
+      "kind": "manufacturer",
+      "priority": 100
+    },
+    "licensed-feed.example": {
+      "kind": "licensed_feed",
+      "priority": 110
+    },
+    "specialist-retailer.example": {
+      "kind": "specialist_retailer",
+      "priority": 70
+    }
+  }
+}

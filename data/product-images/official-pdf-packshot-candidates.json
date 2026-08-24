@@ -1,0 +1,68 @@
+[
+  {
+    "images": [
+      "https://uskfnszcdqpcfrhjxitl.supabase.co/storage/v1/object/public/product-images/source-artifacts/v1/rwanda-fda-hm-2442/a05971cb83eb2d81684d7e588fd1154ed6bc5279b40612186922fc89af3d546e-evoke-100-sildenafil-100mg-tablets.png"
+    ],
+    "page_primary_image": true,
+    "priority": 126,
+    "product_id": "rwanda-fda-hm-2442",
+    "rights_basis": "Exact product pack cropped without textual alteration from an official manufacturer catalogue PDF; original document and immutable derived crop retained for traceability; reuse rights not independently verified.",
+    "rights_verified": false,
+    "source_crop": [
+      0.69,
+      0.44,
+      0.98,
+      0.7
+    ],
+    "source_crop_sha256": "a05971cb83eb2d81684d7e588fd1154ed6bc5279b40612186922fc89af3d546e",
+    "source_document_sha256": "50ed73c87f6da2e83455ce702b833e74d4b4ab6f600cb5dd7f65c206ed5daf41",
+    "source_kind": "manufacturer",
+    "source_page_number": 1,
+    "source_page_url": "https://irp-cdn.multiscreensite.com/30e70586/files/uploaded/evoke-A5-sticker.pdf",
+    "title": "Evoke 100 Sildenafil 100mg tablets Laboratory & Allied Ltd official manufacturer catalogue packshot"
+  },
+  {
+    "images": [
+      "https://uskfnszcdqpcfrhjxitl.supabase.co/storage/v1/object/public/product-images/source-artifacts/v1/rwanda-fda-hm-0160/d95d882eced02cccac078858a178489fcf5c7b4b33442e7a30a7286923f0475c-gynagone-kit.png"
+    ],
+    "page_primary_image": true,
+    "priority": 126,
+    "product_id": "rwanda-fda-hm-0160",
+    "rights_basis": "Exact product pack cropped without textual alteration from an official manufacturer catalogue PDF; original document and immutable derived crop retained for traceability; reuse rights not independently verified.",
+    "rights_verified": false,
+    "source_crop": [
+      0.5,
+      0.57,
+      0.9,
+      0.79
+    ],
+    "source_crop_sha256": "d95d882eced02cccac078858a178489fcf5c7b4b33442e7a30a7286923f0475c",
+    "source_document_sha256": "e0aba8982f7520cfff56c7238f37fa7c73b40ea346f869ae77336b3dc7fbe3e4",
+    "source_kind": "manufacturer",
+    "source_page_number": 1,
+    "source_page_url": "https://irp-cdn.multiscreensite.com/30e70586/files/uploaded/gynagone-A5-sticker.pdf",
+    "title": "Gynagone Kit Azithromycin 500mg 2 tablets Secnidazole 500mg 4 tablets Fluconazole 150mg 1 capsule Laboratory & Allied Ltd official manufacturer catalogue packshot"
+  },
+  {
+    "images": [
+      "https://uskfnszcdqpcfrhjxitl.supabase.co/storage/v1/object/public/product-images/source-artifacts/v1/rwanda-fda-hm-1038/b69ee8fa30fafc4c82d2d73c617771dabe538b605734f3fa35e14442b4ac03d4-rheumac-gel-diclofenac-1-percent.png"
+    ],
+    "page_primary_image": true,
+    "priority": 126,
+    "product_id": "rwanda-fda-hm-1038",
+    "rights_basis": "Exact product pack cropped without textual alteration from an official manufacturer catalogue PDF; original document and immutable derived crop retained for traceability; reuse rights not independently verified.",
+    "rights_verified": false,
+    "source_crop": [
+      0.03,
+      0.63,
+      0.42,
+      0.88
+    ],
+    "source_crop_sha256": "b69ee8fa30fafc4c82d2d73c617771dabe538b605734f3fa35e14442b4ac03d4",
+    "source_document_sha256": "b6b558ba5222d2876d3e938f57fcc6a439ae31aee6e02d54aa6c1c52c0aa39f8",
+    "source_kind": "manufacturer",
+    "source_page_number": 1,
+    "source_page_url": "https://irp-cdn.multiscreensite.com/30e70586/files/uploaded/rheumac.pdf",
+    "title": "Rheumac Gel Diclofenac Sodium BP 1% Laboratory & Allied Ltd official manufacturer catalogue packshot"
+  }
+]

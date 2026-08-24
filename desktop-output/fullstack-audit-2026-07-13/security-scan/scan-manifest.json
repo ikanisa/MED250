@@ -1,0 +1,118 @@
+{
+  "documentType": "codex-security.scan-manifest",
+  "scan": {
+    "artifacts": [
+      {
+        "mediaType": "application/json",
+        "path": "findings.json",
+        "sha256": "003f8ee28dc59bea02092052ce30b1f82b4c7a1d6701d6daf584f378e6d32f95"
+      },
+      {
+        "mediaType": "application/json",
+        "path": "coverage.json",
+        "sha256": "999a2228c6d53f8a3f63ffd13a3de58d18ba2e78ad0868583bf1e032731324c3"
+      },
+      {
+        "mediaType": "application/octet-stream",
+        "path": "artifacts/02_discovery/finding_discovery_report.md",
+        "sha256": "44b1c1810ce0a8332db66e84376ff9d1b38a720b83234a6841c8663df214d29e"
+      },
+      {
+        "mediaType": "application/octet-stream",
+        "path": "artifacts/02_discovery/work_ledger.jsonl",
+        "sha256": "9a64638a36122c213b50c695f2cb0a4b49de5dedc0b0cb747e91c52e4a438988"
+      },
+      {
+        "mediaType": "application/octet-stream",
+        "path": "artifacts/03_coverage/repository_coverage_ledger.md",
+        "sha256": "a388e3549246c88fe6aed7037318b5dba87f4be93e56e9ed307268b9d00c5e54"
+      },
+      {
+        "mediaType": "application/octet-stream",
+        "path": "artifacts/03_coverage/validation_closure_table.md",
+        "sha256": "5d8bc73ccca3e1ebbbb99d5ae777b826b4e02adba1bbffe657347ab0f15a8cb4"
+      },
+      {
+        "mediaType": "application/octet-stream",
+        "path": "artifacts/05_findings/attack_path_analysis_report.md",
+        "sha256": "aa50fb2d0c0f4174165b844f072081357b9d9906164e9a64d094a81697217c3f"
+      }
+    ],
+    "completedAt": "2026-07-13T22:57:02Z",
+    "coverageRef": "coverage.json",
+    "findingsRef": "findings.json",
+    "id": "565904a48825d810c544271e0cc10882a59272c1_20260713T220040Z",
+    "producer": {
+      "name": "codex-security-plugin",
+      "version": "0.1.11"
+    },
+    "scope": {
+      "artifactsReviewed": [
+        "176 source and configuration files",
+        "Supabase migrations and Edge Functions",
+        "Cloudflare Worker and deployment workflows",
+        "browser, data, release, and backend tests"
+      ],
+      "context": "MED+250 is gated as a private preview; live operations remain disabled.",
+      "excludePaths": [
+        "node_modules/",
+        ".next/",
+        "dist/"
+      ],
+      "includePaths": [
+        "."
+      ],
+      "limitations": [
+        "No privileged production mutation or live OTP was attempted.",
+        "No physical-phone UAT or Cloudflare production deployment was performed.",
+        "External regulatory and operational approvals remain launch gates."
+      ],
+      "runtimeStatus": "release:check previously passed; npm audit reported no known dependency vulnerabilities",
+      "summary": "Full repository security review of the frozen dirty working-tree snapshot.",
+      "validationMode": "Static source-to-sink review plus bounded local diagnostics and non-destructive public-role checks."
+    },
+    "sealedAt": "2026-07-13T22:57:02Z",
+    "startedAt": "2026-07-13T22:00:40Z",
+    "status": "completed",
+    "target": {
+      "displayName": "MED250",
+      "kind": "git_worktree",
+      "revision": "565904a48825d810c544271e0cc10882a59272c1",
+      "snapshotDigest": "codex-security-snapshot/v1:sha256:8d7642c617446e815f5dae210932b0972bb9c46ed42916c5b0a9e0c78a728f0b",
+      "targetId": "target_sha256_e71b40704a8f1fed3d652a46a41f4deed170fe871f741035e0861ad9d8370e96"
+    },
+    "threatModel": {
+      "assets": [
+        "Customer sessions, exact locations, orders, WhatsApp contacts, and prescriptions",
+        "Pharmacy identities, memberships, OTP challenges, and offers",
+        "Supabase, WhatsApp, Google Maps, GitHub, and Cloudflare credentials"
+      ],
+      "assumptions": [
+        "External processors enforce their documented controls",
+        "Live mode remains gated until all operational approvals and credential rotation are evidenced"
+      ],
+      "attackerCapabilities": [
+        "Unauthenticated HTTP and Supabase calls",
+        "Authenticated anonymous customer calls",
+        "Legitimate or compromised pharmacy staff calls",
+        "Supply-chain influence over imported data or CI dependencies"
+      ],
+      "securityObjectives": [
+        "Preserve tenant ownership and pre/post-selection privacy",
+        "Issue pharmacy sessions only to current authorized staff",
+        "Keep regulated product and routing state current",
+        "Keep privileged credentials out of public and unnecessary execution contexts"
+      ],
+      "summary": "Public customers and pharmacy staff cross Cloudflare, Supabase Auth/RLS/RPC, private Storage, and pre/post-selection disclosure boundaries.",
+      "trustBoundaries": [
+        "Public Internet to Cloudflare Worker",
+        "Browser to Supabase public endpoints",
+        "OTP Edge Function to Auth and service role",
+        "Browser JWT to RLS and SECURITY DEFINER RPCs",
+        "Private Storage to selected pharmacy",
+        "Developer and CI to production"
+      ]
+    }
+  },
+  "schemaVersion": "1.0"
+}

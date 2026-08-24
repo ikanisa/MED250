@@ -1,0 +1,44 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_DOMAIN_DNS_VERIFIED",
+  "evidence_type": "domain_verification",
+  "status": "complete",
+  "title": "MED+250 production domain DNS TLS and route verification",
+  "summary": "Fresh post-deployment verification confirms that the production custom hostname resolves publicly and the fail-soft catalogue release serves every required HTTPS marketplace route.",
+  "recorded_at": "2026-07-16T12:43:07Z",
+  "recorded_by": "Codex automated verifier",
+  "recorded_role": "Release verification agent",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Public DNS resolution",
+      "status": "passed",
+      "detail": "The configured production hostname resolved through public Cloudflare-proxied addresses."
+    },
+    {
+      "name": "HTTPS and security headers",
+      "status": "passed",
+      "detail": "The live HTTPS origin returned the required transport, framing, content, permissions, referrer, and request-tracing headers."
+    },
+    {
+      "name": "Worker route behavior",
+      "status": "passed",
+      "detail": "The seven-route verifier passed, and a separate ninety-request sample returned HTTP 200 for every tested catalogue, category, product, robots, and sitemap request."
+    },
+    {
+      "name": "Production build and route configuration",
+      "status": "passed",
+      "detail": "The production Worker build, live metadata tests, strict dry run, custom-domain deployment, and desktop and mobile browser checks passed for Cloudflare version 431f38e3-4b6c-47cd-94a8-2d1adc0442a5."
+    }
+  ],
+  "verified_by": "Codex automated verifier",
+  "verifier_role": "Release verification agent",
+  "verified_at": "2026-07-16T12:43:07Z",
+  "hostnames": [
+    "med250.gikundiro.com"
+  ],
+  "dns_passed": true,
+  "tls_passed": true,
+  "routes_passed": true
+}

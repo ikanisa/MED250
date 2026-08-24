@@ -1,0 +1,13 @@
+{
+  "broken_product_ids": [],
+  "broken_public_url_count": 0,
+  "broken_public_urls": [],
+  "checked_at": "2026-07-17T19:46:23+00:00",
+  "complete": true,
+  "expected_images": 23977,
+  "expected_products": 4659,
+  "missing_or_incomplete_count": 0,
+  "missing_or_incomplete_product_ids": [],
+  "products_with_target_images": 4659,
+  "published_images": 23977
+}

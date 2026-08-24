@@ -1,0 +1,54 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED",
+  "evidence_type": "test_record",
+  "status": "complete",
+  "title": "Production Edge Function protected-access verification",
+  "summary": "Production probes confirm that every reviewed administrative function denies unauthorised calls, both pharmacy authentication functions reject untrusted origins, and a fresh management inventory confirms all reviewed deployments remain active at the governed versions.",
+  "recorded_at": "2026-07-16T13:43:37Z",
+  "recorded_by": "Codex automated verifier",
+  "recorded_role": "Release verification agent",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Administrative function denial",
+      "status": "passed",
+      "detail": "Cleanup, geocoding, pharmacy-contact review, and product-review calls without their protected credentials returned HTTP 403."
+    },
+    {
+      "name": "Untrusted-origin denial",
+      "status": "passed",
+      "detail": "Both pharmacy authentication endpoints returned HTTP 403 for an untrusted origin and emitted no allow-origin header."
+    },
+    {
+      "name": "Fresh six-function protected probe",
+      "status": "passed",
+      "detail": "A fresh production probe returned HTTP 403 for all four administrative endpoints without protected credentials and for both pharmacy authentication endpoints with an untrusted origin; none emitted an allow-origin header."
+    },
+    {
+      "name": "Protected cleanup execution",
+      "status": "passed",
+      "detail": "The protected scheduled cleanup path executed after deployment and recorded a successful, non-stale aggregate maintenance result."
+    },
+    {
+      "name": "Current six-function protected probe",
+      "status": "passed",
+      "detail": "At the latest verification, all four administrative functions and both pharmacy authentication functions returned HTTP 403 without the required authority, and none emitted an allow-origin header."
+    },
+    {
+      "name": "Retired diagnostic endpoint safely contained",
+      "status": "passed",
+      "detail": "An unauthenticated production request to active env-dump version 6 returned HTTP 401 at the Supabase gateway. A complete static review of the downloaded deployed source found zero reportable security findings and confirmed that authenticated execution can only return a constant non-cacheable HTTP 410 retirement response. Response-body SHA-256: 2fa2c84fed16d2ecfffc375515c8095ca6be18d8dabe1f54fd12142d23834634."
+    },
+    {
+      "name": "Current reviewed deployment inventory",
+      "status": "passed",
+      "detail": "A fresh linked-project management inventory reports geocode-pharmacies version 6, cleanup-prescriptions version 4, both pharmacy authentication functions at version 9, review-pharmacy-contacts version 3 and review-marketplace-products version 5, all ACTIVE with the intended gateway settings."
+    }
+  ],
+  "executed_by": "Codex automated verifier",
+  "executor_role": "Release verification agent",
+  "started_at": "2026-07-16T10:05:45Z",
+  "completed_at": "2026-07-16T13:43:37Z"
+}

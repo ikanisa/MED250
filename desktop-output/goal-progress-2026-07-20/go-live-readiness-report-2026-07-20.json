@@ -1,0 +1,270 @@
+{
+  "schemaVersion": "1",
+  "release": "med250-production",
+  "productionReady": false,
+  "launchEvidence": {
+    "valid": true,
+    "strictValid": false,
+    "gateCount": 11,
+    "statusCounts": {
+      "pending": 11,
+      "confirmed": 0,
+      "rejected": 0,
+      "invalid": 0
+    },
+    "strictErrorCount": 11
+  },
+  "gateReadiness": {
+    "confirmed": 0,
+    "approvalPending": 3,
+    "preparedEvidencePending": 8,
+    "missingEvidence": 0
+  },
+  "duplicateRegister": {
+    "valid": false,
+    "expectedGroupCount": 51,
+    "reviewedRowCount": 51,
+    "decisionCounts": {
+      "pending": 51,
+      "accepted_source_duplicate": 0,
+      "blocked_source_correction": 0
+    },
+    "errorCount": 51
+  },
+  "physicalUat": {
+    "valid": false,
+    "scenarioCount": 12,
+    "statusCounts": {
+      "pending": 12,
+      "passed": 0,
+      "failed": 0,
+      "blocked": 0,
+      "invalid": 0
+    },
+    "errorCount": 22
+  },
+  "handoff": {
+    "gateCount": 11,
+    "missingEvidenceArtifactCount": 11,
+    "preparedPendingArtifactCount": 11,
+    "unpreparedEvidenceArtifactCount": 0
+  },
+  "gates": [
+    {
+      "name": "MED250_GATE_GPS_READY",
+      "title": "Authoritative pharmacy GPS readiness",
+      "owner": "MED+250 operations",
+      "status": "pending",
+      "readiness": "prepared_evidence_pending",
+      "requiredEvidenceTypes": [
+        "operations_snapshot",
+        "review_ledger"
+      ],
+      "suppliedEvidenceTypes": [
+        "operations_snapshot"
+      ],
+      "missingEvidenceTypes": [
+        "review_ledger"
+      ],
+      "preparedPendingEvidence": [
+        "review_ledger"
+      ],
+      "approvalComplete": false
+    },
+    {
+      "name": "MED250_GATE_WHATSAPP_READY",
+      "title": "Pharmacy WhatsApp readiness",
+      "owner": "MED+250 operations",
+      "status": "pending",
+      "readiness": "prepared_evidence_pending",
+      "requiredEvidenceTypes": [
+        "operations_snapshot",
+        "review_ledger"
+      ],
+      "suppliedEvidenceTypes": [
+        "operations_snapshot"
+      ],
+      "missingEvidenceTypes": [
+        "review_ledger"
+      ],
+      "preparedPendingEvidence": [
+        "review_ledger"
+      ],
+      "approvalComplete": false
+    },
+    {
+      "name": "MED250_GATE_DUPLICATE_REGISTER_REVIEWED",
+      "title": "Duplicate-register review",
+      "owner": "MED+250 register data reviewer",
+      "status": "pending",
+      "readiness": "prepared_evidence_pending",
+      "requiredEvidenceTypes": [
+        "review_ledger"
+      ],
+      "suppliedEvidenceTypes": [],
+      "missingEvidenceTypes": [
+        "review_ledger"
+      ],
+      "preparedPendingEvidence": [
+        "review_ledger"
+      ],
+      "approvalComplete": false
+    },
+    {
+      "name": "MED250_GATE_SECURITY_HARDENING_DEPLOYED",
+      "title": "Security-hardening migration deployment",
+      "owner": "MED+250 backend owner",
+      "status": "pending",
+      "readiness": "approval_pending",
+      "requiredEvidenceTypes": [
+        "deployment_receipt",
+        "test_record"
+      ],
+      "suppliedEvidenceTypes": [
+        "deployment_receipt",
+        "test_record"
+      ],
+      "missingEvidenceTypes": [],
+      "preparedPendingEvidence": [],
+      "approvalComplete": false
+    },
+    {
+      "name": "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED",
+      "title": "Revised Edge Function deployment",
+      "owner": "MED+250 backend owner",
+      "status": "pending",
+      "readiness": "approval_pending",
+      "requiredEvidenceTypes": [
+        "deployment_receipt",
+        "test_record"
+      ],
+      "suppliedEvidenceTypes": [
+        "deployment_receipt",
+        "test_record"
+      ],
+      "missingEvidenceTypes": [],
+      "preparedPendingEvidence": [],
+      "approvalComplete": false
+    },
+    {
+      "name": "MED250_GATE_TURNSTILE_SERVER_VERIFIED",
+      "title": "Turnstile server verification",
+      "owner": "MED+250 security owner",
+      "status": "pending",
+      "readiness": "prepared_evidence_pending",
+      "requiredEvidenceTypes": [
+        "test_record"
+      ],
+      "suppliedEvidenceTypes": [],
+      "missingEvidenceTypes": [
+        "test_record"
+      ],
+      "preparedPendingEvidence": [
+        "test_record"
+      ],
+      "approvalComplete": false
+    },
+    {
+      "name": "MED250_GATE_AUTH_RATE_LIMITS_APPROVED",
+      "title": "Anonymous-auth rate-limit approval",
+      "owner": "MED+250 security owner",
+      "status": "pending",
+      "readiness": "prepared_evidence_pending",
+      "requiredEvidenceTypes": [
+        "signed_approval",
+        "test_record"
+      ],
+      "suppliedEvidenceTypes": [],
+      "missingEvidenceTypes": [
+        "signed_approval",
+        "test_record"
+      ],
+      "preparedPendingEvidence": [
+        "signed_approval",
+        "test_record"
+      ],
+      "approvalComplete": false
+    },
+    {
+      "name": "MED250_GATE_PRESCRIPTION_RETENTION_APPROVED",
+      "title": "Prescription-retention approval",
+      "owner": "MED+250 privacy owner",
+      "status": "pending",
+      "readiness": "prepared_evidence_pending",
+      "requiredEvidenceTypes": [
+        "signed_approval",
+        "test_record"
+      ],
+      "suppliedEvidenceTypes": [
+        "test_record"
+      ],
+      "missingEvidenceTypes": [
+        "signed_approval"
+      ],
+      "preparedPendingEvidence": [
+        "signed_approval"
+      ],
+      "approvalComplete": false
+    },
+    {
+      "name": "MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED",
+      "title": "Cloudflare account verification",
+      "owner": "MED+250 infrastructure owner",
+      "status": "pending",
+      "readiness": "prepared_evidence_pending",
+      "requiredEvidenceTypes": [
+        "account_verification",
+        "signed_approval"
+      ],
+      "suppliedEvidenceTypes": [],
+      "missingEvidenceTypes": [
+        "account_verification",
+        "signed_approval"
+      ],
+      "preparedPendingEvidence": [
+        "account_verification",
+        "signed_approval"
+      ],
+      "approvalComplete": false
+    },
+    {
+      "name": "MED250_GATE_DOMAIN_DNS_VERIFIED",
+      "title": "Production domain and DNS verification",
+      "owner": "MED+250 infrastructure owner",
+      "status": "pending",
+      "readiness": "approval_pending",
+      "requiredEvidenceTypes": [
+        "domain_verification",
+        "test_record"
+      ],
+      "suppliedEvidenceTypes": [
+        "domain_verification",
+        "test_record"
+      ],
+      "missingEvidenceTypes": [],
+      "preparedPendingEvidence": [],
+      "approvalComplete": false
+    },
+    {
+      "name": "MED250_GATE_PHYSICAL_UAT_PASSED",
+      "title": "Controlled physical-device UAT",
+      "owner": "MED+250 QA owner",
+      "status": "pending",
+      "readiness": "prepared_evidence_pending",
+      "requiredEvidenceTypes": [
+        "signed_approval",
+        "test_record"
+      ],
+      "suppliedEvidenceTypes": [],
+      "missingEvidenceTypes": [
+        "signed_approval",
+        "test_record"
+      ],
+      "preparedPendingEvidence": [
+        "signed_approval",
+        "test_record"
+      ],
+      "approvalComplete": false
+    }
+  ]
+}

@@ -1,0 +1,116 @@
+{
+  "captured_at": "2026-07-13T20:42:15Z",
+  "project": "uskfnszcdqpcfrhjxitl",
+  "contract_version": "2026-07-13.7",
+  "privacy": {
+    "aggregate_only": true,
+    "contains_row_identifiers": false,
+    "contains_object_names": false
+  },
+  "catalogue_search": {
+    "exists": true,
+    "security_invoker": true,
+    "stable": true,
+    "search_path_locked": true,
+    "anon_can_execute": true,
+    "authenticated_can_execute": true
+  },
+  "monitoring": {
+    "health_exists": true,
+    "health_security_definer": true,
+    "health_search_path_locked": true,
+    "anon_can_execute_health": false,
+    "authenticated_can_execute_health": false,
+    "service_role_can_execute_health": true
+  },
+  "pharmacy_privacy": {
+    "anon_can_read_pharmacies": false,
+    "authenticated_can_read_pharmacies": false,
+    "anon_can_read_recipients": false,
+    "authenticated_can_read_recipients": false
+  },
+  "geocode_governance": {
+    "review_column_count": 4,
+    "expected_review_column_count": 4,
+    "review_constraint_exists": true,
+    "review_constraint_validated": true,
+    "unique_verified_place_index": true,
+    "verified_without_review_count": 0
+  },
+  "contact_governance": {
+    "review_function_exists": true,
+    "service_role_can_review": true,
+    "anon_can_review": false,
+    "authenticated_can_review": false,
+    "reviewed_without_evidence_count": 0,
+    "admin_verified_without_evidence_count": 0
+  },
+  "member_contacts": {
+    "function_exists": true,
+    "security_definer": true,
+    "search_path_locked": true,
+    "anon_can_execute": false,
+    "authenticated_can_execute": true
+  },
+  "prescriptions": {
+    "bucket_exists": true,
+    "cleanup_claims_rls": true
+  },
+  "realtime": {
+    "orders": true,
+    "offers": true,
+    "notifications": true
+  },
+  "api_surface": {
+    "function_count": 24,
+    "expected_function_count": 24,
+    "public_execute_count": 0,
+    "anonymous_security_definer_count": 0,
+    "mutable_security_definer_path_count": 0,
+    "expected_authenticated_security_definer_count": 13,
+    "missing_authenticated_security_definer_count": 0,
+    "unexpected_authenticated_security_definer_count": 0
+  },
+  "table_surface": {
+    "table_count": 19,
+    "expected_table_count": 19,
+    "rls_disabled_count": 0,
+    "anonymous_select_count": 0,
+    "expected_deny_by_default_count": 8,
+    "missing_deny_by_default_count": 0,
+    "unexpected_deny_by_default_count": 0,
+    "expected_authenticated_select_count": 8,
+    "missing_authenticated_select_count": 0,
+    "unexpected_authenticated_select_count": 0
+  },
+  "contract_access": {
+    "anon_can_execute": false,
+    "authenticated_can_execute": false,
+    "service_role_can_execute": true
+  },
+  "edge_functions": {
+    "cleanup_prescriptions": {
+      "version": 2,
+      "status": "ACTIVE",
+      "unauthenticated_boot_probe_status": 403
+    },
+    "pharmacy_send_otp": {
+      "version": 4,
+      "status": "ACTIVE"
+    },
+    "pharmacy_verify_otp": {
+      "version": 4,
+      "status": "ACTIVE"
+    },
+    "geocode_pharmacies": {
+      "version": 4,
+      "status": "ACTIVE",
+      "unauthenticated_probe_status": 403
+    },
+    "review_pharmacy_contacts": {
+      "version": 1,
+      "status": "ACTIVE",
+      "unauthenticated_probe_status": 403
+    }
+  }
+}

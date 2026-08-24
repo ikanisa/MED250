@@ -1,0 +1,50 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "captured_at": "2026-07-16T10:52:25Z",
+  "status": "owner_review_required",
+  "summary": "Two complete 725-row public-evidence discovery runs were merged under the current pharmacy-identity guard and matched to the authoritative May 2026 retail register. The resulting files are private review candidates only; no production contact, WhatsApp identity, login permission, GPS coordinate, price, stock value, or seller record was created.",
+  "source_discovery": {
+    "december_2025_rows": 725,
+    "complete_run_count": 2,
+    "rows_with_public_phone_evidence": 335,
+    "rows_with_identity_valid_maps_phone": 68,
+    "rows_with_resolved_identity_valid_maps_place": 97,
+    "rows_requiring_review_or_unmatched": 484
+  },
+  "current_registry_reconciliation": {
+    "may_2026_retail_rows": 766,
+    "accepted_registry_matches": 698,
+    "ambiguous_or_absent_review_rows": 27,
+    "candidate_phone_contact_rows": 370,
+    "candidate_google_maps_url_rows": 71,
+    "browser_discovered_candidate_phone_rows": 42
+  },
+  "private_artifacts": {
+    "merged_audit": {
+      "path": "work/pharmacy-contact-candidates-merged.csv",
+      "sha256": "af07b3dabad3a78282adc57d558e789bb3a20530578c20e915c5e54138d2382e"
+    },
+    "accepted_registry_matches": {
+      "path": "work/pharmacy-contact-registry-matches.csv",
+      "sha256": "50b4d8e4cabda10fce4e9488720bc5eec2743f7e624c22245813555721f3060e"
+    },
+    "registry_review_queue": {
+      "path": "work/pharmacy-contact-registry-review.csv",
+      "sha256": "140898e2561e6f8b3ff91012abcaf806931d78c7565b0071e042cbe864ce7c27"
+    },
+    "unapplied_candidate_sql": {
+      "path": "work/pharmacy-contact-candidate-import.sql",
+      "sha256": "cb5efe6918a91fadb0572d634eb895a937763edd53b19d4d43b6ab861cf1063c"
+    }
+  },
+  "governance": {
+    "supabase_import_applied": false,
+    "production_contacts_promoted": 0,
+    "whatsapp_identities_created": 0,
+    "login_enabled_contacts_created": 0,
+    "maps_urls_treated_as_verified_coordinates": false,
+    "public_or_maps_phone_treated_as_authorised_whatsapp": false,
+    "reason_for_hold": "The operations and data owners must resolve the 27 registry matches, verify each intended business contact directly with the pharmacy, approve source reuse, and use the governed single-record contact workflow. Public evidence alone cannot authorize WhatsApp login."
+  }
+}

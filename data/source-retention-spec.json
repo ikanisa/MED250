@@ -1,0 +1,294 @@
+{
+  "schema_version": "1",
+  "bundle_id": "med250-source-retention-2026-07-16",
+  "classification": "controlled_private_source_evidence",
+  "default_output": "outputs/controlled-evidence/med250-source-retention-2026-07-16",
+  "artifacts": [
+    {
+      "id": "rwanda_fda_products_raw_html",
+      "role": "raw_source",
+      "source_kind": "local",
+      "source": "archive/task-1-full-source/work/fda/products-register.html",
+      "source_url": "https://rwandafda.gov.rw/register/monitoring_preview_register",
+      "bundle_path": "raw/rwanda-fda/products-register-july-2026.html",
+      "media_type": "text/html",
+      "expected_bytes": 4986608,
+      "expected_sha256": "517244c76abc27b0a5c7774ff10fd66fdba069bcb3e4c0ce74256bd154c99b59",
+      "semantic_check": {
+        "type": "html_pattern_count",
+        "pattern": "class=\"hm-reg-row",
+        "expected": 2480
+      }
+    },
+    {
+      "id": "rwanda_fda_products_extracted_text",
+      "role": "raw_source_companion",
+      "source_kind": "local",
+      "source": "archive/task-1-full-source/work/fda/products-register-july-2026.txt",
+      "source_url": "https://rwandafda.gov.rw/register/monitoring_preview_register",
+      "bundle_path": "raw/rwanda-fda/products-register-july-2026.txt",
+      "media_type": "text/plain",
+      "expected_bytes": 46443,
+      "expected_sha256": "410c75afc69248b303786aa552c230687fbd08b1aa0a64a8a77c10d76615584d"
+    },
+    {
+      "id": "rwanda_fda_retail_extracted_text",
+      "role": "raw_source_companion",
+      "source_kind": "local",
+      "source": "archive/task-1-full-source/work/fda/retail-pharmacies-may-2026.txt",
+      "source_url": "https://rwandafda.gov.rw/medicines-inspection-licensed-premises/",
+      "bundle_path": "raw/rwanda-fda/retail-pharmacies-may-2026.txt",
+      "media_type": "text/plain",
+      "expected_bytes": 107906,
+      "expected_sha256": "84084be12abf867c79959aca736f1f40ddfc4d19dffe00066e65634c4a87358a"
+    },
+    {
+      "id": "rwanda_fda_retail_pdf",
+      "role": "raw_source",
+      "source_kind": "remote",
+      "source": "https://rwandafda.gov.rw/monitoring-tool/documents-management/uploads/1/Licensed-Premises/1781785110_1.%20LIST%20LICENSED%20HUMAN%20RETAIL%20PHARMACIES-MAY%202026%201.pdf",
+      "bundle_path": "raw/rwanda-fda/retail-pharmacies-may-2026.pdf",
+      "media_type": "application/pdf",
+      "expected_bytes": 890163,
+      "expected_sha256": "48170a4e7a058965e4dd5e1063c8248fa385dd7954970c9283a33e45d0629c98"
+    },
+    {
+      "id": "rwanda_fda_online_pdf",
+      "role": "raw_source",
+      "source_kind": "remote",
+      "source": "https://rwandafda.gov.rw/monitoring-tool/documents-management/uploads/1/Licensed-Premises/1781787371_5.%20%20LIST%20OF%20LICENSED%20ONLINE%20PHARMACIES-MAY%2020261.pdf",
+      "bundle_path": "raw/rwanda-fda/online-pharmacies-may-2026.pdf",
+      "media_type": "application/pdf",
+      "expected_bytes": 139949,
+      "expected_sha256": "51f0decd0823db06766115b047c84e7a17ac6df29fd63f9eaf37f0a24a241834"
+    },
+    {
+      "id": "rwanda_fda_roster_bugesera",
+      "role": "raw_source",
+      "source_kind": "remote",
+      "source": "https://monitoring.rwandafda.gov.rw/monitoring/documents-management/uploads/3/Human-Retail-Pharmacy-Duty-rosters/Retail_Pharmacies_Duty_Roster_in_Bugesera_District_JULY-AUGUST-SEPTEMBER_2026.pdf",
+      "bundle_path": "raw/rwanda-fda/duty-rosters/bugesera.pdf",
+      "media_type": "application/pdf",
+      "expected_bytes": 432159,
+      "expected_sha256": "b069ea475b023e58851a24d8bb5d3a179b69402b7e217ce3a02aa3aec8b719c1"
+    },
+    {
+      "id": "rwanda_fda_roster_huye",
+      "role": "raw_source",
+      "source_kind": "remote",
+      "source": "https://monitoring.rwandafda.gov.rw/monitoring/documents-management/uploads/3/Human-Retail-Pharmacy-Duty-rosters/Retail_Pharmacies_Duty_Roster_in_Huye_District_JULY-AUGUST-SEPTEMBER_2026.pdf",
+      "bundle_path": "raw/rwanda-fda/duty-rosters/huye.pdf",
+      "media_type": "application/pdf",
+      "expected_bytes": 400185,
+      "expected_sha256": "283d54a247a97ef39494a010a723e335ae841d80249f0fb3912f542690dbbbb9"
+    },
+    {
+      "id": "rwanda_fda_roster_kamonyi",
+      "role": "raw_source",
+      "source_kind": "remote",
+      "source": "https://monitoring.rwandafda.gov.rw/monitoring/documents-management/uploads/3/Human-Retail-Pharmacy-Duty-rosters/Retail_Pharmacies_Duty_Roster_in_Kamonyi_District_JULY-AUGUST-SEPTEMBER_2026.pdf",
+      "bundle_path": "raw/rwanda-fda/duty-rosters/kamonyi.pdf",
+      "media_type": "application/pdf",
+      "expected_bytes": 401205,
+      "expected_sha256": "de09717d4b3822d395dd66f38d595b26fb88c1e46c300bd3cf87e05293edb307"
+    },
+    {
+      "id": "rwanda_fda_roster_kayonza",
+      "role": "raw_source",
+      "source_kind": "remote",
+      "source": "https://monitoring.rwandafda.gov.rw/monitoring/documents-management/uploads/3/Human-Retail-Pharmacy-Duty-rosters/Retail_Pharmacies_Duty_Roster_in_Kayonza_District_JULY-AUGUST-SEPTEMBER_2026.pdf",
+      "bundle_path": "raw/rwanda-fda/duty-rosters/kayonza.pdf",
+      "media_type": "application/pdf",
+      "expected_bytes": 394896,
+      "expected_sha256": "3f60b9b220eb0f6daa754e66b3cc44be1116b284a70f848d32dda058accc297a"
+    },
+    {
+      "id": "rwanda_fda_roster_kigali",
+      "role": "raw_source",
+      "source_kind": "remote",
+      "source": "https://monitoring.rwandafda.gov.rw/monitoring/documents-management/uploads/3/Human-Retail-Pharmacy-Duty-rosters/Retail_Pharmacies_Duty_Roster_in_Kigali_City_for_JULY-AUGUST-SEPTEMBER_2026.pdf",
+      "bundle_path": "raw/rwanda-fda/duty-rosters/kigali.pdf",
+      "media_type": "application/pdf",
+      "expected_bytes": 356944,
+      "expected_sha256": "5a717a030c845e954a0b3f0fbbb2e290ff3fa88092e0b472a60d1818a3e04d47"
+    },
+    {
+      "id": "rwanda_fda_roster_muhanga",
+      "role": "raw_source",
+      "source_kind": "remote",
+      "source": "https://monitoring.rwandafda.gov.rw/monitoring/documents-management/uploads/3/Human-Retail-Pharmacy-Duty-rosters/Retail_Pharmacies_Duty_Roster_in_Muhanga_District_JULY-AUGUST-SEPTEMBER_2026.pdf",
+      "bundle_path": "raw/rwanda-fda/duty-rosters/muhanga.pdf",
+      "media_type": "application/pdf",
+      "expected_bytes": 317697,
+      "expected_sha256": "ae4a740fee5de34b152539fb6dc77657a68e16eab21478cf322d21bcebadf202"
+    },
+    {
+      "id": "rwanda_fda_roster_musanze",
+      "role": "raw_source",
+      "source_kind": "remote",
+      "source": "https://monitoring.rwandafda.gov.rw/monitoring/documents-management/uploads/3/Human-Retail-Pharmacy-Duty-rosters/Retail_Pharmacies_Duty_Roster_in_Musanze_JULY-AUGUST-SEPTEMBER_2026.pdf",
+      "bundle_path": "raw/rwanda-fda/duty-rosters/musanze.pdf",
+      "media_type": "application/pdf",
+      "expected_bytes": 311913,
+      "expected_sha256": "7ee184f40c8e71d0f1b6868948cc4806cbd6374b699e2767ea39bfe6dadbfb32"
+    },
+    {
+      "id": "rwanda_fda_roster_nyagatare",
+      "role": "raw_source",
+      "source_kind": "remote",
+      "source": "https://monitoring.rwandafda.gov.rw/monitoring/documents-management/uploads/3/Human-Retail-Pharmacy-Duty-rosters/Retail_Pharmacies_Duty_Roster_in_Nyagatare_for_JULY-AUGUST-SEPTEMBER_2026.pdf",
+      "bundle_path": "raw/rwanda-fda/duty-rosters/nyagatare.pdf",
+      "media_type": "application/pdf",
+      "expected_bytes": 196213,
+      "expected_sha256": "9b82080b5423093692ab0e8b343ce6afc25af0488c10051318e8cc6b1d8b1dcb"
+    },
+    {
+      "id": "rwanda_fda_roster_rubavu",
+      "role": "raw_source",
+      "source_kind": "remote",
+      "source": "https://monitoring.rwandafda.gov.rw/monitoring/documents-management/uploads/3/Human-Retail-Pharmacy-Duty-rosters/Retail_Pharmacies_Duty_Roster_in_Rubavu_for_JULY-AUGUST-SEPTEMBER_2026.pdf",
+      "bundle_path": "raw/rwanda-fda/duty-rosters/rubavu.pdf",
+      "media_type": "application/pdf",
+      "expected_bytes": 318335,
+      "expected_sha256": "bbc14cbf9fcd06a44d7d14c2712a61d210aa77f4af76476aaea80dc403792498"
+    },
+    {
+      "id": "rwanda_fda_roster_ruhango",
+      "role": "raw_source",
+      "source_kind": "remote",
+      "source": "https://monitoring.rwandafda.gov.rw/monitoring/documents-management/uploads/3/Human-Retail-Pharmacy-Duty-rosters/Retail_Pharmacies_Duty_Roster_in_Ruhango_for_JULY-AUGUST-SEPTEMBER_2026.pdf",
+      "bundle_path": "raw/rwanda-fda/duty-rosters/ruhango.pdf",
+      "media_type": "application/pdf",
+      "expected_bytes": 194709,
+      "expected_sha256": "78ffb4974b5592909fea7404686f539bd7d5acb579c2362f839db14f99c23d5a"
+    },
+    {
+      "id": "rwanda_fda_roster_rwamagana",
+      "role": "raw_source",
+      "source_kind": "remote",
+      "source": "https://monitoring.rwandafda.gov.rw/monitoring/documents-management/uploads/3/Human-Retail-Pharmacy-Duty-rosters/Retail_Pharmacies_Duty_Roster_in_Rwamagana_JULY-AUGUST-SEPTEMBER_2026.pdf",
+      "bundle_path": "raw/rwanda-fda/duty-rosters/rwamagana.pdf",
+      "media_type": "application/pdf",
+      "expected_bytes": 199919,
+      "expected_sha256": "7e67ed8dd8ecd23ea27abb2d4a9868c3300bbe2b93b33b8285f6562c654016de"
+    },
+    {
+      "id": "amazon_raw_research",
+      "role": "raw_research",
+      "source_kind": "local",
+      "source": "outputs/019f66ce-d480-7a90-9bb7-ee6e417b5ce7/corrected/research/amazon-products-raw-2026-07-15.json",
+      "source_url": "https://www.amazon.com/",
+      "bundle_path": "raw/amazon/amazon-products-raw-2026-07-15.json",
+      "media_type": "application/json",
+      "expected_bytes": 2200672,
+      "expected_sha256": "0479c4e4d4950f443abaf2c716a9e32c83d77829e88ba4960f68070a4355c6a5",
+      "semantic_check": {
+        "type": "json"
+      }
+    },
+    {
+      "id": "amazon_corrected_dataset",
+      "role": "derived_research",
+      "source_kind": "local",
+      "source": "outputs/019f66ce-d480-7a90-9bb7-ee6e417b5ce7/corrected/research/corrected-catalog-dataset-2026-07-15.json",
+      "bundle_path": "derived/amazon/corrected-catalog-dataset-2026-07-15.json",
+      "media_type": "application/json",
+      "expected_bytes": 10368603,
+      "expected_sha256": "5000580eb85403a58de8e604bdd055b25b22958ae5755206913a070bcae31383",
+      "semantic_check": {
+        "type": "json"
+      }
+    },
+    {
+      "id": "amazon_catalogue_workbook",
+      "role": "derived_release",
+      "source_kind": "local",
+      "source": "outputs/019f66ce-d480-7a90-9bb7-ee6e417b5ce7/corrected/Rwanda_Marketplace_Amazon_First_Catalog_4680.xlsx",
+      "bundle_path": "derived/amazon/Rwanda_Marketplace_Amazon_First_Catalog_4680.xlsx",
+      "media_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "expected_bytes": 1701508,
+      "expected_sha256": "6919e5c0728d1d6e1431844c99e1a96935a4b3b7f29fe60f0adb6a1aa8853f20"
+    },
+    {
+      "id": "rwanda_fda_products_derived",
+      "role": "derived_release",
+      "source_kind": "local",
+      "source": "data/imports/rwanda-fda-products-july-2026.csv",
+      "bundle_path": "derived/rwanda-fda/rwanda-fda-products-july-2026.csv",
+      "media_type": "text/csv",
+      "expected_bytes": 992901,
+      "expected_sha256": "8b6b22d154da87c26bb7fc153d621c41f713f9ba0b60ff16d0c6c4f8122aab22",
+      "semantic_check": {
+        "type": "csv_data_rows",
+        "expected": 2480
+      }
+    },
+    {
+      "id": "rwanda_fda_retail_derived",
+      "role": "derived_release",
+      "source_kind": "local",
+      "source": "data/imports/rwanda-fda-retail-pharmacies-may-2026.csv",
+      "bundle_path": "derived/rwanda-fda/rwanda-fda-retail-pharmacies-may-2026.csv",
+      "media_type": "text/csv",
+      "expected_bytes": 210437,
+      "expected_sha256": "977b4d35036d178b45191f98de55e574e848755f1153df252a7a621665b583a9",
+      "semantic_check": {
+        "type": "csv_data_rows",
+        "expected": 766
+      }
+    },
+    {
+      "id": "rwanda_fda_online_derived",
+      "role": "derived_release",
+      "source_kind": "local",
+      "source": "data/imports/rwanda-fda-online-pharmacies-may-2026.csv",
+      "bundle_path": "derived/rwanda-fda/rwanda-fda-online-pharmacies-may-2026.csv",
+      "media_type": "text/csv",
+      "expected_bytes": 997,
+      "expected_sha256": "03032e7e892cb2d1ffc3a335d28d81288f082c8989fd9113299632c56e2c79c9",
+      "semantic_check": {
+        "type": "csv_data_rows",
+        "expected": 3
+      }
+    },
+    {
+      "id": "rwanda_fda_source_manifest",
+      "role": "governance",
+      "source_kind": "local",
+      "source": "data/imports/source-manifest.json",
+      "bundle_path": "governance/rwanda-fda-source-manifest.json",
+      "media_type": "application/json",
+      "expected_bytes": 8574,
+      "expected_sha256": "e0dbd473389b1cc57f8a9b8c4de30e6e4daba13393b40977d722c98ecae17fad",
+      "semantic_check": {
+        "type": "json"
+      }
+    },
+    {
+      "id": "rwanda_fda_roster_manifest",
+      "role": "governance",
+      "source_kind": "local",
+      "source": "data/imports/rwanda-fda-pharmacy-contacts-manifest.json",
+      "bundle_path": "governance/rwanda-fda-pharmacy-contacts-manifest.json",
+      "media_type": "application/json",
+      "expected_bytes": 4286,
+      "expected_sha256": "4ea33e492dc21317b9f0708161d8a6dc9cffd1c00fbd242716371edbdc4dc33a",
+      "semantic_check": {
+        "type": "json"
+      }
+    },
+    {
+      "id": "amazon_quality_overrides",
+      "role": "governance",
+      "source_kind": "local",
+      "source": "data/imports/amazon-product-quality-overrides-2026-07-16.json",
+      "bundle_path": "governance/amazon-product-quality-overrides-2026-07-16.json",
+      "media_type": "application/json",
+      "expected_bytes": 37453,
+      "expected_sha256": "6aa58e301563b923a1c3d2e34eaece8df6583ff2d75a9ca1c05c01dc980418c8",
+      "semantic_check": {
+        "type": "json"
+      }
+    }
+  ]
+}

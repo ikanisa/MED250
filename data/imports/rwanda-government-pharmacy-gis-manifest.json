@@ -1,0 +1,15 @@
+{
+  "generated_at": "2026-07-16T06:34:32.440Z",
+  "source": "https://gh.space.gov.rw/server/rest/services/Health_Facilities/FeatureServer/3",
+  "source_owner": "Government of Rwanda geospatial portal",
+  "source_service_item_id": "814af48dc25f4d08bfe0c745ab094efc",
+  "source_features": 291,
+  "source_sha256": "111e825a27f427e4f8a9563e629e8f234b3bb0f3f0c216c1d2229c45dd4ba68a",
+  "registry_sha256": "977b4d35036d178b45191f98de55e574e848755f1153df252a7a621665b583a9",
+  "matched_sha256": "d9de8fec06aa39b18d7f0d77ead22ba52c2b1b165dd4d0cc5f44579352d04421",
+  "review_sha256": "521b78ea95c25d962af6743a0001e8c3e7ec6189059a737462d34e19bc6459d8",
+  "matched_pharmacies": 93,
+  "review_features": 198,
+  "matching_rule": "Unique exact current FDA licensed name, district, sector and cell; WGS84 Rwanda point; recorded GPS accuracy at most 10 metres.",
+  "observation_warning": "Government coordinates were collected in 2021 and edited in 2023; exact current FDA locality matching is required before activation."
+}

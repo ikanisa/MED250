@@ -1,0 +1,61 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_PRESCRIPTION_RETENTION_APPROVED",
+  "evidence_type": "signed_approval",
+  "status": "pending",
+  "title": "MED+250 prescription access and retention policy approval",
+  "summary": "Owner-ready approval record for the implemented private prescription lifecycle. Technical cleanup and access tests are complete, but privacy, legal-basis, role assignment and incident acceptance require the named privacy owner.",
+  "recorded_at": "2026-07-16T13:57:59+02:00",
+  "recorded_by": "MED+250 prescription lifecycle audit",
+  "recorded_role": "Release evidence preparer",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Private access boundary",
+      "status": "passed",
+      "detail": "The policy limits file access to the customer and selected pharmacy, with unrelated recipients excluded and signed links capped by the remaining selection window."
+    },
+    {
+      "name": "Implemented retention periods",
+      "status": "passed",
+      "detail": "The policy records the deployed 24-hour orphan rule, 24-hour selected-pharmacy access window and 30-day completed-request deletion rule."
+    },
+    {
+      "name": "Cleanup schedule and concurrency safety",
+      "status": "passed",
+      "detail": "The policy records the protected six-hour schedule, 15-minute lease, path-grouped reference proof, deletion-before-reference-clearing rule and retry recovery behavior."
+    },
+    {
+      "name": "Controlled technical test",
+      "status": "passed",
+      "detail": "The existing redacted test record confirms the deployed retention and access controls without exposing prescription, customer, pharmacy or precise-location data."
+    },
+    {
+      "name": "Privacy and legal acceptance",
+      "status": "blocked",
+      "detail": "The privacy owner has not yet recorded the applicable legal basis, controller and processor roles, transfer conditions, notification obligations or any required policy conditions."
+    },
+    {
+      "name": "Named incident roles and signature",
+      "status": "pending",
+      "detail": "The privacy owner must assign the accountable privacy and security incident contacts, approve the periods and safeguards, and sign this artifact."
+    }
+  ],
+  "policy_reference": "docs/launch/PRESCRIPTION_RETENTION_POLICY.md",
+  "policy_sha256": "70a77a1e721b94348125032bcd529e9a89baa3f6cfda907ee3b8070e1d47b88f",
+  "test_reference": "docs/launch/evidence/prescription-retention-test-2026-07-16.json",
+  "test_sha256": "7ed3d3dff07e1bfcd37550fb7ff2074e50346b8f4221d69be93d3d54946db525",
+  "decision": null,
+  "approved_by": null,
+  "approved_role": null,
+  "approved_at": null,
+  "completion_instructions": [
+    "Review the policy with the applicable Rwanda privacy, health-data and pharmaceutical obligations.",
+    "Assign the accountable privacy and security incident contacts in the controlled staff register.",
+    "Record any legal-basis, controller, processor, transfer, notification or retention conditions in the redacted decision.",
+    "Confirm both recorded SHA-256 values still match their files.",
+    "Set every check to passed, set decision to approved, add the approver, role and timezone-qualified timestamp, and set status to complete.",
+    "Validate the artifact strictly and add it to data/launch-evidence.json with its exact SHA-256 digest."
+  ]
+}

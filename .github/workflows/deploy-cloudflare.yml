@@ -1,0 +1,111 @@
+name: Deploy MED+250 to Cloudflare
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Deployment target
+        required: true
+        type: choice
+        options:
+          - production
+      confirmation:
+        description: Type DEPLOY MED250 LIVE for a production deployment
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: med250-deploy-${{ inputs.target }}
+  cancel-in-progress: false
+
+jobs:
+  validate-request:
+    name: Validate deployment request
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Require explicit live confirmation
+        env:
+          TARGET: ${{ inputs.target }}
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          if [ "$TARGET" = "production" ] && [ "$CONFIRMATION" != "DEPLOY MED250 LIVE" ]; then
+            echo "Production deployment requires the exact confirmation phrase."
+            exit 1
+          fi
+
+  production:
+    name: Deploy production Worker
+    if: inputs.target == 'production'
+    needs: validate-request
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: med250-production
+    env:
+      NEXT_PUBLIC_MED250_CATALOGUE_BACKEND: worker-d1
+      NEXT_PUBLIC_MED250_AUTH_BACKEND: worker-d1
+      NEXT_PUBLIC_MED250_ORDER_BACKEND: worker-d1
+      NEXT_PUBLIC_MED250_WORKSPACE_BACKEND: worker-d1
+      NEXT_PUBLIC_MARKETPLACE_MODE: live
+      NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
+      NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
+      NEXT_PUBLIC_MED250_OBSERVABILITY: cloud
+      MED250_DEPLOYMENT_TARGET: production
+      MED250_DEPLOYMENT_ORIGIN: ${{ vars.NEXT_PUBLIC_SITE_URL }}
+      MED250_RELEASE_REVISION: ${{ github.sha }}
+      MED250_D1_DATABASE_ID: ${{ vars.MED250_D1_DATABASE_ID }}
+      MED250_ADMIN_WHATSAPP: ${{ vars.MED250_ADMIN_WHATSAPP }}
+      TWILIO_ACCOUNT_SID: ${{ vars.TWILIO_ACCOUNT_SID }}
+      TWILIO_WHATSAPP_FROM: ${{ vars.TWILIO_WHATSAPP_FROM }}
+      TWILIO_CLIENT_LOCATION_CAPTURE_CONTENT_SID: ${{ vars.TWILIO_CLIENT_LOCATION_CAPTURE_CONTENT_SID }}
+      TWILIO_CLIENT_LOCATION_CHOICE_CONTENT_SID: ${{ vars.TWILIO_CLIENT_LOCATION_CHOICE_CONTENT_SID }}
+      TWILIO_CUSTOMER_OTP_CONTENT_SID: ${{ vars.TWILIO_CUSTOMER_OTP_CONTENT_SID }}
+      TWILIO_PHARMACY_CLIENT_MEDIA_REQUEST_CONTENT_SID: ${{ vars.TWILIO_PHARMACY_CLIENT_MEDIA_REQUEST_CONTENT_SID }}
+      TWILIO_PHARMACY_OTP_CONTENT_SID: ${{ vars.TWILIO_PHARMACY_OTP_CONTENT_SID }}
+      TWILIO_PHARMACY_REQUEST_CONTENT_SID: ${{ vars.TWILIO_PHARMACY_REQUEST_CONTENT_SID }}
+      MED250_GATE_GPS_READY: ${{ vars.MED250_GATE_GPS_READY }}
+      MED250_GATE_WHATSAPP_READY: ${{ vars.MED250_GATE_WHATSAPP_READY }}
+      MED250_GATE_DUPLICATE_REGISTER_REVIEWED: ${{ vars.MED250_GATE_DUPLICATE_REGISTER_REVIEWED }}
+      MED250_GATE_SECURITY_HARDENING_DEPLOYED: ${{ vars.MED250_GATE_SECURITY_HARDENING_DEPLOYED }}
+      MED250_GATE_EDGE_FUNCTIONS_DEPLOYED: ${{ vars.MED250_GATE_EDGE_FUNCTIONS_DEPLOYED }}
+      MED250_GATE_TURNSTILE_SERVER_VERIFIED: ${{ vars.MED250_GATE_TURNSTILE_SERVER_VERIFIED }}
+      MED250_GATE_AUTH_RATE_LIMITS_APPROVED: ${{ vars.MED250_GATE_AUTH_RATE_LIMITS_APPROVED }}
+      MED250_GATE_PRESCRIPTION_RETENTION_APPROVED: ${{ vars.MED250_GATE_PRESCRIPTION_RETENTION_APPROVED }}
+      MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED: ${{ vars.MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED }}
+      MED250_GATE_DOMAIN_DNS_VERIFIED: ${{ vars.MED250_GATE_DOMAIN_DNS_VERIFIED }}
+      MED250_GATE_PHYSICAL_UAT_PASSED: ${{ vars.MED250_GATE_PHYSICAL_UAT_PASSED }}
+      MED250_GATE_SOURCE_RECONCILED: ${{ vars.MED250_GATE_SOURCE_RECONCILED }}
+      MED250_GATE_WORKER_D1_CUTOVER_APPROVED: ${{ vars.MED250_GATE_WORKER_D1_CUTOVER_APPROVED }}
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version-file: package.json
+          cache: npm
+      - run: npm ci
+      - name: Validate production attestations and governed sources
+        run: npm run release:preflight:live && npm run data:duplicates:verify -- --strict && npm run uat:verify:live
+      - name: Run Worker-D1 production release checks
+        run: npm run lint && npm run cloudflare:typecheck && npm run data:validate && npm run data:quality && npm run test:preview && npm run cloudflare:check:worker-d1 && npm run performance:budget
+      - name: Apply approved D1 production migrations
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler d1 migrations apply med250-production --remote --config dist/server/wrangler.worker-d1.production.json
+      - name: Deploy production Worker
+        uses: cloudflare/wrangler-action@9acf94ace14e7dc412b076f2c5c20b8ce93c79cd # v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: 4.110.0
+          command: deploy --config dist/server/wrangler.worker-d1.production.json --strict
+      - name: Verify private Worker-D1 operational readiness
+        env:
+          MED250_HEALTH_PROBE_TOKEN: ${{ secrets.MED250_HEALTH_PROBE_TOKEN }}
+        run: npm run ops:health:worker-d1 -- --url "$NEXT_PUBLIC_SITE_URL/api/internal/health" --production --strict
+      - name: Verify production deployment
+        run: npm run deployment:verify -- --url "$NEXT_PUBLIC_SITE_URL" --mode live --expected-revision "${{ github.sha }}"

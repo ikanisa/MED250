@@ -1,0 +1,197 @@
+{
+  "schema_version": "2",
+  "release": "med250-production",
+  "description": "Evidence registry for the eleven fail-closed MED+250 production launch gates. A gate may be confirmed only after its referenced evidence exists and has a named approver and timezone-qualified approval timestamp.",
+  "gates": {
+    "MED250_GATE_GPS_READY": {
+      "title": "Authoritative pharmacy GPS readiness",
+      "owner": "MED+250 operations",
+      "required_evidence_types": ["operations_snapshot", "review_ledger"],
+      "status": "pending",
+      "acceptance": "The approved operating pharmacy set has authoritative premises coordinates with reviewer identity and durable source evidence, and strict operational health reports dispatch-ready coverage.",
+      "evidence": [
+        {
+          "type": "operations_snapshot",
+          "reference": "docs/launch/evidence/gps-operational-health-2026-07-16.json",
+          "sha256": "98eade6bf6be83e1a4f558bb3729dfde03a5df5c329be640298983c6a09acde4",
+          "recorded_at": "2026-07-16T13:43:37Z",
+          "summary": "Privacy-safe production health snapshot confirming governed GPS and dispatch-ready coverage with no strict health findings."
+        }
+      ],
+      "approved_by": null,
+      "approved_role": null,
+      "approved_at": null
+    },
+    "MED250_GATE_WHATSAPP_READY": {
+      "title": "Pharmacy WhatsApp readiness",
+      "owner": "MED+250 operations",
+      "required_evidence_types": ["operations_snapshot", "review_ledger"],
+      "status": "pending",
+      "acceptance": "The approved operating pharmacy set has current, pharmacy-authorised login-enabled WhatsApp contacts and the strict operational-health check passes.",
+      "evidence": [
+        {
+          "type": "operations_snapshot",
+          "reference": "docs/launch/evidence/whatsapp-operational-health-2026-07-16.json",
+          "sha256": "1608a4a9d63b327d78b1cd2ebc8ce5e895a4115d12c56e9574db16cc93d0e6f9",
+          "recorded_at": "2026-07-16T13:43:37Z",
+          "summary": "Privacy-safe production health snapshot confirming governed WhatsApp login coverage and no recent delivery failures."
+        }
+      ],
+      "approved_by": null,
+      "approved_role": null,
+      "approved_at": null
+    },
+    "MED250_GATE_DUPLICATE_REGISTER_REVIEWED": {
+      "title": "Duplicate-register review",
+      "owner": "MED+250 register data reviewer",
+      "required_evidence_types": ["review_ledger"],
+      "status": "pending",
+      "acceptance": "The strict duplicate-register verifier passes with named, timestamped decisions for every synchronized product and pharmacy duplicate group.",
+      "evidence": [],
+      "approved_by": null,
+      "approved_role": null,
+      "approved_at": null
+    },
+    "MED250_GATE_SECURITY_HARDENING_DEPLOYED": {
+      "title": "Security-hardening migration deployment",
+      "owner": "MED+250 backend owner",
+      "required_evidence_types": ["deployment_receipt", "test_record"],
+      "status": "pending",
+      "acceptance": "The forward security migrations and contract refresh are deployed using rotated credentials, and the privileged backend verifier returns contract 2026-07-18.3 with the runtime and DDL product-image governance guards, aggregate public trust-metric boundary, fail-closed product-description workflow, and all invariants passing.",
+      "evidence": [
+        {
+          "type": "deployment_receipt",
+          "reference": "docs/launch/evidence/security-hardening-deployment-2026-07-18.json",
+          "sha256": "dcfdeac982b75a11240db1bfd4a2150ff9c15833055eb1f9485cf0938896b3a3",
+          "recorded_at": "2026-07-18T17:24:14Z",
+          "summary": "Current production receipt for backend contract 2026-07-18.3 reconciliation, description governance, trust controls, catalogue corrections, and notification-outbox index deployment."
+        },
+        {
+          "type": "test_record",
+          "reference": "docs/launch/evidence/security-hardening-test-2026-07-18.json",
+          "sha256": "9d01de4bc5949cb5024ae159192c0c1abb429132c902a688d4dbba8b597d784b",
+          "recorded_at": "2026-07-18T17:28:30Z",
+          "summary": "Current production governance queries, post-deploy advisors, lint, targeted database tests, and the complete 302-test application suite passed."
+        }
+      ],
+      "approved_by": null,
+      "approved_role": null,
+      "approved_at": null
+    },
+    "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED": {
+      "title": "Revised Edge Function deployment",
+      "owner": "MED+250 backend owner",
+      "required_evidence_types": ["deployment_receipt", "test_record"],
+      "status": "pending",
+      "acceptance": "The reviewed OTP, cleanup, geocoding, marketplace-review, contact-review and product-description-review Edge Function versions are deployed and their protected-access boundaries pass.",
+      "evidence": [
+        {
+          "type": "deployment_receipt",
+          "reference": "docs/launch/evidence/edge-functions-deployment-2026-07-18.json",
+          "sha256": "2fec968b290b47c6d1f1390f327f9a57ce6b3f49db4eb93712b6d67dd8a8c74c",
+          "recorded_at": "2026-07-18T17:19:45Z",
+          "summary": "Current production receipt for the newly deployed product-description reviewer, exact deployed source retrieval, custom authentication boundary, and contract headers."
+        },
+        {
+          "type": "test_record",
+          "reference": "docs/launch/evidence/edge-functions-test-2026-07-18.json",
+          "sha256": "ebfd598a100390952c29fb09c99a11c1e7035b4b7b5591aad1731548da1dc7c8",
+          "recorded_at": "2026-07-18T17:19:45Z",
+          "summary": "Current product-description reviewer denial probe, response hardening, one-product workflow review, and complete reviewer regression tests passed."
+        }
+      ],
+      "approved_by": null,
+      "approved_role": null,
+      "approved_at": null
+    },
+    "MED250_GATE_TURNSTILE_SERVER_VERIFIED": {
+      "title": "Turnstile server verification",
+      "owner": "MED+250 security owner",
+      "required_evidence_types": ["test_record"],
+      "status": "pending",
+      "acceptance": "Supabase Auth validates production Turnstile tokens and controlled tests prove invalid or missing tokens cannot create new customer identities.",
+      "evidence": [],
+      "approved_by": null,
+      "approved_role": null,
+      "approved_at": null
+    },
+    "MED250_GATE_AUTH_RATE_LIMITS_APPROVED": {
+      "title": "Anonymous-auth rate-limit approval",
+      "owner": "MED+250 security owner",
+      "required_evidence_types": ["signed_approval", "test_record"],
+      "status": "pending",
+      "acceptance": "Project-wide anonymous-auth limits are approved after impact review and controlled tests prove intended customers can order without weakening abuse controls.",
+      "evidence": [],
+      "approved_by": null,
+      "approved_role": null,
+      "approved_at": null
+    },
+    "MED250_GATE_PRESCRIPTION_RETENTION_APPROVED": {
+      "title": "Prescription-retention approval",
+      "owner": "MED+250 privacy owner",
+      "required_evidence_types": ["signed_approval", "test_record"],
+      "status": "pending",
+      "acceptance": "The privacy owner approves the implemented retention periods and cleanup schedule, and a controlled cleanup run produces a healthy, non-stale aggregate signal.",
+      "evidence": [
+        {
+          "type": "test_record",
+          "reference": "docs/launch/evidence/prescription-retention-test-2026-07-16.json",
+          "sha256": "7ed3d3dff07e1bfcd37550fb7ff2074e50346b8f4221d69be93d3d54946db525",
+          "recorded_at": "2026-07-16T13:43:37Z",
+          "summary": "Protected production retention cleanup completed successfully and a fresh aggregate privacy-safe health check confirmed the signal remains current."
+        }
+      ],
+      "approved_by": null,
+      "approved_role": null,
+      "approved_at": null
+    },
+    "MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED": {
+      "title": "Cloudflare account verification",
+      "owner": "MED+250 infrastructure owner",
+      "required_evidence_types": ["account_verification", "signed_approval"],
+      "status": "pending",
+      "acceptance": "The intended Cloudflare account, least-privilege deploy token, Worker names, protected environments and route ownership are verified with a redacted account record.",
+      "evidence": [],
+      "approved_by": null,
+      "approved_role": null,
+      "approved_at": null
+    },
+    "MED250_GATE_DOMAIN_DNS_VERIFIED": {
+      "title": "Production domain and DNS verification",
+      "owner": "MED+250 infrastructure owner",
+      "required_evidence_types": ["domain_verification", "test_record"],
+      "status": "pending",
+      "acceptance": "med250.gikundiro.com resolves through the intended Cloudflare account, TLS is healthy, the Worker custom-domain route is attached and the deployment verifier passes in live mode.",
+      "evidence": [
+        {
+          "type": "domain_verification",
+          "reference": "docs/launch/evidence/domain-verification-2026-07-20.json",
+          "sha256": "80f304f77cfbee602f134bec07f82bbfd517ea7129c0117050926d49774154e9",
+          "recorded_at": "2026-07-20T16:26:57.716Z",
+          "summary": "Current canonical-domain DNS, HTTPS, ten-route, security-header, robots, sitemap, manifest, service-worker, offline page, and exact-revision checks passed."
+        },
+        {
+          "type": "test_record",
+          "reference": "docs/launch/evidence/domain-deployment-test-2026-07-20.json",
+          "sha256": "d3cb225ef5859451bb631880aa42c1ce6dbed4ddfd0359ea36699830057ea813",
+          "recorded_at": "2026-07-20T16:26:57.716Z",
+          "summary": "Current exact-revision production route verification passed all ten canonical live routes with no verifier errors."
+        }
+      ],
+      "approved_by": null,
+      "approved_role": null,
+      "approved_at": null
+    },
+    "MED250_GATE_PHYSICAL_UAT_PASSED": {
+      "title": "Controlled physical-device UAT",
+      "owner": "MED+250 QA owner",
+      "required_evidence_types": ["signed_approval", "test_record"],
+      "status": "pending",
+      "acceptance": "Named test identities pass GPS consent, WhatsApp OTP, dispatch, realtime confirmation, selection, WhatsApp, MoMo, expiry, cancellation and prescription-access scenarios without contacting unintended pharmacies.",
+      "evidence": [],
+      "approved_by": null,
+      "approved_role": null,
+      "approved_at": null
+    }
+  }
+}

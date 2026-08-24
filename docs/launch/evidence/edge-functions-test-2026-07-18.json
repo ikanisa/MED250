@@ -1,0 +1,44 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED",
+  "evidence_type": "test_record",
+  "status": "complete",
+  "title": "Product-description reviewer protected-access verification",
+  "summary": "A production denial probe, source retrieval, management inventory, and complete reviewer regression set verify that the new administrative endpoint is active, fail-closed, and contract-bound.",
+  "recorded_at": "2026-07-18T17:19:45Z",
+  "recorded_by": "Codex automated verifier",
+  "recorded_role": "Release verification agent",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Unauthenticated denial",
+      "status": "passed",
+      "detail": "A production inspect request without the dedicated administrator credential returned HTTP 403 before any protected product data was returned."
+    },
+    {
+      "name": "Response hardening",
+      "status": "passed",
+      "detail": "The denial response was non-cacheable, declared nosniff protection, and exposed only the reviewed contract headers."
+    },
+    {
+      "name": "One-product workflow",
+      "status": "passed",
+      "detail": "The retrieved handler accepts exactly one governed product identifier and contains no batch approval or bulk publication path."
+    },
+    {
+      "name": "Reviewer regression tests",
+      "status": "passed",
+      "detail": "The protected reviewer, administrator client, body-free receipt, immutable audit workflow, optimistic locking, and description-governance tests all passed."
+    },
+    {
+      "name": "Positive path gate retained",
+      "status": "passed",
+      "detail": "The production positive-path inspection remains intentionally unexecuted without the protected administrator credential and controlled product identity; no approval is inferred from this technical record."
+    }
+  ],
+  "executed_by": "Codex automated verifier",
+  "executor_role": "Release verification agent",
+  "started_at": "2026-07-18T17:19:40Z",
+  "completed_at": "2026-07-18T17:19:45Z"
+}

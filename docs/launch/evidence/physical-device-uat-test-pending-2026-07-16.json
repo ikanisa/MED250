@@ -1,0 +1,92 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_PHYSICAL_UAT_PASSED",
+  "evidence_type": "test_record",
+  "status": "pending",
+  "title": "MED+250 controlled physical-device UAT test record",
+  "summary": "Owner-ready redacted test record for all 12 controlled production scenarios. The governed UAT ledger is structurally valid, but no scenario has been executed or approved and no unintended pharmacy may be contacted.",
+  "recorded_at": "2026-07-16T14:08:21+02:00",
+  "recorded_by": "MED+250 QA readiness review",
+  "recorded_role": "Release evidence preparer",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Preview fail-closed behavior",
+      "status": "pending",
+      "detail": "Verify ordering and indexing remain disabled in preview before the controlled production test path is intentionally enabled."
+    },
+    {
+      "name": "GPS denial recovery",
+      "status": "pending",
+      "detail": "Deny browser location and verify useful recovery guidance appears without dispatching an availability request."
+    },
+    {
+      "name": "GPS consent and bounded dispatch",
+      "status": "pending",
+      "detail": "Grant location and verify real-distance priority, national fallback labeling, eligibility controls and the maximum recipient boundary."
+    },
+    {
+      "name": "Prescription enforcement",
+      "status": "pending",
+      "detail": "Verify a prescription-classified product rejects a missing file and uses the private upload path without exposing content to unrelated recipients."
+    },
+    {
+      "name": "Recipient isolation",
+      "status": "pending",
+      "detail": "Verify only eligible recipient pharmacies receive the request and the approved unrelated-pharmacy test identity cannot read it."
+    },
+    {
+      "name": "WhatsApp OTP lifecycle",
+      "status": "pending",
+      "detail": "Verify one real approved pharmacy OTP succeeds once while wrong, expired and reused codes fail without recording the code."
+    },
+    {
+      "name": "Offer and substitute controls",
+      "status": "pending",
+      "detail": "Verify complete item responses, optional non-final price, fulfilment selection, compatible substitute acceptance and incompatible substitute rejection."
+    },
+    {
+      "name": "Contact privacy and pharmacy selection",
+      "status": "pending",
+      "detail": "Verify pharmacy contact remains private before selection and only the selected pharmacy's governed contact becomes available afterward."
+    },
+    {
+      "name": "Explicit WhatsApp and MoMo handoffs",
+      "status": "pending",
+      "detail": "Verify every external handoff requires explicit customer action and the marketplace makes no claim of payment custody."
+    },
+    {
+      "name": "Cancellation completion and expiry",
+      "status": "pending",
+      "detail": "Verify cancellation, selected-request completion, time-based expiry and closure notifications remove stale actionable requests."
+    },
+    {
+      "name": "Prescription access and retention lifecycle",
+      "status": "pending",
+      "detail": "Verify selected-pharmacy prescription access, unrelated access denial, short-lived links and approved cleanup boundaries through the lifecycle."
+    },
+    {
+      "name": "Privacy-safe health and logs",
+      "status": "pending",
+      "detail": "Verify aggregate operational health and Worker logs contain no prohibited customer, pharmacy, product, request, prescription or precise-location identifier."
+    }
+  ],
+  "uat_ledger_reference": "data/physical-device-uat.json",
+  "uat_ledger_sha256": "489330c2db1ec7400a459bacf216ac7b0bb719893ad8deaee588ed9d69d7ae11",
+  "scenario_count": 12,
+  "passed_scenarios": 0,
+  "pending_scenarios": 12,
+  "executed_by": null,
+  "executor_role": null,
+  "started_at": null,
+  "completed_at": null,
+  "completion_instructions": [
+    "Use only the approved opaque customer, pharmacy and unrelated-pharmacy test identities and confirm the intended pharmacy before any real message is sent.",
+    "Execute every scenario in data/physical-device-uat.json on approved physical devices and retain only redacted evidence references and useful notes.",
+    "Do not record phone numbers, OTPs, Auth identities, order identifiers, prescription contents, exact coordinates or provider secrets.",
+    "Set every ledger scenario to passed with evidence, executor and approval metadata, then run npm run uat:verify:live.",
+    "Update the recorded ledger digest, set passed_scenarios to 12 and pending_scenarios to 0, set every check to passed, add executor metadata and set status to complete.",
+    "Validate the completed test strictly and add it to the launch registry only with its exact SHA-256 digest."
+  ]
+}
