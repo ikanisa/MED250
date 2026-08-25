@@ -282,7 +282,7 @@ test("prepares an immutable Worker-D1 live config from the generated vinext arti
   assert.match(source, /routes: \[\{ pattern: "med-250\.com", custom_domain: true \}\]/);
   assert.match(source, /MED250_BACKEND_MODE: "worker-d1"/);
   assert.match(source, /d1_databases/);
-  assert.match(source, /migrations_dir: "db\/d1\/migrations"/);
+  assert.match(source, /migrations_dir: "\.\.\/\.\.\/db\/d1\/migrations"/);
   assert.match(source, /PRIVATE_MEDIA/);
   assert.match(source, /med250-whatsapp-dispatch-/);
   assert.match(source, /requiredWorkerSecretNames/);
