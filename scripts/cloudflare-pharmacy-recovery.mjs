@@ -12,7 +12,7 @@ const workRoot = join(root, "work");
 const wrangler = join(root, "node_modules", ".bin", "wrangler");
 const execFileAsync = promisify(execFile);
 
-const SCHEMA_VERSION = "med250.cloudflare-pharmacy-recovery.v1";
+const SCHEMA_VERSION = "med250.cloudflare-pharmacy-recovery.v2";
 const SOURCE_PATHS = Object.freeze({
   manifest: "data/imports/source-manifest.json",
   retail: "data/imports/rwanda-fda-retail-pharmacies-may-2026.csv",
@@ -23,6 +23,7 @@ const SOURCE_PATHS = Object.freeze({
   independent_contacts: "data/imports/google-pharmacy-contact-independent-verification.csv",
   government_gis: "data/imports/rwanda-government-pharmacy-gis-matched.csv",
   deep_contact_evidence: "supabase/migrations/20260717090739_import_deeply_verified_pharmacy_phone_contacts.sql",
+  delivery_quarantine: "data/imports/whatsapp-contact-delivery-quarantine.csv",
 });
 const TARGETS = Object.freeze({
   staging: { database_name: "med250-staging" },
@@ -39,13 +40,15 @@ const EXPECTED = Object.freeze({
   independent_exact_rows: 3,
   deep_exact_rows: 2,
   government_geocodes: 93,
+  delivery_quarantine_rows: 3,
   known_numbers: 309,
-  resolved_numbers: 283,
+  resolved_numbers: 280,
   ambiguous_numbers: 26,
+  retired_numbers: 3,
   contacts: 283,
-  login_enabled_contacts: 79,
+  login_enabled_contacts: 78,
   contact_pharmacies: 264,
-  dispatch_eligible_pharmacies: 36,
+  dispatch_eligible_pharmacies: 33,
 });
 const SHA256 = /^[a-f0-9]{64}$/;
 const RWANDA_MOBILE = /^2507[2389][0-9]{7}$/;
@@ -448,9 +451,30 @@ function preferredEvidence(entries) {
       || left.pharmacy_id.localeCompare(right.pharmacy_id));
 }
 
-function buildIdentityRows(evidenceByNumber, importedAt) {
+function deliveryQuarantines(rows) {
+  const quarantines = new Map();
+  for (const [index, row] of rows.entries()) {
+    const contactId = requiredText(row.contact_id, `Delivery quarantine row ${index + 2} contact_id`, 100);
+    if (!/^whatsapp-[a-f0-9]{32}$/.test(contactId)) {
+      throw new PharmacyRecoveryError("invalid_source", `Delivery quarantine row ${index + 2} has an invalid contact_id.`);
+    }
+    if (quarantines.has(contactId)) throw new PharmacyRecoveryError("duplicate_source", `Delivery quarantine contact ${contactId} is duplicated.`);
+    quarantines.set(contactId, {
+      contact_id: contactId,
+      pharmacy_id: requiredText(row.pharmacy_id, `Delivery quarantine row ${index + 2} pharmacy_id`, 100),
+      provider: requiredText(row.provider, `Delivery quarantine row ${index + 2} provider`, 100),
+      error_code: requiredText(row.error_code, `Delivery quarantine row ${index + 2} error_code`, 40),
+      observed_at: exactIso(row.observed_at, `Delivery quarantine row ${index + 2} observed_at`),
+      reason: requiredText(row.reason, `Delivery quarantine row ${index + 2} reason`, 500),
+    });
+  }
+  return quarantines;
+}
+
+function buildIdentityRows(evidenceByNumber, importedAt, quarantines) {
   const contacts = [];
   const knownNumbers = [];
+  const appliedQuarantines = new Set();
   for (const [e164, allEvidence] of [...evidenceByNumber].sort(([left], [right]) => left.localeCompare(right))) {
     const tier = Math.max(...allEvidence.map((entry) => entry.tier));
     const governingEvidence = preferredEvidence(allEvidence.filter((entry) => entry.tier === tier));
@@ -473,13 +497,19 @@ function buildIdentityRows(evidenceByNumber, importedAt) {
       })),
       subordinate_evidence_count: allEvidence.length - governingEvidence.length,
     };
+    const contactId = resolved ? `whatsapp-${sha256(`${pharmacyId}\u0000${e164}`).slice(0, 32)}` : null;
+    const quarantine = contactId ? quarantines.get(contactId) : null;
+    if (quarantine && quarantine.pharmacy_id !== pharmacyId) {
+      throw new PharmacyRecoveryError("invalid_source", `Delivery quarantine ${contactId} does not match its governed pharmacy.`);
+    }
+    if (quarantine) appliedQuarantines.add(contactId);
     knownNumbers.push({
       e164,
-      resolution_status: resolved ? "resolved" : "ambiguous",
-      pharmacy_id: pharmacyId,
+      resolution_status: quarantine ? "retired" : resolved ? "resolved" : "ambiguous",
+      pharmacy_id: quarantine ? null : pharmacyId,
       source: GOVERNED_NUMBER_SOURCE,
-      source_evidence: stableJson(evidenceSummary),
-      reviewed_at: resolved ? matching[0].observed_at : null,
+      source_evidence: stableJson(quarantine ? { ...evidenceSummary, delivery_quarantine: quarantine } : evidenceSummary),
+      reviewed_at: quarantine ? quarantine.observed_at : resolved ? matching[0].observed_at : null,
       created_at: importedAt,
       updated_at: importedAt,
     });
@@ -487,7 +517,7 @@ function buildIdentityRows(evidenceByNumber, importedAt) {
     const primaryEvidence = matching[0];
     const loginEnabled = matching.some((entry) => entry.login_authority);
     contacts.push({
-      id: `whatsapp-${sha256(`${pharmacyId}\u0000${e164}`).slice(0, 32)}`,
+      id: contactId,
       pharmacy_id: pharmacyId,
       channel: "whatsapp",
       e164,
@@ -497,22 +527,29 @@ function buildIdentityRows(evidenceByNumber, importedAt) {
       source_url: primaryEvidence.source_url,
       source_reference: primaryEvidence.source_reference,
       source_observed_at: primaryEvidence.observed_at,
-      login_enabled: loginEnabled ? 1 : 0,
-      dispatch_enabled: 1,
+      login_enabled: quarantine ? 0 : loginEnabled ? 1 : 0,
+      dispatch_enabled: quarantine ? 0 : 1,
       is_primary: 0,
-      active: 1,
+      active: quarantine ? 0 : 1,
       created_at: importedAt,
       updated_at: importedAt,
-      verified_by_label: loginEnabled ? "MED250 exact official-directory review" : "MED250 governed public-contact review",
-      verification_note: loginEnabled
+      verified_by_label: quarantine ? "MED250 production delivery verification"
+        : loginEnabled ? "MED250 exact official-directory review" : "MED250 governed public-contact review",
+      verification_note: quarantine
+        ? `Quarantined after ${quarantine.provider} error ${quarantine.error_code}; destination requires pharmacy re-verification.`
+        : loginEnabled
         ? "Exact official source mapping retained with pharmacy OTP/login and WhatsApp messaging authority."
         : "Verified Rwanda mobile retained for WhatsApp messaging; OTP/login remains disabled pending ownership verification.",
       derived_from_contact_id: null,
       _tier: tier,
     });
   }
+  const unapplied = [...quarantines.keys()].filter((contactId) => !appliedQuarantines.has(contactId));
+  if (unapplied.length) {
+    throw new PharmacyRecoveryError("invalid_source", `Delivery quarantine contacts are not present in governed evidence: ${unapplied.join(", ")}.`);
+  }
   const contactsByPharmacy = new Map();
-  for (const contact of contacts) {
+  for (const contact of contacts.filter((row) => row.active === 1)) {
     const list = contactsByPharmacy.get(contact.pharmacy_id) ?? [];
     list.push(contact);
     contactsByPharmacy.set(contact.pharmacy_id, list);
@@ -535,6 +572,7 @@ function exactCounts(pharmacies, contacts, knownNumbers) {
     known_numbers: knownNumbers.length,
     resolved_numbers: knownNumbers.filter((row) => row.resolution_status === "resolved").length,
     ambiguous_numbers: knownNumbers.filter((row) => row.resolution_status === "ambiguous").length,
+    retired_numbers: knownNumbers.filter((row) => row.resolution_status === "retired").length,
     contacts: contacts.length,
     login_enabled_contacts: contacts.filter((row) => row.login_enabled === 1).length,
     contact_pharmacies: new Set(contacts.map((row) => row.pharmacy_id)).size,
@@ -551,6 +589,7 @@ function validateCounts(counts) {
     known_numbers: EXPECTED.known_numbers,
     resolved_numbers: EXPECTED.resolved_numbers,
     ambiguous_numbers: EXPECTED.ambiguous_numbers,
+    retired_numbers: EXPECTED.retired_numbers,
     contacts: EXPECTED.contacts,
     login_enabled_contacts: EXPECTED.login_enabled_contacts,
     contact_pharmacies: EXPECTED.contact_pharmacies,
@@ -619,6 +658,7 @@ WHERE (SELECT count(*) FROM med250_pharmacies WHERE source_name IN (${officialNa
   AND (SELECT count(*) FROM med250_pharmacy_contacts WHERE source LIKE ${sqlLiteral(`${GOVERNED_CONTACT_PREFIX}%`)}) = ${bundle.counts.contacts}
   AND (SELECT count(*) FROM med250_known_pharmacy_numbers WHERE source = ${sqlLiteral(GOVERNED_NUMBER_SOURCE)}) = ${bundle.counts.known_numbers}
   AND (SELECT count(*) FROM med250_known_pharmacy_numbers WHERE source = ${sqlLiteral(GOVERNED_NUMBER_SOURCE)} AND resolution_status = 'ambiguous') = ${bundle.counts.ambiguous_numbers}
+  AND (SELECT count(*) FROM med250_known_pharmacy_numbers WHERE source = ${sqlLiteral(GOVERNED_NUMBER_SOURCE)} AND resolution_status = 'retired') = ${bundle.counts.retired_numbers}
   AND (SELECT count(*) FROM med250_pharmacies pharmacy
        WHERE pharmacy.source_name IN (${officialNames}) AND pharmacy.dispatch_enabled = 1
          AND pharmacy.marketplace_approved = 1 AND pharmacy.licence_status = 'current'
@@ -630,7 +670,8 @@ WHERE (SELECT count(*) FROM med250_pharmacies WHERE source_name IN (${officialNa
 }
 
 function bundleCore(bundle) {
-  const { bundle_sha256: _bundle, ...core } = bundle;
+  const { bundle_sha256, ...core } = bundle;
+  void bundle_sha256;
   return core;
 }
 
@@ -649,11 +690,12 @@ export async function buildPharmacyRecoveryBundle({ target, importedAt } = {}) {
   const retailRows = csvRows(inputs.retail, EXPECTED.retail_pharmacies, "Retail pharmacy register");
   const onlineRows = csvRows(inputs.online, EXPECTED.online_pharmacies, "Online pharmacy register");
   const gisRows = csvRows(inputs.government_gis, EXPECTED.government_geocodes, "Government GIS review");
+  const quarantineRows = csvRows(inputs.delivery_quarantine, EXPECTED.delivery_quarantine_rows, "WhatsApp delivery quarantine");
   const pharmacies = buildPharmacyRows(retailRows, onlineRows, gisRows, generatedAt, normalizedImportedAt);
   const pharmacyKeys = new Set(pharmacies.map((row) => row.registry_entry_key));
   const evidenceByNumber = buildNumberEvidence(inputs, pharmacyKeys);
-  const { contacts, knownNumbers } = buildIdentityRows(evidenceByNumber, normalizedImportedAt);
-  const contactPharmacies = new Set(contacts.map((row) => row.pharmacy_id));
+  const { contacts, knownNumbers } = buildIdentityRows(evidenceByNumber, normalizedImportedAt, deliveryQuarantines(quarantineRows));
+  const contactPharmacies = new Set(contacts.filter((row) => row.active === 1 && row.dispatch_enabled === 1).map((row) => row.pharmacy_id));
   for (const pharmacy of pharmacies) {
     pharmacy.dispatch_enabled = pharmacy.licence_status === "current"
       && pharmacy.marketplace_approved === 1
@@ -667,13 +709,14 @@ export async function buildPharmacyRecoveryBundle({ target, importedAt } = {}) {
   const inputFiles = files.map(({ path, byte_count, sha256: digest }) => ({ path, byte_count, sha256: digest }));
   const rowSetSha = canonicalHash({ pharmacies, contacts, known_numbers: knownNumbers });
   const authorityPolicy = {
-    version: "2026-08-23",
+    version: "2026-08-24",
     exact_match_tier: 300,
     public_mobile_tier: 200,
     rule: "Use the highest evidence tier. Resolve only when every highest-tier record identifies one pharmacy; otherwise classify as pharmacy and quarantine login/dispatch.",
     login_rule: "Only exact FDA roster and exact MMI government-directory matches grant retained OTP login authority.",
     messaging_rule: "Every resolved verified Rwanda mobile is a WhatsApp messaging contact; phone-derived contacts never gain OTP authority.",
     dispatch_rule: "Current, marketplace-approved registry row plus verified government coordinates plus resolved verified WhatsApp contact.",
+    delivery_quarantine_rule: "A provider-confirmed invalid or restricted WhatsApp destination is inactive for dispatch and login and its governed number is retired until pharmacy re-verification.",
   };
   const sourceSnapshot = canonicalHash({ schema_version: SCHEMA_VERSION, input_files: inputFiles, row_set_sha256: rowSetSha, counts, authority_policy: authorityPolicy });
   const initial = {

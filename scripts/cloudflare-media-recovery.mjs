@@ -117,7 +117,8 @@ function sqlNumber(value) {
 }
 
 function manifestCore(manifest) {
-  const { snapshot_sha256: _snapshot, ...core } = manifest;
+  const { snapshot_sha256, ...core } = manifest;
+  void snapshot_sha256;
   return core;
 }
 
@@ -330,7 +331,11 @@ export async function buildMediaRecoveryBundle(manifestInput, { target, manifest
   if (!objects.length) throw new MediaRecoveryError("no_exact_galleries", "No complete exact-byte galleries are recoverable.");
   const galleryCount = new Set(objects.map((object) => object.product_id)).size;
   const byteCount = objects.reduce((sum, object) => sum + object.byte_count, 0);
-  const portableObjects = objects.map(({ absolute_path: _absolute, ...object }) => object);
+  const portableObjects = objects.map((object) => {
+    const portable = { ...object };
+    delete portable.absolute_path;
+    return portable;
+  });
   const importSnapshotSha256 = canonicalHash({ target, objects: portableObjects });
   const generatedAt = new Date().toISOString();
   const receiptId = `media-recovery-${target}-${importSnapshotSha256.slice(0, 24)}`;

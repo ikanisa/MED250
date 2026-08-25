@@ -19,94 +19,28 @@ catalogue, orders, offers, pharmacy workspace/governance, private prescription
 access, image-only WhatsApp intake, saved locations, deterministic nearest-ten
 dispatch, retries, delivery callbacks and audit state.
 
-Supabase CLI must not be used. Source recovery is permitted only through the
-authenticated Supabase web dashboard in Codex's browser view. CSV exports must
-be downloaded to the git-ignored `work/` directory, hashed with
-`npm run data:dashboard-recovery:manifest`, and converted into a deterministic
-D1 plan with `npm run data:dashboard-recovery:build` before any approved staging
-import. The preflight and post-import count receipts are verified separately by
-`data:dashboard-recovery:verify-preflight` and
-`data:dashboard-recovery:verify-readback`.
-The current Codex browser session is authenticated to the KIRA organization but
-does not have access to MED250 project `uskfnszcdqpcfrhjxitl`; no missing source
-data has been silently accepted.
+Supabase CLI must not be used. Historical source recovery is permitted only
+through an authenticated dashboard export into the git-ignored `work/`
+directory. Every export must be hashed, converted to a deterministic D1 import,
+and reconciled by aggregate preflight and post-import receipts. Supabase is not
+a runtime, deployment target, messaging endpoint, or production authority.
 
-Provider status was rechecked live on 2026-08-23. Meta WhatsApp Manager confirms
-the requested Ikanisa Service Center sender and Phone Number ID `900256399838407`
-inside WABA `1188521970082273`; the sender is `Connected`, but its display name
-is still `In Review`, the last-30-day insights show zero sent, delivered or
-received messages. The authenticated Twilio account inventory contains six
-MED250 templates, all still at WhatsApp approval status `Received`. The submitted
-OTP, saved-location choice and client-image pharmacy card are production-scoped;
-the image card points to `med-250.com`. One restricted API key named
-`MED250 WhatsApp Production v2` exists with only `Messages Create` permission,
-but its one-time secret is not recoverable from the console and is not installed
-in Cloudflare staging. Twilio confirms sender SID
-`XE0c3de00ff6ecefe80924ee9040294c82` is `Online`, but both its inbound webhook
-and sender-level status callback still point to the retired Supabase function.
-They must not be redirected until the exact Cloudflare endpoint, secrets and
-rollback window are verified. Cloudflare staging currently contains only the
-five internal MED250/location-link secrets; a new least-privilege Twilio runtime
-key, the Account Auth Token for webhook validation and media, plus Google Maps
-and Turnstile server secrets are not installed. Provider approval and controlled
-send/reply proof therefore remain open.
+Production has one infrastructure target: the `med250-marketplace-gikundiro`
+Cloudflare Worker on `med-250.com`, its `med250-production` D1 database, private
+production R2 bucket, and production dispatch Queue/DLQ. The generated release
+configuration rejects non-production targets, non-Cloudflare backends, Meta
+runtime credentials, and release revisions that are not exact Git commit SHAs.
 
-The retained source pack can independently seed 769 licensed pharmacies, 309
-known pharmacy numbers and 36 dispatch-eligible pharmacies with verified
-government coordinates. That source pack is now checksum-imported and
-independently readback-verified in staging D1 under receipt
-`pharmacy-registry-5c44bf4043327d7af9bfd2b5-staging`; production is untouched.
-The governed bundle SHA-256 is
-`88ae5460b3d1f77ed8632df61a46ae2bfab09736a1296536a7306b5d5c37da30`.
-Twenty-six numbers remain ambiguous after exact FDA, MMI and
-independently corroborated matches take precedence over broader public-mobile
-evidence; they are still classified as pharmacy numbers but quarantined from
-branch login and dispatch until their exact assignment is reviewed. The 283
-resolved messaging contacts include 79 exact official-directory contacts that
-retain pharmacy OTP-login authority. Every other valid WhatsApp number is a
-client. Source-data preparation is credential-free and the checksum-bound D1
-plan retains separate staging and production approval gates. Aggregate staging
-readback reports zero classification, ambiguity-contact or dispatch-eligibility
-errors, and confirms that ten eligible recipients are available for a bounded
-nearest-ten selection. The separate
-catalogue recovery is complete in staging: 4,680 retained
-rows were checksum-imported, including 4,657 active orderable products and 21
-visible but non-orderable grace-period medicines.
+The Worker classifies every known, active, verified pharmacy WhatsApp number as
+a pharmacy and every other valid WhatsApp number as a client. Ambiguous or
+provider-rejected pharmacy contacts stay quarantined from login and dispatch.
+Catalogue, registry, and media recovery remain checksum-bound operator tasks;
+no source row or media object is promoted merely because it exists in a legacy
+export.
 
-Retained catalogue-media recovery is also provider-read-only. Run
-`npm run media:inventory-recovery` for the hash-only plan; a detailed manifest
-may be written only below git-ignored `work/`. The current inventory finds
-3,690 complete source-cached galleries (19,117 images), but only 2,108 processed
-objects remain byte-exact. Source-only images must be rebuilt as new governed
-objects with new hashes before R2 publication; they are not silently treated
-as the historical published bytes. `npm run media:recovery:build` admits only
-the one complete three-image gallery whose every processed object is byte-exact.
-That checksum-bound bundle is applied and independently verified in staging:
-three private R2 objects totaling 345,190 bytes are bound to immutable D1 receipt
-`media-recovery-staging-3efce88ddbf5bb6342c5c508`. The confirmation-gated
-`npm run media:recovery:apply` verifies exact SHA-256 and byte-count readback
-before writing and verifying the receipt.
-
-The four accountable operator workflows are implemented locally through
-private bearer-protected Worker routes backed by the same D1 binding. D1
-migration `0003_operations_governance.sql` adds optimistic-locking and
-append-only review evidence for pharmacy geocodes, pharmacy contact changes,
-catalogue publication and product descriptions. The `ops:geocode`,
-`ops:contacts`, `ops:marketplace-products` and `ops:product-descriptions`
-commands remain gated. The independent Worker operator secret and isolated
-Cloudflare staging deployment exist. Pharmacy source rows and
-catalogue rows are present in staging, and the first governed media gallery is
-live-verified. Provider credentials/template approval and physical WhatsApp UAT
-evidence are still absent.
-
-The deployment workflow now has three explicit targets: legacy protected
-preview, Worker-D1 staging, and production. A production run must first
-deploy the same Git commit to the isolated staging Worker, pass the private
-aggregate health probe, verify every public route and revision header, and
-record a body-free staging evidence receipt. Staging keeps ordering enabled for
-UAT but forces private crawler policy, its own R2/Queue/DLQ resources, and its
-own D1 database ID. Production remains separately protected
-by its environment approval and all source/provider/physical-UAT gates.
+Production activation still separates technical deployment from Twilio
+template approval and consented physical-device UAT. The repository never marks
+those external gates complete from a local build or a Cloudflare deployment.
 
 Audit remediation is tracked in [`docs/MED250_AUDIT_IMPLEMENTATION_GOALS.md`](docs/MED250_AUDIT_IMPLEMENTATION_GOALS.md) and the machine-validated implementation register. The terminal-state contract requires every acceptance condition to have source-bound, hash-verified or independently verified evidence plus named accountable approval. `npm run audit:closure:status` reconciles the audit register with browser, launch, physical-device, localization, and product-content ledgers and groups all open work by accountable owner. `npm run audit:closure:verify` remains fail-closed until every finding, strategic decision, protected launch gate, live receipt, privacy-safe capture, physical-device scenario, translation, content review, and approval is complete.
 
@@ -126,8 +60,8 @@ Product cards use neutral dosage-form icons unless an image has verified provena
 ## Marketplace safeguards
 
 - Live catalogue browsing uses the paginated same-origin Worker/D1 catalogue API instead of downloading every product into the customer browser. It ranks exact names and ingredients, common-use English/French/Kinyarwanda aliases, and close spelling matches; category, prescription, dosage-form, requestability, central indicative-price filtering, sorting, and stable result counts are applied server-side. The in-browser scorer remains only as the governed preview/offline fallback. Public catalogue routes expose no pharmacy identity or private order data.
-- The Cloudflare Worker creates anonymous client sessions and uses six-digit Twilio WhatsApp authentication templates for verified clients and pharmacy staff. The portal has no email sign-up or claim path. A pharmacy number must already resolve to an approved, active pharmacy contact with explicit login authority. Successful OTP exchange creates a hashed, revocable D1 session carried in a `Secure`, `HttpOnly`, `SameSite=Strict` cookie with a separate CSRF control and bounded idle and absolute expiry.
-- OTPs expire after five minutes, are stored only as a purpose-bound salted hash plus an encrypted delivery payload, allow at most five attempts, invalidate older codes, and are rate-limited by phone, request source, and global volume. The same-origin Worker validates the browser origin and request controls before writing a challenge, queuing WhatsApp delivery, consuming a code, or creating a session. WhatsApp delivery reuses the audience-specific approved Twilio authentication template and server-only API credentials.
+- The Cloudflare Worker creates anonymous client sessions and uses the approved six-digit Meta WhatsApp authentication template for verified clients and pharmacy staff. The portal has no email sign-up or claim path. A pharmacy number must already resolve to an approved, active pharmacy contact with explicit login authority. Successful OTP exchange creates a hashed, revocable D1 session carried in a `Secure`, `HttpOnly`, `SameSite=Strict` cookie with a separate CSRF control and bounded idle and absolute expiry.
+- OTPs expire after five minutes, are stored only as a purpose-bound salted hash plus an encrypted delivery payload, allow at most five attempts, invalidate older codes, and are rate-limited by phone, request source, and global volume. The same-origin Worker validates the browser origin and request controls before writing a challenge, queuing WhatsApp delivery, consuming a code, or creating a session. WhatsApp delivery uses `med250_whatsapp_otp_v1` through server-only Twilio credentials.
 - Atomic, idempotent order creation: a stable customer request UUID ensures retries return the same committed order while draft, line items, and location-based dispatch commit together. A database constraint permits only one active request per customer.
 - The Worker computes deterministic Haversine distance from approved government coordinates, orders by distance with a pharmacy-ID tie-break, and caps each new request at the nearest 10 eligible pharmacies.
 - Dispatch requires current licence and marketplace approval, verified government coordinates, and a resolved verified WhatsApp messaging contact. Pharmacy login remains a separate, narrower authority granted only to exact official-directory contacts; approval is not displayed as a customer-facing badge.
@@ -140,60 +74,21 @@ Product cards use neutral dosage-form icons unless an image has verified provena
 - Privacy-safe operations monitoring is implemented at two layers. The same-origin `/api/telemetry` route accepts only allow-listed events, replaces raw counts and timings with buckets, rejects oversized payloads, and writes no product, request, pharmacy, phone, prescription or location identifiers. The replacement `/api/internal/health` route requires an independent server-only bearer secret, verifies it in constant time, opens one request-scoped D1 client, and returns only the fixed aggregate D1 readiness contract established by migrations `0003_operations_governance.sql` through `0008_dashboard_recovery_reconciliation.sql`. It reports migration, pharmacy, dispatch, inbound, order, private-media retention and recovery counts without identifiers, phone numbers, coordinates or health content. The D1 schema and Worker media-retention handler lease expired WhatsApp and web-prescription media, verify R2 deletion, then revoke grants and record the database receipt with bounded retries.
 - No platform payment custody. A verified MoMo merchant code may be revealed after selection; automated payment needs a licensed PSP, signed callbacks, idempotency, receipts, cancellation, and refund handling.
 
-## Twilio WhatsApp order handoff
+## Twilio WhatsApp handoff
 
-The production target is the Ikanisa Service Center WhatsApp sender `+1 662-222-0600` (Meta phone-number ID `900256399838407`) under the configured production Twilio account. A customer must verify and explicitly consent before submitting. The database then assigns no more than 10 eligible pharmacies and writes one private durable outbox row per assigned verified WhatsApp responder. The pharmacy utility card is generated from the committed order and central catalogue: request reference, medicine names, strengths and pack sizes, per-line quantities, total units, first available catalogue image, distance/coverage, fulfilment preference, and the verified customer WhatsApp number.
+The production sender is `+1 662-222-0600`. Twilio Programmable Messaging is the only Worker messaging transport; the runtime does not require or read a Meta access token, app secret or webhook verification token. Cloudflare Workers, D1, private R2 and Queues are the complete MED+250 application backend and database stack.
 
-The card offers `Can fulfil` and `Cannot fulfil` quick replies. The public Twilio webhook accepts only signature-valid callbacks for the configured account and sender. It verifies that the replying number is the login-enabled WhatsApp contact of that exact assigned pharmacy. A `Can fulfil` reply creates the same complete, price-optional offer shown in the web portal; a web submission enters the same offer tables and produces the same customer WhatsApp update. Message creation, delivery, read, failure, and inbound reply IDs are idempotently recorded. Callback states cannot regress when Twilio delivers them out of order.
+Every signed inbound number has one server-derived role. A number found in an approved, active and verified `dawanear_pharmacy_contacts` WhatsApp entry is a `pharmacy`; every other valid WhatsApp number is recorded as a `client`. The Worker recalculates this role from D1 for every inbound event, so a sender cannot claim pharmacy authority.
 
-The dispatch Queue and its dead-letter Queue are both consumed by the Worker. Exhausted messages transition the matching D1 outbox row to `dead_letter`, revoke its private-media grants and append one idempotent audit event. Any future reset to `retry` must run through a protected Cloudflare operator route with a named operator, substantive reason, a staging approval gate and a second production-only gate. The scheduled outbox sweep then creates a new Queue message instead of reusing the consumed DLQ delivery.
+A client sends one JPG, PNG or WebP medicine or prescription image. The Worker streams the Twilio media object into private R2 and stores only governed metadata in D1. No medicine list, catalogue, OCR diagnosis or product inference is presented in WhatsApp. A first-time client receives a two-line instruction to use WhatsApp's attachment control and send the current location. A returning client receives `Use saved` and `Share new` quick replies; `Share new` sends the same short manual WhatsApp-location instruction.
 
-Configure the server-only variables shown in `.env.example`, deploy the Cloudflare Worker, and register its exact `/api/twilio/whatsapp/inbound` and `/api/twilio/whatsapp/status` HTTPS routes with Twilio. Review the Content API definitions without changing Twilio:
+WhatsApp does not expose a supported button deep link that launches its native location composer. The primary flow therefore uses a native WhatsApp location message, which Twilio supplies as `Latitude` and `Longitude`. As a compatibility fallback, a client may paste a trusted Google Maps share URL. Both paths validate Rwanda bounds, persist the current client location in D1, and then use the same dispatch transaction.
 
-```sh
-npm run twilio:whatsapp:templates
-```
+After location confirmation, D1 selects at most the nearest 10 eligible pharmacies using verified coordinates and WhatsApp contacts. Each assigned pharmacy receives an image-header utility template containing the request reference, image position, client WhatsApp number and approximate distance, with `Can fulfil` and `Cannot fulfil` quick replies. Web catalogue orders use a separate image-header utility template containing medicine names, quantities, total units, client number, distance and fulfilment preference. Reply actions are accepted only from the exact verified pharmacy assigned to that request; the visible client number lets the pharmacy respond directly in WhatsApp.
 
-This produces a deterministic SHA-256 plan for the five versioned staging
-templates and the exact, separate `apply`, `submit`, and `verify` arguments.
-Every staging friendly name begins with `med250_staging_`; production keeps the
-canonical `med250_` names. That boundary prevents a staging Worker URL from
-colliding with or replacing an already submitted production template.
-It does not authenticate to Twilio or change provider state. With restricted
-Twilio API-key credentials in the operator process, `apply` first paginates the
-existing Content inventory, verifies the configured production account,
-sender `whatsapp:+16622220600`, WABA `1188521970082273`, `ONLINE` status, and
-exact template bodies. It then creates missing drafts only; body drift or
-duplicate names fail closed. Both the staging confirmation string and the
-reviewed plan SHA are required.
+The canonical provider endpoints are `/api/twilio/whatsapp/inbound` and `/api/twilio/whatsapp/status`. Both validate Twilio signatures against their exact canonical URLs and configured account before accepting any data. Private media is exposed only through hashed, expiring and replay-limited per-delivery grants. D1 outbox rows, Twilio message SIDs and status events are idempotent and cannot regress on out-of-order callbacks.
 
-Approval submission is a separate confirmed `submit` operation. It never
-creates templates, skips `received`, `pending`, and `approved` templates, and
-refuses to resubmit rejected, paused, disabled, drifted, or ambiguous content.
-The read-only check is:
-
-```sh
-npm run twilio:whatsapp:verify
-```
-
-Verification succeeds only when the exact sender is online, its WABA matches,
-all five templates match their checksum-bound definitions, and every WhatsApp
-approval status is `approved`. Apply, submit, and verify can emit a Cloudflare
-environment manifest containing only non-secret Content SIDs and public target
-identifiers; API keys, API secrets, Auth Tokens, and authorization headers are
-never printed. Template creation, Meta approval, sender migration, Cloudflare
-secret installation, and a real-device end-to-end message remain distinct
-activation gates.
-
-### Image-only WhatsApp client intake
-
-The signed Twilio webhook defines two mutually exclusive WhatsApp identities. A sender whose number is a source/admin-verified `dawanear_pharmacy_contacts` WhatsApp entry is a `pharmacy`; every other valid inbound WhatsApp number is recorded as a `client`. The role is recalculated from the canonical contact register on every inbound message, so a sender cannot self-assert pharmacy access.
-
-A client sends one JPG, PNG, or WebP image of a medicine or prescription directly to `+1 662-222-0600`. No medicine list, catalogue selection, OCR diagnosis, or product inference is created. In the Cloudflare/D1 target, the signed Worker streams the Twilio media into private R2 and D1 retains only its governed key, digest and audit metadata. First-time clients receive a signed `Share location` action that opens the MED+250 map in WhatsApp's in-app webview; WhatsApp's native current-location message is also accepted. Returning clients receive `Use saved location` and `Share new location` quick replies. The disclosure explains that the location is retained and the client image plus WhatsApp number will be shared with no more than ten assigned verified pharmacies.
-
-Once location is confirmed, the database selects the same eligible nearest-pharmacy population used by the web marketplace, caps assignment at 10, and creates one private delivery for the client image and every assigned pharmacy. The pharmacy card contains only the client-supplied image, request reference, distance/coverage and client WhatsApp number. Its media URL uses a random, hashed, expiring and replay-limited R2 grant bound to one outbox delivery. Pharmacy quick replies are accepted only from the exact verified assigned pharmacy number, while the displayed client number lets the pharmacy reply directly in WhatsApp.
-
-The replacement Worker routes are `/api/twilio/whatsapp/inbound`, `/api/twilio/whatsapp/status`, `/whatsapp/location`, `/api/whatsapp/location`, and `/whatsapp-client-media/:grant.png`; Queue and scheduled handlers drain the transactional outbox. Configure D1 plus the server-only Worker secrets in `.env.example`. Submit `med250_staging_client_location_capture_v2` against the staging Worker first; production uses the separate `med250_client_location_capture_v2` template pointing to `med-250.com`. Complete a consented physical-phone image → location → ten-pharmacy dispatch test before calling this path live. The Worker implementation is locally complete, but the cutover flags remain closed until D1/R2, migration, provider approval and physical-phone gates pass.
+Production configuration uses Twilio Content SIDs for pharmacy images/orders, OTPs, saved/new location choices, the manual location prompt, and delivery-based client confirmation. A confirmation is queued only after every pharmacy delivery attempt is terminal and at least one request was actually delivered; its count is the number delivered, never the number merely selected. Provider activation requires exact Twilio sender ownership, Cloudflare-only secret installation, active content resources, exclusive webhook routing, and a consented physical-phone image → native location → nearest-pharmacy dispatch → pharmacy reply test. Local implementation, template state, deployment, and physical delivery remain separate evidence gates.
 
 The web migration is implemented behind closed cutover flags. The
 same-origin Worker exposes `/api/catalogue`, `/api/catalogue/taxonomy`,
@@ -213,8 +108,8 @@ Preview and production share this Cloudflare-only backend contract. Release
 validation rejects every non-`worker-d1` backend slice, any Supabase runtime
 origin or credential, and any Supabase origin in the browser CSP. This local
 implementation is not evidence that Cloudflare resources or the WhatsApp
-provider flow are live: source reconciliation, remote infrastructure, staging
-rehearsals and controlled production cutover remain mandatory.
+provider flow are live: source reconciliation, remote infrastructure readback,
+and controlled production proof remain mandatory.
 
 ## Browser-dashboard recovery into D1
 
@@ -233,19 +128,19 @@ npm run data:dashboard-recovery:manifest -- \
 
 npm run data:dashboard-recovery:build -- \
   --manifest work/dashboard-recovery/source/manifest.json \
-  --target staging \
+  --target production \
   --imported-at 2026-08-23T12:30:00Z \
-  --output-dir work/dashboard-recovery/staging
+  --output-dir work/dashboard-recovery/production
 ```
 
-Run `preflight-readback.sql` against the new empty staging D1 database and
+Run `preflight-readback.sql` against the governed production D1 recovery target and
 verify its JSON result with `data:dashboard-recovery:verify-preflight`. Only
 then apply `recovery-import.sql`. Run `postimport-readback.sql`, verify it with
 `data:dashboard-recovery:verify-readback`, and apply the generated immutable
 verification receipt. Product-image rows remain unapproved until their bytes
 are independently recovered into private R2 and reconciled by SHA-256.
 
-The number is currently identified in Meta WhatsApp Manager. Moving an existing direct Meta sender to Twilio is a provider migration, not a code deployment: confirm the approved Meta Business/WABA and billing prerequisites, plan an interruption window, disable Meta two-step verification only at the controlled registration step, register the same business portfolio through Twilio, re-submit duplicated templates, then prove inbound, outbound, media, quick reply, status callback, and web-portal synchronization on physical phones before marking `MED250_GATE_WHATSAPP_READY=confirmed`.
+The production sender `+1 662-222-0600` is transported exclusively through Twilio Programmable Messaging. The Worker does not use a Meta access token, app secret, direct Cloud API endpoint, or Meta webhook verification secret.
 
 ## Historical Supabase activation sequence (recovery reference only)
 
@@ -351,7 +246,7 @@ The repository also contains `.github/workflows/quality.yml` and `.github/workfl
 - `preview` uses the protected `med250-preview` GitHub environment, deploys only the preview Worker, then verifies routes, headers, HTTPS, `robots.txt`, sitemap suppression, and `X-Robots-Tag`.
 - `production` requires the exact `DEPLOY MED250 LIVE` confirmation plus approval of the `med250-production` GitHub environment. It runs every attestation and Worker-D1 artifact check, deploys the production Worker, then requires the private same-origin operational-health probe and public deployment verifier to pass.
 
-Configure `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as secrets in both GitHub environments. Production additionally needs `MED250_HEALTH_PROBE_TOKEN` as a GitHub environment secret and the identical value installed independently as a Cloudflare Worker secret; it must not receive a Supabase key. Provision distinct staging and production D1 databases before enabling live traffic, then configure their `MED250_D1_DATABASE_ID` values plus all launch and Worker-D1 cutover gates as protected environment variables. Keep the Cloudflare token scoped to the single deployment account and relevant zone. Cloudflare documents the required CI credentials and official Wrangler action at https://developers.cloudflare.com/workers/ci-cd/external-cicd/github-actions/ and its named-environment behavior at https://developers.cloudflare.com/workers/wrangler/environments/.
+Configure `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` only in the protected production environment. Production additionally needs `MED250_HEALTH_PROBE_TOKEN` in the private verifier and the identical value installed independently as a Cloudflare Worker secret; it must not receive a Supabase key. Configure the single production D1 ID plus all launch and Worker-D1 cutover gates as protected environment variables. Keep the Cloudflare token scoped to the MED+250 Worker and relevant zone. Cloudflare documents the required CI credentials at https://developers.cloudflare.com/workers/ci-cd/external-cicd/github-actions/.
 
 To publish manually after the data, privacy, regulatory, and operational gates are complete:
 
@@ -362,7 +257,7 @@ npm run deploy:preview
 npm run deploy:live
 ```
 
-Set `NEXT_PUBLIC_SITE_URL` to the final HTTPS origin and keep every production backend slice at `worker-d1`; production must not receive a public Supabase URL or publishable key. The customer address picker also needs a dedicated `NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY` with Maps JavaScript API and Geocoding API enabled and HTTP-referrer restrictions limited to the MED+250 origins. This browser key is intentionally public; never reuse the server-only `GOOGLE_MAPS_API_KEY` used for pharmacy geocoding. Live public-contact readiness requires approved owner channels in `NEXT_PUBLIC_MED250_CONTACT_EMAIL`, `NEXT_PUBLIC_MED250_SUPPORT_WHATSAPP`, and `NEXT_PUBLIC_MED250_MEETING_URL`; the storefront renders them only when configured, and release validation rejects unsafe email, WhatsApp or non-HTTPS booking values. Keep Twilio WhatsApp, health-probe, server Google Maps, admin-token, and encryption credentials only in protected server secret stores. `npm run deployment:verify -- --url <https-url> --mode preview|live` can be rerun independently after any deployment. A successful dry run proves the Worker bundle and declared bindings are valid; it does not prove that the currently missing remote D1 database, runtime authentication, order dispatch, production DNS or Core Web Vitals are ready. Wrangler is currently authenticated to the intended account, but the local OAuth session has broad account-wide write scopes. Replace it with a least-privilege MED+250 deploy credential and retain a redacted account-verification record before confirming the Cloudflare gate.
+Set `NEXT_PUBLIC_SITE_URL` to the final HTTPS origin and keep every production backend slice at `worker-d1`; production must not receive a public Supabase URL or publishable key. The customer address picker also needs a dedicated `NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY` with Maps JavaScript API and Geocoding API enabled and HTTP-referrer restrictions limited to the MED+250 origins. This browser key is intentionally public; never reuse the server-only `GOOGLE_MAPS_API_KEY` used for pharmacy geocoding. Live public-contact readiness requires approved owner channels in `NEXT_PUBLIC_MED250_CONTACT_EMAIL`, `NEXT_PUBLIC_MED250_SUPPORT_WHATSAPP`, and `NEXT_PUBLIC_MED250_MEETING_URL`; the storefront renders them only when configured, and release validation rejects unsafe values. Keep health-probe, server Google Maps, Twilio, admin-token, and encryption credentials only in protected server secret stores. `npm run deployment:verify -- --url <https-url> --mode preview|live` can be rerun independently after any deployment. A successful dry run proves the Worker bundle and declared bindings are valid; it does not prove provider configuration, remote runtime authentication, order dispatch, production DNS, or physical-phone messaging.
 
 The active custom domain is `med-250.com`, routed directly to the production-named Cloudflare Worker. DNS and TLS reachability are necessary but do not by themselves confirm the launch gate; the strict deployment verifier, account evidence, backend health, controlled UAT and named infrastructure approval must all pass before the current public release can be formally approved or redeployed through the protected production workflow.
 

@@ -1,38 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { locationPageResponse } from "../worker/backend/location-page.ts";
-import {
-  createOpaqueToken,
-  sha256Hex,
-  signClientLocationToken,
-  verifyClientLocationToken,
-} from "../worker/backend/secure-token.ts";
-
-const actorId = "00000000-0000-4000-8000-000000000101";
-const requestId = "00000000-0000-4000-8000-000000000102";
-const secret = "test-only-location-link-secret-with-at-least-32-bytes";
-
-test("signs short-lived audience-specific location claims and rejects tampering or expiry", async () => {
-  const token = await signClientLocationToken({ actorId, requestId }, secret, 10_000);
-  const verified = await verifyClientLocationToken(token, secret, 10_001);
-  assert.equal(verified?.actorId, actorId);
-  assert.equal(verified?.requestId, requestId);
-  assert.equal(verified?.expiresAt, 10_900);
-  const [claims, signature] = token.split(".");
-  const signatureReplacement = signature.startsWith("A") ? "B" : "A";
-  assert.equal(await verifyClientLocationToken(`${claims}.${signatureReplacement}${signature.slice(1)}`, secret, 10_001), null);
-
-  // A 32-byte signature has four possible final base64url characters for the
-  // same decoded bytes unless unused bits are required to be zero. Exercise
-  // that exact malleability case deterministically.
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
-  const finalIndex = alphabet.indexOf(signature.at(-1));
-  assert.equal(finalIndex % 4, 0);
-  const nonCanonicalSignature = `${signature.slice(0, -1)}${alphabet[finalIndex + 1]}`;
-  assert.equal(await verifyClientLocationToken(`${claims}.${nonCanonicalSignature}`, secret, 10_001), null);
-  assert.equal(await verifyClientLocationToken(token, secret, 10_901), null);
-});
+import { resolveGoogleMapsLocation } from "../worker/backend/google-maps-location.ts";
+import { createOpaqueToken, sha256Hex } from "../worker/backend/secure-token.ts";
 
 test("creates non-predictable 256-bit media grants without embedding database identifiers", async () => {
   const first = createOpaqueToken();
@@ -43,51 +13,56 @@ test("creates non-predictable 256-bit media grants without embedding database id
   assert.doesNotMatch(first, /00000000/);
 });
 
-test("renders a no-store consent map and accepts only token-bound Rwanda coordinates", async () => {
-  const token = await signClientLocationToken({ actorId, requestId }, secret);
-  const getResponse = await locationPageResponse(
-    new Request(`https://med-250.com/whatsapp/location?token=${token}`),
-    null,
-    secret,
+test("extracts a Rwanda pin from an official Google Maps share URL", async () => {
+  const resolved = await resolveGoogleMapsLocation(
+    "My delivery pin: https://www.google.com/maps/place/Kigali/@-1.9440727,30.0618851,17z",
   );
-  assert.equal(getResponse?.status, 200);
-  assert.equal(getResponse?.headers.get("cache-control"), "private, no-store");
-  const html = await getResponse.text();
-  assert.match(html, /Confirm and dispatch request/);
-  assert.match(html, /up to 10 verified nearby pharmacies/);
-  assert.match(html, /openstreetmap\.org\/export\/embed/);
+  assert.equal(resolved.matched, true);
+  assert.deepEqual(resolved.location && {
+    latitude: resolved.location.latitude,
+    longitude: resolved.location.longitude,
+  }, { latitude: -1.9440727, longitude: 30.0618851 });
+});
 
-  let saved = null;
-  const repository = {
-    async saveLocation(input) {
-      saved = input;
-      return { locationId: "00000000-0000-4000-8000-000000000103", recipientCount: 7 };
+test("follows only allow-listed Google Maps redirects and does not read response bodies", async () => {
+  const calls = [];
+  let cancelled = false;
+  const resolved = await resolveGoogleMapsLocation(
+    "https://maps.app.goo.gl/med250-test",
+    async (url, init) => {
+      calls.push({ url: String(url), redirect: init.redirect });
+      return new Response(new ReadableStream({
+        cancel() { cancelled = true; },
+      }), {
+        status: 302,
+        headers: { location: "https://www.google.com/maps/place/Delivery/@-1.9536,30.0606,18z" },
+      });
     },
-  };
-  const postResponse = await locationPageResponse(
-    new Request("https://med-250.com/api/whatsapp/location", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ token, latitude: -1.95, longitude: 30.06, accuracyM: 12 }),
-    }),
-    repository,
-    secret,
   );
-  assert.equal(postResponse?.status, 200);
-  assert.deepEqual(await postResponse.json(), { saved: true, recipientCount: 7 });
-  assert.equal(saved.actorId, actorId);
-  assert.equal(saved.requestId, requestId);
-  assert.equal(saved.source, "secure_webview");
-  assert.equal(saved.captureKeyHex.length, 64);
+  assert.equal(resolved.matched, true);
+  assert.equal(resolved.location?.latitude, -1.9536);
+  assert.equal(resolved.location?.longitude, 30.0606);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].redirect, "manual");
+  assert.equal(cancelled, true);
+});
 
-  const outside = await locationPageResponse(
-    new Request("https://med-250.com/api/whatsapp/location", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ token, latitude: 40, longitude: 30.06, accuracyM: 12 }),
-    }),
-    repository,
-    secret,
+test("rejects non-Google URLs, off-platform redirects and coordinates outside Rwanda", async () => {
+  assert.deepEqual(
+    await resolveGoogleMapsLocation("https://example.com/maps/@-1.95,30.06,17z"),
+    { matched: false, location: null },
   );
-  assert.equal(outside?.status, 400);
+  assert.deepEqual(
+    await resolveGoogleMapsLocation("https://www.google.com/maps/@37.7749,-122.4194,17z"),
+    { matched: true, location: null },
+  );
+  const redirected = await resolveGoogleMapsLocation(
+    "https://maps.app.goo.gl/unsafe",
+    async () => new Response(null, { status: 302, headers: { location: "https://example.com/@-1.95,30.06" } }),
+  );
+  assert.deepEqual(redirected, { matched: true, location: null });
+  assert.deepEqual(
+    await resolveGoogleMapsLocation("https://www.google.com/maps/place/%E0%A4%A"),
+    { matched: true, location: null },
+  );
 });

@@ -1,4 +1,5 @@
 import { ingestTwilioImage, MediaIngestError } from "./r2-media.ts";
+import { resolveGoogleMapsLocation } from "./google-maps-location.ts";
 import { d1Database, privateMediaBucket, twilioInboundRuntime } from "./runtime-env.ts";
 import { sha256Hex } from "./secure-token.ts";
 import { parseClientAction } from "./whatsapp-actions.ts";
@@ -65,6 +66,14 @@ async function handleAction(
     await withRepository(env, (repository) => repository.completeInbound(event.eventId, "pharmacy_client_action_rejected", "actor_mismatch"));
     return true;
   }
+  if (action.kind === "guidance") {
+    if (action.action === "send_image") {
+      await withRepository(env, (repository) => repository.queueClientGuidance(event, inbound.fromE164, "send_image"));
+    } else {
+      await withRepository(env, (repository) => repository.completeInbound(event.eventId, "client_guidance_acknowledged"));
+    }
+    return true;
+  }
   if (action.kind === "use_saved") {
     await withRepository(env, (repository) => repository.useSavedLocation({
       eventId: event.eventId,
@@ -100,6 +109,46 @@ async function handleNativeLocation(env: Env, event: InboundReceipt, inbound: Tw
       label: inbound.label,
       source: "whatsapp_native",
       captureKeyHex: await sha256Hex(`whatsapp-native:${inbound.messageSid}`),
+      eventId: event.eventId,
+    });
+  });
+  return true;
+}
+
+async function handleSharedGoogleMapsLocation(
+  env: Env,
+  event: InboundReceipt,
+  inbound: TwilioInboundMessage,
+): Promise<boolean> {
+  const resolved = await resolveGoogleMapsLocation(inbound.body);
+  if (!resolved.matched) return false;
+  if (event.actorType !== "client") {
+    await withRepository(env, (repository) => repository.completeInbound(event.eventId, "pharmacy_maps_location_ignored"));
+    return true;
+  }
+  await withRepository(env, async (repository) => {
+    const requestId = await repository.activeClientRequest(event.actorId);
+    if (!resolved.location) {
+      await repository.queueLocationCaptureRetry({
+        eventId: event.eventId,
+        actorId: event.actorId,
+        requestId,
+        recipientE164: inbound.fromE164,
+      });
+      return;
+    }
+    await repository.saveLocation({
+      actorId: event.actorId,
+      requestId,
+      latitude: resolved.location.latitude,
+      longitude: resolved.location.longitude,
+      accuracyM: null,
+      address: null,
+      label: "Google Maps pin",
+      source: "whatsapp_native",
+      captureKeyHex: await sha256Hex(
+        `google-maps-share:${inbound.messageSid}:${resolved.location.latitude}:${resolved.location.longitude}`,
+      ),
       eventId: event.eventId,
     });
   });
@@ -170,6 +219,7 @@ export async function twilioInboundResponse(request: Request, env: Env): Promise
     if (event.alreadyProcessed) return twiml();
     if (await handleAction(env, event, inbound)) return twiml();
     if (await handleNativeLocation(env, event, inbound)) return twiml();
+    if (await handleSharedGoogleMapsLocation(env, event, inbound)) return twiml();
     if (await handleClientImage(env, event, inbound)) return twiml();
     if (event.actorType === "client") {
       await withRepository(env, (repository) => repository.queueClientGuidance(event, inbound.fromE164, "send_image"));
@@ -227,4 +277,9 @@ export async function twilioStatusResponse(request: Request, env: Env): Promise<
     }));
     return new Response("temporarily_unavailable", { status: 503, headers: { "Cache-Control": "no-store", "Retry-After": "30" } });
   }
+}
+
+export async function sweepWhatsAppOperationalState(env: Env): Promise<void> {
+  const receipt = await withRepository(env, (repository) => repository.reconcileOperationalState());
+  console.log(JSON.stringify({ event: "whatsapp_operational_state_reconciled", ...receipt }));
 }

@@ -34,12 +34,13 @@ test("builds the governed Cloudflare D1 pharmacy identity and location source pa
     online_pharmacies: 3,
     geocoded_pharmacies: 93,
     known_numbers: 309,
-    resolved_numbers: 283,
+    resolved_numbers: 280,
     ambiguous_numbers: 26,
+    retired_numbers: 3,
     contacts: 283,
-    login_enabled_contacts: 79,
+    login_enabled_contacts: 78,
     contact_pharmacies: 264,
-    dispatch_eligible_pharmacies: 36,
+    dispatch_eligible_pharmacies: 33,
   });
   assert.equal(recovery.pharmacies.length, 769);
   assert.equal(recovery.contacts.length, 283);
@@ -50,6 +51,9 @@ test("builds the governed Cloudflare D1 pharmacy identity and location source pa
   assert.match(recovery.bundle.bundle_sha256, /^[a-f0-9]{64}$/);
   assert.match(recovery.sql, /med250_pharmacy_registry_import_receipts/);
   assert.match(recovery.sql, /resolution_status = 'ambiguous'/);
+  assert.match(recovery.sql, /resolution_status = 'retired'/);
+  assert.equal(recovery.contacts.filter((row) => row.active === 0 && row.dispatch_enabled === 0).length, 3);
+  assert.equal(recovery.knownNumbers.filter((row) => row.resolution_status === "retired").length, 3);
   assert.match(recovery.sql, /source LIKE 'MED250 governed registry recovery:%'/);
   assert.doesNotMatch(recovery.sql, /\bBEGIN\b|\bCOMMIT\b|\bSAVEPOINT\b/);
   assert.doesNotMatch(recovery.sql, /@neondatabase|NEON_DATABASE_URL|supabase\.co|@supabase/i);
@@ -75,26 +79,32 @@ test("executes against the canonical D1 schema, quarantines conflicts, and is id
         (SELECT count(*) FROM med250_pharmacy_contacts WHERE login_enabled = 1) AS login_contacts,
         (SELECT count(*) FROM med250_known_pharmacy_numbers) AS known_numbers,
         (SELECT count(*) FROM med250_known_pharmacy_numbers WHERE resolution_status = 'ambiguous') AS ambiguous_numbers,
+        (SELECT count(*) FROM med250_known_pharmacy_numbers WHERE resolution_status = 'retired') AS retired_numbers,
         (SELECT count(*) FROM med250_pharmacy_registry_import_receipts) AS receipts
     `).get();
     assert.deepEqual({ ...counts }, {
       pharmacies: 769,
       geocoded: 93,
-      dispatch_eligible: 36,
+      dispatch_eligible: 33,
       contacts: 283,
-      login_contacts: 79,
+      login_contacts: 78,
       known_numbers: 309,
       ambiguous_numbers: 26,
+      retired_numbers: 3,
       receipts: 1,
     });
     const invariants = database.prepare(`
       SELECT
         (SELECT count(*) FROM med250_pharmacy_contacts contact
           LEFT JOIN med250_known_pharmacy_numbers number ON number.e164 = contact.e164
-          WHERE number.resolution_status <> 'resolved' OR number.pharmacy_id <> contact.pharmacy_id) AS contact_classification_errors,
+          WHERE contact.active = 1 AND (number.resolution_status <> 'resolved' OR number.pharmacy_id <> contact.pharmacy_id)) AS contact_classification_errors,
         (SELECT count(*) FROM med250_known_pharmacy_numbers number
           JOIN med250_pharmacy_contacts contact ON contact.e164 = number.e164
           WHERE number.resolution_status = 'ambiguous') AS ambiguous_contact_errors,
+        (SELECT count(*) FROM med250_known_pharmacy_numbers number
+          JOIN med250_pharmacy_contacts contact ON contact.e164 = number.e164
+          WHERE number.resolution_status = 'retired'
+            AND (contact.active <> 0 OR contact.dispatch_enabled <> 0 OR contact.login_enabled <> 0)) AS retired_contact_errors,
         (SELECT count(*) FROM med250_pharmacies pharmacy WHERE pharmacy.dispatch_enabled = 1 AND NOT (
           pharmacy.marketplace_approved = 1 AND pharmacy.licence_status = 'current'
           AND pharmacy.geocode_status = 'verified' AND pharmacy.latitude IS NOT NULL AND pharmacy.longitude IS NOT NULL
@@ -111,6 +121,7 @@ test("executes against the canonical D1 schema, quarantines conflicts, and is id
     assert.deepEqual({ ...invariants }, {
       contact_classification_errors: 0,
       ambiguous_contact_errors: 0,
+      retired_contact_errors: 0,
       dispatch_eligibility_errors: 0,
       login_authority_errors: 0,
     });

@@ -3,7 +3,6 @@ import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } fr
 import handler from "vinext/server/app-router-entry";
 import { authResponse } from "./backend/auth-api.ts";
 import { catalogueResponse } from "./backend/catalogue-api.ts";
-import { locationPageResponse } from "./backend/location-page.ts";
 import { marketplaceResponse, pharmacyPrescriptionResponse } from "./backend/marketplace-api.ts";
 import { sweepPrivateMediaRetention } from "./backend/media-retention.ts";
 import { orderResponse } from "./backend/order-api.ts";
@@ -16,9 +15,11 @@ import {
   sweepDispatchOutbox,
 } from "./backend/outbox-runtime.ts";
 import { privateMediaResponse } from "./backend/private-media-response.ts";
-import { d1Database, locationLinkSecret } from "./backend/runtime-env.ts";
-import { twilioInboundResponse, twilioStatusResponse } from "./backend/whatsapp-runtime.ts";
-import { WhatsAppRepository } from "./backend/whatsapp-repository.ts";
+import {
+  sweepWhatsAppOperationalState,
+  twilioInboundResponse,
+  twilioStatusResponse,
+} from "./backend/whatsapp-runtime.ts";
 
 type ReleaseMode = "preview" | "catalog" | "live";
 
@@ -71,7 +72,7 @@ function contentSecurityPolicy(): string {
     "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://maps.googleapis.com https://maps.gstatic.com https://static.cloudflareinsights.com",
     "script-src-attr 'none'",
     "style-src 'self' 'unsafe-inline'",
-    "frame-src https://challenges.cloudflare.com https://www.openstreetmap.org",
+    "frame-src https://challenges.cloudflare.com",
     "upgrade-insecure-requests",
     "worker-src 'self' blob:",
   ].join("; ");
@@ -90,13 +91,6 @@ async function whatsappSampleMediaResponse(request: Request, env: Env): Promise<
   return env.ASSETS.fetch(new Request(new URL("/brand/app-icon-512.png", request.url), request));
 }
 
-async function locationResponse(request: Request, env: Env): Promise<Response | null> {
-  const pathname = new URL(request.url).pathname;
-  if (pathname !== "/whatsapp/location" && pathname !== "/api/whatsapp/location") return null;
-  if (pathname === "/whatsapp/location") return locationPageResponse(request, null, locationLinkSecret(env));
-  return locationPageResponse(request, new WhatsAppRepository(d1Database(env)), locationLinkSecret(env));
-}
-
 function scheduleOutboxSweep(ctx: ExecutionContext, env: Env): void {
   ctx.waitUntil(sweepDispatchOutbox(env).catch((error) => {
     console.error(JSON.stringify({
@@ -110,6 +104,15 @@ function schedulePrivateMediaRetention(ctx: ExecutionContext, env: Env): void {
   ctx.waitUntil(sweepPrivateMediaRetention(env).catch((error) => {
     console.error(JSON.stringify({
       event: "private_media_retention_sweep_failed",
+      errorType: error instanceof Error ? error.name : "UnknownError",
+    }));
+  }));
+}
+
+function scheduleWhatsAppOperationalMaintenance(ctx: ExecutionContext, env: Env): void {
+  ctx.waitUntil(sweepWhatsAppOperationalState(env).catch((error) => {
+    console.error(JSON.stringify({
+      event: "whatsapp_operational_maintenance_failed",
       errorType: error instanceof Error ? error.name : "UnknownError",
     }));
   }));
@@ -209,14 +212,10 @@ const worker = {
           ? await catalogueResponse(request, env) ?? new Response("Not found", { status: 404, headers: { "Cache-Control": "no-store" } })
           : new Response("Service temporarily unavailable", { status: 503, headers: { "Cache-Control": "no-store" } });
       } else {
-        const resolvedLocation = env ? await locationResponse(request, env) : null;
-        const prescriptionMedia = env && !resolvedLocation ? await pharmacyPrescriptionResponse(request, env) : null;
-        const sampleMedia = env && !resolvedLocation && !prescriptionMedia ? await whatsappSampleMediaResponse(request, env) : null;
-        const clientMedia = env && !resolvedLocation && !prescriptionMedia && !sampleMedia ? await privateMediaResponse(request, env) : null;
-        if (resolvedLocation) {
-          response = resolvedLocation;
-          if (env && request.method === "POST" && response.ok) scheduleOutboxSweep(ctx, env);
-        } else if (prescriptionMedia) {
+        const prescriptionMedia = env ? await pharmacyPrescriptionResponse(request, env) : null;
+        const sampleMedia = env && !prescriptionMedia ? await whatsappSampleMediaResponse(request, env) : null;
+        const clientMedia = env && !prescriptionMedia && !sampleMedia ? await privateMediaResponse(request, env) : null;
+        if (prescriptionMedia) {
           response = prescriptionMedia;
         } else if (sampleMedia) {
           response = sampleMedia;
@@ -280,6 +279,7 @@ const worker = {
   async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
     scheduleOutboxSweep(ctx, env);
     schedulePrivateMediaRetention(ctx, env);
+    scheduleWhatsAppOperationalMaintenance(ctx, env);
   },
 } satisfies ExportedHandler<Env>;
 

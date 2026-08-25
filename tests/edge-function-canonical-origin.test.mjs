@@ -2,29 +2,17 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const sharedAuth = await readFile(
-  new URL("../supabase/functions/_shared/dawanear-pharmacy-auth.ts", import.meta.url),
-  "utf8",
-);
-
-const edgeEntrypoints = [
-  "dawanear-pharmacy-send-otp",
-  "dawanear-pharmacy-verify-otp",
-  "dawanear-customer-send-otp",
-  "dawanear-customer-verify-otp",
-  "dispatch-whatsapp-notifications",
-  "whatsapp-webhook",
-];
-
-test("keeps the complete WhatsApp Edge bundle on the canonical production origin", async () => {
-  assert.match(sharedAuth, /"https:\/\/med-250\.com"/);
-  assert.doesNotMatch(sharedAuth, /med250\.gikundiro\.com|med250-rwanda\.ikanisa\.chatgpt\.site/);
-
-  for (const slug of edgeEntrypoints) {
-    const source = await readFile(
-      new URL(`../supabase/functions/${slug}/index.ts`, import.meta.url),
-      "utf8",
-    );
-    assert.match(source, /"\.\.\/_shared\/dawanear-pharmacy-auth\.ts"/, `${slug} must use the canonical shared boundary`);
-  }
+test("keeps the complete WhatsApp Worker bundle on the canonical production origin", async () => {
+  const [entrypoint, runtime, setup, wrangler] = await Promise.all([
+    readFile(new URL("../worker/index.ts", import.meta.url), "utf8"),
+    readFile(new URL("../worker/backend/runtime-env.ts", import.meta.url), "utf8"),
+    readFile(new URL("../scripts/twilio-whatsapp-setup.mjs", import.meta.url), "utf8"),
+    readFile(new URL("../wrangler.jsonc", import.meta.url), "utf8"),
+  ]);
+  const active = `${entrypoint}\n${runtime}\n${setup}\n${wrangler}`;
+  assert.match(active, /https:\/\/med-250\.com/);
+  assert.match(entrypoint, /\/api\/twilio\/whatsapp\/inbound/);
+  assert.match(entrypoint, /\/api\/twilio\/whatsapp\/status/);
+  assert.doesNotMatch(active, /\/api\/meta\/whatsapp|META_ACCESS_TOKEN|WHATSAPP_ACCESS_TOKEN/);
+  assert.doesNotMatch(active, /med250\.gikundiro\.com|med250-rwanda\.ikanisa\.chatgpt\.site/);
 });

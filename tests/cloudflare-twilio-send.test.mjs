@@ -7,6 +7,7 @@ import {
   TwilioSendError,
 } from "../worker/backend/twilio-send.ts";
 import { encryptOtpCode } from "../worker/backend/secure-token.ts";
+import { parseClientAction } from "../worker/backend/whatsapp-actions.ts";
 
 const runtime = {
   accountSid: `AC${"0".repeat(32)}`,
@@ -16,8 +17,8 @@ const runtime = {
   statusCallbackUrl: "https://med-250.com/api/twilio/whatsapp/status",
   apiKey: "SK00000000000000000000000000000001",
   apiSecret: "test-only-api-secret",
-  locationLinkSecret: "test-only-location-link-secret-with-at-least-32-bytes",
-  locationCaptureContentSid: "HX00000000000000000000000000000001",
+  clientDispatchConfirmationContentSid: "HX00000000000000000000000000000008",
+  locationCaptureContentSid: "HX00000000000000000000000000000007",
   locationChoiceContentSid: "HX00000000000000000000000000000002",
   pharmacyClientMediaContentSid: "HX00000000000000000000000000000003",
   pharmacyRequestContentSid: "HX00000000000000000000000000000006",
@@ -56,7 +57,39 @@ test("composes the submitted image template without medicine lists and with an o
   assert.doesNotMatch(JSON.stringify(message.variables), /medicine name|catalogue list|pack size/i);
 });
 
-test("composes saved/new location prompts and a dispatch confirmation", async () => {
+test("composes pharmacy dispatches and parses replies for governed registry pharmacy IDs", async () => {
+  const pharmacyId = "retail-rw-fda-123";
+  const message = await composeOutboxMessage(delivery({ pharmacyId }), runtime, "a".repeat(43));
+  assert.equal(
+    message.variables["6"],
+    `med250:media:can:00000000-0000-4000-8000-000000000002:${pharmacyId}`,
+  );
+  assert.deepEqual(
+    parseClientAction(message.variables["6"]),
+    {
+      kind: "pharmacy_response",
+      response: "can_fulfil",
+      requestId: "00000000-0000-4000-8000-000000000002",
+      pharmacyId,
+    },
+  );
+});
+
+test("uses a manual WhatsApp location prompt, saved/new choices and a dispatch confirmation", async () => {
+  const capture = await composeOutboxMessage(delivery({
+    kind: "location_capture",
+    pharmacyId: null,
+    r2Key: null,
+    customerE164: null,
+    payload: {
+      actor_id: "00000000-0000-4000-8000-000000000005",
+      request_id: "00000000-0000-4000-8000-000000000002",
+    },
+  }), runtime, null);
+  assert.equal(capture.kind, "content");
+  assert.equal(capture.contentSid, runtime.locationCaptureContentSid);
+  assert.deepEqual(capture.variables, {});
+
   const choice = await composeOutboxMessage(delivery({
     kind: "location_choice",
     pharmacyId: null,
@@ -77,8 +110,17 @@ test("composes saved/new location prompts and a dispatch confirmation", async ()
     customerE164: null,
     payload: { recipient_count: 10 },
   }), runtime, null);
-  assert.equal(confirmation.kind, "text");
-  assert.match(confirmation.body, /10 nearby verified pharmacies/);
+  assert.equal(confirmation.kind, "content");
+  assert.equal(confirmation.contentSid, runtime.clientDispatchConfirmationContentSid);
+  assert.deepEqual(confirmation.variables, { "1": "10" });
+});
+
+test("accepts the location quick-reply payload and rejects malformed request IDs", () => {
+  assert.deepEqual(
+    parseClientAction("med250:loc:share:00000000-0000-4000-8000-000000000002"),
+    { kind: "share_location", requestId: "00000000-0000-4000-8000-000000000002" },
+  );
+  assert.equal(parseClientAction("med250:loc:share:not-a-request"), null);
 });
 
 test("decrypts a durable OTP only while composing its audience-specific Twilio template", async () => {
@@ -147,6 +189,26 @@ test("sends via least-privilege Twilio API credentials with a status callback", 
   assert.equal(capturedForm.get("To"), "whatsapp:+250780000000");
   assert.equal(capturedForm.get("From"), "whatsapp:+16622220600");
   assert.equal(capturedForm.get("StatusCallback"), runtime.statusCallbackUrl);
+});
+
+test("falls back to the proven account credential only after a definitive key authorization rejection", async () => {
+  const authorization = [];
+  const receipt = await sendTwilioMessage({
+    kind: "text",
+    toE164: "250780000000",
+    body: "Test message",
+  }, runtime, async (_url, init) => {
+    authorization.push(new Headers(init.headers).get("authorization"));
+    if (authorization.length === 1) {
+      return Response.json({ code: 70051, message: "Authorization Failed" }, { status: 403 });
+    }
+    return Response.json({ sid: "MM00000000000000000000000000000010", status: "queued" });
+  });
+  assert.equal(receipt.sid, "MM00000000000000000000000000000010");
+  assert.deepEqual(authorization, [
+    `Basic ${btoa(`${runtime.apiKey}:${runtime.apiSecret}`)}`,
+    `Basic ${btoa(`${runtime.accountSid}:${runtime.authToken}`)}`,
+  ]);
 });
 
 test("classifies definitive 503 responses as retryable and transport timeouts as ambiguous", async () => {

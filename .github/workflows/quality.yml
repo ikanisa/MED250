@@ -1,8 +1,6 @@
 name: MED+250 quality
 
 on:
-  push:
-  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -15,6 +13,7 @@ concurrency:
 jobs:
   release-check:
     name: Preview-safe release gate
+    if: ${{ vars.MED250_GITHUB_FREE_ACCOUNT_CONFIRMED == 'true' && vars.MED250_GITHUB_ACTIONS_FREE_TIER_CONFIRMED == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:

@@ -3,15 +3,6 @@ const BASE64URL = /^[A-Za-z0-9_-]+$/;
 const encoder = new TextEncoder();
 const decoder = new TextDecoder("utf-8", { fatal: true });
 
-export type ClientLocationClaims = {
-  version: 1;
-  purpose: "client_location";
-  actorId: string;
-  requestId: string;
-  nonce: string;
-  expiresAt: number;
-};
-
 function base64UrlEncode(bytes: Uint8Array): string {
   let binary = "";
   for (const byte of bytes) binary += String.fromCharCode(byte);
@@ -129,69 +120,4 @@ export function constantTimeEqualHex(left: string, right: string): boolean {
 
 export function createOpaqueToken(): string {
   return base64UrlEncode(crypto.getRandomValues(new Uint8Array(32)));
-}
-
-export async function signClientLocationToken(
-  values: { actorId: string; requestId: string },
-  secret: string,
-  nowSeconds = Math.floor(Date.now() / 1000),
-): Promise<string> {
-  if (!UUID.test(values.actorId) || !UUID.test(values.requestId)) {
-    throw new Error("Location token identifiers are invalid.");
-  }
-  const claims: ClientLocationClaims = {
-    version: 1,
-    purpose: "client_location",
-    actorId: values.actorId.toLowerCase(),
-    requestId: values.requestId.toLowerCase(),
-    nonce: crypto.randomUUID(),
-    expiresAt: nowSeconds + 15 * 60,
-  };
-  const encodedClaims = base64UrlEncode(encoder.encode(JSON.stringify(claims)));
-  const signature = new Uint8Array(await crypto.subtle.sign("HMAC", await hmacKey(secret), encoder.encode(encodedClaims)));
-  return `${encodedClaims}.${base64UrlEncode(signature)}`;
-}
-
-export async function verifyClientLocationToken(
-  token: string,
-  secret: string,
-  nowSeconds = Math.floor(Date.now() / 1000),
-): Promise<ClientLocationClaims | null> {
-  if (token.length < 80 || token.length > 1200) return null;
-  const parts = token.split(".");
-  if (parts.length !== 2) return null;
-  try {
-    const valid = await crypto.subtle.verify(
-      "HMAC",
-      await hmacKey(secret),
-      base64UrlDecode(parts[1]),
-      encoder.encode(parts[0]),
-    );
-    if (!valid) return null;
-    const parsed: unknown = JSON.parse(decoder.decode(base64UrlDecode(parts[0])));
-    if (typeof parsed !== "object" || parsed === null) return null;
-    const version: unknown = Reflect.get(parsed, "version");
-    const purpose: unknown = Reflect.get(parsed, "purpose");
-    const actorId: unknown = Reflect.get(parsed, "actorId");
-    const requestId: unknown = Reflect.get(parsed, "requestId");
-    const nonce: unknown = Reflect.get(parsed, "nonce");
-    const expiresAt: unknown = Reflect.get(parsed, "expiresAt");
-    if (
-      version !== 1
-      || purpose !== "client_location"
-      || typeof actorId !== "string"
-      || typeof requestId !== "string"
-      || typeof nonce !== "string"
-      || typeof expiresAt !== "number"
-      || !UUID.test(actorId)
-      || !UUID.test(requestId)
-      || !UUID.test(nonce)
-      || !Number.isSafeInteger(expiresAt)
-      || expiresAt <= nowSeconds
-      || expiresAt > nowSeconds + 20 * 60
-    ) return null;
-    return { version, purpose, actorId, requestId, nonce, expiresAt };
-  } catch {
-    return null;
-  }
 }

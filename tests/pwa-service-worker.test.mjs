@@ -50,7 +50,6 @@ test("keeps sensitive MED+250 routes outside Cache Storage", async () => {
     "/api/twilio/whatsapp/status",
     "/pharmacies",
     "/pharmacy-prescription/private-token",
-    "/whatsapp/location",
     "/whatsapp-client-media/private-token",
     "/whatsapp-order-media/private-token",
     "/?request=open",

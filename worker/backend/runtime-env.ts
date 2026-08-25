@@ -109,7 +109,7 @@ export type TwilioInboundRuntime = {
 
 export function twilioInboundRuntime(env: Env): TwilioInboundRuntime {
   return {
-    accountSid: matchingString(env, "TWILIO_ACCOUNT_SID", ACCOUNT_SID),
+    accountSid: matchingString(env, "TWILIO_ACCOUNT_ID", ACCOUNT_SID),
     authToken: minimumSecret(env, "TWILIO_AUTH_TOKEN", 16),
     fromE164: e164Digits(requiredString(env, "TWILIO_WHATSAPP_FROM")),
     inboundWebhookUrl: secureUrl(env, "TWILIO_WHATSAPP_WEBHOOK_URL", "/api/twilio/whatsapp/inbound"),
@@ -120,7 +120,7 @@ export function twilioInboundRuntime(env: Env): TwilioInboundRuntime {
 export type TwilioSendRuntime = TwilioInboundRuntime & {
   apiKey: string;
   apiSecret: string;
-  locationLinkSecret: string;
+  clientDispatchConfirmationContentSid: string;
   locationCaptureContentSid: string;
   locationChoiceContentSid: string;
   pharmacyClientMediaContentSid: string;
@@ -130,16 +130,12 @@ export type TwilioSendRuntime = TwilioInboundRuntime & {
   otpEncryptionSecret: string;
 };
 
-export function locationLinkSecret(env: Env): string {
-  return minimumSecret(env, "TWILIO_LOCATION_LINK_SECRET", 32);
-}
-
 export function twilioSendRuntime(env: Env): TwilioSendRuntime {
   return {
     ...twilioInboundRuntime(env),
     apiKey: matchingString(env, "TWILIO_API_KEY", API_KEY_SID),
     apiSecret: minimumSecret(env, "TWILIO_API_SECRET", 16),
-    locationLinkSecret: locationLinkSecret(env),
+    clientDispatchConfirmationContentSid: matchingString(env, "TWILIO_CLIENT_DISPATCH_CONFIRMATION_CONTENT_SID", CONTENT_SID),
     locationCaptureContentSid: matchingString(env, "TWILIO_CLIENT_LOCATION_CAPTURE_CONTENT_SID", CONTENT_SID),
     locationChoiceContentSid: matchingString(env, "TWILIO_CLIENT_LOCATION_CHOICE_CONTENT_SID", CONTENT_SID),
     pharmacyClientMediaContentSid: matchingString(env, "TWILIO_PHARMACY_CLIENT_MEDIA_REQUEST_CONTENT_SID", CONTENT_SID),

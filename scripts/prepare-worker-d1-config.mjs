@@ -1,6 +1,5 @@
 import { execFile } from "node:child_process";
-import { createHash } from "node:crypto";
-import { readFile, readdir, stat, writeFile } from "node:fs/promises";
+import { readFile, rm, stat, writeFile } from "node:fs/promises";
 import { basename, join, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { promisify } from "node:util";
@@ -15,6 +14,10 @@ const whatsappSenderPattern = /^whatsapp:\+[1-9][0-9]{7,14}$/;
 const e164Pattern = /^[1-9][0-9]{7,14}$/;
 const execFileAsync = promisify(execFile);
 
+export async function removeDevelopmentOnlyVars(directory = serverDirectory) {
+  await rm(join(directory, ".dev.vars"), { force: true });
+}
+
 function isLocalPlaceholderDatabaseId(value) {
   return /^00000000-0000-4000-8000-0000000000\d{2}$/.test(value);
 }
@@ -25,13 +28,14 @@ export const requiredWorkerSecretNames = Object.freeze([
   "MED250_OTP_ENCRYPTION_SECRET",
   "MED250_OTP_SECRET",
   "TURNSTILE_SECRET_KEY",
+  "TWILIO_ACCOUNT_ID",
   "TWILIO_API_KEY",
   "TWILIO_API_SECRET",
   "TWILIO_AUTH_TOKEN",
-  "TWILIO_LOCATION_LINK_SECRET",
 ]);
 
 const contentSidNames = Object.freeze([
+  "TWILIO_CLIENT_DISPATCH_CONFIRMATION_CONTENT_SID",
   "TWILIO_CLIENT_LOCATION_CAPTURE_CONTENT_SID",
   "TWILIO_CLIENT_LOCATION_CHOICE_CONTENT_SID",
   "TWILIO_CUSTOMER_OTP_CONTENT_SID",
@@ -39,6 +43,22 @@ const contentSidNames = Object.freeze([
   "TWILIO_PHARMACY_OTP_CONTENT_SID",
   "TWILIO_PHARMACY_REQUEST_CONTENT_SID",
 ]);
+
+const canonicalProviderVarNames = Object.freeze([
+  "TWILIO_WHATSAPP_FROM",
+  ...contentSidNames,
+]);
+
+function assertProviderValuesMatchGeneratedConfig(generated, providerValues) {
+  const generatedVars = generated?.vars;
+  if (!generatedVars || typeof generatedVars !== "object" || Array.isArray(generatedVars)) return;
+  for (const name of canonicalProviderVarNames) {
+    const canonical = typeof generatedVars[name] === "string" ? generatedVars[name].trim() : "";
+    if (canonical && providerValues[name] !== canonical) {
+      throw new Error(`${name} conflicts with the canonical built Worker configuration; refusing stale provider deployment.`);
+    }
+  }
+}
 
 function exactEnvironmentValue(environment, name) {
   const value = String(environment[name] ?? "").trim();
@@ -117,6 +137,7 @@ function configuredProviderValues(environment, origin) {
     return [name, value];
   }));
   return validatedProviderValues({
+    MED250_WHATSAPP_PROVIDER: "twilio",
     MED250_ADMIN_WHATSAPP: adminWhatsapp,
     MED250_ALLOWED_ORIGINS: origin,
     TWILIO_ACCOUNT_SID: accountSid,
@@ -130,6 +151,9 @@ function configuredProviderValues(environment, origin) {
 function validatedProviderValues(providerValues, origin) {
   if (!providerValues || typeof providerValues !== "object" || Array.isArray(providerValues)) {
     throw new Error("Provider deployment values are required.");
+  }
+  if (providerValues.MED250_WHATSAPP_PROVIDER !== "twilio") {
+    throw new Error("Production WhatsApp provider must remain Twilio.");
   }
   if (!accountSidPattern.test(String(providerValues.TWILIO_ACCOUNT_SID ?? ""))) {
     throw new Error("TWILIO_ACCOUNT_SID is invalid.");
@@ -174,6 +198,10 @@ export function prepareWorkerD1Config(generated, {
   }
   const exactOrigin = deploymentOrigin(origin);
   const exactProviderValues = validatedProviderValues(providerValues, exactOrigin);
+  const nonSecretProviderValues = Object.fromEntries(
+    Object.entries(exactProviderValues).filter(([name]) => name !== "TWILIO_ACCOUNT_SID"),
+  );
+  assertProviderValuesMatchGeneratedConfig(generated, exactProviderValues);
   assertGeneratedResourceBoundary(generated, target);
 
   const config = structuredClone(generated);
@@ -182,7 +210,11 @@ export function prepareWorkerD1Config(generated, {
   }
   const name = "med250-marketplace-gikundiro";
   const vars = Object.fromEntries(Object.entries(config.vars ?? {}).filter(([key]) => (
-    !key.includes("SUPABASE") && !key.startsWith("NEXT_PUBLIC_MED250_") && key !== "NEXT_PUBLIC_MARKETPLACE_MODE"
+    !key.includes("SUPABASE")
+    && !key.startsWith("META_")
+    && !key.startsWith("WHATSAPP_")
+    && !key.startsWith("NEXT_PUBLIC_MED250_")
+    && key !== "NEXT_PUBLIC_MARKETPLACE_MODE"
   )));
   Object.assign(vars, {
     MED250_RELEASE_MODE: "live",
@@ -194,7 +226,7 @@ export function prepareWorkerD1Config(generated, {
     NEXT_PUBLIC_MARKETPLACE_MODE: "live",
     NEXT_PUBLIC_SITE_URL: exactOrigin,
     NEXT_PUBLIC_MED250_OBSERVABILITY: "cloud",
-    ...exactProviderValues,
+    ...nonSecretProviderValues,
   });
 
   const result = {
@@ -208,7 +240,9 @@ export function prepareWorkerD1Config(generated, {
       binding: "DB",
       database_name: `med250-${target}`,
       database_id: databaseId,
-      migrations_dir: "db/d1/migrations",
+      // This config is written under dist/server, while the canonical ledger
+      // remains at the repository root.
+      migrations_dir: "../../db/d1/migrations",
     }],
   };
   result.secrets = { required: [...requiredWorkerSecretNames] };
@@ -225,44 +259,20 @@ async function gitRevision() {
   return stdout.trim();
 }
 
-async function artifactRevision(directory) {
-  const files = [];
-  async function visit(current) {
-    for (const entry of await readdir(current, { withFileTypes: true })) {
-      const path = join(current, entry.name);
-      if (entry.isDirectory()) await visit(path);
-      else if (entry.isFile() && !/^wrangler\.worker-d1\./.test(entry.name)) files.push(path);
-    }
-  }
-  await visit(directory);
-  files.sort((left, right) => relative(directory, left).localeCompare(relative(directory, right)));
-  const hash = createHash("sha256");
-  for (const path of files) {
-    hash.update(relative(directory, path));
-    hash.update("\0");
-    hash.update(await readFile(path));
-    hash.update("\0");
-  }
-  return hash.digest("hex").slice(0, 40);
-}
-
 export async function run(environment = process.env) {
   const target = argumentValue("--target") || environment.MED250_DEPLOYMENT_TARGET?.trim() || "production";
   if (target !== "production") throw new Error("--target must be production; MED250 has no staging deployment.");
   const sourceConfigPath = resolve(argumentValue("--source") || join(serverDirectory, "wrangler.json"));
   const outputConfigPath = resolve(argumentValue("--output") || join(serverDirectory, `wrangler.worker-d1.${target}.json`));
   const requestedRevision = argumentValue("--revision") || environment.MED250_RELEASE_REVISION?.trim() || "git";
-  if (!new Set(["git", "artifact"]).has(requestedRevision) && !revisionPattern.test(requestedRevision)) {
-    throw new Error("--revision must be git, artifact, or an exact lowercase 40-character revision.");
+  if (requestedRevision !== "git" && !revisionPattern.test(requestedRevision)) {
+    throw new Error("--revision must be git or an exact lowercase 40-character Git commit SHA.");
   }
-  if (requestedRevision === "artifact") throw new Error("Artifact revisions are not permitted for production deployment.");
   const releaseRevision = requestedRevision === "git"
     ? await gitRevision()
-    : requestedRevision === "artifact" ? await artifactRevision(serverDirectory) : requestedRevision;
+    : requestedRevision;
   const origin = deploymentOrigin(exactEnvironmentValue(environment, "MED250_DEPLOYMENT_ORIGIN"));
   const databaseId = d1DatabaseId(environment, "MED250_D1_DATABASE_ID");
-  const providerMode = argumentValue("--provider-mode") || "required";
-  if (providerMode !== "required") throw new Error("--provider-mode must be required for production deployment.");
   const providerValues = configuredProviderValues(environment, origin);
   const generated = JSON.parse(await readFile(sourceConfigPath, "utf8"));
   const config = prepareWorkerD1Config(generated, {
@@ -272,6 +282,10 @@ export async function run(environment = process.env) {
     d1DatabaseId: databaseId,
     providerValues,
   });
+  // Vinext writes local dotenv values to this development-only file. It is
+  // never part of a governed production Worker and must not remain beside the
+  // deployment config where Wrangler can discover it.
+  await removeDevelopmentOnlyVars();
   await stat(join(serverDirectory, config.main));
   await stat(resolve(serverDirectory, config.assets.directory));
   await writeFile(outputConfigPath, `${JSON.stringify(config, null, 2)}\n`, { mode: 0o600 });
@@ -281,8 +295,8 @@ export async function run(environment = process.env) {
     worker: config.name,
     origin,
     releaseRevision,
-    revisionKind: requestedRevision === "artifact" ? "artifact_sha256_160" : requestedRevision === "git" ? "git" : "explicit",
-    providerMode,
+    revisionKind: requestedRevision === "git" ? "git" : "explicit_git",
+    provider: "twilio",
     config: relative(root, outputConfigPath),
     source: basename(sourceConfigPath),
     d1Bindings: config.d1_databases.map((entry) => entry.binding),

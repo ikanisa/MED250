@@ -1,0 +1,4 @@
+contact_id,pharmacy_id,provider,error_code,observed_at,reason
+whatsapp-51c902d6bb6bb581bd422441d26bc733,retail-2026-05-66,Twilio WhatsApp,63024,2026-08-24T16:44:38.561Z,Destination rejected as invalid or restricted WhatsApp user; pharmacy re-verification required
+whatsapp-bd4bc629fb30d475b20b584f8b1b1b6e,retail-2026-05-661,Twilio WhatsApp,63024,2026-08-24T16:44:33.579Z,Destination rejected as invalid or restricted WhatsApp user; pharmacy re-verification required
+whatsapp-a3cfd55eab9b5909739776d917f83700,retail-2026-05-395,Twilio WhatsApp,63024,2026-08-24T16:44:36.718Z,Destination rejected as invalid or restricted WhatsApp user; pharmacy re-verification required

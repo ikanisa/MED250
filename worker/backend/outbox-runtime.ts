@@ -92,7 +92,7 @@ async function recordSendFailure(
   env: Env,
   outboxId: string,
   queueDeliveryId: string,
-  error: TwilioSendError,
+  error: { code: string; retryable: boolean; outcomeUnknown: boolean },
   retryDelaySeconds: number,
 ): Promise<boolean> {
   return withRepository(env, async (repository) => {
@@ -140,8 +140,10 @@ export async function processDispatchMessage(message: Message<unknown>, env: Env
   let providerAccepted = false;
   try {
     const runtime = twilioSendRuntime(env);
-    const outbound = await composeOutboxMessage(prepared.delivery, runtime, prepared.mediaToken);
-    const receipt = await sendTwilioMessage(outbound, runtime);
+    const receipt = await sendTwilioMessage(
+      await composeOutboxMessage(prepared.delivery, runtime, prepared.mediaToken),
+      runtime,
+    );
     providerAccepted = true;
     const recorded = await withRepository(env, (repository) => repository.recordProviderAcceptance(body.outboxId, receipt.sid));
     if (!recorded) throw new Error("Provider acceptance receipt was not persisted.");

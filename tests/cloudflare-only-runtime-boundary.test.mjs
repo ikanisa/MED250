@@ -59,13 +59,35 @@ test("keeps every callable provider and deployment verifier on Worker APIs", asy
   assert.doesNotMatch(operationalScripts, /--publish/);
 });
 
-test("binds WhatsApp template media and location actions to the configured Worker origin", async () => {
+test("binds WhatsApp media to the Worker and gives clients manual WhatsApp location instructions", async () => {
   const setup = await source("scripts/twilio-whatsapp-setup.mjs");
-  const plan = buildProviderPlan({ target: "production", env: {} });
+  const plan = buildProviderPlan({
+    target: "production",
+    env: { TWILIO_EXPECTED_ACCOUNT_SID: `AC${"0".repeat(32)}` },
+  });
   const serialized = JSON.stringify(plan.templates);
+  const locationCapture = plan.templates.find(({ content }) => content.friendly_name === "med250_client_manual_location_v3");
   assert.equal(plan.worker_origin, "https://med-250.com");
   assert.ok(serialized.includes(`${plan.worker_origin}/whatsapp-client-media/{{5}}.png`));
   assert.ok(serialized.includes(`${plan.worker_origin}/whatsapp-order-media/{{7}}.png`));
-  assert.ok(serialized.includes(`${plan.worker_origin}/whatsapp/location?token={{1}}`));
+  assert.ok(serialized.includes("med250_client_manual_location_v3"));
+  assert.ok(serialized.includes("We received your requests, please share your current location in WhatsApp:\\nTap + or 📎 → Location → Send your current location"));
+  assert.doesNotMatch(serialized, /live-google-maps|google(?:\.com\/)? maps|openstreetmap/i);
+  assert.doesNotMatch(JSON.stringify(locationCapture), /twilio\/call-to-action|action|url/i);
+  assert.match(setup, /TWILIO_CLIENT_LOCATION_CAPTURE_CONTENT_SID/);
+  assert.doesNotMatch(setup, /TWILIO_WHATSAPP_LOCATION_URL/);
   assert.doesNotMatch(setup, forbiddenRuntime);
+});
+
+test("keeps the active Worker and deployment path independent of Meta access tokens", async () => {
+  const activeFiles = await Promise.all([
+    source("worker/index.ts"),
+    source("worker/backend/outbox-runtime.ts"),
+    source("worker/backend/runtime-env.ts"),
+    source("scripts/prepare-worker-d1-config.mjs"),
+    source(".env.example"),
+  ]);
+  const active = activeFiles.join("\n");
+  assert.doesNotMatch(active, /WHATSAPP_ACCESS_TOKEN|META_APP_SECRET|metaWhatsAppRuntime|sendMetaMessage/);
+  assert.match(active, /MED250_WHATSAPP_PROVIDER["']?:?\s*["']twilio/);
 });

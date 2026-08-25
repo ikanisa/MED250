@@ -25,6 +25,7 @@ concurrency:
 jobs:
   validate-request:
     name: Validate deployment request
+    if: ${{ vars.MED250_GITHUB_FREE_ACCOUNT_CONFIRMED == 'true' && vars.MED250_GITHUB_ACTIONS_FREE_TIER_CONFIRMED == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
@@ -63,6 +64,7 @@ jobs:
       TWILIO_WHATSAPP_FROM: ${{ vars.TWILIO_WHATSAPP_FROM }}
       TWILIO_CLIENT_LOCATION_CAPTURE_CONTENT_SID: ${{ vars.TWILIO_CLIENT_LOCATION_CAPTURE_CONTENT_SID }}
       TWILIO_CLIENT_LOCATION_CHOICE_CONTENT_SID: ${{ vars.TWILIO_CLIENT_LOCATION_CHOICE_CONTENT_SID }}
+      TWILIO_CLIENT_DISPATCH_CONFIRMATION_CONTENT_SID: ${{ vars.TWILIO_CLIENT_DISPATCH_CONFIRMATION_CONTENT_SID }}
       TWILIO_CUSTOMER_OTP_CONTENT_SID: ${{ vars.TWILIO_CUSTOMER_OTP_CONTENT_SID }}
       TWILIO_PHARMACY_CLIENT_MEDIA_REQUEST_CONTENT_SID: ${{ vars.TWILIO_PHARMACY_CLIENT_MEDIA_REQUEST_CONTENT_SID }}
       TWILIO_PHARMACY_OTP_CONTENT_SID: ${{ vars.TWILIO_PHARMACY_OTP_CONTENT_SID }}
@@ -101,7 +103,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          wranglerVersion: 4.110.0
+          wranglerVersion: 4.125.0
           command: deploy --config dist/server/wrangler.worker-d1.production.json --strict
       - name: Verify private Worker-D1 operational readiness
         env:

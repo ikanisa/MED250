@@ -13,15 +13,15 @@ import {
 function bindings(overrides = {}) {
   return {
     DB: { prepare() {}, batch() {} },
-    TWILIO_ACCOUNT_SID: `AC${"0".repeat(32)}`,
+    TWILIO_ACCOUNT_ID: `AC${"0".repeat(32)}`,
     TWILIO_AUTH_TOKEN: "test-only-auth-token",
     TWILIO_WHATSAPP_FROM: "whatsapp:+16622220600",
     TWILIO_WHATSAPP_WEBHOOK_URL: "https://med-250.com/api/twilio/whatsapp/inbound",
     TWILIO_WHATSAPP_STATUS_CALLBACK_URL: "https://med-250.com/api/twilio/whatsapp/status",
     TWILIO_API_KEY: "SK00000000000000000000000000000001",
     TWILIO_API_SECRET: "test-only-api-secret",
-    TWILIO_LOCATION_LINK_SECRET: "test-only-location-link-secret-with-at-least-32-bytes",
-    TWILIO_CLIENT_LOCATION_CAPTURE_CONTENT_SID: "HX00000000000000000000000000000001",
+    TWILIO_CLIENT_DISPATCH_CONFIRMATION_CONTENT_SID: "HX00000000000000000000000000000008",
+    TWILIO_CLIENT_LOCATION_CAPTURE_CONTENT_SID: "HX00000000000000000000000000000007",
     TWILIO_CLIENT_LOCATION_CHOICE_CONTENT_SID: "HX00000000000000000000000000000002",
     TWILIO_PHARMACY_CLIENT_MEDIA_REQUEST_CONTENT_SID: "HX00000000000000000000000000000003",
     TWILIO_PHARMACY_REQUEST_CONTENT_SID: "HX00000000000000000000000000000006",
@@ -31,6 +31,7 @@ function bindings(overrides = {}) {
     MED250_OTP_ENCRYPTION_SECRET: "test-only-otp-encryption-secret-with-at-least-32-bytes",
     MED250_HEALTH_PROBE_TOKEN: "test-only-operational-health-token-at-least-32-bytes",
     MED250_RELEASE_MODE: "preview",
+    MED250_WHATSAPP_PROVIDER: "twilio",
     ...overrides,
   };
 }
@@ -40,6 +41,8 @@ test("validates the D1 binding and dynamically installed Twilio secrets", () => 
   assert.equal(d1Database(env), env.DB);
   assert.equal(healthProbeToken(env), "test-only-operational-health-token-at-least-32-bytes");
   assert.equal(twilioInboundRuntime(env).fromE164, "16622220600");
+  assert.equal(twilioSendRuntime(env).locationCaptureContentSid, "HX00000000000000000000000000000007");
+  assert.equal(twilioSendRuntime(env).clientDispatchConfirmationContentSid, "HX00000000000000000000000000000008");
   assert.equal(twilioSendRuntime(env).pharmacyClientMediaContentSid, "HX00000000000000000000000000000003");
   assert.equal(twilioSendRuntime(env).customerOtpContentSid, "HX00000000000000000000000000000005");
   assert.equal(twilioSendRuntime(env).pharmacyRequestContentSid, "HX00000000000000000000000000000006");

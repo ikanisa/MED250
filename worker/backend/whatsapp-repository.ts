@@ -1,7 +1,6 @@
 import {
   allRows,
   atomicBatch,
-  d1Boolean,
   firstRow,
   newId,
   newReference,
@@ -11,6 +10,7 @@ import {
   runStatement,
   type D1Row,
 } from "../../db/index.ts";
+import { clientMediaFinalizationDecision } from "./delivery-finality.ts";
 import { dispatchToNearestPharmacies } from "./dispatch-repository.ts";
 
 export { parseClientAction } from "./whatsapp-actions.ts";
@@ -50,6 +50,14 @@ export type OutboxDelivery = {
   mediaIndex: number | null;
   r2Key: string | null;
   distanceM: number | null;
+};
+
+export type WhatsAppMaintenanceReceipt = {
+  expiredGrantsRevoked: number;
+  staleMediaFailed: number;
+  staleInboundClosed: number;
+  failedRequestsClosed: number;
+  clientConfirmationsQueued: number;
 };
 
 function stringValue(row: D1Row, key: string): string {
@@ -93,12 +101,61 @@ function deliveryRank(status: string): number {
 export class WhatsAppRepository {
   constructor(private readonly database: D1Database) {}
 
+  private async finalizeClientMediaRequest(requestId: string): Promise<{
+    failedRequestClosed: boolean;
+    clientConfirmationQueued: boolean;
+  }> {
+    const state = await firstRow<D1Row>(this.database, `
+      SELECT
+        count(*) AS total,
+        sum(CASE WHEN status IN ('delivered', 'read') THEN 1 ELSE 0 END) AS delivered,
+        sum(CASE WHEN status NOT IN ('delivered', 'read', 'failed', 'dead_letter') THEN 1 ELSE 0 END) AS unfinished
+      FROM med250_dispatch_outbox
+      WHERE request_id = ? AND kind = 'client_media_request'
+    `, [requestId]);
+    const total = nullableNumber(state ?? {}, "total") ?? 0;
+    const delivered = nullableNumber(state ?? {}, "delivered") ?? 0;
+    const unfinished = nullableNumber(state ?? {}, "unfinished") ?? 0;
+    const decision = clientMediaFinalizationDecision({ total, delivered, unfinished });
+    if (decision === "wait") {
+      return { failedRequestClosed: false, clientConfirmationQueued: false };
+    }
+
+    const at = nowIso();
+    if (decision === "confirm_delivered") {
+      const inserted = await runStatement(this.database, `
+        INSERT OR IGNORE INTO med250_dispatch_outbox (
+          id, dedupe_key, kind, request_id, recipient_e164, payload, status,
+          available_at, created_at, updated_at
+        )
+        SELECT ?, 'client-confirmation:' || request.id, 'client_confirmation', request.id,
+          request.customer_e164, json_object('recipient_count', ?), 'pending', ?, ?, ?
+        FROM med250_client_requests request WHERE request.id = ?
+      `, [newId(), delivered, at, at, at, requestId]);
+      return { failedRequestClosed: false, clientConfirmationQueued: changes(inserted) === 1 };
+    }
+
+    const closed = await runStatement(this.database, `
+      UPDATE med250_client_requests
+      SET status = 'cancelled', closed_at = coalesce(closed_at, ?), updated_at = ?
+      WHERE id = ? AND source = 'whatsapp_image' AND status = 'dispatched'
+    `, [at, at, requestId]);
+    if (changes(closed) === 1) {
+      await runStatement(this.database, `
+        INSERT INTO med250_audit_events (event_type, request_id, details, created_at)
+        VALUES ('client_request_all_pharmacy_deliveries_failed', ?,
+          json_object('terminal_recipient_count', ?, 'delivered_recipient_count', 0), ?)
+      `, [requestId, total, at]);
+    }
+    return { failedRequestClosed: changes(closed) === 1, clientConfirmationQueued: false };
+  }
+
   async beginInbound(input: {
     accountSid: string; messageSid: string; fromE164: string; profileName: string | null;
     mediaCount: number; locationProvided: boolean; buttonPayload: string | null;
   }): Promise<InboundReceipt> {
     if (!input.accountSid.trim()) throw new Error("provider account ID is required");
-    if (!/^(?:SM|MM)[0-9a-f]{32}$/i.test(input.messageSid)) throw new Error("provider message SID is invalid");
+    if (!/^(?:SM|MM)[0-9a-f]{32}$/i.test(input.messageSid)) throw new Error("Twilio provider message SID is invalid");
     if (input.mediaCount !== 0 && input.mediaCount !== 1) throw new Error("exactly zero or one inbound image is supported");
     const messageSid = input.messageSid.toUpperCase();
     const existing = await firstRow<D1Row>(this.database, `
@@ -164,7 +221,8 @@ export class WhatsAppRepository {
         VALUES ('twilio_inbound_signature_verified', ?, json_object(
           'provider', 'twilio', 'media_count', ?, 'location_provided', ?, 'button_provided', ?
         ), ?)
-      `, [actorId, input.mediaCount, input.locationProvided ? 1 : 0, input.buttonPayload?.trim() ? 1 : 0, at]);
+      `, [actorId, input.mediaCount,
+        input.locationProvided ? 1 : 0, input.buttonPayload?.trim() ? 1 : 0, at]);
     }
     return {
       eventId: stringValue(event, "event_id"), actorId: stringValue(event, "actor_id"),
@@ -356,11 +414,6 @@ export class WhatsAppRepository {
         basePayload: { source: "whatsapp_image" }, emptyOutcome: "cancel", auditEvent: "client_request_dispatched",
         emptyAuditEvent: "client_request_no_eligible_pharmacy",
       });
-      await runStatement(this.database, `
-        INSERT OR IGNORE INTO med250_dispatch_outbox (
-          id, dedupe_key, kind, request_id, recipient_e164, payload, status, available_at, created_at, updated_at
-        ) VALUES (?, ?, 'client_confirmation', ?, ?, json_object('recipient_count', ?), 'pending', ?, ?, ?)
-      `, [newId(), `client-confirmation:${input.requestId}`, input.requestId, stringValue(actor, "e164"), recipientCount, at, at, at]);
     } else {
       await runStatement(this.database, `
         INSERT OR IGNORE INTO med250_dispatch_outbox (
@@ -403,11 +456,6 @@ export class WhatsAppRepository {
       emptyAuditEvent: "saved_client_location_no_eligible_pharmacy",
     });
     await atomicBatch(this.database, [
-      this.database.prepare(`
-        INSERT OR IGNORE INTO med250_dispatch_outbox (
-          id, dedupe_key, kind, request_id, recipient_e164, payload, status, available_at, created_at, updated_at
-        ) VALUES (?, ?, 'client_confirmation', ?, ?, json_object('recipient_count', ?), 'pending', ?, ?, ?)
-      `).bind(newId(), `client-confirmation:${input.requestId}`, input.requestId, stringValue(row, "e164"), recipientCount, at, at, at),
       this.database.prepare("UPDATE med250_inbound_events SET request_id = ?, outcome = ?, processed_at = ?, last_error_code = NULL WHERE id = ? AND actor_id = ?")
         .bind(input.requestId, recipientCount > 0 ? "saved_location_used_and_dispatched" : "saved_location_used_no_eligible_pharmacy", at, input.eventId, input.actorId),
       this.database.prepare(`INSERT INTO med250_audit_events (event_type, actor_id, request_id, details, created_at)
@@ -419,7 +467,7 @@ export class WhatsAppRepository {
 
   async requestNewLocation(input: { eventId: string; actorId: string; requestId: string }): Promise<void> {
     const row = await firstRow<D1Row>(this.database, `
-      SELECT actor.e164 FROM med250_actors actor JOIN med250_client_requests request ON request.actor_id = actor.id
+      SELECT request.id, actor.e164 FROM med250_actors actor JOIN med250_client_requests request ON request.actor_id = actor.id
       WHERE actor.id = ? AND actor.actor_type = 'client' AND request.id = ?
         AND request.status IN ('awaiting_location_choice', 'awaiting_location')
     `, [input.actorId, input.requestId]);
@@ -431,11 +479,51 @@ export class WhatsAppRepository {
       this.database.prepare(`
         INSERT OR IGNORE INTO med250_dispatch_outbox (
           id, dedupe_key, kind, request_id, recipient_e164, payload, status, available_at, created_at, updated_at
-        ) VALUES (?, ?, 'location_capture', ?, ?, ?, 'pending', ?, ?, ?)
-      `).bind(newId(), `client-new-location:${input.requestId}`, input.requestId, stringValue(row, "e164"),
-        JSON.stringify({ actor_id: input.actorId, request_id: input.requestId }), at, at, at),
-      this.database.prepare("UPDATE med250_inbound_events SET request_id = ?, outcome = 'new_location_prompt_queued', processed_at = ?, last_error_code = NULL WHERE id = ? AND actor_id = ?")
+        ) VALUES (?, ?, 'location_capture', ?, ?, json_object('actor_id', ?, 'request_id', ?), 'pending', ?, ?, ?)
+      `).bind(newId(), `client-native-location:${input.requestId}`, input.requestId, stringValue(row, "e164"),
+        input.actorId, input.requestId, at, at, at),
+      this.database.prepare("UPDATE med250_inbound_events SET request_id = ?, outcome = 'native_location_share_selected', processed_at = ?, last_error_code = NULL WHERE id = ? AND actor_id = ?")
         .bind(input.requestId, at, input.eventId, input.actorId),
+    ]);
+  }
+
+  async queueLocationCaptureRetry(input: {
+    eventId: string;
+    actorId: string;
+    requestId: string | null;
+    recipientE164: string;
+  }): Promise<void> {
+    const at = nowIso();
+    if (!input.requestId) {
+      await atomicBatch(this.database, [
+        this.database.prepare(`
+          INSERT OR IGNORE INTO med250_dispatch_outbox (
+            id, dedupe_key, kind, recipient_e164, payload, status, available_at, created_at, updated_at
+          ) VALUES (?, ?, 'client_guidance', ?, json_object('guidance', 'send_image'), 'pending', ?, ?, ?)
+        `).bind(newId(), `client-maps-without-request:${input.eventId}`, input.recipientE164, at, at, at),
+        this.database.prepare(`
+          UPDATE med250_inbound_events SET outcome = 'google_maps_location_without_request', processed_at = ?,
+            last_error_code = NULL WHERE id = ? AND actor_id = ?
+        `).bind(at, input.eventId, input.actorId),
+      ]);
+      return;
+    }
+    const request = await firstRow<D1Row>(this.database, `
+      SELECT id FROM med250_client_requests WHERE id = ? AND actor_id = ?
+        AND status IN ('awaiting_location', 'awaiting_location_choice') AND expires_at > ?
+    `, [input.requestId, input.actorId, at]);
+    if (!request) throw new Error("client request cannot retry location capture");
+    await atomicBatch(this.database, [
+      this.database.prepare(`
+        INSERT OR IGNORE INTO med250_dispatch_outbox (
+          id, dedupe_key, kind, request_id, recipient_e164, payload, status, available_at, created_at, updated_at
+        ) VALUES (?, ?, 'location_capture', ?, ?, json_object('actor_id', ?, 'request_id', ?), 'pending', ?, ?, ?)
+      `).bind(newId(), `client-location-retry:${input.eventId}`, input.requestId, input.recipientE164,
+        input.actorId, input.requestId, at, at, at),
+      this.database.prepare(`
+        UPDATE med250_inbound_events SET request_id = ?, outcome = 'google_maps_location_unresolved_reprompted',
+          processed_at = ?, last_error_code = NULL WHERE id = ? AND actor_id = ?
+      `).bind(input.requestId, at, input.eventId, input.actorId),
     ]);
   }
 
@@ -457,7 +545,7 @@ export class WhatsAppRepository {
       INSERT OR IGNORE INTO med250_pharmacy_responses (
         id, provider_message_sid, request_id, pharmacy_id, response_status, received_at
       ) VALUES (?, ?, ?, ?, ?, ?)
-    `, [responseId, input.messageSid.toUpperCase(), input.requestId, input.pharmacyId, input.responseStatus, at]);
+    `, [responseId, input.messageSid, input.requestId, input.pharmacyId, input.responseStatus, at]);
     const statements: D1PreparedStatement[] = [
       this.database.prepare("UPDATE med250_request_recipients SET response_status = ?, responded_at = coalesce(responded_at, ?) WHERE request_id = ? AND pharmacy_id = ?")
         .bind(input.responseStatus, at, input.requestId, input.pharmacyId),
@@ -636,7 +724,7 @@ export class WhatsAppRepository {
     outboxId: string; queueDeliveryId: string; errorCode: string; retryable: boolean; retryDelaySeconds: number;
   }): Promise<boolean> {
     const row = await firstRow<D1Row>(this.database, `
-      SELECT request_id, otp_challenge_id, provider_attempts, max_provider_attempts
+      SELECT request_id, kind, otp_challenge_id, provider_attempts, max_provider_attempts
       FROM med250_dispatch_outbox WHERE id = ? AND queue_delivery_id = ?
     `, [input.outboxId, input.queueDeliveryId]);
     if (!row) throw new Error("outbox delivery lease not found");
@@ -656,6 +744,9 @@ export class WhatsAppRepository {
           nullableNumber(row, "provider_attempts") ?? 0, input.retryable ? 1 : 0, at),
     ]);
     if (!retry && row.otp_challenge_id) await runStatement(this.database, "UPDATE med250_otp_challenges SET delivery_status = 'failed', failed_at = coalesce(failed_at, ?) WHERE id = ?", [at, row.otp_challenge_id]);
+    if (!retry && stringValue(row, "kind") === "client_media_request" && row.request_id) {
+      await this.finalizeClientMediaRequest(stringValue(row, "request_id"));
+    }
     return retry;
   }
 
@@ -676,7 +767,7 @@ export class WhatsAppRepository {
     eventKey: string; messageSid: string; providerStatus: string; errorCode: string | null; occurredAt: Date;
   }): Promise<boolean> {
     const outbox = await firstRow<D1Row>(this.database, `
-      SELECT id, request_id, otp_challenge_id, status FROM med250_dispatch_outbox WHERE provider_message_sid = ?
+      SELECT id, kind, request_id, otp_challenge_id, status FROM med250_dispatch_outbox WHERE provider_message_sid = ?
     `, [input.messageSid]);
     if (!outbox) return false;
     const mapped = ["accepted", "queued", "sending", "sent"].includes(input.providerStatus) ? "sent"
@@ -715,7 +806,121 @@ export class WhatsAppRepository {
         failed_at = CASE WHEN ? = 'failed' THEN coalesce(failed_at, ?) ELSE failed_at END WHERE id = ?
     `).bind(resulting, input.messageSid, resulting, occurred, outbox.otp_challenge_id));
     await atomicBatch(this.database, statements);
+    if (stringValue(outbox, "kind") === "client_media_request" && outbox.request_id) {
+      // "Dispatched" means WhatsApp delivered the request to at least one
+      // pharmacy, never merely that Twilio accepted the API call.
+      await this.finalizeClientMediaRequest(stringValue(outbox, "request_id"));
+    }
     return true;
+  }
+
+  async reconcileOperationalState(staleSeconds = 900, limit = 100): Promise<WhatsAppMaintenanceReceipt> {
+    const boundedLimit = Math.max(1, Math.min(limit, 500));
+    const at = nowIso();
+    const cutoff = new Date(Date.now() - Math.max(300, Math.min(staleSeconds, 86_400)) * 1_000).toISOString();
+
+    const expiredGrantResult = await runStatement(this.database, `
+      UPDATE med250_media_access_grants SET revoked_at = ?
+      WHERE revoked_at IS NULL AND expires_at <= ?
+    `, [at, at]);
+    const expiredGrantsRevoked = changes(expiredGrantResult);
+    if (expiredGrantsRevoked > 0) {
+      await runStatement(this.database, `
+        INSERT INTO med250_audit_events (event_type, details, created_at)
+        VALUES ('expired_private_media_grants_revoked', json_object('grant_count', ?), ?)
+      `, [expiredGrantsRevoked, at]);
+    }
+
+    const staleMedia = await allRows<D1Row>(this.database, `
+      SELECT media.id, media.request_id, event.id AS event_id
+      FROM med250_request_media media
+      LEFT JOIN med250_inbound_events event
+        ON event.request_id = media.request_id AND event.provider_message_sid = media.provider_message_sid
+      WHERE media.processing_status = 'processing' AND media.created_at < ?
+      ORDER BY media.created_at, media.id LIMIT ?
+    `, [cutoff, boundedLimit]);
+    let staleMediaFailed = 0;
+    for (const media of staleMedia) {
+      const mediaId = stringValue(media, "id");
+      const requestId = stringValue(media, "request_id");
+      const failed = await runStatement(this.database, `
+        UPDATE med250_request_media
+        SET processing_status = 'failed', processing_error_code = 'media_processing_timeout', updated_at = ?
+        WHERE id = ? AND processing_status = 'processing' AND created_at < ?
+      `, [at, mediaId, cutoff]);
+      if (changes(failed) !== 1) continue;
+      staleMediaFailed += 1;
+      const statements: D1PreparedStatement[] = [
+        this.database.prepare(`
+          UPDATE med250_client_requests
+          SET status = 'cancelled', closed_at = coalesce(closed_at, ?), updated_at = ?
+          WHERE id = ? AND status = 'processing_media'
+        `).bind(at, at, requestId),
+        this.database.prepare(`
+          INSERT INTO med250_audit_events (event_type, request_id, details, created_at)
+          VALUES ('stale_client_media_failed_closed', ?, json_object('timeout_seconds', ?), ?)
+        `).bind(requestId, Math.max(300, Math.min(staleSeconds, 86_400)), at),
+      ];
+      const eventId = nullableString(media, "event_id");
+      if (eventId) statements.push(this.database.prepare(`
+        UPDATE med250_inbound_events
+        SET outcome = 'client_image_failed_timeout', processed_at = coalesce(processed_at, ?),
+          last_error_code = 'media_processing_timeout'
+        WHERE id = ? AND processed_at IS NULL
+      `).bind(at, eventId));
+      await atomicBatch(this.database, statements);
+    }
+
+    const staleEvents = await allRows<D1Row>(this.database, `
+      SELECT id, actor_id, request_id FROM med250_inbound_events
+      WHERE processed_at IS NULL AND received_at < ?
+      ORDER BY received_at, id LIMIT ?
+    `, [cutoff, boundedLimit]);
+    let staleInboundClosed = 0;
+    for (const event of staleEvents) {
+      const eventId = stringValue(event, "id");
+      const closed = await runStatement(this.database, `
+        UPDATE med250_inbound_events
+        SET outcome = 'stale_inbound_reconciled', processed_at = ?, last_error_code = 'inbound_processing_timeout'
+        WHERE id = ? AND processed_at IS NULL AND received_at < ?
+      `, [at, eventId, cutoff]);
+      if (changes(closed) !== 1) continue;
+      staleInboundClosed += 1;
+      await runStatement(this.database, `
+        INSERT INTO med250_audit_events (event_type, actor_id, request_id, details, created_at)
+        VALUES ('stale_inbound_event_closed', ?, ?, json_object('timeout_seconds', ?), ?)
+      `, [nullableString(event, "actor_id"), nullableString(event, "request_id"),
+        Math.max(300, Math.min(staleSeconds, 86_400)), at]);
+    }
+
+    const terminalRequests = await allRows<D1Row>(this.database, `
+      SELECT DISTINCT request.id
+      FROM med250_client_requests request
+      JOIN med250_dispatch_outbox outbox ON outbox.request_id = request.id
+      WHERE request.source = 'whatsapp_image' AND request.status = 'dispatched'
+        AND outbox.kind = 'client_media_request'
+        AND NOT EXISTS (
+          SELECT 1 FROM med250_dispatch_outbox unfinished
+          WHERE unfinished.request_id = request.id AND unfinished.kind = 'client_media_request'
+            AND unfinished.status NOT IN ('delivered', 'read', 'failed', 'dead_letter')
+        )
+      ORDER BY request.id LIMIT ?
+    `, [boundedLimit]);
+    let failedRequestsClosed = 0;
+    let clientConfirmationsQueued = 0;
+    for (const request of terminalRequests) {
+      const finalized = await this.finalizeClientMediaRequest(stringValue(request, "id"));
+      if (finalized.failedRequestClosed) failedRequestsClosed += 1;
+      if (finalized.clientConfirmationQueued) clientConfirmationsQueued += 1;
+    }
+
+    return {
+      expiredGrantsRevoked,
+      staleMediaFailed,
+      staleInboundClosed,
+      failedRequestsClosed,
+      clientConfirmationsQueued,
+    };
   }
 
   async markStaleProviderSendsUnknown(staleSeconds = 600): Promise<number> {
@@ -737,7 +942,7 @@ export class WhatsAppRepository {
 
   async recordDeadLetter(input: { outboxId: string; queueDeliveryId: string; attempts: number }): Promise<boolean> {
     const row = await firstRow<D1Row>(this.database, `
-      SELECT request_id, status, provider_message_sid FROM med250_dispatch_outbox WHERE id = ?
+      SELECT request_id, kind, status, provider_message_sid FROM med250_dispatch_outbox WHERE id = ?
     `, [input.outboxId]);
     if (!row) return false;
     const status = stringValue(row, "status");
@@ -756,6 +961,9 @@ export class WhatsAppRepository {
         VALUES ('dispatch_dead_letter_recorded', ?, ?, json_object('dlq_receipt_attempts', ?, 'reason', 'cloudflare_queue_retries_exhausted'), ?)`)
         .bind(row.request_id ?? null, input.outboxId, Math.max(1, input.attempts), at),
     ]);
+    if (stringValue(row, "kind") === "client_media_request" && row.request_id) {
+      await this.finalizeClientMediaRequest(stringValue(row, "request_id"));
+    }
     return true;
   }
 }

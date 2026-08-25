@@ -1,7 +1,7 @@
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
-import { dirname, join, relative, resolve, sep } from "node:path";
+import { join, relative, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 
@@ -387,7 +387,8 @@ WHERE (SELECT count(*) FROM med250_catalogue_products WHERE source_kind = 'rwand
 }
 
 function bundleCore(bundle) {
-  const { bundle_sha256: _bundle, ...core } = bundle;
+  const { bundle_sha256, ...core } = bundle;
+  void bundle_sha256;
   return core;
 }
 

@@ -25,6 +25,8 @@ const TARGETS = Object.freeze({
 
 const SAMPLE_ORDER_ID = "00000000-0000-4000-8000-000000000001";
 const SAMPLE_PHARMACY_ID = "00000000-0000-4000-8000-000000000002";
+const CLIENT_INVITE_MESSAGE = "Order medicines and prescriptions from nearby pharmacies with MED+250 on WhatsApp: https://wa.me/16622220600";
+const CLIENT_INVITE_SHARE_URL = `https://wa.me/?text=${encodeURIComponent(CLIENT_INVITE_MESSAGE)}`;
 
 function stableValue(value) {
   if (Array.isArray(value)) return value.map(stableValue);
@@ -156,15 +158,11 @@ export function buildProviderPlan({ target = "production", env = process.env } =
     origin,
     "{{7}}",
   );
-  const locationBaseUrl = workerUrl(
-    env.TWILIO_WHATSAPP_LOCATION_URL,
-    `${origin}/whatsapp/location`,
-    origin,
-  );
   const templates = [
     {
       envNames: ["TWILIO_PHARMACY_REQUEST_CONTENT_SID"],
       approvalCategory: "UTILITY",
+      approvalRequired: true,
       content: {
         friendly_name: "med250_pharmacy_request_v3",
         language: "en",
@@ -194,6 +192,7 @@ export function buildProviderPlan({ target = "production", env = process.env } =
     {
       envNames: ["TWILIO_PHARMACY_OTP_CONTENT_SID", "TWILIO_CUSTOMER_OTP_CONTENT_SID", "TWILIO_OTP_CONTENT_SID"],
       approvalCategory: "AUTHENTICATION",
+      approvalRequired: true,
       content: {
         friendly_name: "med250_whatsapp_otp_v1",
         language: "en",
@@ -210,14 +209,14 @@ export function buildProviderPlan({ target = "production", env = process.env } =
     {
       envNames: ["TWILIO_CLIENT_LOCATION_CAPTURE_CONTENT_SID"],
       approvalCategory: "UTILITY",
+      approvalRequired: false,
       content: {
-        friendly_name: "med250_client_location_capture_v2",
+        friendly_name: "med250_client_manual_location_v3",
         language: "en",
-        variables: { "1": "sample" },
+        variables: {},
         types: {
-          "twilio/call-to-action": {
-            body: "We received your medicine or prescription image. Tap Share location to open the secure MED+250 map inside WhatsApp. By continuing, you allow MED+250 to save this location and share your image and WhatsApp number with up to 10 assigned verified nearby pharmacies.",
-            actions: [{ type: "URL", title: "Share location", url: `${locationBaseUrl}?token={{1}}` }],
+          "twilio/text": {
+            body: "We received your requests, please share your current location in WhatsApp:\nTap + or 📎 → Location → Send your current location",
           },
         },
       },
@@ -225,8 +224,9 @@ export function buildProviderPlan({ target = "production", env = process.env } =
     {
       envNames: ["TWILIO_CLIENT_LOCATION_CHOICE_CONTENT_SID"],
       approvalCategory: "UTILITY",
+      approvalRequired: false,
       content: {
-        friendly_name: "med250_client_location_choice_v1",
+        friendly_name: "med250_client_location_choice_manual_v2",
         language: "en",
         variables: {
           "1": `med250:loc:saved:${SAMPLE_ORDER_ID}:${SAMPLE_PHARMACY_ID}`,
@@ -234,10 +234,28 @@ export function buildProviderPlan({ target = "production", env = process.env } =
         },
         types: {
           "twilio/quick-reply": {
-            body: "We have a saved delivery location for you. Choose it or share a new one. By continuing, you allow MED+250 to share your image and WhatsApp number with up to 10 assigned verified nearby pharmacies.",
+            body: "We received your requests, please use your saved location or share a new one",
             actions: [
-              { type: "QUICK_REPLY", title: "Use saved location", id: "{{1}}" },
-              { type: "QUICK_REPLY", title: "Share new location", id: "{{2}}" },
+              { type: "QUICK_REPLY", title: "Use saved", id: "{{1}}" },
+              { type: "QUICK_REPLY", title: "Share new", id: "{{2}}" },
+            ],
+          },
+        },
+      },
+    },
+    {
+      envNames: ["TWILIO_CLIENT_DISPATCH_CONFIRMATION_CONTENT_SID"],
+      approvalCategory: "UTILITY",
+      approvalRequired: false,
+      content: {
+        friendly_name: "med250_client_dispatch_share_v1",
+        language: "en",
+        variables: { "1": "10" },
+        types: {
+          "twilio/call-to-action": {
+            body: "Your request was dispatched to {{1}} nearby pharmacies. They will reply to you directly on WhatsApp.",
+            actions: [
+              { type: "URL", title: "Share Med+250", url: CLIENT_INVITE_SHARE_URL },
             ],
           },
         },
@@ -246,8 +264,9 @@ export function buildProviderPlan({ target = "production", env = process.env } =
     {
       envNames: ["TWILIO_PHARMACY_CLIENT_MEDIA_REQUEST_CONTENT_SID"],
       approvalCategory: "UTILITY",
+      approvalRequired: true,
       content: {
-        friendly_name: "med250_pharmacy_client_media_request_v1",
+        friendly_name: "med250_pharmacy_client_media_request_v2",
         language: "en",
         variables: {
           "1": "WA-TEST-001",
@@ -260,7 +279,7 @@ export function buildProviderPlan({ target = "production", env = process.env } =
         },
         types: {
           "twilio/card": {
-            title: "New MED+250 image request {{1}}. Image {{2}}. Customer WhatsApp: {{3}}. Routing: {{4}}. This is only the client-supplied medicine or prescription image; no catalogue list was generated. Reply directly to the customer or confirm below.",
+            title: "New MED+250 request {{1}}. Image {{2}}.\nCustomer WhatsApp: {{3}}. Routing: {{4}}.\nReply directly to the customer or confirm below.",
             media: [clientMediaUrl],
             actions: [
               { type: "QUICK_REPLY", title: "Can fulfil", id: "{{6}}" },
@@ -508,9 +527,17 @@ function publicTemplateResult(item) {
     sid: item.sid,
     found: item.found,
     exact: item.exact,
+    approval_required: item.template.approvalRequired,
     approval_status: item.approval.status,
     ...(item.approval.rejection_reason ? { rejection_reason: item.approval.rejection_reason } : {}),
   };
+}
+
+function templateReady(item) {
+  if (!item.found || !item.exact) return false;
+  return item.template.approvalRequired
+    ? item.approval.status === "approved"
+    : item.approval.status === "unsubmitted" || item.approval.status === "approved";
 }
 
 function manifest(plan, items) {
@@ -553,6 +580,7 @@ function planOutput(plan) {
       friendly_name: template.content.friendly_name,
       language: template.content.language,
       category: template.approvalCategory,
+      approval_required: template.approvalRequired,
       env_names: template.envNames,
       types: Object.keys(template.content.types),
       content_sha256: sha256(template.content),
@@ -586,7 +614,7 @@ export async function executeProviderSetup({
     const ready = current.sender.found
       && current.sender.online
       && current.sender.waba_match
-      && current.templates.every((item) => item.found && item.exact && item.approval.status === "approved");
+      && current.templates.every(templateReady);
     const output = {
       mode: "verify",
       target: plan.target,
@@ -632,7 +660,7 @@ export async function executeProviderSetup({
       sender: current.sender,
       templates: results.map((item) => ({ ...publicTemplateResult(item), created: item.created })),
       cloudflare_env_manifest: cloudflareManifest,
-      next: "Review the exact applied templates, then run the separately confirmed submit mode.",
+      next: "Review the exact applied templates, then submit only the approval-required outbound templates.",
     };
     stdout(`${JSON.stringify(output, null, 2)}\n`);
     return { exitCode: 0, mode: "apply", plan, output };
@@ -640,6 +668,7 @@ export async function executeProviderSetup({
 
   for (const item of current.templates) {
     if (!item.found) throw new Error(`Cannot submit missing Twilio content ${item.template.content.friendly_name}; run apply first.`);
+    if (!item.template.approvalRequired) continue;
     if (APPROVAL_BLOCKED.has(item.approval.status)) {
       throw new Error(`Cannot resubmit ${item.template.content.friendly_name} while its approval status is ${item.approval.status}; review and version the template first.`);
     }
@@ -649,6 +678,10 @@ export async function executeProviderSetup({
   }
   const results = [];
   for (const item of current.templates) {
+    if (!item.template.approvalRequired) {
+      results.push({ ...item, submitted: false });
+      continue;
+    }
     if (APPROVAL_IN_FLIGHT.has(item.approval.status)) {
       results.push({ ...item, submitted: false });
       continue;
@@ -667,7 +700,7 @@ export async function executeProviderSetup({
     sender: current.sender,
     templates: results.map((item) => ({ ...publicTemplateResult(item), submitted: item.submitted })),
     cloudflare_env_manifest: cloudflareManifest,
-    next: "Run verify after Meta has reviewed every template; only approved status satisfies readiness.",
+    next: "Run verify after WhatsApp has reviewed every approval-required template. In-session location actions remain unsubmitted by design.",
   };
   stdout(`${JSON.stringify(output, null, 2)}\n`);
   return { exitCode: 0, mode: "submit", plan, output };

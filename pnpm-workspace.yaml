@@ -5,3 +5,6 @@ allowBuilds:
   workerd: false
 minimumReleaseAgeExclude:
   - '@cloudflare/workers-types@5.20260823.1'
+overrides:
+  '@esbuild-kit/core-utils>esbuild': 0.25.12
+  postcss: 8.5.26

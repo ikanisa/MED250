@@ -142,7 +142,7 @@
   display:block;
   overflow-x:auto;
   overscroll-behavior-inline:contain;
-  scroll-snap-type:none;
+  scroll-snap-type:inline proximity;
   scrollbar-width:thin;
   -webkit-mask-image:linear-gradient(90deg,transparent 0,var(--color-black) 2.5%,var(--color-black) 97.5%,transparent 100%);
   mask-image:linear-gradient(90deg,transparent 0,var(--color-black) 2.5%,var(--color-black) 97.5%,transparent 100%);
@@ -157,6 +157,7 @@
   gap:12px;
 }
 .subcategory-rail button {
+  scroll-snap-align:start;
   flex:0 0 clamp(148px,16vw,210px);
   min-height:clamp(142px,15vw,172px);
   padding:9px;

@@ -1,10 +1,14 @@
 import { readResponseText } from "./bounded-body.ts";
 import type { TwilioSendRuntime } from "./runtime-env.ts";
-import { decryptOtpCode, signClientLocationToken } from "./secure-token.ts";
+import { decryptOtpCode } from "./secure-token.ts";
 import type { OutboxDelivery } from "./whatsapp-repository.ts";
 
 const MESSAGE_SID = /^(?:SM|MM)[0-9a-f]{32}$/i;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+// Pharmacy registry rows use stable governed keys such as
+// `retail-rw-fda-123`, not UUIDs. Keep this stricter than an arbitrary string
+// because the value is embedded in signed-inbound quick-reply payloads.
+const PHARMACY_ID = /^(?:[a-z0-9]+(?:-[a-z0-9]+)*)$/i;
 
 export class TwilioSendError extends Error {
   readonly code: string;
@@ -115,15 +119,14 @@ export async function composeOutboxMessage(
   }
 
   if (delivery.kind === "location_capture") {
-    const actorId = payloadUuid(delivery.payload, "actor_id");
+    payloadUuid(delivery.payload, "actor_id");
     const requestId = delivery.requestId ?? payloadUuid(delivery.payload, "request_id");
     if (!UUID.test(requestId)) throw new Error("Location capture request ID is invalid.");
-    const token = await signClientLocationToken({ actorId, requestId }, runtime.locationLinkSecret);
     return {
       kind: "content",
       toE164: delivery.recipientE164,
       contentSid: runtime.locationCaptureContentSid,
-      variables: { "1": token },
+      variables: {},
     };
   }
 
@@ -150,7 +153,8 @@ export async function composeOutboxMessage(
       || !delivery.r2Key
       || !mediaToken
       || !UUID.test(delivery.requestId)
-      || !UUID.test(delivery.pharmacyId)
+      || delivery.pharmacyId.length > 64
+      || !PHARMACY_ID.test(delivery.pharmacyId)
     ) throw new Error("Client-media delivery context is incomplete.");
     const imageIndex = Math.max(1, (delivery.mediaIndex ?? 0) + 1);
     const mediaCount = Math.max(imageIndex, delivery.mediaCount ?? imageIndex);
@@ -172,13 +176,18 @@ export async function composeOutboxMessage(
 
   if (delivery.kind === "client_confirmation") {
     const count = recipientCount(delivery.payload);
-    return {
-      kind: "text",
-      toE164: delivery.recipientE164,
-      body: count > 0
-        ? `Your image request was securely dispatched to ${count} nearby verified pharmacies. They received your WhatsApp number and may reply to you directly here.`
-        : "Your location was saved. No verified pharmacy could be assigned yet, so your image was not shared. Please try again later.",
-    };
+    return count > 0
+      ? {
+          kind: "content",
+          toE164: delivery.recipientE164,
+          contentSid: runtime.clientDispatchConfirmationContentSid,
+          variables: { "1": String(count) },
+        }
+      : {
+          kind: "text",
+          toE164: delivery.recipientE164,
+          body: "Your location was saved. No verified pharmacy could be assigned yet, so your image was not shared. Please try again later.",
+        };
   }
 
   if (delivery.kind === "client_guidance") {
@@ -235,45 +244,61 @@ export async function sendTwilioMessage(
     form.set("Body", message.body);
   }
 
-  let response: Response;
-  try {
-    response = await fetcher(
-      `https://api.twilio.com/2010-04-01/Accounts/${runtime.accountSid}/Messages.json`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Basic ${btoa(`${runtime.apiKey}:${runtime.apiSecret}`)}`,
-          "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-          Accept: "application/json",
+  const request = async (username: string, password: string): Promise<Response> => {
+    try {
+      return await fetcher(
+        `https://api.twilio.com/2010-04-01/Accounts/${runtime.accountSid}/Messages.json`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Basic ${btoa(`${username}:${password}`)}`,
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+            Accept: "application/json",
+          },
+          body: form,
+          // Keep redirects observable as definitive HTTP responses. A rejected
+          // redirect otherwise surfaces only as a TypeError and leaves provider
+          // finality ambiguous even though Twilio did not accept the request.
+          redirect: "manual",
+          signal: AbortSignal.timeout(10_000),
         },
-        body: form,
-        // Keep redirects observable as definitive HTTP responses. A rejected
-        // redirect otherwise surfaces only as a TypeError and leaves provider
-        // finality ambiguous even though Twilio did not accept the request.
-        redirect: "manual",
-        signal: AbortSignal.timeout(10_000),
-      },
-    );
-  } catch (error) {
-    throw new TwilioSendError(
-      transportFailureCode(error),
-      "Twilio send outcome is unknown after a transport failure.",
-      { retryable: false, outcomeUnknown: true },
-    );
-  }
+      );
+    } catch (error) {
+      throw new TwilioSendError(
+        transportFailureCode(error),
+        "Twilio send outcome is unknown after a transport failure.",
+        { retryable: false, outcomeUnknown: true },
+      );
+    }
+  };
 
-  let body: string;
-  try {
-    body = await readResponseText(response, 64 * 1024);
-  } catch {
-    throw new TwilioSendError(
-      response.ok ? "twilio_acceptance_receipt_unreadable" : `twilio_http_${response.status}`,
-      "Twilio returned an unreadable response.",
-      {
-        retryable: !response.ok && (response.status === 408 || response.status === 409 || response.status === 429 || response.status >= 500),
-        outcomeUnknown: response.ok,
-      },
-    );
+  const responseBody = async (response: Response): Promise<string> => {
+    try {
+      return await readResponseText(response, 64 * 1024);
+    } catch {
+      throw new TwilioSendError(
+        response.ok ? "twilio_acceptance_receipt_unreadable" : `twilio_http_${response.status}`,
+        "Twilio returned an unreadable response.",
+        {
+          retryable: !response.ok && (response.status === 408 || response.status === 409 || response.status === 429 || response.status >= 500),
+          outcomeUnknown: response.ok,
+        },
+      );
+    }
+  };
+
+  let response = await request(runtime.apiKey, runtime.apiSecret);
+  let body = await responseBody(response);
+  const primaryErrorCode = response.ok ? null : errorCodeFromResponse(response.status, body);
+  if (
+    !response.ok
+    && (response.status === 401 || response.status === 403)
+    && (primaryErrorCode === "twilio_70051" || primaryErrorCode === "twilio_20003")
+  ) {
+    // Authentication rejection is definitive: Twilio did not create a Message.
+    // The already-installed Auth Token is therefore a safe one-shot fallback.
+    response = await request(runtime.accountSid, runtime.authToken);
+    body = await responseBody(response);
   }
   if (!response.ok) {
     const retryable = response.status === 408 || response.status === 409 || response.status === 429 || response.status >= 500;

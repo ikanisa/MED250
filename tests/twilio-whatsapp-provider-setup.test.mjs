@@ -109,7 +109,7 @@ test("builds one deterministic Cloudflare production plan with separate provider
   assert.equal(first.plan_sha256, second.plan_sha256);
   assert.match(first.plan_sha256, /^[0-9a-f]{64}$/);
   assert.equal(first.worker_origin, "https://med-250.com");
-  assert.equal(first.templates.length, 5);
+  assert.equal(first.templates.length, 6);
   assert.ok(first.templates.every((template) => (
     template.content.friendly_name.startsWith("med250_")
     && !template.content.friendly_name.startsWith("med250_staging_")
@@ -119,9 +119,40 @@ test("builds one deterministic Cloudflare production plan with separate provider
     "Copy Code",
   );
   assert.equal(
-    first.templates[4].content.types["twilio/card"].media[0],
+    first.templates[5].content.types["twilio/card"].media[0],
     "https://med-250.com/whatsapp-client-media/{{5}}.png",
   );
+  assert.equal(first.templates[2].content.friendly_name, "med250_client_manual_location_v3");
+  assert.equal(first.templates[2].content.types["twilio/text"].body.split("\n").length, 2);
+  assert.equal(
+    first.templates[2].content.types["twilio/text"].body,
+    "We received your requests, please share your current location in WhatsApp:\nTap + or 📎 → Location → Send your current location",
+  );
+  assert.equal(first.templates[2].content.types["twilio/text"].actions, undefined);
+  assert.equal(first.templates[3].content.friendly_name, "med250_client_location_choice_manual_v2");
+  assert.equal(
+    first.templates[3].content.types["twilio/quick-reply"].body,
+    "We received your requests, please use your saved location or share a new one",
+  );
+  assert.deepEqual(
+    first.templates[3].content.types["twilio/quick-reply"].actions.map(({ title }) => title),
+    ["Use saved", "Share new"],
+  );
+  assert.equal(first.templates[4].content.friendly_name, "med250_client_dispatch_share_v1");
+  assert.equal(
+    first.templates[4].content.types["twilio/call-to-action"].body,
+    "Your request was dispatched to {{1}} nearby pharmacies. They will reply to you directly on WhatsApp.",
+  );
+  assert.deepEqual(first.templates[4].content.types["twilio/call-to-action"].actions.map(({ type, title }) => ({ type, title })), [
+    { type: "URL", title: "Share Med+250" },
+  ]);
+  const shareUrl = new URL(first.templates[4].content.types["twilio/call-to-action"].actions[0].url);
+  assert.equal(shareUrl.origin, "https://wa.me");
+  assert.equal(
+    shareUrl.searchParams.get("text"),
+    "Order medicines and prescriptions from nearby pharmacies with MED+250 on WhatsApp: https://wa.me/16622220600",
+  );
+  assert.doesNotMatch(JSON.stringify(first.templates[2].content), /button|action|url|google maps/i);
   assert.equal(parseArguments([]).mode, "plan");
   assert.equal(parseArguments(["--apply"]).mode, "apply");
   assert.equal(parseArguments(["--submit-approval"]).mode, "submit");
@@ -189,7 +220,9 @@ test("requires both the exact production confirmation and reviewed plan checksum
 });
 
 test("read-only verification proves sender, WABA, exact templates, approvals, and a non-secret Cloudflare manifest", async () => {
-  const { fetchImpl } = fixture();
+  const { fetchImpl } = fixture({
+    approvalStatuses: ["approved", "approved", "unsubmitted", "unsubmitted", "unsubmitted", "approved"],
+  });
   let output = "";
   const result = await executeProviderSetup({
     argv: ["--mode=verify", "--target=production"],
@@ -201,7 +234,9 @@ test("read-only verification proves sender, WABA, exact templates, approvals, an
   assert.equal(result.output.ready, true);
   assert.equal(result.output.sender.online, true);
   assert.equal(result.output.sender.waba_match, true);
-  assert.equal(Object.keys(result.output.cloudflare_env_manifest.content_sids).length, 7);
+  assert.equal(result.output.templates[2].approval_required, false);
+  assert.equal(result.output.templates[2].approval_status, "unsubmitted");
+  assert.equal(Object.keys(result.output.cloudflare_env_manifest.content_sids).length, 8);
   assert.doesNotMatch(output, new RegExp(API_SECRET));
   assert.doesNotMatch(output, new RegExp(API_KEY));
   assert.doesNotMatch(output, /auth.?token/i);
@@ -209,7 +244,7 @@ test("read-only verification proves sender, WABA, exact templates, approvals, an
 
 test("submission is idempotent and posts only exact unsubmitted templates", async () => {
   const { plan, posts, fetchImpl } = fixture({
-    approvalStatuses: ["approved", "pending", "received", "unsubmitted", "unsubmitted"],
+    approvalStatuses: ["unsubmitted", "pending", "unsubmitted", "unsubmitted", "unsubmitted", "unsubmitted"],
   });
   const result = await executeProviderSetup({
     argv: [
@@ -225,15 +260,15 @@ test("submission is idempotent and posts only exact unsubmitted templates", asyn
   assert.equal(result.exitCode, 0);
   assert.equal(posts.length, 2);
   assert.deepEqual(posts.map((post) => post.body.name), [
-    "med250_client_location_choice_v1",
-    "med250_pharmacy_client_media_request_v1",
+    "med250_pharmacy_request_v3",
+    "med250_pharmacy_client_media_request_v2",
   ]);
   assert.equal(result.output.templates.filter((template) => template.submitted).length, 2);
 });
 
 test("template drift aborts before any approval submission", async () => {
   const { plan, posts, fetchImpl } = fixture({
-    approvalStatuses: ["unsubmitted", "unsubmitted", "unsubmitted", "unsubmitted", "unsubmitted"],
+    approvalStatuses: ["unsubmitted", "unsubmitted", "unsubmitted", "unsubmitted", "unsubmitted", "unsubmitted"],
     driftIndex: 2,
   });
   await assert.rejects(

@@ -54,9 +54,10 @@ test("keeps basket state bounded and precise customer details session-only", asy
 });
 
 test("closes offer-item, pharmacy-login, description, and image publication gaps", async () => {
-  const [migration, verifyOtp] = await Promise.all([
+  const [migration, authRepository, d1Schema] = await Promise.all([
     read("../supabase/migrations/20260723120000_marketplace_go_live_hardening.sql"),
-    read("../supabase/functions/dawanear-pharmacy-verify-otp/index.ts"),
+    read("../worker/backend/auth-repository.ts"),
+    read("../db/d1/migrations/0001_initial.sql"),
   ]);
 
   assert.match(migration, /dawanear_pharmacy_contacts_one_login_authority_idx/);
@@ -83,10 +84,11 @@ test("closes offer-item, pharmacy-login, description, and image publication gaps
   assert.match(migration, /'expected_function_count', 32/);
   assert.match(migration, /pharmacy_identity_binding/);
 
-  assert.match(verifyOtp, /pharmacies\.length !== 1/);
-  assert.match(verifyOtp, /\.rpc\("dawanear_bind_pharmacy_identity"/);
-  assert.doesNotMatch(verifyOtp, /\.from\("dawanear_pharmacy_memberships"\)/);
-  assert.doesNotMatch(verifyOtp, /\.from\("dawanear_pharmacy_identities"\)\.insert/);
+  assert.match(d1Schema, /med250_pharmacy_contacts_verified_whatsapp_idx/);
+  assert.match(authRepository, /resolution_status"\) === "ambiguous"/);
+  assert.match(authRepository, /contact\.login_enabled/);
+  assert.match(authRepository, /classification\.pharmacyId !== pharmacyId/);
+  assert.doesNotMatch(authRepository, /supabase|dawanear_pharmacy_memberships/i);
 });
 
 test("keeps the aggregate image contract bounded to materialized rollups", async () => {
