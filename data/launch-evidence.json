@@ -6,7 +6,10 @@
     "MED250_GATE_GPS_READY": {
       "title": "Authoritative pharmacy GPS readiness",
       "owner": "MED+250 operations",
-      "required_evidence_types": ["operations_snapshot", "review_ledger"],
+      "required_evidence_types": [
+        "operations_snapshot",
+        "review_ledger"
+      ],
       "status": "pending",
       "acceptance": "The approved operating pharmacy set has authoritative premises coordinates with reviewer identity and durable source evidence, and strict operational health reports dispatch-ready coverage.",
       "evidence": [
@@ -25,7 +28,10 @@
     "MED250_GATE_WHATSAPP_READY": {
       "title": "Pharmacy WhatsApp readiness",
       "owner": "MED+250 operations",
-      "required_evidence_types": ["operations_snapshot", "review_ledger"],
+      "required_evidence_types": [
+        "operations_snapshot",
+        "review_ledger"
+      ],
       "status": "pending",
       "acceptance": "The approved operating pharmacy set has current, pharmacy-authorised login-enabled WhatsApp contacts and the strict operational-health check passes.",
       "evidence": [
@@ -44,7 +50,9 @@
     "MED250_GATE_DUPLICATE_REGISTER_REVIEWED": {
       "title": "Duplicate-register review",
       "owner": "MED+250 register data reviewer",
-      "required_evidence_types": ["review_ledger"],
+      "required_evidence_types": [
+        "review_ledger"
+      ],
       "status": "pending",
       "acceptance": "The strict duplicate-register verifier passes with named, timestamped decisions for every synchronized product and pharmacy duplicate group.",
       "evidence": [],
@@ -55,9 +63,12 @@
     "MED250_GATE_SECURITY_HARDENING_DEPLOYED": {
       "title": "Security-hardening migration deployment",
       "owner": "MED+250 backend owner",
-      "required_evidence_types": ["deployment_receipt", "test_record"],
+      "required_evidence_types": [
+        "deployment_receipt",
+        "test_record"
+      ],
       "status": "pending",
-      "acceptance": "The forward security migrations and contract refresh are deployed using rotated credentials, and the privileged backend verifier returns contract 2026-07-18.3 with the runtime and DDL product-image governance guards, aggregate public trust-metric boundary, fail-closed product-description workflow, and all invariants passing.",
+      "acceptance": "The canonical Cloudflare D1 migration ledger is current, the production Worker is bound to the governed D1/R2/Queue resources, and the security, privacy, media-rights and order-lifecycle invariants pass against the exact deployed Git revision.",
       "evidence": [
         {
           "type": "deployment_receipt",
@@ -79,11 +90,14 @@
       "approved_at": null
     },
     "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED": {
-      "title": "Revised Edge Function deployment",
+      "title": "Cloudflare Worker backend deployment",
       "owner": "MED+250 backend owner",
-      "required_evidence_types": ["deployment_receipt", "test_record"],
+      "required_evidence_types": [
+        "deployment_receipt",
+        "test_record"
+      ],
       "status": "pending",
-      "acceptance": "The reviewed OTP, cleanup, geocoding, marketplace-review, contact-review and product-description-review Edge Function versions are deployed and their protected-access boundaries pass.",
+      "acceptance": "The reviewed Cloudflare Worker routes for authentication, WhatsApp inbound/status callbacks, dispatch, cleanup, geocoding and governed review workflows are deployed at the exact Git revision and their protected-access boundaries pass.",
       "evidence": [
         {
           "type": "deployment_receipt",
@@ -107,9 +121,11 @@
     "MED250_GATE_TURNSTILE_SERVER_VERIFIED": {
       "title": "Turnstile server verification",
       "owner": "MED+250 security owner",
-      "required_evidence_types": ["test_record"],
+      "required_evidence_types": [
+        "test_record"
+      ],
       "status": "pending",
-      "acceptance": "Supabase Auth validates production Turnstile tokens and controlled tests prove invalid or missing tokens cannot create new customer identities.",
+      "acceptance": "The production Cloudflare Worker validates Turnstile tokens server-side and controlled tests prove invalid or missing tokens cannot create new customer sessions or availability requests.",
       "evidence": [],
       "approved_by": null,
       "approved_role": null,
@@ -118,7 +134,10 @@
     "MED250_GATE_AUTH_RATE_LIMITS_APPROVED": {
       "title": "Anonymous-auth rate-limit approval",
       "owner": "MED+250 security owner",
-      "required_evidence_types": ["signed_approval", "test_record"],
+      "required_evidence_types": [
+        "signed_approval",
+        "test_record"
+      ],
       "status": "pending",
       "acceptance": "Project-wide anonymous-auth limits are approved after impact review and controlled tests prove intended customers can order without weakening abuse controls.",
       "evidence": [],
@@ -129,7 +148,10 @@
     "MED250_GATE_PRESCRIPTION_RETENTION_APPROVED": {
       "title": "Prescription-retention approval",
       "owner": "MED+250 privacy owner",
-      "required_evidence_types": ["signed_approval", "test_record"],
+      "required_evidence_types": [
+        "signed_approval",
+        "test_record"
+      ],
       "status": "pending",
       "acceptance": "The privacy owner approves the implemented retention periods and cleanup schedule, and a controlled cleanup run produces a healthy, non-stale aggregate signal.",
       "evidence": [
@@ -148,9 +170,12 @@
     "MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED": {
       "title": "Cloudflare account verification",
       "owner": "MED+250 infrastructure owner",
-      "required_evidence_types": ["account_verification", "signed_approval"],
+      "required_evidence_types": [
+        "account_verification",
+        "signed_approval"
+      ],
       "status": "pending",
-      "acceptance": "The intended Cloudflare account, least-privilege deploy token, Worker names, protected environments and route ownership are verified with a redacted account record.",
+      "acceptance": "The intended Cloudflare account, production Worker, direct custom-domain route, required secret bindings, least-privilege release credential and rollback access are verified with a redacted account record.",
       "evidence": [],
       "approved_by": null,
       "approved_role": null,
@@ -159,9 +184,12 @@
     "MED250_GATE_DOMAIN_DNS_VERIFIED": {
       "title": "Production domain and DNS verification",
       "owner": "MED+250 infrastructure owner",
-      "required_evidence_types": ["domain_verification", "test_record"],
+      "required_evidence_types": [
+        "domain_verification",
+        "test_record"
+      ],
       "status": "pending",
-      "acceptance": "med250.gikundiro.com resolves through the intended Cloudflare account, TLS is healthy, the Worker custom-domain route is attached and the deployment verifier passes in live mode.",
+      "acceptance": "med-250.com resolves through the intended Cloudflare account, TLS is healthy, the direct Worker custom-domain route is attached and the deployment verifier passes all required routes at the exact live Git revision.",
       "evidence": [
         {
           "type": "domain_verification",
@@ -185,7 +213,10 @@
     "MED250_GATE_PHYSICAL_UAT_PASSED": {
       "title": "Controlled physical-device UAT",
       "owner": "MED+250 QA owner",
-      "required_evidence_types": ["signed_approval", "test_record"],
+      "required_evidence_types": [
+        "signed_approval",
+        "test_record"
+      ],
       "status": "pending",
       "acceptance": "Named test identities pass GPS consent, WhatsApp OTP, dispatch, realtime confirmation, selection, WhatsApp, MoMo, expiry, cancellation and prescription-access scenarios without contacting unintended pharmacies.",
       "evidence": [],

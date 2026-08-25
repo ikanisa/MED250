@@ -304,17 +304,15 @@ Gates:
 - `MED250_GATE_SECURITY_HARDENING_DEPLOYED`
 - `MED250_GATE_EDGE_FUNCTIONS_DEPLOYED`
 
-The historical deployment and test artifacts cover the six functions reviewed on 2026-07-16 and remain historical. Fresh 2026-07-18 deployment and test artifacts now bind the active description reviewer, backend contract `2026-07-18.3`, description governance, aggregate trust boundary, scoped database advisors, and the 302-test suite captured when those artifacts were generated. The current serial suite passes 304/304 after adding the exact-release recommendation checks. The anonymous reviewer-denial probe passes. The backend owner must use the protected administrator credential and a controlled product identity for the remaining authenticated read-only inspection, review the fresh artifacts, and add their real name, role, and timezone-qualified approval to the registry. Run:
+The old Supabase function artifacts are retained as historical evidence only. The active backend is the single production Cloudflare Worker with direct D1, R2 and Queue bindings plus Twilio transport. The backend owner must review a fresh exact-Git deployment receipt, the current D1 migration ledger, the nine-secret inventory, aggregate operational health and the complete serial regression result, then add their real name, role and timezone-qualified approval to the registry. Run:
 
 ```sh
-npm run backend:verify
-npm run backend:verify:description-reviewer -- --product-id PRODUCT_ID --expected-updated-at EXACT_INSPECT_UPDATED_AT --evidence-output docs/launch/evidence/product-description-reviewer-verification-YYYY-MM-DD.json
+npm run cloudflare:typecheck
+npm run cloudflare:check:worker-d1
 npm run ops:health:strict
 ```
 
-Use the exact `updated_at` returned by a fresh inspection. The receipt contains no response body, raw product identifier, credentials, description, or review note. Hash it and bind that digest into the current Edge Function test record before owner approval; the automated records are supporting evidence, not approval artifacts by themselves.
-
-Configure the protected production environment with `MED250_ADMIN_TOKEN` as a secret and the exact probe inputs as `MED250_DESCRIPTION_REVIEWER_PROBE_PRODUCT_ID` and `MED250_DESCRIPTION_REVIEWER_PROBE_EXPECTED_UPDATED_AT` variables. The live release gate intentionally rejects missing or stale probe inputs.
+Bind the redacted receipts and their hashes into the current Worker deployment and security-hardening test records before owner approval. Automated records support the decision but are not approval artifacts by themselves. Do not add a Supabase credential, Meta token, staging target, customer identifier or pharmacy phone number to the evidence.
 
 After the backend owner reviews the evidence-complete gates, record approval
 with the explicit gate approval helper instead of hand-editing
