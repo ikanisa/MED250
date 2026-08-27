@@ -34,6 +34,10 @@ Indicative catalogue prices do not qualify as offers. `AggregateOffer` is emitte
 
 The pilot routes are `/find-medicine`, `/about`, and `/trust`. `/rw` remains blocked until a qualified translation provider, governed glossary version, clinical reviewer, legal reviewer, review date, and complete runtime catalogue are recorded. Run `npm run localization:verify` before any locale-release change.
 
+## Rwanda FDA source-gap reconciliation
+
+Run `npm run seo:audit-source-gaps` to compare the committed 2,480-product index with the current public Rwanda FDA register. Use `npm run seo:refresh-source-gaps` only after reviewing the authority page title, product count, and exact-registration reconciliation. The generated ledger records fields that are blank in the authority source; it is not permission to infer ingredients, strengths, pack sizes, or manufacturers from brand names or adjacent columns. A field remains blank until the Rwanda FDA register or a separately approved authoritative product record supplies the exact value.
+
 ## Release checks
 
 Run `npm run seo:quality`, `npm run localization:verify`, the application test suite, production build checks, and browser QA at desktop and mobile widths. After release, verify the sitemap, canonical tags, Product and Breadcrumb JSON-LD, the absence of unsupported Offer or review markup, and all new trust and intent routes.

@@ -42,6 +42,7 @@ const optionalPublicRuntimeKeys = [
   "NEXT_PUBLIC_SUPABASE_URL",
   "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
   "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
+  "NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION",
 ];
 const optionalPublicRuntime = Object.fromEntries(optionalPublicRuntimeKeys
   .map((key) => [key, process.env[key]?.trim()])

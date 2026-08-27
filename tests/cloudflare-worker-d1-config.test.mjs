@@ -80,6 +80,27 @@ test("prepares a production config with only the governed D1 binding", () => {
   assert.equal(config.vars.NEXT_PUBLIC_SUPABASE_URL, undefined);
 });
 
+test("propagates only a bounded Google site-verification token", () => {
+  const token = "example_search_console_token_123456789";
+  const config = prepareWorkerD1Config(generated(), {
+    target: "production",
+    origin: "https://med-250.com",
+    releaseRevision: revision,
+    d1DatabaseId: databaseId,
+    providerValues,
+    googleSiteVerification: token,
+  });
+  assert.equal(config.vars.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION, token);
+  assert.throws(() => prepareWorkerD1Config(generated(), {
+    target: "production",
+    origin: "https://med-250.com",
+    releaseRevision: revision,
+    d1DatabaseId: databaseId,
+    providerValues,
+    googleSiteVerification: '<meta name="google-site-verification">',
+  }), /token content only/);
+});
+
 test("removes Vinext development dotenv material before production preparation", async () => {
   const directory = await mkdtemp(join(tmpdir(), "med250-production-prep-"));
   try {

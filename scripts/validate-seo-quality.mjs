@@ -6,6 +6,7 @@ import { productMetadataDescription, productMetadataTitle } from "../lib/seo-con
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const products = JSON.parse(await readFile(path.join(projectRoot, "data/product-seo-index.json"), "utf8"));
 const locations = JSON.parse(await readFile(path.join(projectRoot, "data/seo/location-pages.json"), "utf8"));
+const sourceGapAudit = JSON.parse(await readFile(path.join(projectRoot, "data/seo/rwanda-fda-source-gap-audit.json"), "utf8"));
 const errors = [];
 const warnings = [];
 const seenIds = new Set();
@@ -27,8 +28,20 @@ for (const record of products) {
 
 for (const [field, count] of Object.entries(missing)) {
   if (count > regressionBudgets[field]) errors.push(`${field} missing count ${count} exceeds regression budget ${regressionBudgets[field]}`);
-  else if (count) warnings.push(`${field}: ${count} records remain in the governed completion queue`);
+  const auditedRecords = sourceGapAudit.missing?.[field] ?? [];
+  const auditedIds = auditedRecords.map(({ id }) => id).toSorted();
+  const missingIds = products.filter((record) => !String(record[field] ?? "").trim()).map(({ id }) => id).toSorted();
+  if (JSON.stringify(auditedIds) !== JSON.stringify(missingIds)) errors.push(`${field}: authority-source gap ledger does not match the product index`);
+  if (sourceGapAudit.counts?.[field] !== count) errors.push(`${field}: authority-source gap count does not match the product index`);
+  else if (count) warnings.push(`${field}: ${count} fields are blank in the current Rwanda FDA authority source and remain fail-closed`);
 }
+
+if (sourceGapAudit.schemaVersion !== "1") errors.push("Rwanda FDA source-gap audit schema is invalid");
+if (sourceGapAudit.source?.url !== "https://rwandafda.gov.rw/register/monitoring_preview_register") errors.push("Rwanda FDA source-gap audit URL is invalid");
+if (sourceGapAudit.source?.rowCount !== products.length) errors.push("Rwanda FDA source-gap audit row count does not match the product index");
+const observedAt = new Date(sourceGapAudit.source?.observedAt ?? "");
+if (Number.isNaN(observedAt.valueOf()) || observedAt.valueOf() > Date.now() + 5 * 60 * 1_000) errors.push("Rwanda FDA source-gap audit timestamp is invalid");
+else if (Date.now() - observedAt.valueOf() > 90 * 24 * 60 * 60 * 1_000) errors.push("Rwanda FDA source-gap audit is older than 90 days; refresh it before release");
 
 const publicLocationPaths = locations.pages.filter((page) => page.status === "public").map((page) => page.path);
 if (publicLocationPaths.join(",") !== "/contact") errors.push("Only the governed contact location page may currently be public");

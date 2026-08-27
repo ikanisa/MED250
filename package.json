@@ -102,6 +102,8 @@
     "domain:evidence:refresh": "node scripts/refresh-domain-launch-evidence.mjs",
     "seo:generate-products": "node scripts/generate-product-seo-index.mjs && node scripts/generate-product-sitemap-index.mjs && node scripts/generate-product-related-index.mjs",
     "seo:generate-sitemap": "node scripts/generate-product-sitemap-index.mjs",
+    "seo:audit-source-gaps": "node scripts/audit-rwanda-fda-source-gaps.mjs",
+    "seo:refresh-source-gaps": "node scripts/audit-rwanda-fda-source-gaps.mjs --write",
     "seo:quality": "node scripts/validate-seo-quality.mjs",
     "data:related-products": "node scripts/generate-product-related-index.mjs",
     "related:verify:live": "node --env-file-if-exists=.env.local scripts/verify-live-related-products.mjs",

@@ -1,0 +1,2269 @@
+{
+  "schemaVersion": "1",
+  "classification": "authoritative-source gaps; no medical field may be inferred from a brand name or adjacent field",
+  "source": {
+    "name": "Rwanda Food and Drugs Authority registered pharmaceutical products",
+    "url": "https://rwandafda.gov.rw/register/monitoring_preview_register",
+    "registerTitle": "LIST OF REGISTERED PHARMACEUTICAL PRODUCTS — AUGUST 2026",
+    "observedAt": "2026-08-27T16:49:47.385Z",
+    "rowCount": 2480,
+    "trackedFieldProjectionSha256": "001f57ae91af735f2056e5a0e5163c258ff4f95d7760b4eaa6f90c941041f84b"
+  },
+  "missing": {
+    "generic": [
+      {
+        "id": "rwanda-fda-hm-0003",
+        "registrationNumber": "RWANDA-FDA24/HM/0882/0115"
+      },
+      {
+        "id": "rwanda-fda-hm-0018",
+        "registrationNumber": "RWANDA-FDA24/HM/1029/0094"
+      },
+      {
+        "id": "rwanda-fda-hm-0021",
+        "registrationNumber": "RWANDA-FDA26/HM/0195/0096"
+      },
+      {
+        "id": "rwanda-fda-hm-0036",
+        "registrationNumber": "RWANDA-FDA23/HM/0181/0073"
+      },
+      {
+        "id": "rwanda-fda-hm-0039",
+        "registrationNumber": "RWANDA-FDA25/HM/0273/0069"
+      },
+      {
+        "id": "rwanda-fda-hm-0055",
+        "registrationNumber": "RWANDA-FDA25/HM/0576/0053"
+      },
+      {
+        "id": "rwanda-fda-hm-0062",
+        "registrationNumber": "RWANDA-FDA25/HM/0596/0059"
+      },
+      {
+        "id": "rwanda-fda-hm-0066",
+        "registrationNumber": "RWANDA-FDA25/HM/0327/0066"
+      },
+      {
+        "id": "rwanda-fda-hm-0068",
+        "registrationNumber": "RWANDA-FDA24/HM/0670/0058"
+      },
+      {
+        "id": "rwanda-fda-hm-0070",
+        "registrationNumber": "RWANDA-FDA25/HM/0029/0075"
+      },
+      {
+        "id": "rwanda-fda-hm-0086",
+        "registrationNumber": "RWANDA-FDA25/HM/0163/0035"
+      },
+      {
+        "id": "rwanda-fda-hm-0113",
+        "registrationNumber": "RWANDA-FDA25/HM/0385/0012"
+      },
+      {
+        "id": "rwanda-fda-hm-0136",
+        "registrationNumber": "RWANDA-FDA23/HM/0304/0036"
+      },
+      {
+        "id": "rwanda-fda-hm-0148",
+        "registrationNumber": "RWANDA-FDA24/HM/0140/0027"
+      },
+      {
+        "id": "rwanda-fda-hm-0160",
+        "registrationNumber": "RWANDA-FDA24/HM/1064/0021"
+      },
+      {
+        "id": "rwanda-fda-hm-0167",
+        "registrationNumber": "RWANDA-FDA23/HM/0303/0012"
+      },
+      {
+        "id": "rwanda-fda-hm-0171",
+        "registrationNumber": "Rwanda FDA-HMP-MA-2346"
+      },
+      {
+        "id": "rwanda-fda-hm-1093",
+        "registrationNumber": "Rwanda FDA-HBP-MA-0134"
+      },
+      {
+        "id": "rwanda-fda-hm-1094",
+        "registrationNumber": "Rwanda FDA-HBP-MA-0133"
+      },
+      {
+        "id": "rwanda-fda-hm-1179",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1335"
+      },
+      {
+        "id": "rwanda-fda-hm-1266",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1277"
+      },
+      {
+        "id": "rwanda-fda-hm-1570",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0964"
+      },
+      {
+        "id": "rwanda-fda-hm-2260",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0223"
+      },
+      {
+        "id": "rwanda-fda-hm-2312",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0224"
+      }
+    ],
+    "strength": [
+      {
+        "id": "rwanda-fda-hm-0001",
+        "registrationNumber": "RWANDA-FDA24/HM/0809/0118"
+      },
+      {
+        "id": "rwanda-fda-hm-0002",
+        "registrationNumber": "RWANDA-FDA24/HM/0183/0116"
+      },
+      {
+        "id": "rwanda-fda-hm-0003",
+        "registrationNumber": "RWANDA-FDA24/HM/0882/0115"
+      },
+      {
+        "id": "rwanda-fda-hm-0004",
+        "registrationNumber": "RWANDA-FDA25/HM/0428/0117"
+      },
+      {
+        "id": "rwanda-fda-hm-0005",
+        "registrationNumber": "RWANDA-FDA24/HM/0863/0119"
+      },
+      {
+        "id": "rwanda-fda-hm-0006",
+        "registrationNumber": "RWANDA-FDA24/HM/0755/0114"
+      },
+      {
+        "id": "rwanda-fda-hm-0007",
+        "registrationNumber": "RWANDA-FDA25/HM/0045/0113"
+      },
+      {
+        "id": "rwanda-fda-hm-0008",
+        "registrationNumber": "RWANDA-FDA25/HM/0294/0105"
+      },
+      {
+        "id": "rwanda-fda-hm-0009",
+        "registrationNumber": "RWANDA-FDA24/HM/0073/0108"
+      },
+      {
+        "id": "rwanda-fda-hm-0010",
+        "registrationNumber": "RWANDA-FDA24/HM/0495/0104"
+      },
+      {
+        "id": "rwanda-fda-hm-0011",
+        "registrationNumber": "RWANDA-FDA25/HM/0581/0106"
+      },
+      {
+        "id": "rwanda-fda-hm-0012",
+        "registrationNumber": "RWANDA-FDA24/HM/0229/0111"
+      },
+      {
+        "id": "rwanda-fda-hm-0013",
+        "registrationNumber": "RWANDA-FDA25/HM/0328/0103"
+      },
+      {
+        "id": "rwanda-fda-hm-0014",
+        "registrationNumber": "RWANDA-FDA25/HM/0730/0107"
+      },
+      {
+        "id": "rwanda-fda-hm-0015",
+        "registrationNumber": "RWANDA-FDA24/HM/0625/0112"
+      },
+      {
+        "id": "rwanda-fda-hm-0016",
+        "registrationNumber": "RWANDA-FDA25/HM/0028/0109"
+      },
+      {
+        "id": "rwanda-fda-hm-0017",
+        "registrationNumber": "RWANDA-FDA24/HM/0547/0100"
+      },
+      {
+        "id": "rwanda-fda-hm-0018",
+        "registrationNumber": "RWANDA-FDA24/HM/1029/0094"
+      },
+      {
+        "id": "rwanda-fda-hm-0019",
+        "registrationNumber": "RWANDA-FDA25/HM/0624/0095"
+      },
+      {
+        "id": "rwanda-fda-hm-0020",
+        "registrationNumber": "RWANDA-FDA24/HM/0546/0099"
+      },
+      {
+        "id": "rwanda-fda-hm-0021",
+        "registrationNumber": "RWANDA-FDA26/HM/0195/0096"
+      },
+      {
+        "id": "rwanda-fda-hm-0022",
+        "registrationNumber": "RWANDA-FDA26/HM/0221/0097"
+      },
+      {
+        "id": "rwanda-fda-hm-0023",
+        "registrationNumber": "RWANDA-FDA25/HM/0034/0102"
+      },
+      {
+        "id": "rwanda-fda-hm-0024",
+        "registrationNumber": "RWANDA-FDA24/HM/1092/0093"
+      },
+      {
+        "id": "rwanda-fda-hm-0025",
+        "registrationNumber": "RWANDA-FDA24/HM/0068/0101"
+      },
+      {
+        "id": "rwanda-fda-hm-0026",
+        "registrationNumber": "RWANDA-FDA24/HM/0942/0092"
+      },
+      {
+        "id": "rwanda-fda-hm-0027",
+        "registrationNumber": "RWANDA-FDA26/HM/0202/0098"
+      },
+      {
+        "id": "rwanda-fda-hm-0028",
+        "registrationNumber": "RWANDA-FDA24/HM/0753/0090"
+      },
+      {
+        "id": "rwanda-fda-hm-0029",
+        "registrationNumber": "RWANDA-FDA23/HM/0506/0089"
+      },
+      {
+        "id": "rwanda-fda-hm-0030",
+        "registrationNumber": "RWANDA-FDA24/HM/0097/0091"
+      },
+      {
+        "id": "rwanda-fda-hm-0031",
+        "registrationNumber": "RWANDA-FDA24/HM/0369/0084"
+      },
+      {
+        "id": "rwanda-fda-hm-0032",
+        "registrationNumber": "RWANDA-FDA23/HM/0546/0088"
+      },
+      {
+        "id": "rwanda-fda-hm-0033",
+        "registrationNumber": "RWANDA-FDA24/HM/0019/0086"
+      },
+      {
+        "id": "rwanda-fda-hm-0034",
+        "registrationNumber": "RWANDA-FDA24/HM/0029/0087"
+      },
+      {
+        "id": "rwanda-fda-hm-0035",
+        "registrationNumber": "RWANDA-FDA24/HM/0137/0085"
+      },
+      {
+        "id": "rwanda-fda-hm-0036",
+        "registrationNumber": "RWANDA-FDA23/HM/0181/0073"
+      },
+      {
+        "id": "rwanda-fda-hm-0037",
+        "registrationNumber": "RWANDA-FDA23/HM/0177/0080"
+      },
+      {
+        "id": "rwanda-fda-hm-0038",
+        "registrationNumber": "RWANDA-FDA25/HM/0372/0082"
+      },
+      {
+        "id": "rwanda-fda-hm-0039",
+        "registrationNumber": "RWANDA-FDA25/HM/0273/0069"
+      },
+      {
+        "id": "rwanda-fda-hm-0040",
+        "registrationNumber": "RWANDA-FDA25/HM/0278/0049"
+      },
+      {
+        "id": "rwanda-fda-hm-0041",
+        "registrationNumber": "RWANDA-FDA23/HM/0182/0083"
+      },
+      {
+        "id": "rwanda-fda-hm-0042",
+        "registrationNumber": "RWANDA-FDA25/HM/0143/0060"
+      },
+      {
+        "id": "rwanda-fda-hm-0043",
+        "registrationNumber": "RWANDA-FDA25/HM/0229/0076"
+      },
+      {
+        "id": "rwanda-fda-hm-0044",
+        "registrationNumber": "RWANDA-FDA23/HM/0380/0055"
+      },
+      {
+        "id": "rwanda-fda-hm-0045",
+        "registrationNumber": "RWANDA-FDA24/HM/0212/0056"
+      },
+      {
+        "id": "rwanda-fda-hm-0046",
+        "registrationNumber": "RWANDA-FDA24/HM/1050/0052"
+      },
+      {
+        "id": "rwanda-fda-hm-0047",
+        "registrationNumber": "RWANDA-FDA24/HM/0071/0064"
+      },
+      {
+        "id": "rwanda-fda-hm-0048",
+        "registrationNumber": "RWANDA-FDA25/HM/0042/0074"
+      },
+      {
+        "id": "rwanda-fda-hm-0049",
+        "registrationNumber": "RWANDA-FDA24/HM/0943/0063"
+      },
+      {
+        "id": "rwanda-fda-hm-0050",
+        "registrationNumber": "RWANDA-FDA24/HM/0629/0079"
+      },
+      {
+        "id": "rwanda-fda-hm-0051",
+        "registrationNumber": "RWANDA-FDA24/HM/0579/0057"
+      },
+      {
+        "id": "rwanda-fda-hm-0052",
+        "registrationNumber": "RWANDA-FDA24/HM/0350/0054"
+      },
+      {
+        "id": "rwanda-fda-hm-0053",
+        "registrationNumber": "RWANDA-FDA25/HM/0166/0071"
+      },
+      {
+        "id": "rwanda-fda-hm-0054",
+        "registrationNumber": "RWANDA-FDA25/HM/0244/0062"
+      },
+      {
+        "id": "rwanda-fda-hm-0055",
+        "registrationNumber": "RWANDA-FDA25/HM/0576/0053"
+      },
+      {
+        "id": "rwanda-fda-hm-0056",
+        "registrationNumber": "RWANDA-FDA25/HM/0575/0051"
+      },
+      {
+        "id": "rwanda-fda-hm-0057",
+        "registrationNumber": "RWANDA-FDA25/HM/0429/0061"
+      },
+      {
+        "id": "rwanda-fda-hm-0058",
+        "registrationNumber": "RWANDA-FDA25/HM/0054/0078"
+      },
+      {
+        "id": "rwanda-fda-hm-0059",
+        "registrationNumber": "RWANDA-FDA24/HM/0443/0070"
+      },
+      {
+        "id": "rwanda-fda-hm-0060",
+        "registrationNumber": "RWANDA-FDA24/HM/0550/0065"
+      },
+      {
+        "id": "rwanda-fda-hm-0061",
+        "registrationNumber": "RWANDA-FDA23/HM/0469/0072"
+      },
+      {
+        "id": "rwanda-fda-hm-0062",
+        "registrationNumber": "RWANDA-FDA25/HM/0596/0059"
+      },
+      {
+        "id": "rwanda-fda-hm-0063",
+        "registrationNumber": "RWANDA-FDA24/HM/1055/0050"
+      },
+      {
+        "id": "rwanda-fda-hm-0064",
+        "registrationNumber": "RWANDA-FDA24/HM/1005/0067"
+      },
+      {
+        "id": "rwanda-fda-hm-0065",
+        "registrationNumber": "RWANDA-FDA25/HM/0053/0077"
+      },
+      {
+        "id": "rwanda-fda-hm-0066",
+        "registrationNumber": "RWANDA-FDA25/HM/0327/0066"
+      },
+      {
+        "id": "rwanda-fda-hm-0067",
+        "registrationNumber": "RWANDA-FDA24/HM/0630/0081"
+      },
+      {
+        "id": "rwanda-fda-hm-0068",
+        "registrationNumber": "RWANDA-FDA24/HM/0670/0058"
+      },
+      {
+        "id": "rwanda-fda-hm-0069",
+        "registrationNumber": "RWANDA-FDA25/HM/0491/0068"
+      },
+      {
+        "id": "rwanda-fda-hm-0070",
+        "registrationNumber": "RWANDA-FDA25/HM/0029/0075"
+      },
+      {
+        "id": "rwanda-fda-hm-0073",
+        "registrationNumber": "RWANDA-FDA25/HB/0202/0047"
+      },
+      {
+        "id": "rwanda-fda-hm-0074",
+        "registrationNumber": "RWANDA-FDA25/HM/0185/0048"
+      },
+      {
+        "id": "rwanda-fda-hm-0075",
+        "registrationNumber": "RWANDA-FDA24/HM/0725/0029"
+      },
+      {
+        "id": "rwanda-fda-hm-0076",
+        "registrationNumber": "RWANDA-FDA25/HM/0538/0037"
+      },
+      {
+        "id": "rwanda-fda-hm-0077",
+        "registrationNumber": "RWANDA-FDA25/HM/0542/0041"
+      },
+      {
+        "id": "rwanda-fda-hm-0078",
+        "registrationNumber": "RWANDA-FDA25/HM/0292/0044"
+      },
+      {
+        "id": "rwanda-fda-hm-0079",
+        "registrationNumber": "RWANDA-FDA25/HM/0299/0043"
+      },
+      {
+        "id": "rwanda-fda-hm-0080",
+        "registrationNumber": "RWANDA-FDA25/HM/0531/0038"
+      },
+      {
+        "id": "rwanda-fda-hm-0081",
+        "registrationNumber": "RWANDA-FDA25/HM/0226/0042"
+      },
+      {
+        "id": "rwanda-fda-hm-0082",
+        "registrationNumber": "RWANDA-FDA25/HM/0582/0040"
+      },
+      {
+        "id": "rwanda-fda-hm-0083",
+        "registrationNumber": "RWANDA-FDA25/HM/0035/0030"
+      },
+      {
+        "id": "rwanda-fda-hm-0084",
+        "registrationNumber": "RWANDA-FDA25/HM/0379/0036"
+      },
+      {
+        "id": "rwanda-fda-hm-0085",
+        "registrationNumber": "RWANDA-FDA23/HM/0155/0034"
+      },
+      {
+        "id": "rwanda-fda-hm-0086",
+        "registrationNumber": "RWANDA-FDA25/HM/0163/0035"
+      },
+      {
+        "id": "rwanda-fda-hm-0087",
+        "registrationNumber": "RWANDA-FDA24/HM/0954/0032"
+      },
+      {
+        "id": "rwanda-fda-hm-0088",
+        "registrationNumber": "RWANDA-FDA24/HM/0950/0033"
+      },
+      {
+        "id": "rwanda-fda-hm-0089",
+        "registrationNumber": "RWANDA-FDA25/HM/0507/0039"
+      },
+      {
+        "id": "rwanda-fda-hm-0090",
+        "registrationNumber": "RWANDA-FDA25/HM/0010/0031"
+      },
+      {
+        "id": "rwanda-fda-hm-0096",
+        "registrationNumber": "RWANDA-FDA24/HM/0311/0026"
+      },
+      {
+        "id": "rwanda-fda-hm-0130",
+        "registrationNumber": "RWANDA-FDA25/HM/0295/0048"
+      },
+      {
+        "id": "rwanda-fda-hm-0139",
+        "registrationNumber": "RWANDA-FDA24/HM/0129/0026"
+      },
+      {
+        "id": "rwanda-fda-hm-0374",
+        "registrationNumber": "Rwanda FDA 24 HM 0010"
+      },
+      {
+        "id": "rwanda-fda-hm-0809",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1728"
+      },
+      {
+        "id": "rwanda-fda-hm-0897",
+        "registrationNumber": "Rwanda FDA-HMP-MA-2083"
+      },
+      {
+        "id": "rwanda-fda-hm-1179",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1335"
+      },
+      {
+        "id": "rwanda-fda-hm-1266",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1277"
+      },
+      {
+        "id": "rwanda-fda-hm-1469",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1539"
+      },
+      {
+        "id": "rwanda-fda-hm-2480",
+        "registrationNumber": "RWANDA FDA-HMP-MA-1895"
+      }
+    ],
+    "packSize": [
+      {
+        "id": "rwanda-fda-hm-0001",
+        "registrationNumber": "RWANDA-FDA24/HM/0809/0118"
+      },
+      {
+        "id": "rwanda-fda-hm-0002",
+        "registrationNumber": "RWANDA-FDA24/HM/0183/0116"
+      },
+      {
+        "id": "rwanda-fda-hm-0003",
+        "registrationNumber": "RWANDA-FDA24/HM/0882/0115"
+      },
+      {
+        "id": "rwanda-fda-hm-0004",
+        "registrationNumber": "RWANDA-FDA25/HM/0428/0117"
+      },
+      {
+        "id": "rwanda-fda-hm-0005",
+        "registrationNumber": "RWANDA-FDA24/HM/0863/0119"
+      },
+      {
+        "id": "rwanda-fda-hm-0006",
+        "registrationNumber": "RWANDA-FDA24/HM/0755/0114"
+      },
+      {
+        "id": "rwanda-fda-hm-0007",
+        "registrationNumber": "RWANDA-FDA25/HM/0045/0113"
+      },
+      {
+        "id": "rwanda-fda-hm-0008",
+        "registrationNumber": "RWANDA-FDA25/HM/0294/0105"
+      },
+      {
+        "id": "rwanda-fda-hm-0009",
+        "registrationNumber": "RWANDA-FDA24/HM/0073/0108"
+      },
+      {
+        "id": "rwanda-fda-hm-0010",
+        "registrationNumber": "RWANDA-FDA24/HM/0495/0104"
+      },
+      {
+        "id": "rwanda-fda-hm-0011",
+        "registrationNumber": "RWANDA-FDA25/HM/0581/0106"
+      },
+      {
+        "id": "rwanda-fda-hm-0012",
+        "registrationNumber": "RWANDA-FDA24/HM/0229/0111"
+      },
+      {
+        "id": "rwanda-fda-hm-0013",
+        "registrationNumber": "RWANDA-FDA25/HM/0328/0103"
+      },
+      {
+        "id": "rwanda-fda-hm-0014",
+        "registrationNumber": "RWANDA-FDA25/HM/0730/0107"
+      },
+      {
+        "id": "rwanda-fda-hm-0015",
+        "registrationNumber": "RWANDA-FDA24/HM/0625/0112"
+      },
+      {
+        "id": "rwanda-fda-hm-0016",
+        "registrationNumber": "RWANDA-FDA25/HM/0028/0109"
+      },
+      {
+        "id": "rwanda-fda-hm-0017",
+        "registrationNumber": "RWANDA-FDA24/HM/0547/0100"
+      },
+      {
+        "id": "rwanda-fda-hm-0018",
+        "registrationNumber": "RWANDA-FDA24/HM/1029/0094"
+      },
+      {
+        "id": "rwanda-fda-hm-0019",
+        "registrationNumber": "RWANDA-FDA25/HM/0624/0095"
+      },
+      {
+        "id": "rwanda-fda-hm-0020",
+        "registrationNumber": "RWANDA-FDA24/HM/0546/0099"
+      },
+      {
+        "id": "rwanda-fda-hm-0021",
+        "registrationNumber": "RWANDA-FDA26/HM/0195/0096"
+      },
+      {
+        "id": "rwanda-fda-hm-0022",
+        "registrationNumber": "RWANDA-FDA26/HM/0221/0097"
+      },
+      {
+        "id": "rwanda-fda-hm-0023",
+        "registrationNumber": "RWANDA-FDA25/HM/0034/0102"
+      },
+      {
+        "id": "rwanda-fda-hm-0024",
+        "registrationNumber": "RWANDA-FDA24/HM/1092/0093"
+      },
+      {
+        "id": "rwanda-fda-hm-0025",
+        "registrationNumber": "RWANDA-FDA24/HM/0068/0101"
+      },
+      {
+        "id": "rwanda-fda-hm-0026",
+        "registrationNumber": "RWANDA-FDA24/HM/0942/0092"
+      },
+      {
+        "id": "rwanda-fda-hm-0027",
+        "registrationNumber": "RWANDA-FDA26/HM/0202/0098"
+      },
+      {
+        "id": "rwanda-fda-hm-0028",
+        "registrationNumber": "RWANDA-FDA24/HM/0753/0090"
+      },
+      {
+        "id": "rwanda-fda-hm-0029",
+        "registrationNumber": "RWANDA-FDA23/HM/0506/0089"
+      },
+      {
+        "id": "rwanda-fda-hm-0030",
+        "registrationNumber": "RWANDA-FDA24/HM/0097/0091"
+      },
+      {
+        "id": "rwanda-fda-hm-0031",
+        "registrationNumber": "RWANDA-FDA24/HM/0369/0084"
+      },
+      {
+        "id": "rwanda-fda-hm-0032",
+        "registrationNumber": "RWANDA-FDA23/HM/0546/0088"
+      },
+      {
+        "id": "rwanda-fda-hm-0033",
+        "registrationNumber": "RWANDA-FDA24/HM/0019/0086"
+      },
+      {
+        "id": "rwanda-fda-hm-0034",
+        "registrationNumber": "RWANDA-FDA24/HM/0029/0087"
+      },
+      {
+        "id": "rwanda-fda-hm-0035",
+        "registrationNumber": "RWANDA-FDA24/HM/0137/0085"
+      },
+      {
+        "id": "rwanda-fda-hm-0036",
+        "registrationNumber": "RWANDA-FDA23/HM/0181/0073"
+      },
+      {
+        "id": "rwanda-fda-hm-0037",
+        "registrationNumber": "RWANDA-FDA23/HM/0177/0080"
+      },
+      {
+        "id": "rwanda-fda-hm-0038",
+        "registrationNumber": "RWANDA-FDA25/HM/0372/0082"
+      },
+      {
+        "id": "rwanda-fda-hm-0039",
+        "registrationNumber": "RWANDA-FDA25/HM/0273/0069"
+      },
+      {
+        "id": "rwanda-fda-hm-0040",
+        "registrationNumber": "RWANDA-FDA25/HM/0278/0049"
+      },
+      {
+        "id": "rwanda-fda-hm-0041",
+        "registrationNumber": "RWANDA-FDA23/HM/0182/0083"
+      },
+      {
+        "id": "rwanda-fda-hm-0042",
+        "registrationNumber": "RWANDA-FDA25/HM/0143/0060"
+      },
+      {
+        "id": "rwanda-fda-hm-0043",
+        "registrationNumber": "RWANDA-FDA25/HM/0229/0076"
+      },
+      {
+        "id": "rwanda-fda-hm-0044",
+        "registrationNumber": "RWANDA-FDA23/HM/0380/0055"
+      },
+      {
+        "id": "rwanda-fda-hm-0045",
+        "registrationNumber": "RWANDA-FDA24/HM/0212/0056"
+      },
+      {
+        "id": "rwanda-fda-hm-0046",
+        "registrationNumber": "RWANDA-FDA24/HM/1050/0052"
+      },
+      {
+        "id": "rwanda-fda-hm-0047",
+        "registrationNumber": "RWANDA-FDA24/HM/0071/0064"
+      },
+      {
+        "id": "rwanda-fda-hm-0048",
+        "registrationNumber": "RWANDA-FDA25/HM/0042/0074"
+      },
+      {
+        "id": "rwanda-fda-hm-0049",
+        "registrationNumber": "RWANDA-FDA24/HM/0943/0063"
+      },
+      {
+        "id": "rwanda-fda-hm-0050",
+        "registrationNumber": "RWANDA-FDA24/HM/0629/0079"
+      },
+      {
+        "id": "rwanda-fda-hm-0051",
+        "registrationNumber": "RWANDA-FDA24/HM/0579/0057"
+      },
+      {
+        "id": "rwanda-fda-hm-0052",
+        "registrationNumber": "RWANDA-FDA24/HM/0350/0054"
+      },
+      {
+        "id": "rwanda-fda-hm-0053",
+        "registrationNumber": "RWANDA-FDA25/HM/0166/0071"
+      },
+      {
+        "id": "rwanda-fda-hm-0054",
+        "registrationNumber": "RWANDA-FDA25/HM/0244/0062"
+      },
+      {
+        "id": "rwanda-fda-hm-0055",
+        "registrationNumber": "RWANDA-FDA25/HM/0576/0053"
+      },
+      {
+        "id": "rwanda-fda-hm-0056",
+        "registrationNumber": "RWANDA-FDA25/HM/0575/0051"
+      },
+      {
+        "id": "rwanda-fda-hm-0057",
+        "registrationNumber": "RWANDA-FDA25/HM/0429/0061"
+      },
+      {
+        "id": "rwanda-fda-hm-0058",
+        "registrationNumber": "RWANDA-FDA25/HM/0054/0078"
+      },
+      {
+        "id": "rwanda-fda-hm-0059",
+        "registrationNumber": "RWANDA-FDA24/HM/0443/0070"
+      },
+      {
+        "id": "rwanda-fda-hm-0060",
+        "registrationNumber": "RWANDA-FDA24/HM/0550/0065"
+      },
+      {
+        "id": "rwanda-fda-hm-0061",
+        "registrationNumber": "RWANDA-FDA23/HM/0469/0072"
+      },
+      {
+        "id": "rwanda-fda-hm-0062",
+        "registrationNumber": "RWANDA-FDA25/HM/0596/0059"
+      },
+      {
+        "id": "rwanda-fda-hm-0063",
+        "registrationNumber": "RWANDA-FDA24/HM/1055/0050"
+      },
+      {
+        "id": "rwanda-fda-hm-0064",
+        "registrationNumber": "RWANDA-FDA24/HM/1005/0067"
+      },
+      {
+        "id": "rwanda-fda-hm-0065",
+        "registrationNumber": "RWANDA-FDA25/HM/0053/0077"
+      },
+      {
+        "id": "rwanda-fda-hm-0066",
+        "registrationNumber": "RWANDA-FDA25/HM/0327/0066"
+      },
+      {
+        "id": "rwanda-fda-hm-0067",
+        "registrationNumber": "RWANDA-FDA24/HM/0630/0081"
+      },
+      {
+        "id": "rwanda-fda-hm-0068",
+        "registrationNumber": "RWANDA-FDA24/HM/0670/0058"
+      },
+      {
+        "id": "rwanda-fda-hm-0069",
+        "registrationNumber": "RWANDA-FDA25/HM/0491/0068"
+      },
+      {
+        "id": "rwanda-fda-hm-0070",
+        "registrationNumber": "RWANDA-FDA25/HM/0029/0075"
+      },
+      {
+        "id": "rwanda-fda-hm-0071",
+        "registrationNumber": "RWANDA-FDA24/HM/1083/0045"
+      },
+      {
+        "id": "rwanda-fda-hm-0072",
+        "registrationNumber": "RWANDA-FDA24/HM/0180/0046"
+      },
+      {
+        "id": "rwanda-fda-hm-0073",
+        "registrationNumber": "RWANDA-FDA25/HB/0202/0047"
+      },
+      {
+        "id": "rwanda-fda-hm-0074",
+        "registrationNumber": "RWANDA-FDA25/HM/0185/0048"
+      },
+      {
+        "id": "rwanda-fda-hm-0075",
+        "registrationNumber": "RWANDA-FDA24/HM/0725/0029"
+      },
+      {
+        "id": "rwanda-fda-hm-0076",
+        "registrationNumber": "RWANDA-FDA25/HM/0538/0037"
+      },
+      {
+        "id": "rwanda-fda-hm-0077",
+        "registrationNumber": "RWANDA-FDA25/HM/0542/0041"
+      },
+      {
+        "id": "rwanda-fda-hm-0078",
+        "registrationNumber": "RWANDA-FDA25/HM/0292/0044"
+      },
+      {
+        "id": "rwanda-fda-hm-0079",
+        "registrationNumber": "RWANDA-FDA25/HM/0299/0043"
+      },
+      {
+        "id": "rwanda-fda-hm-0080",
+        "registrationNumber": "RWANDA-FDA25/HM/0531/0038"
+      },
+      {
+        "id": "rwanda-fda-hm-0081",
+        "registrationNumber": "RWANDA-FDA25/HM/0226/0042"
+      },
+      {
+        "id": "rwanda-fda-hm-0082",
+        "registrationNumber": "RWANDA-FDA25/HM/0582/0040"
+      },
+      {
+        "id": "rwanda-fda-hm-0083",
+        "registrationNumber": "RWANDA-FDA25/HM/0035/0030"
+      },
+      {
+        "id": "rwanda-fda-hm-0084",
+        "registrationNumber": "RWANDA-FDA25/HM/0379/0036"
+      },
+      {
+        "id": "rwanda-fda-hm-0085",
+        "registrationNumber": "RWANDA-FDA23/HM/0155/0034"
+      },
+      {
+        "id": "rwanda-fda-hm-0086",
+        "registrationNumber": "RWANDA-FDA25/HM/0163/0035"
+      },
+      {
+        "id": "rwanda-fda-hm-0087",
+        "registrationNumber": "RWANDA-FDA24/HM/0954/0032"
+      },
+      {
+        "id": "rwanda-fda-hm-0088",
+        "registrationNumber": "RWANDA-FDA24/HM/0950/0033"
+      },
+      {
+        "id": "rwanda-fda-hm-0089",
+        "registrationNumber": "RWANDA-FDA25/HM/0507/0039"
+      },
+      {
+        "id": "rwanda-fda-hm-0090",
+        "registrationNumber": "RWANDA-FDA25/HM/0010/0031"
+      },
+      {
+        "id": "rwanda-fda-hm-0091",
+        "registrationNumber": "RWANDA-FDA24/HM/0666/0024"
+      },
+      {
+        "id": "rwanda-fda-hm-0094",
+        "registrationNumber": "RWANDA-FDA24/HM/0782/0025"
+      },
+      {
+        "id": "rwanda-fda-hm-0095",
+        "registrationNumber": "RWANDA-FDA23/HM/0295/0027"
+      },
+      {
+        "id": "rwanda-fda-hm-0099",
+        "registrationNumber": "RWANDA-FDA25/HM/0134/0017"
+      },
+      {
+        "id": "rwanda-fda-hm-0100",
+        "registrationNumber": "RWANDA-FDA23/HM/0414/0013"
+      },
+      {
+        "id": "rwanda-fda-hm-0101",
+        "registrationNumber": "RWANDA-FDA24/HM/0530/0011"
+      },
+      {
+        "id": "rwanda-fda-hm-0102",
+        "registrationNumber": "RWANDA-FDA24/HM/0486/0014"
+      },
+      {
+        "id": "rwanda-fda-hm-0103",
+        "registrationNumber": "RWANDA-FDA25/HM/0301/0002"
+      },
+      {
+        "id": "rwanda-fda-hm-0105",
+        "registrationNumber": "RWANDA-FDA24/HM/0914/0001"
+      },
+      {
+        "id": "rwanda-fda-hm-0108",
+        "registrationNumber": "RWANDA-FDA24/HM/0910/0016"
+      },
+      {
+        "id": "rwanda-fda-hm-0111",
+        "registrationNumber": "RWANDA-FDA24/HM/0611/0018"
+      },
+      {
+        "id": "rwanda-fda-hm-0116",
+        "registrationNumber": "RWANDA-FDA23/HM/0587/0021"
+      },
+      {
+        "id": "rwanda-fda-hm-0118",
+        "registrationNumber": "RWANDA-FDA25/HM/0287/0007"
+      },
+      {
+        "id": "rwanda-fda-hm-0121",
+        "registrationNumber": "RWANDA-FDA24/HM/0876/0050"
+      },
+      {
+        "id": "rwanda-fda-hm-0129",
+        "registrationNumber": "RWANDA-FDA25/HM/0105/0049"
+      },
+      {
+        "id": "rwanda-fda-hm-0130",
+        "registrationNumber": "RWANDA-FDA25/HM/0295/0048"
+      },
+      {
+        "id": "rwanda-fda-hm-0132",
+        "registrationNumber": "RWANDA-FDA24/HM/0688/0028"
+      },
+      {
+        "id": "rwanda-fda-hm-0134",
+        "registrationNumber": "RWANDA-FDA25/HM/0275/0032"
+      },
+      {
+        "id": "rwanda-fda-hm-0136",
+        "registrationNumber": "RWANDA-FDA23/HM/0304/0036"
+      },
+      {
+        "id": "rwanda-fda-hm-0138",
+        "registrationNumber": "RWANDA-FDA24/HM/1081/0035"
+      },
+      {
+        "id": "rwanda-fda-hm-0143",
+        "registrationNumber": "RWANDA-FDA25/HM/0162/0033"
+      },
+      {
+        "id": "rwanda-fda-hm-0144",
+        "registrationNumber": "RWANDA-FDA25/HM/0261/0039"
+      },
+      {
+        "id": "rwanda-fda-hm-0145",
+        "registrationNumber": "RWANDA-FDA25/HM/0300/0034"
+      },
+      {
+        "id": "rwanda-fda-hm-0146",
+        "registrationNumber": "RWANDA-FDA25/HM/0100/0038"
+      },
+      {
+        "id": "rwanda-fda-hm-0147",
+        "registrationNumber": "RWANDA-FDA25/HM/0132/0037"
+      },
+      {
+        "id": "rwanda-fda-hm-0160",
+        "registrationNumber": "RWANDA-FDA24/HM/1064/0021"
+      },
+      {
+        "id": "rwanda-fda-hm-0165",
+        "registrationNumber": "RWANDA-FDA24/HM/1015/0008"
+      },
+      {
+        "id": "rwanda-fda-hm-0168",
+        "registrationNumber": "Rwanda FDA-HMP-MA-2343"
+      },
+      {
+        "id": "rwanda-fda-hm-0169",
+        "registrationNumber": "Rwanda FDA-HMP-MA-2344"
+      },
+      {
+        "id": "rwanda-fda-hm-0170",
+        "registrationNumber": "Rwanda FDA-HMP-MA-2345"
+      },
+      {
+        "id": "rwanda-fda-hm-0171",
+        "registrationNumber": "Rwanda FDA-HMP-MA-2346"
+      },
+      {
+        "id": "rwanda-fda-hm-0278",
+        "registrationNumber": "Rwanda FDA-HMP-MA-2211"
+      },
+      {
+        "id": "rwanda-fda-hm-0324",
+        "registrationNumber": "Rwanda FDA-HMP-MA-2169"
+      },
+      {
+        "id": "rwanda-fda-hm-0354",
+        "registrationNumber": "Rwanda FDA-HMP-MA-2145"
+      },
+      {
+        "id": "rwanda-fda-hm-0362",
+        "registrationNumber": "Rwanda FDA-HMP-MA-2097"
+      },
+      {
+        "id": "rwanda-fda-hm-0370",
+        "registrationNumber": "Rwanda FDA-HMP-MA-2112"
+      },
+      {
+        "id": "rwanda-fda-hm-0374",
+        "registrationNumber": "Rwanda FDA 24 HM 0010"
+      },
+      {
+        "id": "rwanda-fda-hm-0396",
+        "registrationNumber": "Rwanda FDA-HMP-MA-2095"
+      },
+      {
+        "id": "rwanda-fda-hm-0397",
+        "registrationNumber": "Rwanda FDA-HMP-MA-2142"
+      },
+      {
+        "id": "rwanda-fda-hm-0407",
+        "registrationNumber": "Rwanda FDA-HMP-MA-2160"
+      },
+      {
+        "id": "rwanda-fda-hm-0409",
+        "registrationNumber": "Rwanda FDA-HMP-MA-2100"
+      },
+      {
+        "id": "rwanda-fda-hm-0410",
+        "registrationNumber": "Rwanda FDA-HMP-MA-2099"
+      },
+      {
+        "id": "rwanda-fda-hm-0420",
+        "registrationNumber": "Rwanda FDA-HMP-MA-2125"
+      },
+      {
+        "id": "rwanda-fda-hm-0428",
+        "registrationNumber": "Rwanda FDA-HMP-MA-2041"
+      },
+      {
+        "id": "rwanda-fda-hm-0431",
+        "registrationNumber": "Rwanda FDA-HMP-MA-2046"
+      },
+      {
+        "id": "rwanda-fda-hm-0435",
+        "registrationNumber": "Rwanda FDA-HMP-MA-2067"
+      },
+      {
+        "id": "rwanda-fda-hm-0453",
+        "registrationNumber": "Rwanda FDA-HMP-MA-2042"
+      },
+      {
+        "id": "rwanda-fda-hm-0462",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1616"
+      },
+      {
+        "id": "rwanda-fda-hm-0474",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1880"
+      },
+      {
+        "id": "rwanda-fda-hm-0475",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1881"
+      },
+      {
+        "id": "rwanda-fda-hm-0495",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1999"
+      },
+      {
+        "id": "rwanda-fda-hm-0496",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1998"
+      },
+      {
+        "id": "rwanda-fda-hm-0508",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1614"
+      },
+      {
+        "id": "rwanda-fda-hm-0512",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1888"
+      },
+      {
+        "id": "rwanda-fda-hm-0527",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1794"
+      },
+      {
+        "id": "rwanda-fda-hm-0535",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1896"
+      },
+      {
+        "id": "rwanda-fda-hm-0557",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1594"
+      },
+      {
+        "id": "rwanda-fda-hm-0582",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1617"
+      },
+      {
+        "id": "rwanda-fda-hm-0618",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1752"
+      },
+      {
+        "id": "rwanda-fda-hm-0630",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1807"
+      },
+      {
+        "id": "rwanda-fda-hm-0637",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1716"
+      },
+      {
+        "id": "rwanda-fda-hm-0640",
+        "registrationNumber": "Rwanda FDA-HMP-MA-2008"
+      },
+      {
+        "id": "rwanda-fda-hm-0641",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1936"
+      },
+      {
+        "id": "rwanda-fda-hm-0647",
+        "registrationNumber": "RwandaFDA-HMP-MA-1879"
+      },
+      {
+        "id": "rwanda-fda-hm-0649",
+        "registrationNumber": "RwandaFDA-HMP-MA-1875"
+      },
+      {
+        "id": "rwanda-fda-hm-0651",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1857"
+      },
+      {
+        "id": "rwanda-fda-hm-0654",
+        "registrationNumber": "Rwanda-FDA-HM-1856"
+      },
+      {
+        "id": "rwanda-fda-hm-0661",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1858"
+      },
+      {
+        "id": "rwanda-fda-hm-0697",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1831"
+      },
+      {
+        "id": "rwanda-fda-hm-0701",
+        "registrationNumber": "RwandaFDA-HMP-MA-1887"
+      },
+      {
+        "id": "rwanda-fda-hm-0708",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1995"
+      },
+      {
+        "id": "rwanda-fda-hm-0712",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1822"
+      },
+      {
+        "id": "rwanda-fda-hm-0714",
+        "registrationNumber": "Rwanda FDA-HMP-MA-2032"
+      },
+      {
+        "id": "rwanda-fda-hm-0726",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1840"
+      },
+      {
+        "id": "rwanda-fda-hm-0732",
+        "registrationNumber": "RwandaFDA-HMP-MA-1899"
+      },
+      {
+        "id": "rwanda-fda-hm-0733",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1929"
+      },
+      {
+        "id": "rwanda-fda-hm-0734",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1865"
+      },
+      {
+        "id": "rwanda-fda-hm-0743",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1810"
+      },
+      {
+        "id": "rwanda-fda-hm-0749",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1993"
+      },
+      {
+        "id": "rwanda-fda-hm-0754",
+        "registrationNumber": "Rwanda FDA-HMP-MA-2009"
+      },
+      {
+        "id": "rwanda-fda-hm-0769",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1638"
+      },
+      {
+        "id": "rwanda-fda-hm-0774",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1979"
+      },
+      {
+        "id": "rwanda-fda-hm-0806",
+        "registrationNumber": "Rwanda FDA-HMP-MA-2162"
+      },
+      {
+        "id": "rwanda-fda-hm-0837",
+        "registrationNumber": "RwandaFDA-HMP-MA-1871"
+      },
+      {
+        "id": "rwanda-fda-hm-0851",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1753"
+      },
+      {
+        "id": "rwanda-fda-hm-0858",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1882"
+      },
+      {
+        "id": "rwanda-fda-hm-0883",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1593"
+      },
+      {
+        "id": "rwanda-fda-hm-0906",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1644"
+      },
+      {
+        "id": "rwanda-fda-hm-0914",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1996"
+      },
+      {
+        "id": "rwanda-fda-hm-0915",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1853"
+      },
+      {
+        "id": "rwanda-fda-hm-0918",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1693"
+      },
+      {
+        "id": "rwanda-fda-hm-0941",
+        "registrationNumber": "Rwanda-FDA-HM-1854"
+      },
+      {
+        "id": "rwanda-fda-hm-0942",
+        "registrationNumber": "Rwanda-FDA-HM-1855"
+      },
+      {
+        "id": "rwanda-fda-hm-0957",
+        "registrationNumber": "Rwanda FDA-HMP-MA-2104"
+      },
+      {
+        "id": "rwanda-fda-hm-0964",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1818"
+      },
+      {
+        "id": "rwanda-fda-hm-0969",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1994"
+      },
+      {
+        "id": "rwanda-fda-hm-0991",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1454"
+      },
+      {
+        "id": "rwanda-fda-hm-1006",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1491"
+      },
+      {
+        "id": "rwanda-fda-hm-1039",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1529"
+      },
+      {
+        "id": "rwanda-fda-hm-1061",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1441"
+      },
+      {
+        "id": "rwanda-fda-hm-1115",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1416"
+      },
+      {
+        "id": "rwanda-fda-hm-1149",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1321"
+      },
+      {
+        "id": "rwanda-fda-hm-1161",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1330"
+      },
+      {
+        "id": "rwanda-fda-hm-1177",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1377"
+      },
+      {
+        "id": "rwanda-fda-hm-1178",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1090"
+      },
+      {
+        "id": "rwanda-fda-hm-1180",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1357"
+      },
+      {
+        "id": "rwanda-fda-hm-1202",
+        "registrationNumber": "Rwanda FDA-HMP-MA- 1338"
+      },
+      {
+        "id": "rwanda-fda-hm-1209",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1318"
+      },
+      {
+        "id": "rwanda-fda-hm-1210",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1319"
+      },
+      {
+        "id": "rwanda-fda-hm-1218",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1312"
+      },
+      {
+        "id": "rwanda-fda-hm-1220",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1320"
+      },
+      {
+        "id": "rwanda-fda-hm-1224",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1309"
+      },
+      {
+        "id": "rwanda-fda-hm-1228",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1310"
+      },
+      {
+        "id": "rwanda-fda-hm-1249",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1270"
+      },
+      {
+        "id": "rwanda-fda-hm-1260",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1285"
+      },
+      {
+        "id": "rwanda-fda-hm-1273",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1214"
+      },
+      {
+        "id": "rwanda-fda-hm-1274",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1211"
+      },
+      {
+        "id": "rwanda-fda-hm-1292",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1177"
+      },
+      {
+        "id": "rwanda-fda-hm-1312",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1180"
+      },
+      {
+        "id": "rwanda-fda-hm-1315",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1181"
+      },
+      {
+        "id": "rwanda-fda-hm-1316",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1183"
+      },
+      {
+        "id": "rwanda-fda-hm-1329",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1174"
+      },
+      {
+        "id": "rwanda-fda-hm-1353",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1230"
+      },
+      {
+        "id": "rwanda-fda-hm-1356",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1209"
+      },
+      {
+        "id": "rwanda-fda-hm-1363",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1204"
+      },
+      {
+        "id": "rwanda-fda-hm-1383",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1147"
+      },
+      {
+        "id": "rwanda-fda-hm-1395",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1124"
+      },
+      {
+        "id": "rwanda-fda-hm-1408",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1075"
+      },
+      {
+        "id": "rwanda-fda-hm-1410",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1089"
+      },
+      {
+        "id": "rwanda-fda-hm-1420",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1066"
+      },
+      {
+        "id": "rwanda-fda-hm-1427",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1117"
+      },
+      {
+        "id": "rwanda-fda-hm-1430",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1069"
+      },
+      {
+        "id": "rwanda-fda-hm-1451",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1073"
+      },
+      {
+        "id": "rwanda-fda-hm-1452",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1074"
+      },
+      {
+        "id": "rwanda-fda-hm-1453",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1120"
+      },
+      {
+        "id": "rwanda-fda-hm-1455",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1163"
+      },
+      {
+        "id": "rwanda-fda-hm-1465",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1093"
+      },
+      {
+        "id": "rwanda-fda-hm-1468",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1070"
+      },
+      {
+        "id": "rwanda-fda-hm-1474",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1023"
+      },
+      {
+        "id": "rwanda-fda-hm-1480",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1032"
+      },
+      {
+        "id": "rwanda-fda-hm-1484",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1044"
+      },
+      {
+        "id": "rwanda-fda-hm-1496",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1016"
+      },
+      {
+        "id": "rwanda-fda-hm-1502",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1027"
+      },
+      {
+        "id": "rwanda-fda-hm-1503",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1035"
+      },
+      {
+        "id": "rwanda-fda-hm-1520",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0980"
+      },
+      {
+        "id": "rwanda-fda-hm-1532",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0988"
+      },
+      {
+        "id": "rwanda-fda-hm-1554",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0997"
+      },
+      {
+        "id": "rwanda-fda-hm-1643",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0941"
+      },
+      {
+        "id": "rwanda-fda-hm-1649",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0827"
+      },
+      {
+        "id": "rwanda-fda-hm-1650",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0826"
+      },
+      {
+        "id": "rwanda-fda-hm-1689",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0721"
+      },
+      {
+        "id": "rwanda-fda-hm-1694",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0833"
+      },
+      {
+        "id": "rwanda-fda-hm-1712",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0829"
+      },
+      {
+        "id": "rwanda-fda-hm-1747",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0724"
+      },
+      {
+        "id": "rwanda-fda-hm-1748",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0793"
+      },
+      {
+        "id": "rwanda-fda-hm-1760",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0747"
+      },
+      {
+        "id": "rwanda-fda-hm-1762",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0694"
+      },
+      {
+        "id": "rwanda-fda-hm-1765",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0693"
+      },
+      {
+        "id": "rwanda-fda-hm-1771",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0800"
+      },
+      {
+        "id": "rwanda-fda-hm-1772",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0784"
+      },
+      {
+        "id": "rwanda-fda-hm-1773",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0783"
+      },
+      {
+        "id": "rwanda-fda-hm-1774",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0785"
+      },
+      {
+        "id": "rwanda-fda-hm-1781",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0728"
+      },
+      {
+        "id": "rwanda-fda-hm-1790",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0788"
+      },
+      {
+        "id": "rwanda-fda-hm-1794",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0781"
+      },
+      {
+        "id": "rwanda-fda-hm-1803",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0737"
+      },
+      {
+        "id": "rwanda-fda-hm-1807",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0769"
+      },
+      {
+        "id": "rwanda-fda-hm-1808",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0768"
+      },
+      {
+        "id": "rwanda-fda-hm-1815",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0795"
+      },
+      {
+        "id": "rwanda-fda-hm-1820",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0772"
+      },
+      {
+        "id": "rwanda-fda-hm-1823",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0761"
+      },
+      {
+        "id": "rwanda-fda-hm-1824",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0758"
+      },
+      {
+        "id": "rwanda-fda-hm-1833",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0763"
+      },
+      {
+        "id": "rwanda-fda-hm-1834",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0762"
+      },
+      {
+        "id": "rwanda-fda-hm-1835",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0692"
+      },
+      {
+        "id": "rwanda-fda-hm-1836",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0767"
+      },
+      {
+        "id": "rwanda-fda-hm-1839",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0709"
+      },
+      {
+        "id": "rwanda-fda-hm-1844",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0711"
+      },
+      {
+        "id": "rwanda-fda-hm-1847",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0696"
+      },
+      {
+        "id": "rwanda-fda-hm-1850",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0752"
+      },
+      {
+        "id": "rwanda-fda-hm-1851",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0699"
+      },
+      {
+        "id": "rwanda-fda-hm-1852",
+        "registrationNumber": "Rwanda FDA-HMP-MA- 0766"
+      },
+      {
+        "id": "rwanda-fda-hm-1853",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0690"
+      },
+      {
+        "id": "rwanda-fda-hm-1859",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0704"
+      },
+      {
+        "id": "rwanda-fda-hm-1862",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0685"
+      },
+      {
+        "id": "rwanda-fda-hm-1863",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0686"
+      },
+      {
+        "id": "rwanda-fda-hm-1883",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0652"
+      },
+      {
+        "id": "rwanda-fda-hm-1889",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0662"
+      },
+      {
+        "id": "rwanda-fda-hm-1893",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0635"
+      },
+      {
+        "id": "rwanda-fda-hm-1896",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0633"
+      },
+      {
+        "id": "rwanda-fda-hm-1908",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0638"
+      },
+      {
+        "id": "rwanda-fda-hm-1909",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0639"
+      },
+      {
+        "id": "rwanda-fda-hm-1916",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0644"
+      },
+      {
+        "id": "rwanda-fda-hm-1918",
+        "registrationNumber": "Rwanda FDA-HMP-MA- 0658"
+      },
+      {
+        "id": "rwanda-fda-hm-1919",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0547"
+      },
+      {
+        "id": "rwanda-fda-hm-1921",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0637"
+      },
+      {
+        "id": "rwanda-fda-hm-1922",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0636"
+      },
+      {
+        "id": "rwanda-fda-hm-1925",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0643"
+      },
+      {
+        "id": "rwanda-fda-hm-1929",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0609"
+      },
+      {
+        "id": "rwanda-fda-hm-1930",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0620"
+      },
+      {
+        "id": "rwanda-fda-hm-1936",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0640"
+      },
+      {
+        "id": "rwanda-fda-hm-1942",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0641"
+      },
+      {
+        "id": "rwanda-fda-hm-1951",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0539"
+      },
+      {
+        "id": "rwanda-fda-hm-1972",
+        "registrationNumber": "Rwanda FDA-HMP-MA- MA-0523"
+      },
+      {
+        "id": "rwanda-fda-hm-1977",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0540"
+      },
+      {
+        "id": "rwanda-fda-hm-2012",
+        "registrationNumber": "RwandaFDA-HMP-MA-0486"
+      },
+      {
+        "id": "rwanda-fda-hm-2013",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0487"
+      },
+      {
+        "id": "rwanda-fda-hm-2051",
+        "registrationNumber": "RwandaFDA-HMP-MA-0485"
+      },
+      {
+        "id": "rwanda-fda-hm-2067",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0406"
+      },
+      {
+        "id": "rwanda-fda-hm-2108",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0431"
+      },
+      {
+        "id": "rwanda-fda-hm-2124",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0461"
+      },
+      {
+        "id": "rwanda-fda-hm-2152",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0363"
+      },
+      {
+        "id": "rwanda-fda-hm-2159",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0352"
+      },
+      {
+        "id": "rwanda-fda-hm-2161",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0348"
+      },
+      {
+        "id": "rwanda-fda-hm-2163",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0378"
+      },
+      {
+        "id": "rwanda-fda-hm-2168",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0346"
+      },
+      {
+        "id": "rwanda-fda-hm-2171",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0372"
+      },
+      {
+        "id": "rwanda-fda-hm-2172",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0347"
+      },
+      {
+        "id": "rwanda-fda-hm-2173",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0365"
+      },
+      {
+        "id": "rwanda-fda-hm-2174",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0380"
+      },
+      {
+        "id": "rwanda-fda-hm-2190",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0385"
+      },
+      {
+        "id": "rwanda-fda-hm-2194",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0337"
+      },
+      {
+        "id": "rwanda-fda-hm-2198",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0222"
+      },
+      {
+        "id": "rwanda-fda-hm-2222",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0282"
+      },
+      {
+        "id": "rwanda-fda-hm-2230",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0253"
+      },
+      {
+        "id": "rwanda-fda-hm-2243",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0286"
+      },
+      {
+        "id": "rwanda-fda-hm-2244",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0284"
+      },
+      {
+        "id": "rwanda-fda-hm-2245",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0285"
+      },
+      {
+        "id": "rwanda-fda-hm-2253",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0266"
+      },
+      {
+        "id": "rwanda-fda-hm-2257",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0320"
+      },
+      {
+        "id": "rwanda-fda-hm-2262",
+        "registrationNumber": "Rwanda FDA-HMP-MA- 0233"
+      },
+      {
+        "id": "rwanda-fda-hm-2270",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0263"
+      },
+      {
+        "id": "rwanda-fda-hm-2293",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0275"
+      },
+      {
+        "id": "rwanda-fda-hm-2300",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0304"
+      },
+      {
+        "id": "rwanda-fda-hm-2305",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0234"
+      },
+      {
+        "id": "rwanda-fda-hm-2332",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0153"
+      },
+      {
+        "id": "rwanda-fda-hm-2333",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0154"
+      },
+      {
+        "id": "rwanda-fda-hm-2355",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0204"
+      },
+      {
+        "id": "rwanda-fda-hm-2363",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0156"
+      },
+      {
+        "id": "rwanda-fda-hm-2364",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0158"
+      },
+      {
+        "id": "rwanda-fda-hm-2366",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0192"
+      },
+      {
+        "id": "rwanda-fda-hm-2368",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0134"
+      },
+      {
+        "id": "rwanda-fda-hm-2369",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0122"
+      },
+      {
+        "id": "rwanda-fda-hm-2373",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0164"
+      },
+      {
+        "id": "rwanda-fda-hm-2376",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0125"
+      },
+      {
+        "id": "rwanda-fda-hm-2377",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0126"
+      },
+      {
+        "id": "rwanda-fda-hm-2378",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0124"
+      },
+      {
+        "id": "rwanda-fda-hm-2384",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0129"
+      },
+      {
+        "id": "rwanda-fda-hm-2385",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0130"
+      },
+      {
+        "id": "rwanda-fda-hm-2386",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0138"
+      },
+      {
+        "id": "rwanda-fda-hm-2387",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0140"
+      },
+      {
+        "id": "rwanda-fda-hm-2388",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0141"
+      },
+      {
+        "id": "rwanda-fda-hm-2389",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0142"
+      },
+      {
+        "id": "rwanda-fda-hm-2391",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0139"
+      },
+      {
+        "id": "rwanda-fda-hm-2393",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0131"
+      },
+      {
+        "id": "rwanda-fda-hm-2399",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0145"
+      },
+      {
+        "id": "rwanda-fda-hm-2408",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0117"
+      },
+      {
+        "id": "rwanda-fda-hm-2409",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0118"
+      },
+      {
+        "id": "rwanda-fda-hm-2411",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0120"
+      },
+      {
+        "id": "rwanda-fda-hm-2417",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0116"
+      },
+      {
+        "id": "rwanda-fda-hm-2475",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0061"
+      },
+      {
+        "id": "rwanda-fda-hm-2476",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0060"
+      }
+    ],
+    "manufacturer": [
+      {
+        "id": "rwanda-fda-hm-0010",
+        "registrationNumber": "RWANDA-FDA24/HM/0495/0104"
+      },
+      {
+        "id": "rwanda-fda-hm-0049",
+        "registrationNumber": "RWANDA-FDA24/HM/0943/0063"
+      },
+      {
+        "id": "rwanda-fda-hm-0111",
+        "registrationNumber": "RWANDA-FDA24/HM/0611/0018"
+      },
+      {
+        "id": "rwanda-fda-hm-0112",
+        "registrationNumber": "RWANDA-FDA25/HM/0255/0010"
+      },
+      {
+        "id": "rwanda-fda-hm-0140",
+        "registrationNumber": "RWANDA-FDA25/HM/0233/0031"
+      },
+      {
+        "id": "rwanda-fda-hm-0329",
+        "registrationNumber": "Rwanda FDA-HMP-MA-2184"
+      },
+      {
+        "id": "rwanda-fda-hm-0374",
+        "registrationNumber": "Rwanda FDA 24 HM 0010"
+      },
+      {
+        "id": "rwanda-fda-hm-0416",
+        "registrationNumber": "Rwanda FDA-HMP-MA-2128"
+      },
+      {
+        "id": "rwanda-fda-hm-0551",
+        "registrationNumber": "Rwanda FDA-HMP-MA-2165"
+      },
+      {
+        "id": "rwanda-fda-hm-0569",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1770"
+      },
+      {
+        "id": "rwanda-fda-hm-0575",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1908"
+      },
+      {
+        "id": "rwanda-fda-hm-0617",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1654"
+      },
+      {
+        "id": "rwanda-fda-hm-0624",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1701"
+      },
+      {
+        "id": "rwanda-fda-hm-0812",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1639"
+      },
+      {
+        "id": "rwanda-fda-hm-0889",
+        "registrationNumber": "Rwanda FDA-HMP-MA-2020"
+      },
+      {
+        "id": "rwanda-fda-hm-0930",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1943"
+      },
+      {
+        "id": "rwanda-fda-hm-1068",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1482"
+      },
+      {
+        "id": "rwanda-fda-hm-1085",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1449"
+      },
+      {
+        "id": "rwanda-fda-hm-1137",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1341"
+      },
+      {
+        "id": "rwanda-fda-hm-1138",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1342"
+      },
+      {
+        "id": "rwanda-fda-hm-1139",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1343"
+      },
+      {
+        "id": "rwanda-fda-hm-1140",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1344"
+      },
+      {
+        "id": "rwanda-fda-hm-1142",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1322"
+      },
+      {
+        "id": "rwanda-fda-hm-1165",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1390"
+      },
+      {
+        "id": "rwanda-fda-hm-1209",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1318"
+      },
+      {
+        "id": "rwanda-fda-hm-1210",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1319"
+      },
+      {
+        "id": "rwanda-fda-hm-1258",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1296"
+      },
+      {
+        "id": "rwanda-fda-hm-1310",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1260"
+      },
+      {
+        "id": "rwanda-fda-hm-1333",
+        "registrationNumber": "Rwanda FDA-HBP-MA-0124"
+      },
+      {
+        "id": "rwanda-fda-hm-1334",
+        "registrationNumber": "Rwanda FDA-HBP-MA-0125"
+      },
+      {
+        "id": "rwanda-fda-hm-1336",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1208"
+      },
+      {
+        "id": "rwanda-fda-hm-1338",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1207"
+      },
+      {
+        "id": "rwanda-fda-hm-1412",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1101"
+      },
+      {
+        "id": "rwanda-fda-hm-1414",
+        "registrationNumber": "Rwanda FDA-HMP-MA-1162"
+      },
+      {
+        "id": "rwanda-fda-hm-1631",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0927"
+      },
+      {
+        "id": "rwanda-fda-hm-1743",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0725"
+      },
+      {
+        "id": "rwanda-fda-hm-1744",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0806"
+      },
+      {
+        "id": "rwanda-fda-hm-1753",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0720"
+      },
+      {
+        "id": "rwanda-fda-hm-1756",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0808"
+      },
+      {
+        "id": "rwanda-fda-hm-1758",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0719"
+      },
+      {
+        "id": "rwanda-fda-hm-1768",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0790"
+      },
+      {
+        "id": "rwanda-fda-hm-1840",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0497"
+      },
+      {
+        "id": "rwanda-fda-hm-1860",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0777"
+      },
+      {
+        "id": "rwanda-fda-hm-1867",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0622"
+      },
+      {
+        "id": "rwanda-fda-hm-1902",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0678"
+      },
+      {
+        "id": "rwanda-fda-hm-1918",
+        "registrationNumber": "Rwanda FDA-HMP-MA- 0658"
+      },
+      {
+        "id": "rwanda-fda-hm-1934",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0674"
+      },
+      {
+        "id": "rwanda-fda-hm-1950",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0605"
+      },
+      {
+        "id": "rwanda-fda-hm-1968",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0587"
+      },
+      {
+        "id": "rwanda-fda-hm-1973",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0598"
+      },
+      {
+        "id": "rwanda-fda-hm-1974",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0597"
+      },
+      {
+        "id": "rwanda-fda-hm-1975",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0596"
+      },
+      {
+        "id": "rwanda-fda-hm-1986",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0568"
+      },
+      {
+        "id": "rwanda-fda-hm-2030",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0512"
+      },
+      {
+        "id": "rwanda-fda-hm-2045",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0510"
+      },
+      {
+        "id": "rwanda-fda-hm-2046",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0465"
+      },
+      {
+        "id": "rwanda-fda-hm-2057",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0509"
+      },
+      {
+        "id": "rwanda-fda-hm-2069",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0472"
+      },
+      {
+        "id": "rwanda-fda-hm-2070",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0466"
+      },
+      {
+        "id": "rwanda-fda-hm-2099",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0467"
+      },
+      {
+        "id": "rwanda-fda-hm-2106",
+        "registrationNumber": "Rwanda FDA-HMP-MA- 0357"
+      },
+      {
+        "id": "rwanda-fda-hm-2137",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0473"
+      },
+      {
+        "id": "rwanda-fda-hm-2167",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0358"
+      },
+      {
+        "id": "rwanda-fda-hm-2199",
+        "registrationNumber": "Rwanda FDA-HBP-MA- 0022"
+      },
+      {
+        "id": "rwanda-fda-hm-2228",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0231"
+      },
+      {
+        "id": "rwanda-fda-hm-2233",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0293"
+      },
+      {
+        "id": "rwanda-fda-hm-2235",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0310"
+      },
+      {
+        "id": "rwanda-fda-hm-2236",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0294"
+      },
+      {
+        "id": "rwanda-fda-hm-2239",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0230"
+      },
+      {
+        "id": "rwanda-fda-hm-2340",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0195"
+      },
+      {
+        "id": "rwanda-fda-hm-2346",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0202"
+      },
+      {
+        "id": "rwanda-fda-hm-2347",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0203"
+      },
+      {
+        "id": "rwanda-fda-hm-2390",
+        "registrationNumber": "Rwanda FDA-HMP-MA- 0132"
+      },
+      {
+        "id": "rwanda-fda-hm-2400",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0176"
+      },
+      {
+        "id": "rwanda-fda-hm-2401",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0175"
+      },
+      {
+        "id": "rwanda-fda-hm-2402",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0171"
+      },
+      {
+        "id": "rwanda-fda-hm-2404",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0172"
+      },
+      {
+        "id": "rwanda-fda-hm-2405",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0147"
+      },
+      {
+        "id": "rwanda-fda-hm-2434",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0078"
+      },
+      {
+        "id": "rwanda-fda-hm-2443",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0092"
+      },
+      {
+        "id": "rwanda-fda-hm-2444",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0089"
+      },
+      {
+        "id": "rwanda-fda-hm-2445",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0091"
+      },
+      {
+        "id": "rwanda-fda-hm-2446",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0090"
+      },
+      {
+        "id": "rwanda-fda-hm-2451",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0095"
+      },
+      {
+        "id": "rwanda-fda-hm-2452",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0096"
+      },
+      {
+        "id": "rwanda-fda-hm-2478",
+        "registrationNumber": "Rwanda FDA-HMP-MA-0069"
+      }
+    ]
+  },
+  "counts": {
+    "generic": 24,
+    "strength": 98,
+    "packSize": 352,
+    "manufacturer": 86
+  },
+  "publicationRule": "Keep the field blank until the Rwanda FDA register or a separately approved authoritative product record supplies the exact value."
+}

@@ -11,6 +11,7 @@ const d1DatabaseIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-
 const contentSidPattern = /^HX[a-f0-9]{32}$/i;
 const whatsappSenderPattern = /^whatsapp:\+[1-9][0-9]{7,14}$/;
 const e164Pattern = /^[1-9][0-9]{7,14}$/;
+const googleSiteVerificationPattern = /^[A-Za-z0-9_-]{20,256}$/;
 const execFileAsync = promisify(execFile);
 
 export async function removeDevelopmentOnlyVars(directory = serverDirectory) {
@@ -180,6 +181,7 @@ export function prepareWorkerD1Config(generated, {
   releaseRevision,
   d1DatabaseId: databaseId,
   providerValues,
+  googleSiteVerification = "",
 }) {
   if (!generated || typeof generated !== "object" || Array.isArray(generated)) {
     throw new Error("Generated Wrangler config must be an object.");
@@ -191,6 +193,10 @@ export function prepareWorkerD1Config(generated, {
   }
   const exactOrigin = deploymentOrigin(origin);
   const exactProviderValues = validatedProviderValues(providerValues, exactOrigin);
+  const verificationToken = String(googleSiteVerification ?? "").trim();
+  if (verificationToken && !googleSiteVerificationPattern.test(verificationToken)) {
+    throw new Error("NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION must be the token content only, not a meta tag or verification URL.");
+  }
   assertProviderValuesMatchGeneratedConfig(generated, exactProviderValues);
   assertGeneratedResourceBoundary(generated, target);
 
@@ -218,6 +224,7 @@ export function prepareWorkerD1Config(generated, {
     NEXT_PUBLIC_MED250_OBSERVABILITY: "cloud",
     ...exactProviderValues,
   });
+  if (verificationToken) vars.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION = verificationToken;
 
   const result = {
     ...config,
@@ -284,6 +291,7 @@ export async function run(environment = process.env) {
     releaseRevision,
     d1DatabaseId: databaseId,
     providerValues,
+    googleSiteVerification: environment.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
   });
   // Vinext writes local dotenv values to this development-only file. It is
   // never part of a governed production Worker and must not remain beside the
