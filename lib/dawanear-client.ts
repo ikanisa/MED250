@@ -325,14 +325,26 @@ export type PharmacySelectedOrder = {
   updatedAt: string;
 };
 
-/** MED250 has one operating backend: the same-origin Cloudflare Worker and D1. */
-export const catalogueBackendConfigured = true;
-export const authBackendConfigured = true;
-export const orderBackendConfigured = true;
-export const orderingBackendConfigured = true;
-export const pharmacyWorkspaceBackendConfigured = true;
-export const backendConfigured = true;
-export const pharmacyPortalBackendConfigured = true;
+/**
+ * MED250 production uses one operating backend: the same-origin Cloudflare
+ * Worker and D1. The public Sites catalogue is intentionally static and must
+ * not probe same-origin API routes that are not deployed on that host.
+ */
+export const catalogueBackendConfigured =
+  process.env.NEXT_PUBLIC_MED250_CATALOGUE_BACKEND === "worker-d1";
+export const authBackendConfigured =
+  process.env.NEXT_PUBLIC_MED250_AUTH_BACKEND === "worker-d1";
+export const orderBackendConfigured =
+  process.env.NEXT_PUBLIC_MED250_ORDER_BACKEND === "worker-d1";
+export const orderingBackendConfigured = orderBackendConfigured;
+export const pharmacyWorkspaceBackendConfigured =
+  process.env.NEXT_PUBLIC_MED250_WORKSPACE_BACKEND === "worker-d1";
+export const backendConfigured = catalogueBackendConfigured
+  && authBackendConfigured
+  && orderBackendConfigured
+  && pharmacyWorkspaceBackendConfigured;
+export const pharmacyPortalBackendConfigured =
+  authBackendConfigured && pharmacyWorkspaceBackendConfigured;
 
 function isRecord(value: unknown): value is JsonRecord {
   return typeof value === "object" && value !== null && !Array.isArray(value);

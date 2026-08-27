@@ -184,7 +184,7 @@ test("publishes central indicative price columns through the RLS-protected catal
 });
 
 test("storefront loads and searches the unified catalogue with exact taxonomy fields", () => {
-  assert.match(client, /catalogueBackendConfigured = true/);
+  assert.match(client, /NEXT_PUBLIC_MED250_CATALOGUE_BACKEND === "worker-d1"/);
   assert.match(client, /med250ApiJson\("\/api\/catalogue\/taxonomy"\)/);
   assert.match(client, /export async function loadCatalogueProductsByIds/);
   assert.match(client, /export async function loadProductImagePresentation/);

@@ -53,7 +53,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     areaServed: { "@type": "Country", name: companyLocation.countryName },
     address: {
       "@type": "PostalAddress",
-      streetAddress: `${companyLocation.venue}, ${companyLocation.streetLine}`,
+      streetAddress: companyLocation.streetLine,
       addressLocality: companyLocation.addressLocality,
       addressRegion: companyLocation.addressRegion,
       addressCountry: companyLocation.addressCountry,
@@ -61,7 +61,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     location: {
       "@type": "Place",
       "@id": locationId,
-      name: companyLocation.venue,
+      name: `${companyLocation.organizationName} Kigali`,
       address: {
         "@type": "PostalAddress",
         streetAddress: companyLocation.streetLine,

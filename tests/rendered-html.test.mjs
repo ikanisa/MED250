@@ -53,7 +53,7 @@ test("server-renders the MED+250 marketplace", async () => {
   assert.match(html, /og-marketplace-v2\.png/);
   assert.match(html, /"@type":"Organization"/);
   assert.match(html, /"@type":"SearchAction"/);
-  assert.match(html, /Norrsken House Kigali/);
+  assert.doesNotMatch(html, /Norrsken House Kigali/);
   assert.match(html, /1 KN 78 St/);
   assert.match(html, /Kiyovu/);
   assert.match(html, /Nyarugenge/);
@@ -72,7 +72,7 @@ test("publishes the MED+250 Kigali location as a crawlable contact page", async 
   assert.equal(response.status, 200);
   const html = await response.text();
   assert.match(html, /<title>MED\+250 Kigali location and contact \| MED\+250<\/title>/);
-  assert.match(html, /Norrsken House Kigali/);
+  assert.doesNotMatch(html, /Norrsken House Kigali/);
   assert.match(html, /1 KN 78 St/);
   assert.match(html, /Kiyovu/);
   assert.match(html, /Nyarugenge/);
@@ -1080,8 +1080,8 @@ test("uses isolated Cloudflare Worker sessions with no alternate browser databas
   await assert.rejects(access(new URL("../lib/supabase.ts", import.meta.url)));
   assert.doesNotMatch(packageJson, /@supabase\/supabase-js|NEXT_PUBLIC_SUPABASE/);
   assert.doesNotMatch(client, /createClient|requireCustomerBackend|requirePharmacyBackend|customerSupabase|pharmacySupabase|postgres_changes|\.rpc\(/);
-  assert.match(client, /catalogueBackendConfigured = true/);
-  assert.match(client, /pharmacyPortalBackendConfigured = true/);
+  assert.match(client, /NEXT_PUBLIC_MED250_CATALOGUE_BACKEND === "worker-d1"/);
+  assert.match(client, /pharmacyPortalBackendConfigured =\s*authBackendConfigured && pharmacyWorkspaceBackendConfigured/);
 
   const customerSessionSection = client.slice(
     client.indexOf("export async function ensureAnonymousCustomer"),

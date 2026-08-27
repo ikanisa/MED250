@@ -8,12 +8,12 @@ import { publicContactChannels } from "../../lib/public-contact-channels.mjs";
 export const metadata: Metadata = {
   title: "MED+250 Kigali location and contact",
   description:
-    "Find MED+250 at Norrsken House Kigali, 1 KN 78 St, Kiyovu, Nyarugenge, Kigali, and use the Rwanda pharmacy marketplace online.",
+    "Find MED+250 at 1 KN 78 St, Kiyovu, Nyarugenge, Kigali, and use the Rwanda pharmacy marketplace online.",
   alternates: marketplaceAlternates(companyLocation.pagePath),
   openGraph: {
     title: "MED+250 Kigali location and contact",
     description:
-      "MED+250 is based at Norrsken House Kigali and serves people across Rwanda through its online pharmacy marketplace.",
+      "MED+250 is based in Kigali and serves people across Rwanda through its online pharmacy marketplace.",
     url: companyLocation.pagePath,
   },
 };
@@ -24,13 +24,12 @@ export default function ContactPage() {
     <InfoShell
       eyebrow="Kigali · Rwanda"
       title="Find MED+250 in Kigali"
-      intro="Our team is based at Norrsken House Kigali. MED+250 helps people across Rwanda search pharmacy products and request availability online."
+      intro="Our team is based in Kigali. MED+250 helps people across Rwanda search pharmacy products and request availability online."
     >
       <section className="location-card">
         <h2>Our location</h2>
         <address>
           <strong>{companyLocation.organizationName}</strong>
-          <span>{companyLocation.venue}</span>
           <span>{companyLocation.streetAddress}</span>
           <span>{companyLocation.neighborhood}, {companyLocation.district}</span>
           <span>{companyLocation.addressLocality}, {companyLocation.countryName}</span>
