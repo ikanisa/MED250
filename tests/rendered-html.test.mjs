@@ -575,6 +575,8 @@ test("lazy-loads more catalogue products continuously while scrolling", async ()
   assert.match(marketplace, /new IntersectionObserver/);
   assert.match(marketplace, /rootMargin: "800px 0px"/);
   assert.match(marketplace, /setVisibleCount\(\(count\) => count \+ PRODUCT_BATCH_SIZE\)/);
+  assert.match(marketplace, /const hasMoreProducts = !catalogueError && !liveCatalogueResultsUnavailable && \(/);
+  assert.match(marketplace, /\{visibleProducts\.length && !catalogueError \? <div ref=\{productLoadSentinelRef\}/);
   assert.match(marketplace, /ref=\{productLoadSentinelRef\}/);
   assert.match(marketplace, /data-testid="product-scroll-sentinel"/);
   assert.match(marketplace, /marketplaceMessage\("catalogue\.load_more"\)/);

@@ -1848,9 +1848,11 @@ export default function Marketplace({
   ]);
   const accessibleCatalogueSize = Math.max(catalogueMatchCount, visibleProducts.length);
   const catalogueBusy = catalogueInitialising || catalogueLoading;
-  const hasMoreProducts = !liveCatalogueResultsUnavailable && serverCatalogueActive
-    ? serverCatalogueTotal > catalogue.length
-    : filtered.length > visibleCount;
+  const hasMoreProducts = !catalogueError && !liveCatalogueResultsUnavailable && (
+    serverCatalogueActive
+      ? serverCatalogueTotal > catalogue.length
+      : filtered.length > visibleCount
+  );
 
   useEffect(() => {
     if (!catalogueBusy) productLoadPendingRef.current = false;
@@ -3112,7 +3114,7 @@ export default function Marketplace({
               key={product.id}
             />)}
           </div> : liveCatalogueResultsUnavailable ? <div className="catalogue-empty" role="status"><CircleAlert size={28} /><h3>{marketplaceMessage("inventory.aef8e0cc6aa3")}</h3><p>{marketplaceMessage("inventory.3340e9286bd3")}</p><button type="button" onClick={() => { setCatalogueError(""); setServerCatalogueAvailable(true); setCatalogueRetryKey((key) => key + 1); }}>{marketplaceMessage("common.try_again")}</button></div> : <div className="catalogue-empty"><Search size={28} /><h3>{marketplaceMessage("inventory.ca602ed1950d")}</h3><p>{marketplaceMessage("inventory.1f0d418afe7e")}</p><button onClick={clearCatalogueFilters}>{marketplaceMessage("inventory.fd2b359b4763")}</button></div>}
-          {visibleProducts.length ? <div ref={productLoadSentinelRef} className={`infinite-scroll-sentinel${catalogueBusy && hasMoreProducts ? " is-loading" : ""}`} role="status" aria-live="polite" aria-atomic="true" data-testid="product-scroll-sentinel">
+          {visibleProducts.length && !catalogueError ? <div ref={productLoadSentinelRef} className={`infinite-scroll-sentinel${catalogueBusy && hasMoreProducts ? " is-loading" : ""}`} role="status" aria-live="polite" aria-atomic="true" data-testid="product-scroll-sentinel">
             {hasMoreProducts ? <><span className="infinite-scroll-spinner" aria-hidden="true" /><span>{catalogueBusy ? marketplaceMessage("inventory.97b72d67281c") : marketplaceMessage("inventory.6795683ef969")}</span><button type="button" onClick={() => { if (!catalogueBusy) { productLoadPendingRef.current = true; setVisibleCount((count) => count + PRODUCT_BATCH_SIZE); } }} disabled={catalogueBusy}>{catalogueBusy ? marketplaceMessage("inventory.ba3bbbe10d8b") : marketplaceMessage("catalogue.load_more")}</button></> : <span>{marketplaceFormatMessage("inventory.da287b007270", [marketplaceNumber(accessibleCatalogueSize)])}</span>}
           </div> : null}
         </section>
