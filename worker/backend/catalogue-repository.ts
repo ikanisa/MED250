@@ -216,6 +216,10 @@ const PUBLIC_COLUMNS = `
   product.indicative_price_basis,
   product.indicative_price_source_url,
   product.indicative_price_updated_at,
+  0 as verified_offer_count,
+  0 as verified_offer_min_rwf,
+  0 as verified_offer_max_rwf,
+  null as verified_offer_updated_at,
   case when product.description_approved = 1 then product.description end as description,
   case when product.description_approved = 1 then product.description_source_name end as description_source_name,
   case when product.description_approved = 1 then product.description_source_url end as description_source_url`;

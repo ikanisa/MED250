@@ -16,11 +16,19 @@ const PROHIBITED_MARKETPLACE_REFERENCE = /\bamazon(?:\.com|as)?\b/giu;
 export function removeProhibitedMarketplaceReference(value: string) {
   return value
     .normalize("NFKC")
+    .replace(/\uFFFD/gu, " ")
     .replace(PROHIBITED_MARKETPLACE_REFERENCE, " ")
     .replace(/\s+([,;:.])/gu, "$1")
     .replace(/\s+/g, " ")
-    .replace(/^[\s,;:–—-]+|[\s,;:–—-]+$/gu, "")
+    .replace(/^[\s|,;:–—-]+|[\s|,;:–—-]+$/gu, "")
     .trim();
+}
+
+function clipAtWordBoundary(value: string, maximumLength: number) {
+  if (value.length <= maximumLength) return value;
+  const prefix = value.slice(0, maximumLength + 1);
+  const lastWordBoundary = prefix.lastIndexOf(" ");
+  return prefix.slice(0, lastWordBoundary >= Math.floor(maximumLength * .6) ? lastWordBoundary : maximumLength).trimEnd();
 }
 
 export function officialCatalogueTitle(value: string) {
@@ -48,8 +56,6 @@ export function customerProductTitle(value: string) {
       : official;
   if (cased.length <= 120) return cased;
   const firstClause = cased.split(/[,;]|\s[-–—]\s/, 1)[0].trim();
-  if (firstClause.length >= 28 && firstClause.length <= 117) return `${firstClause}…`;
-  const prefix = cased.slice(0, 117);
-  const lastWordBoundary = prefix.lastIndexOf(" ");
-  return `${prefix.slice(0, lastWordBoundary >= 72 ? lastWordBoundary : 117).trimEnd()}…`;
+  if (firstClause.length >= 28 && firstClause.length <= 120) return firstClause;
+  return clipAtWordBoundary(cased, 120);
 }

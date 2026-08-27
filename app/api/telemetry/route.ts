@@ -9,6 +9,9 @@ const EVENT_NAMES = new Set([
   "pharmacy_selected",
   "whatsapp_handoff",
   "momo_handoff",
+  "seo_landing",
+  "availability_request_verified",
+  "pharmacy_confirmation_received",
 ]);
 
 const CATEGORIES = new Set(["Medicines", "Personal care", "Baby & family", "Wellness & devices"]);
@@ -96,6 +99,20 @@ function sanitizeProperties(name: string, properties: Record<string, unknown>) {
   }
   if (name === "whatsapp_handoff" || name === "momo_handoff") {
     return { configured: booleanValue(properties, "configured") };
+  }
+  if (name === "seo_landing") {
+    const channels = new Set(["organic_search", "paid_search", "social", "internal", "referral", "direct_or_unknown"]);
+    const landingTypes = new Set(["home", "product", "category", "trust", "intent", "other"]);
+    const devices = new Set(["desktop", "mobile", "tablet"]);
+    return {
+      channel: typeof properties.channel === "string" && channels.has(properties.channel) ? properties.channel : "direct_or_unknown",
+      landing_type: typeof properties.landingType === "string" && landingTypes.has(properties.landingType) ? properties.landingType : "other",
+      device: typeof properties.device === "string" && devices.has(properties.device) ? properties.device : null,
+    };
+  }
+  if (name === "availability_request_verified") return { verified: true };
+  if (name === "pharmacy_confirmation_received") {
+    return { offer_count_bucket: bucket(numberValue(properties, "offerCount"), [1, 2, 5, 10]) };
   }
   return {};
 }

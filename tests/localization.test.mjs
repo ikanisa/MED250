@@ -2,10 +2,11 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-import { validateLocalizationFiles, validateLocalizationRegistry } from "../scripts/validate-localization.mjs";
+import { validateKinyarwandaPilot, validateLocalizationFiles, validateLocalizationRegistry } from "../scripts/validate-localization.mjs";
 
 const registry = JSON.parse(await readFile(new URL("../data/localization/locale-releases.json", import.meta.url), "utf8"));
 const inventory = JSON.parse(await readFile(new URL("../data/localization/source-copy-inventory.json", import.meta.url), "utf8"));
+const kinyarwandaPilot = JSON.parse(await readFile(new URL("../data/localization/kinyarwanda-pilot.json", import.meta.url), "utf8"));
 
 test("keeps locale publication fail-closed until complete review evidence exists", async () => {
   const result = await validateLocalizationFiles();
@@ -28,6 +29,14 @@ test("keeps locale publication fail-closed until complete review evidence exists
   assert.equal(kinyarwanda.runtime_ready, false);
   assert.equal(kinyarwanda.route_mode, "blocked_until_approved");
   assert.equal(kinyarwanda.catalog, null);
+});
+
+test("keeps the Kinyarwanda intent pilot blocked until every accountable review field exists", () => {
+  assert.deepEqual(kinyarwandaPilot.pilot_routes, ["/find-medicine", "/about", "/trust"]);
+  assert.equal(kinyarwandaPilot.public, false);
+  assert.equal(validateKinyarwandaPilot(kinyarwandaPilot).valid, true);
+  const unsafe = { ...kinyarwandaPilot, public: true, publication_ready: true };
+  assert.match(validateKinyarwandaPilot(unsafe).errors.join(" "), /cannot be publication-ready/);
 });
 
 test("routes every privacy and marketplace-terms string through the governed runtime catalog", () => {

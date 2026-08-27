@@ -102,6 +102,7 @@
     "domain:evidence:refresh": "node scripts/refresh-domain-launch-evidence.mjs",
     "seo:generate-products": "node scripts/generate-product-seo-index.mjs && node scripts/generate-product-sitemap-index.mjs && node scripts/generate-product-related-index.mjs",
     "seo:generate-sitemap": "node scripts/generate-product-sitemap-index.mjs",
+    "seo:quality": "node scripts/validate-seo-quality.mjs",
     "data:related-products": "node scripts/generate-product-related-index.mjs",
     "related:verify:live": "node --env-file-if-exists=.env.local scripts/verify-live-related-products.mjs",
     "launch:evidence:verify": "node scripts/validate-launch-evidence.mjs",
@@ -122,8 +123,8 @@
     "uat:evidence:build": "node scripts/create-physical-uat-launch-evidence.mjs",
     "release:preflight": "npm run launch:evidence:verify && node scripts/validate-release-config.mjs",
     "release:preflight:live": "NEXT_PUBLIC_MED250_CATALOGUE_BACKEND=worker-d1 NEXT_PUBLIC_MED250_AUTH_BACKEND=worker-d1 NEXT_PUBLIC_MED250_ORDER_BACKEND=worker-d1 NEXT_PUBLIC_MED250_WORKSPACE_BACKEND=worker-d1 NEXT_PUBLIC_MARKETPLACE_MODE=live NEXT_PUBLIC_SITE_URL=https://med-250.com NEXT_PUBLIC_MED250_OBSERVABILITY=cloud node scripts/validate-release-config.mjs --live",
-    "release:check": "npm run release:preflight && npm run security:audit && npm run lint && npm run data:validate && npm run data:quality && npm run python:test && npm test && npm run performance:budget && wrangler deploy --dry-run --strict",
-    "release:check:deployment": "npm run release:preflight:live && npm run security:audit && npm run lint && npm run cloudflare:typecheck && npm run data:validate && npm run data:quality && npm run python:test && npm run test:preview && npm run cloudflare:check:worker-d1 && npm run performance:budget",
+    "release:check": "npm run release:preflight && npm run security:audit && npm run lint && npm run data:validate && npm run data:quality && npm run seo:quality && npm run python:test && npm test && npm run performance:budget && wrangler deploy --dry-run --strict",
+    "release:check:deployment": "npm run release:preflight:live && npm run security:audit && npm run lint && npm run cloudflare:typecheck && npm run data:validate && npm run data:quality && npm run seo:quality && npm run python:test && npm run test:preview && npm run cloudflare:check:worker-d1 && npm run performance:budget",
     "release:check:live": "npm run release:check:deployment",
     "deploy:preview": "npm run release:check && wrangler deploy --dry-run --strict",
     "deploy:live": "npm run release:check:deployment && wrangler deploy --config dist/server/wrangler.worker-d1.production.json --strict"

@@ -8,6 +8,7 @@ import { absoluteUrl } from "../../../lib/site";
 import { safeJsonLd } from "../../../lib/safe-json-ld";
 import { customerProductTitle } from "../../../lib/product-display";
 import { marketplaceAlternates } from "../../../lib/marketplace-locale";
+import { productMetadataDescription, productMetadataTitle, verifiedAggregateOffer } from "../../../lib/seo-content";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -25,11 +26,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     imageUrls: imageUrls.length ? imageUrls : baseProduct.imageUrls,
   } : null;
   if (!product) return { title: "Product not found", robots: { index: false, follow: false } };
-  const displayName = customerProductTitle(product.brand);
-  const description = product.description || (localProduct
-    ? productSeoDescription(localProduct)
-    : `${displayName}${product.subcategory ? ` — ${product.subcategory}` : ""}. View central product information, request availability, and continue with a pharmacy on WhatsApp.`);
-  const title = [displayName, product.strength].filter(Boolean).join(" ");
+  const description = productMetadataDescription(product, product.description || (localProduct ? productSeoDescription(localProduct) : null));
+  const title = productMetadataTitle(product);
   return {
     title,
     description,
@@ -67,9 +65,8 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     })
     .filter((candidate) => Boolean(candidate.imageUrl ?? candidate.imageUrls?.[0]))
     .slice(0, 8);
-  const description = product.description || (localProduct
-    ? productSeoDescription(localProduct)
-    : `${displayName}${product.subcategory ? ` — ${product.subcategory}` : ""}. View central product information, request availability, and continue with a pharmacy on WhatsApp.`);
+  const description = productMetadataDescription(product, product.description || (localProduct ? productSeoDescription(localProduct) : null));
+  const aggregateOffer = verifiedAggregateOffer(product);
   const productSchema = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -80,6 +77,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     category: product.category,
     image: product.imageUrls?.length ? product.imageUrls : product.imageUrl ? [product.imageUrl] : undefined,
     url: absoluteUrl(`/product/${encodeURIComponent(product.id)}`),
+    offers: aggregateOffer ?? undefined,
     additionalProperty: [
       product.generic ? { "@type": "PropertyValue", name: "Generic name", value: product.generic } : null,
       product.form ? { "@type": "PropertyValue", name: "Dosage form", value: product.form } : null,

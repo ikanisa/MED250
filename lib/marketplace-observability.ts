@@ -8,7 +8,10 @@ export type MarketplaceEventName =
   | "order_failed"
   | "pharmacy_selected"
   | "whatsapp_handoff"
-  | "momo_handoff";
+  | "momo_handoff"
+  | "seo_landing"
+  | "availability_request_verified"
+  | "pharmacy_confirmation_received";
 
 type SafeMarketplaceProperties = Record<string, string | number | boolean | null>;
 

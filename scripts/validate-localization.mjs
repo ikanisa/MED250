@@ -11,6 +11,17 @@ const allowedStatuses = new Set(["approved_source", "approved_translation", "awa
 const allowedRouteModes = new Set(["default_unprefixed", "localized_prefix", "blocked_until_approved"]);
 const requiredReviewFields = ["translation_provider", "glossary_version", "clinical_reviewer", "legal_reviewer", "reviewed_at"];
 
+export function validateKinyarwandaPilot(pilot) {
+  const errors = [];
+  if (pilot?.schema_version !== 1) errors.push("Kinyarwanda pilot schema_version must be 1");
+  if (pilot?.locale !== "rw-RW") errors.push("Kinyarwanda pilot locale must be rw-RW");
+  if (!Array.isArray(pilot?.pilot_routes) || !pilot.pilot_routes.length) errors.push("Kinyarwanda pilot routes are required");
+  const hasReviewEvidence = requiredReviewFields.every((field) => String(pilot?.[field] ?? "").trim()) && String(pilot?.catalog ?? "").trim();
+  if ((pilot?.publication_ready || pilot?.public) && !hasReviewEvidence) errors.push("Kinyarwanda pilot cannot be publication-ready without catalog and accountable review evidence");
+  if (pilot?.public && !pilot?.publication_ready) errors.push("Kinyarwanda pilot cannot be public before publication_ready");
+  return { valid: errors.length === 0, errors };
+}
+
 async function loadJson(relativePath) {
   const absolutePath = path.join(projectRoot, relativePath);
   const content = await readFile(absolutePath, "utf8");
@@ -127,9 +138,11 @@ export async function validateLocalizationFiles() {
   const result = await validateLocalizationRegistry(registry);
   const sourceCatalog = await loadJson(registry.source_catalog);
   const runtimeCatalog = await loadJson(registry.runtime_catalog);
+  const kinyarwandaPilot = await loadJson("data/localization/kinyarwanda-pilot.json");
   const committedInventory = JSON.parse(await readFile(path.join(projectRoot, registry.source_copy_inventory), "utf8"));
   const generatedInventory = await buildSourceCopyInventory();
   const errors = [...result.errors];
+  errors.push(...validateKinyarwandaPilot(kinyarwandaPilot).errors);
 
   if (runtimeCatalog.locale !== registry.default_locale) {
     errors.push("runtime catalog locale must equal the default locale");

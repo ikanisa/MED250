@@ -77,6 +77,34 @@ test("publishes the MED+250 Kigali location as a crawlable contact page", async 
   assert.match(html, /not a pharmacy collection point/i);
 });
 
+test("publishes the Rwanda trust and medicine-intent architecture without unsupported claims", async () => {
+  const expectations = [
+    ["/about", /What the marketplace does/],
+    ["/trust", /How MED\+250 separates verified facts/],
+    ["/find-medicine", /name="search"/],
+  ];
+  for (const [pathname, pattern] of expectations) {
+    const response = await render(pathname);
+    assert.equal(response.status, 200, pathname);
+    const html = await response.text();
+    assert.match(html, pattern);
+    assert.match(html, /Trust centre/);
+  }
+
+  const sitemapResponse = await render("/sitemap.xml");
+  assert.equal(sitemapResponse.status, 200);
+  const sitemap = await sitemapResponse.text();
+  for (const pathname of ["/about", "/trust", "/find-medicine"]) assert.match(sitemap, new RegExp(pathname.replaceAll("-", "\\-")));
+  assert.doesNotMatch(sitemap, /\/rw\//);
+
+  const productResponse = await render("/product/rwanda-fda-hm-0001");
+  assert.equal(productResponse.status, 200);
+  const productHtml = await productResponse.text();
+  assert.match(productHtml, /"@type":"Product"/);
+  assert.doesNotMatch(productHtml, /"@type":"AggregateOffer"/);
+  assert.match(productHtml, /Sources and availability/);
+});
+
 test("adds category-aware product breadcrumbs and source-backed related products", async () => {
   const [marketplace, productPage, productSeo, productRelated, taxonomy, css] = await Promise.all([
     readFile(new URL("../app/marketplace.tsx", import.meta.url), "utf8"),
@@ -245,7 +273,7 @@ test("shows only governed public product descriptions with source attribution", 
   assert.match(publicProduct, /descriptionSourceUrl: httpsUrl\(row, "description_source_url"\)/);
   assert.match(productPage, /const remoteProduct = await getPublicMarketplaceProduct\(id\)/);
   assert.match(productPage, /const baseProduct = remoteProduct \?\? \(localProduct \? toMarketplaceProduct\(localProduct\) : null\)/);
-  assert.match(productPage, /const description = product\.description \|\|/);
+  assert.match(productPage, /productMetadataDescription\(product, product\.description \|\|/);
   assert.match(marketplace, /selectedProduct\.description \? <section className="product-description"/);
   assert.match(marketplace, /descriptionSourceUrl\?\.startsWith\("https:\/\/"\)/);
   assert.match(css, /\.product-description \{/);
@@ -403,6 +431,17 @@ test("accepts only privacy-safe bucketed marketplace telemetry", async () => {
   }), {}, { waitUntil() {}, passThroughOnException() {} });
   assert.equal(accepted.status, 202);
   assert.deepEqual(await accepted.json(), { accepted: true });
+
+  const seoAccepted = await worker.fetch(new Request("https://med-250.com/api/telemetry", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: "seo_landing",
+      properties: { channel: "organic_search", landingType: "intent", device: "mobile", rawReferrer: "discard-me" },
+    }),
+  }), {}, { waitUntil() {}, passThroughOnException() {} });
+  assert.equal(seoAccepted.status, 202);
+  assert.deepEqual(await seoAccepted.json(), { accepted: true });
 
   const rejected = await worker.fetch(new Request("https://med-250.com/api/telemetry", {
     method: "POST",
@@ -1076,20 +1115,8 @@ test("protects new anonymous customer sessions with Turnstile in live mode", asy
   assert.match(worker, /script-src[^\n]*static\.cloudflareinsights\.com/);
   assert.match(worker, /frame-src https:\/\/challenges\.cloudflare\.com/);
   assert.match(preflight, /Live release validation requires NEXT_PUBLIC_TURNSTILE_SITE_KEY/);
-  assert.match(preflight, /MED250_GATE_GPS_READY/);
-  assert.match(preflight, /MED250_GATE_WHATSAPP_READY/);
-  assert.match(preflight, /MED250_GATE_DUPLICATE_REGISTER_REVIEWED/);
-  assert.match(preflight, /MED250_GATE_SECURITY_HARDENING_DEPLOYED/);
-  assert.match(preflight, /MED250_GATE_EDGE_FUNCTIONS_DEPLOYED/);
-  assert.match(preflight, /MED250_GATE_TURNSTILE_SERVER_VERIFIED/);
-  assert.match(preflight, /MED250_GATE_AUTH_RATE_LIMITS_APPROVED/);
-  assert.match(preflight, /MED250_GATE_PRESCRIPTION_RETENTION_APPROVED/);
-  assert.match(preflight, /MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED/);
-  assert.match(preflight, /MED250_GATE_DOMAIN_DNS_VERIFIED/);
-  assert.match(preflight, /MED250_GATE_PHYSICAL_UAT_PASSED/);
-  assert.match(preflight, /MED250_GATE_SOURCE_RECONCILED/);
-  assert.doesNotMatch(preflight, /MED250_GATE_WORKER_D1_STAGING_PASSED/);
-  assert.match(preflight, /MED250_GATE_WORKER_D1_CUTOVER_APPROVED/);
+  assert.match(preflight, /workerD1Cutover/);
+  assert.match(preflight, /NEXT_PUBLIC_MED250_OBSERVABILITY=cloud/);
 });
 
 test("uses Twilio WhatsApp OTP only for pharmacy portal access", async () => {

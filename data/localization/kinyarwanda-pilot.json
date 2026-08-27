@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "locale": "rw-RW",
+  "status": "awaiting_qualified_translation",
+  "public": false,
+  "publication_ready": false,
+  "pilot_routes": [
+    "/find-medicine",
+    "/about",
+    "/trust"
+  ],
+  "translation_provider": null,
+  "glossary_version": null,
+  "clinical_reviewer": null,
+  "legal_reviewer": null,
+  "reviewed_at": null,
+  "catalog": null,
+  "publication_rule": "All review fields and the governed catalog must be complete before publication_ready or public can be true."
+}

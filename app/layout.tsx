@@ -9,10 +9,12 @@ import { companyLocation } from "../lib/company-location";
 import NavigationFeedback from "./navigation-feedback";
 import PwaManager from "./pwa-manager";
 import { SiteWebMcpRegistrar } from "../webmcp/site-registrar";
+import SeoMeasurement from "./seo-measurement";
 import "./globals.css";
 
 const display = Manrope({ variable: "--font-display", subsets: ["latin"] });
 const sans = DM_Sans({ variable: "--font-sans", subsets: ["latin"] });
+const googleSiteVerification = String(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ?? "").trim();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -26,6 +28,7 @@ export const metadata: Metadata = {
   publisher: siteName,
   category: "health marketplace",
   keywords: ["Rwanda pharmacy marketplace", "pharmacy products Rwanda", "medicines Rwanda", "medicine availability Rwanda", "Kigali pharmacy products", "find pharmacies Rwanda"],
+  verification: googleSiteVerification ? { google: googleSiteVerification } : undefined,
   other: { "geo.region": "RW-01", "geo.placename": companyLocation.addressLocality },
   alternates: marketplaceAlternates("/"),
   robots: searchIndexingEnabled
@@ -88,5 +91,5 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <link rel="icon" href="/brand/favicon-32.png" sizes="32x32" type="image/png" />
     <link rel="icon" href="/brand/favicon-48.png" sizes="48x48" type="image/png" />
     <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png" sizes="180x180" type="image/png" />
-  </head><body className={`${display.variable} ${sans.variable}`}><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(organizationSchema) }} /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteSchema) }} /><NavigationFeedback /><PwaManager /><SiteWebMcpRegistrar />{children}</body></html>;
+  </head><body className={`${display.variable} ${sans.variable}`}><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(organizationSchema) }} /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteSchema) }} /><SeoMeasurement /><NavigationFeedback /><PwaManager /><SiteWebMcpRegistrar />{children}</body></html>;
 }

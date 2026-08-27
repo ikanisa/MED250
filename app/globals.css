@@ -1502,6 +1502,11 @@ body { background:var(--clay-page-cool); }
 .product-description h2 { margin:0; color:var(--color-ink); font:800 15px/1.3 var(--font-display),sans-serif; letter-spacing:-.15px; }
 .product-description p { margin:9px 0 0; color:var(--color-muted); font-size:13px; line-height:1.65; overflow-wrap:anywhere; }
 .product-description a { display:inline-flex; margin-top:10px; color:var(--color-violet); font-size:11px; font-weight:800; text-underline-offset:3px; }
+.product-trust-panel { margin:18px 0 0; padding:18px 20px; border:1px solid var(--clay-border); border-radius:14px; background:linear-gradient(135deg,var(--surface-mint),var(--alpha-white-82)); }
+.product-trust-panel h2 { margin:0; display:flex; align-items:center; gap:8px; color:var(--color-ink); font:800 15px/1.3 var(--font-display),sans-serif; }
+.product-trust-panel p { margin:9px 0 0; color:var(--color-muted); font-size:13px; line-height:1.65; }
+.product-trust-panel>div { margin-top:12px; display:flex; flex-wrap:wrap; gap:16px; }
+.product-trust-panel a { min-height:44px; display:inline-flex; align-items:center; color:var(--color-violet); font-size:12px; font-weight:850; text-underline-offset:3px; }
 .product-specification-list { margin:28px 0 0; border-top:1px solid var(--clay-border); border-bottom:1px solid var(--clay-border); }
 .product-specification-list>div { min-height:52px; padding:12px 0; display:grid; grid-template-columns:28px minmax(145px,.72fr) minmax(0,1.45fr); align-items:start; gap:14px; border-bottom:1px solid var(--clay-border); }
 .product-specification-list>div:last-child { border-bottom:0; }
@@ -1547,6 +1552,21 @@ body { background:var(--clay-page-cool); }
 .info-content section { padding-bottom:32px; border-bottom:1px solid var(--line); }
 .info-content h2 { margin:0 0 10px; font:800 clamp(24px,3vw,34px)/1.08 var(--font-display),sans-serif; letter-spacing:-1px; }
 .info-content p { max-width:800px; margin:0; color:var(--color-muted); font-size:16px; line-height:1.75; }
+.info-content a { color:var(--color-violet); font-weight:800; text-underline-offset:3px; }
+.info-steps { margin:0; padding:0; display:grid; gap:18px; list-style:none; }
+.info-steps li { padding:24px; display:grid; grid-template-columns:48px 1fr; gap:18px; border:1px solid var(--clay-border); border-radius:18px; background:var(--alpha-white-82); box-shadow:var(--clay-shadow-soft); }
+.info-steps li>span { width:42px; height:42px; display:grid; place-items:center; border-radius:13px; color:var(--color-violet); background:var(--surface-lavender); font:900 16px var(--font-display),sans-serif; }
+.info-steps h2 { margin-top:3px; }
+.info-actions { display:flex; flex-wrap:wrap; gap:10px; }
+.medicine-search-form { padding:28px; display:grid; gap:12px; border:1px solid var(--clay-border); border-radius:18px; background:var(--alpha-white-82); box-shadow:var(--clay-shadow-soft); }
+.medicine-search-form label { color:var(--color-ink); font-weight:850; line-height:1.5; }
+.medicine-search-form>div { display:grid; grid-template-columns:1fr auto; gap:10px; }
+.medicine-search-form input { min-height:52px; padding:0 16px; border:1px solid var(--clay-border-strong); border-radius:12px; color:var(--color-ink); background:var(--color-white); font:600 16px var(--font-sans),sans-serif; }
+.medicine-search-form button { min-height:52px; padding:0 20px; border:0; border-radius:12px; color:var(--color-white); background:var(--brand-action-gradient); font-weight:850; cursor:pointer; }
+.info-faq details { padding:18px 0; border-top:1px solid var(--line); }
+.info-faq summary { color:var(--color-ink); font-size:16px; font-weight:850; cursor:pointer; }
+.info-faq details p { margin-top:10px; font-size:15px; }
+.info-reviewed { font-size:13px!important; font-weight:750; }
 .info-callout { padding:28px; border-radius:18px; background:color-mix(in srgb,var(--clay-surface-lavender) 14%,var(--color-white)); }
 .info-callout a { margin-top:18px; padding:12px 18px; display:inline-flex; border-radius:8px; color:var(--ink); background:var(--clay-surface-warm); font-weight:850; }
 .location-card address { display:grid; gap:6px; color:var(--color-muted); font-style:normal; font-size:16px; line-height:1.55; }
@@ -1620,6 +1640,10 @@ body { background:var(--clay-page-cool); }
   .info-hero { padding:52px 20px; }
   .info-hero h1 { letter-spacing:-2px; }
   .info-hero p { font-size:16px; }
+  .info-steps li { padding:18px; grid-template-columns:40px 1fr; gap:13px; }
+  .info-steps li>span { width:38px; height:38px; }
+  .medicine-search-form { padding:20px; }
+  .medicine-search-form>div { grid-template-columns:1fr; }
   footer>nav { align-items:flex-start; flex-direction:column; }
 }
 

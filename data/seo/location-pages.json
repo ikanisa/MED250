@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "pages": [
+    {
+      "path": "/contact",
+      "status": "public",
+      "evidence": "governed_company_location"
+    }
+  ],
+  "future_page_gate": {
+    "required": [
+      "verified_operational_coverage",
+      "partner_consent",
+      "accountable_review_date"
+    ],
+    "rule": "Do not publish district, pharmacy, or service-area pages until every required field is recorded."
+  }
+}

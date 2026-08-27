@@ -21,8 +21,14 @@ test("does not rewrite mixed-case source titles and keeps an exact normalized of
 
 test("uses a concise customer title while keeping the full official source title available", () => {
   const official = "Aveeno Baby Daily Moisture Gentle Baby Body Wash and Shampoo with Oat Extract, 2-in-1 Baby Wash and Hair Shampoo, Tear-Free, Paraben-Free for Sensitive Skin and Hair, Lightly Scented, 18 Fl Oz";
-  assert.equal(customerProductTitle(official), "Aveeno Baby Daily Moisture Gentle Baby Body Wash and Shampoo with Oat Extract…");
+  assert.equal(customerProductTitle(official), "Aveeno Baby Daily Moisture Gentle Baby Body Wash and Shampoo with Oat Extract");
   assert.equal(officialCatalogueTitle(official), official);
+});
+
+test("removes broken terminal separators and replacement characters without adding ellipses", () => {
+  assert.equal(customerProductTitle("IBUPAR TABLETS |"), "Ibupar tablets");
+  assert.equal(customerProductTitle("Vitamin C \uFFFD |"), "Vitamin C");
+  assert.doesNotMatch(customerProductTitle("A very long product title ".repeat(12)), /…/u);
 });
 
 test("removes prohibited marketplace references from every product-title form", () => {
