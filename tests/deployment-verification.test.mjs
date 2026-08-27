@@ -241,6 +241,10 @@ test("keeps production as the only remotely deployable Worker target", async () 
   assert.match(packageJson.scripts["build:production"], /NEXT_PUBLIC_MED250_AUTH_BACKEND=worker-d1/);
   assert.match(packageJson.scripts["build:sites"], /NEXT_PUBLIC_MED250_DEPLOYMENT_MODE=catalog/);
   assert.match(packageJson.scripts["build:sites"], /NEXT_PUBLIC_MARKETPLACE_MODE=catalog/);
+  assert.match(packageJson.scripts["build:sites"], /NEXT_PUBLIC_MED250_CATALOGUE_BACKEND=static-catalog/);
+  assert.match(packageJson.scripts["build:sites"], /NEXT_PUBLIC_MED250_AUTH_BACKEND=disabled/);
+  assert.match(packageJson.scripts["build:sites"], /NEXT_PUBLIC_MED250_ORDER_BACKEND=disabled/);
+  assert.match(packageJson.scripts["build:sites"], /NEXT_PUBLIC_MED250_WORKSPACE_BACKEND=disabled/);
   assert.match(packageJson.scripts["build:sites"], /NEXT_PUBLIC_SITE_URL=https:\/\/med250-rwanda\.ikanisa\.chatgpt\.site/);
   assert.match(packageJson.scripts["sites:verify:catalog"], /--mode catalog/);
   assert.match(packageJson.scripts["domain:evidence:refresh"], /refresh-domain-launch-evidence\.mjs/);
