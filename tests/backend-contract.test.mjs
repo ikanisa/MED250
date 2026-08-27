@@ -526,39 +526,40 @@ test("keeps the deployed contract service-only and identifier-free", async () =>
   assert.doesNotMatch(migration, /phone_numbers|whatsapp_numbers|customer_location/);
 });
 
-test("makes Worker-D1 drift and cutover controls mandatory in the production-only release gate", async () => {
+test("separates technical production deployment from operational activation evidence", async () => {
   const packageJson = JSON.parse(await readFile(
     new URL("../package.json", import.meta.url),
     "utf8",
   ));
   const liveGate = packageJson.scripts["release:check:live"];
-  assert.match(liveGate, /^npm run release:preflight:live/);
+  const deploymentGate = packageJson.scripts["release:check:deployment"];
+  assert.match(liveGate, /^npm run release:preflight:activation/);
   assert.match(liveGate, /&& npm run launch:go-live:status/);
   assert.match(liveGate, /&& npm run data:duplicates:verify -- --strict/);
-  assert.match(liveGate, /&& npm run cloudflare:typecheck/);
-  assert.match(liveGate, /&& npm run cloudflare:check:worker-d1/);
+  assert.match(liveGate, /&& npm run uat:verify:live/);
+  assert.match(liveGate, /&& npm run release:check:deployment/);
+  assert.match(deploymentGate, /^npm run release:preflight:live/);
+  assert.match(deploymentGate, /&& npm run cloudflare:typecheck/);
+  assert.match(deploymentGate, /&& npm run cloudflare:check:worker-d1/);
   const workerD1Check = packageJson.scripts["cloudflare:check:worker-d1"];
   assert.match(workerD1Check, /^npm run test:production/);
   assert.match(workerD1Check, /npm run cloudflare:prepare:worker-d1/);
   assert.match(workerD1Check, /wrangler deploy --config dist\/server\/wrangler[.]worker-d1[.]production[.]json --dry-run --strict/);
   assert.doesNotMatch(workerD1Check, /--keep-vars/);
   assert.doesNotMatch(workerD1Check, /--env production/);
-  assert.doesNotMatch(liveGate, /backend:verify|ops:health|SUPABASE/);
+  assert.doesNotMatch(deploymentGate, /launch:go-live:status|data:duplicates:verify -- --strict|uat:verify:live/);
+  assert.doesNotMatch(deploymentGate, /backend:verify|ops:health|SUPABASE/);
   assert.ok(
-    liveGate.indexOf("release:preflight:live") < liveGate.indexOf("data:duplicates:verify"),
-    "fail-closed attestation checks must run before source-governance checks",
+    liveGate.indexOf("release:preflight:activation") < liveGate.indexOf("data:duplicates:verify"),
+    "operational activation evidence must run before source-governance checks",
   );
   assert.ok(
-    liveGate.indexOf("release:preflight:live") < liveGate.indexOf("launch:go-live:status")
+    liveGate.indexOf("release:preflight:activation") < liveGate.indexOf("launch:go-live:status")
       && liveGate.indexOf("launch:go-live:status") < liveGate.indexOf("data:duplicates:verify"),
-    "consolidated go-live readiness must run before source-governance and Worker packaging checks",
+    "consolidated go-live readiness must run before source-governance checks",
   );
   assert.ok(
-    liveGate.indexOf("data:duplicates:verify") < liveGate.indexOf("cloudflare:typecheck"),
-    "source-governance review must pass before Worker packaging checks",
-  );
-  assert.ok(
-    liveGate.indexOf("cloudflare:typecheck") < liveGate.indexOf("cloudflare:check:worker-d1"),
+    deploymentGate.indexOf("cloudflare:typecheck") < deploymentGate.indexOf("cloudflare:check:worker-d1"),
     "Worker type drift must be checked before the production config is prepared",
   );
 });

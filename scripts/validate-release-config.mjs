@@ -2,7 +2,8 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { publicContactChannelErrors } from "../lib/public-contact-channels.mjs";
 
-const liveRequired = process.argv.includes("--live");
+const activationRequired = process.argv.includes("--activation");
+const liveRequired = activationRequired || process.argv.includes("--live");
 const envPath = [".env.local", ".env"].map((path) => resolve(path)).find(existsSync);
 const wranglerPath = resolve("wrangler.jsonc");
 const source = envPath ? readFileSync(envPath, "utf8") : "";
@@ -21,7 +22,7 @@ const fileEnv = Object.fromEntries(source
 const env = { ...fileEnv, ...process.env };
 const errors = [];
 const warnings = [];
-const liveGateNames = [
+const activationGateNames = [
   "MED250_GATE_GPS_READY",
   "MED250_GATE_WHATSAPP_READY",
   "MED250_GATE_DUPLICATE_REGISTER_REVIEWED",
@@ -135,23 +136,27 @@ if (siteUrl) {
   }
 }
 
+errors.push(...publicContactChannelErrors(env, { requireAll: activationRequired }));
+
 if (liveRequired) {
   if (mode !== "live") errors.push("Live release validation requires NEXT_PUBLIC_MARKETPLACE_MODE=live.");
   if (!workerD1Cutover) errors.push("Live release validation requires every MED250 backend slice to use worker-d1.");
   if (!siteUrl) errors.push("Live release validation requires an explicit NEXT_PUBLIC_SITE_URL.");
   if (!turnstileSiteKey) errors.push("Live release validation requires NEXT_PUBLIC_TURNSTILE_SITE_KEY.");
   if (observabilityMode !== "cloud") errors.push("Live release validation requires NEXT_PUBLIC_MED250_OBSERVABILITY=cloud.");
-  errors.push(...publicContactChannelErrors(env, { requireAll: true }));
-  for (const gateName of liveGateNames) {
+}
+
+if (activationRequired) {
+  for (const gateName of activationGateNames) {
     if (env[gateName]?.trim().toLowerCase() !== "confirmed") {
-      errors.push(`Live release validation requires ${gateName}=confirmed.`);
+      errors.push(`Operational activation validation requires ${gateName}=confirmed.`);
     }
   }
 }
 
 const result = {
   status: errors.length ? "failed" : "passed",
-  target: liveRequired ? "live" : mode || "unknown",
+  target: activationRequired ? "activation" : liveRequired ? "live_deployment" : mode || "unknown",
   envFileDetected: Boolean(envPath),
   workerReleaseMode: workerMode || "missing",
   workerName: workerName || "missing",
@@ -159,7 +164,7 @@ const result = {
   backendModes,
   workerD1Cutover,
   publicVariablesChecked: Object.keys(env).filter((name) => name.startsWith("NEXT_PUBLIC_")).sort(),
-  liveGatesChecked: liveRequired ? liveGateNames : [],
+  activationGatesChecked: activationRequired ? activationGateNames : [],
   warnings,
   errors,
 };

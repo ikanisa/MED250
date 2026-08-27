@@ -57,7 +57,7 @@ test("rejects unsafe or incomplete public contact configuration", () => {
   ]);
 });
 
-test("binds the public contact channels to the footer, example env and live release validator", async () => {
+test("binds the public contact channels to the footer, example env and activation validator", async () => {
   const [marketplace, infoShell, envExample, preflight, messages] = await Promise.all([
     readFile(new URL("../app/marketplace.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/info-shell.tsx", import.meta.url), "utf8"),
@@ -73,14 +73,14 @@ test("binds the public contact channels to the footer, example env and live rele
   assert.match(envExample, /NEXT_PUBLIC_MED250_CONTACT_EMAIL=/);
   assert.match(envExample, /NEXT_PUBLIC_MED250_SUPPORT_WHATSAPP=/);
   assert.match(envExample, /NEXT_PUBLIC_MED250_MEETING_URL=/);
-  assert.match(preflight, /publicContactChannelErrors\(env, \{ requireAll: true \}\)/);
+  assert.match(preflight, /publicContactChannelErrors\(env, \{ requireAll: activationRequired \}\)/);
   assert.match(messages, /public_contact\.email/);
   assert.match(messages, /public_contact\.whatsapp/);
   assert.match(messages, /public_contact\.booking/);
 });
 
-test("live release validation requires all public contact channels", () => {
-  const result = spawnSync(process.execPath, ["scripts/validate-release-config.mjs", "--live"], {
+test("operational activation validation requires all public contact channels", () => {
+  const result = spawnSync(process.execPath, ["scripts/validate-release-config.mjs", "--activation"], {
     cwd: new URL("..", import.meta.url),
     encoding: "utf8",
     env: {

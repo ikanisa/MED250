@@ -96,18 +96,14 @@ test("binds contact imports and production automation to reviewed artifacts", as
   const productionWorkflow = workflow.slice(workflow.indexOf("\n  production:"));
   assert.doesNotMatch(productionWorkflow, /SUPABASE_URL|SUPABASE_PUBLISHABLE_KEY|SUPABASE_SECRET_KEY/);
   assert.ok(
-    workflow.indexOf("Validate production attestations and governed sources")
+    workflow.indexOf("Validate production deployment configuration")
       < workflow.indexOf("Run Worker-D1 production release checks"),
-    "production attestations must pass before Worker-D1 packaging checks",
+    "production configuration must pass before Worker-D1 packaging checks",
   );
-  assert.match(workflow, /MED250_GATE_SECURITY_HARDENING_DEPLOYED/);
-  assert.match(workflow, /MED250_GATE_EDGE_FUNCTIONS_DEPLOYED/);
-  assert.match(workflow, /MED250_GATE_PRESCRIPTION_RETENTION_APPROVED/);
-  assert.match(workflow, /MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED/);
-  assert.match(workflow, /MED250_GATE_DOMAIN_DNS_VERIFIED/);
-  assert.match(workflow, /MED250_GATE_SOURCE_RECONCILED/);
+  assert.doesNotMatch(workflow, /MED250_GATE_/);
   assert.doesNotMatch(workflow, /staging|MED250_GATE_WORKER_D1_STAGING_PASSED/);
-  assert.match(workflow, /MED250_GATE_WORKER_D1_CUTOVER_APPROVED/);
+  assert.match(workflow, /Report operational activation readiness/);
+  assert.match(workflow, /continue-on-error: true/);
   assert.doesNotMatch(worker, /supabase\.co|legacy-supabase|neon\.tech/i);
   assert.match(worker, /connect-src 'self' https:\/\/maps\.googleapis\.com https:\/\/maps\.gstatic\.com/);
   assert.match(wrangler, /"compatibility_flags": \["nodejs_compat"\]/);

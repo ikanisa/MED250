@@ -8,7 +8,6 @@ const root = resolve(import.meta.dirname, "..");
 const serverDirectory = join(root, "dist", "server");
 const revisionPattern = /^[a-f0-9]{40}$/;
 const d1DatabaseIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
-const accountSidPattern = /^AC[a-f0-9]{32}$/i;
 const contentSidPattern = /^HX[a-f0-9]{32}$/i;
 const whatsappSenderPattern = /^whatsapp:\+[1-9][0-9]{7,14}$/;
 const e164Pattern = /^[1-9][0-9]{7,14}$/;
@@ -60,9 +59,9 @@ function assertProviderValuesMatchGeneratedConfig(generated, providerValues) {
   }
 }
 
-function exactEnvironmentValue(environment, name) {
-  const value = String(environment[name] ?? "").trim();
-  if (!value) throw new Error(`${name} is required to prepare a Worker-D1 deployment.`);
+function exactDeploymentValue(environment, canonicalValues, name) {
+  const value = String(environment[name] ?? canonicalValues[name] ?? "").trim();
+  if (!value) throw new Error(`${name} is required in the environment or canonical production Wrangler configuration.`);
   return value;
 }
 
@@ -124,15 +123,13 @@ function assertGeneratedResourceBoundary(config, target) {
   }
 }
 
-function configuredProviderValues(environment, origin) {
-  const accountSid = exactEnvironmentValue(environment, "TWILIO_ACCOUNT_SID");
-  const from = exactEnvironmentValue(environment, "TWILIO_WHATSAPP_FROM");
-  const adminWhatsapp = exactEnvironmentValue(environment, "MED250_ADMIN_WHATSAPP").replace(/\D/g, "");
-  if (!accountSidPattern.test(accountSid)) throw new Error("TWILIO_ACCOUNT_SID is invalid.");
+function configuredProviderValues(environment, canonicalValues, origin) {
+  const from = exactDeploymentValue(environment, canonicalValues, "TWILIO_WHATSAPP_FROM");
+  const adminWhatsapp = exactDeploymentValue(environment, canonicalValues, "MED250_ADMIN_WHATSAPP").replace(/\D/g, "");
   if (!whatsappSenderPattern.test(from)) throw new Error("TWILIO_WHATSAPP_FROM must use whatsapp:+E164 format.");
   if (!e164Pattern.test(adminWhatsapp)) throw new Error("MED250_ADMIN_WHATSAPP is invalid.");
   const contentSids = Object.fromEntries(contentSidNames.map((name) => {
-    const value = exactEnvironmentValue(environment, name);
+    const value = exactDeploymentValue(environment, canonicalValues, name);
     if (!contentSidPattern.test(value)) throw new Error(`${name} is not a valid Twilio Content SID.`);
     return [name, value];
   }));
@@ -140,7 +137,6 @@ function configuredProviderValues(environment, origin) {
     MED250_WHATSAPP_PROVIDER: "twilio",
     MED250_ADMIN_WHATSAPP: adminWhatsapp,
     MED250_ALLOWED_ORIGINS: origin,
-    TWILIO_ACCOUNT_SID: accountSid,
     TWILIO_WHATSAPP_FROM: from,
     TWILIO_WHATSAPP_WEBHOOK_URL: `${origin}/api/twilio/whatsapp/inbound`,
     TWILIO_WHATSAPP_STATUS_CALLBACK_URL: `${origin}/api/twilio/whatsapp/status`,
@@ -154,9 +150,6 @@ function validatedProviderValues(providerValues, origin) {
   }
   if (providerValues.MED250_WHATSAPP_PROVIDER !== "twilio") {
     throw new Error("Production WhatsApp provider must remain Twilio.");
-  }
-  if (!accountSidPattern.test(String(providerValues.TWILIO_ACCOUNT_SID ?? ""))) {
-    throw new Error("TWILIO_ACCOUNT_SID is invalid.");
   }
   if (!whatsappSenderPattern.test(String(providerValues.TWILIO_WHATSAPP_FROM ?? ""))) {
     throw new Error("TWILIO_WHATSAPP_FROM must use whatsapp:+E164 format.");
@@ -198,9 +191,6 @@ export function prepareWorkerD1Config(generated, {
   }
   const exactOrigin = deploymentOrigin(origin);
   const exactProviderValues = validatedProviderValues(providerValues, exactOrigin);
-  const nonSecretProviderValues = Object.fromEntries(
-    Object.entries(exactProviderValues).filter(([name]) => name !== "TWILIO_ACCOUNT_SID"),
-  );
   assertProviderValuesMatchGeneratedConfig(generated, exactProviderValues);
   assertGeneratedResourceBoundary(generated, target);
 
@@ -226,7 +216,7 @@ export function prepareWorkerD1Config(generated, {
     NEXT_PUBLIC_MARKETPLACE_MODE: "live",
     NEXT_PUBLIC_SITE_URL: exactOrigin,
     NEXT_PUBLIC_MED250_OBSERVABILITY: "cloud",
-    ...nonSecretProviderValues,
+    ...exactProviderValues,
   });
 
   const result = {
@@ -271,9 +261,22 @@ export async function run(environment = process.env) {
   const releaseRevision = requestedRevision === "git"
     ? await gitRevision()
     : requestedRevision;
-  const origin = deploymentOrigin(exactEnvironmentValue(environment, "MED250_DEPLOYMENT_ORIGIN"));
-  const databaseId = d1DatabaseId(environment, "MED250_D1_DATABASE_ID");
-  const providerValues = configuredProviderValues(environment, origin);
+  const canonicalConfig = JSON.parse(await readFile(resolve(root, "wrangler.jsonc"), "utf8"));
+  const canonicalProduction = canonicalConfig?.env?.production;
+  if (!canonicalProduction || typeof canonicalProduction !== "object") {
+    throw new Error("wrangler.jsonc env.production is required as the canonical production configuration.");
+  }
+  const canonicalValues = {
+    ...(canonicalProduction.vars ?? {}),
+    MED250_DEPLOYMENT_ORIGIN: canonicalProduction.vars?.NEXT_PUBLIC_SITE_URL,
+  };
+  const canonicalDatabaseId = canonicalProduction.d1_databases?.find((entry) => entry?.binding === "DB")?.database_id;
+  const origin = deploymentOrigin(exactDeploymentValue(environment, canonicalValues, "MED250_DEPLOYMENT_ORIGIN"));
+  const databaseId = d1DatabaseId({
+    ...environment,
+    MED250_D1_DATABASE_ID: environment.MED250_D1_DATABASE_ID || canonicalDatabaseId,
+  }, "MED250_D1_DATABASE_ID");
+  const providerValues = configuredProviderValues(environment, canonicalValues, origin);
   const generated = JSON.parse(await readFile(sourceConfigPath, "utf8"));
   const config = prepareWorkerD1Config(generated, {
     target,

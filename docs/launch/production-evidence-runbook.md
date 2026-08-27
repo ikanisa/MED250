@@ -1,6 +1,8 @@
 # MED+250 production evidence runbook
 
-This runbook closes the 11 fail-closed production gates without weakening them or treating configuration flags as evidence. The authoritative registry is `data/launch-evidence.json`; `npm run launch:evidence:verify:live` is the final machine gate.
+This runbook closes the 11 fail-closed operational-activation gates without treating configuration flags as evidence. The authoritative registry is `data/launch-evidence.json`; `npm run launch:evidence:verify:live` is the final machine gate for enabling and signing off customer operations.
+
+Production code deployment is deliberately separate from operational activation. `npm run release:check:deployment` proves the build, Worker-D1 configuration, security controls, governed data, tests, and dry-run package are deployable. `npm run release:check:live` additionally requires the evidence registry, duplicate decisions, content review, and physical-device UAT. This avoids the circular requirement for an exact deployed-revision receipt before that revision can be deployed, while keeping incomplete operational evidence visible and non-transferable.
 
 ## Evidence handling rules
 

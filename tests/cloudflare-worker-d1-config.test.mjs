@@ -16,7 +16,6 @@ const providerValues = {
   MED250_WHATSAPP_PROVIDER: "twilio",
   MED250_ADMIN_WHATSAPP: "250795588248",
   MED250_ALLOWED_ORIGINS: "https://med-250.com",
-  TWILIO_ACCOUNT_SID: `AC${"0".repeat(32)}`,
   TWILIO_WHATSAPP_FROM: "whatsapp:+16622220600",
   TWILIO_WHATSAPP_WEBHOOK_URL: "https://med-250.com/api/twilio/whatsapp/inbound",
   TWILIO_WHATSAPP_STATUS_CALLBACK_URL: "https://med-250.com/api/twilio/whatsapp/status",
@@ -75,7 +74,6 @@ test("prepares a production config with only the governed D1 binding", () => {
   assert.equal(config.vars.NEXT_PUBLIC_MED250_INDEXING_MODE, "public");
   assert.equal(config.vars.MED250_WHATSAPP_PROVIDER, "twilio");
   assert.equal(config.vars.TWILIO_WHATSAPP_FROM, "whatsapp:+16622220600");
-  assert.equal(config.vars.TWILIO_ACCOUNT_SID, undefined);
   assert.ok(config.secrets.required.includes("TWILIO_ACCOUNT_ID"));
   assert.equal(config.vars.WHATSAPP_ACCESS_TOKEN, undefined);
   assert.equal(config.vars.META_APP_ID, undefined);
