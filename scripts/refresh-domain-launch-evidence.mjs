@@ -175,6 +175,7 @@ export async function refreshDomainLaunchEvidence({
   }
 
   const nextManifest = structuredClone(manifest);
+  nextManifest.release_revision = expectedRevision;
   const gate = nextManifest.gates?.[DOMAIN_GATE];
   if (!gate) throw new Error(`Missing ${DOMAIN_GATE} in launch evidence manifest.`);
   for (const item of artifacts) {

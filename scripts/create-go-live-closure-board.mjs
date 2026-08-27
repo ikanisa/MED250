@@ -255,7 +255,7 @@ function blockerSummary(gateName, gate, readinessGate, evidence, report) {
     blockers.push("Machine evidence is present; owner review and approval remain deliberately separate.");
   }
   if (readinessGate?.staleReleaseEvidence) {
-    blockers.push("Release-bound evidence is stale against the current repository checkout; rerun the exact-revision live verifier before approval.");
+    blockers.push("Release-bound evidence is stale against the recorded production release; rerun the exact-revision live verifier before approval.");
   }
   return [...new Set(blockers)];
 }

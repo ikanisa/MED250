@@ -1,0 +1,47 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_SECURITY_HARDENING_DEPLOYED",
+  "evidence_type": "test_record",
+  "status": "complete",
+  "title": "Current Cloudflare security-hardening verification",
+  "summary": "Targeted security and Worker regression tests, exact-revision live-route verification and fail-closed Turnstile probes passed for the deployed production revision.",
+  "recorded_at": "2026-08-27T11:03:28Z",
+  "recorded_by": "Codex automated verifier",
+  "recorded_role": "Release verification agent",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Targeted security regression suite",
+      "status": "passed",
+      "detail": "Eighty of eighty targeted Cloudflare, security-hardening, deployment-verification, Turnstile and WebMCP tests passed with no failures, skips or cancellations."
+    },
+    {
+      "name": "Turnstile fail-closed boundary",
+      "status": "passed",
+      "detail": "Automated and live negative-path probes reject missing and invalid Turnstile tokens before user creation or session issuance, with bounded redacted error responses."
+    },
+    {
+      "name": "Protected order and media boundary",
+      "status": "passed",
+      "detail": "Tests passed for authenticated order creation, origin and CSRF checks, bounded prescription uploads, immutable R2 storage and non-predictable media grants."
+    },
+    {
+      "name": "Provider callback boundary",
+      "status": "passed",
+      "detail": "Tests passed for Twilio request signatures, canonical callback URLs, media-host allowlisting, tamper rejection, bounded bodies and delivery-finality handling."
+    },
+    {
+      "name": "Exact-revision live verification",
+      "status": "passed",
+      "detail": "All ten canonical production routes passed HTTPS, security-header, indexing, PWA and release-revision checks with no verifier errors."
+    }
+  ],
+  "executed_by": "Codex automated verifier",
+  "executor_role": "Release verification agent",
+  "started_at": "2026-08-27T11:02:20Z",
+  "completed_at": "2026-08-27T11:03:28Z",
+  "expected_release_revision": "f26e28cca3729c986da802e4c7715954785eb8fa",
+  "observed_release_revision": "f26e28cca3729c986da802e4c7715954785eb8fa",
+  "release_revision_expectation": "matched"
+}

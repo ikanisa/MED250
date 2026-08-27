@@ -15,7 +15,7 @@ const manifest = JSON.parse(await readFile(
 test("keeps all eleven production gates in a structurally valid evidence registry", () => {
   const result = validateLaunchEvidence(manifest, {
     rootDir: new URL("..", import.meta.url).pathname,
-    now: new Date("2026-07-20T17:00:00Z"),
+    now: new Date("2026-08-28T17:00:00Z"),
   });
   assert.equal(result.valid, true);
   assert.equal(result.gateCount, 11);
@@ -27,7 +27,7 @@ test("blocks production while any launch evidence remains pending", () => {
   const result = validateLaunchEvidence(manifest, {
     strict: true,
     rootDir: new URL("..", import.meta.url).pathname,
-    now: new Date("2026-07-20T17:00:00Z"),
+    now: new Date("2026-08-28T17:00:00Z"),
   });
   assert.equal(result.valid, false);
   assert.equal(result.errors.filter((error) => /production requires confirmed evidence/.test(error)).length, 11);
@@ -53,7 +53,7 @@ test("accepts confirmed gates only with durable evidence and named approval", ()
   const result = validateLaunchEvidence(confirmed, {
     strict: true,
     rootDir: new URL("..", import.meta.url).pathname,
-    now: new Date("2026-07-14T12:00:00Z"),
+    now: new Date("2026-08-28T12:00:00Z"),
   });
   assert.equal(result.valid, true);
   assert.equal(result.statusCounts.confirmed, 11);
@@ -61,6 +61,7 @@ test("accepts confirmed gates only with durable evidence and named approval", ()
 
 test("rejects missing gates, evidence-free confirmations and secret-like references", () => {
   const unsafe = structuredClone(manifest);
+  unsafe.release_revision = "not-a-release-revision";
   delete unsafe.gates.MED250_GATE_GPS_READY;
   const whatsapp = unsafe.gates.MED250_GATE_WHATSAPP_READY;
   whatsapp.status = "confirmed";
@@ -75,10 +76,11 @@ test("rejects missing gates, evidence-free confirmations and secret-like referen
   }];
   const result = validateLaunchEvidence(unsafe, {
     rootDir: new URL("..", import.meta.url).pathname,
-    now: new Date("2026-07-14T12:00:00Z"),
+    now: new Date("2026-08-28T12:00:00Z"),
   });
   assert.equal(result.valid, false);
   assert.ok(result.errors.some((error) => /missing launch evidence gate MED250_GATE_GPS_READY/.test(error)));
+  assert.ok(result.errors.some((error) => /release_revision must be a lowercase 40-character Git SHA/.test(error)));
   assert.ok(result.errors.some((error) => /contains secret-like material/.test(error)));
 });
 
@@ -98,7 +100,7 @@ test("requires gate-specific evidence, approver roles, and matching repository d
   }];
   const result = validateLaunchEvidence(unsafe, {
     rootDir: new URL("..", import.meta.url).pathname,
-    now: new Date("2026-07-14T12:00:00Z"),
+    now: new Date("2026-08-28T12:00:00Z"),
   });
   assert.equal(result.valid, false);
   assert.ok(result.errors.some((error) => /without required review_ledger evidence/.test(error)));
@@ -120,7 +122,7 @@ test("rejects evidence and approval timestamps without an explicit timezone", ()
   }];
   const result = validateLaunchEvidence(unsafe, {
     rootDir: new URL("..", import.meta.url).pathname,
-    now: new Date("2026-07-14T12:00:00Z"),
+    now: new Date("2026-08-28T12:00:00Z"),
   });
   assert.equal(result.valid, false);
   assert.ok(result.errors.some((error) => /needs a timezone-qualified recorded_at timestamp/.test(error)));

@@ -109,7 +109,7 @@ export async function recordLaunchEvidence({
   if (confirm) {
     const staleGateNames = await staleReleaseEvidenceGateNames(nextManifest, { rootDir });
     if (staleGateNames.has(gateName)) {
-      throw new Error(`Cannot confirm ${gateName}: release-bound evidence is stale against the current repository checkout. Refresh exact-revision evidence before approval.`);
+      throw new Error(`Cannot confirm ${gateName}: release-bound evidence is stale against the recorded production release. Refresh exact-revision evidence before approval.`);
     }
   }
 

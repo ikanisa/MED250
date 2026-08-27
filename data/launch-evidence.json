@@ -1,6 +1,7 @@
 {
   "schema_version": "2",
   "release": "med250-production",
+  "release_revision": "f26e28cca3729c986da802e4c7715954785eb8fa",
   "description": "Evidence registry for the eleven fail-closed MED+250 production launch gates. A gate may be confirmed only after its referenced evidence exists and has a named approver and timezone-qualified approval timestamp.",
   "gates": {
     "MED250_GATE_GPS_READY": {
@@ -72,17 +73,17 @@
       "evidence": [
         {
           "type": "deployment_receipt",
-          "reference": "docs/launch/evidence/security-hardening-deployment-2026-07-18.json",
-          "sha256": "dcfdeac982b75a11240db1bfd4a2150ff9c15833055eb1f9485cf0938896b3a3",
-          "recorded_at": "2026-07-18T17:24:14Z",
-          "summary": "Current production receipt for backend contract 2026-07-18.3 reconciliation, description governance, trust controls, catalogue corrections, and notification-outbox index deployment."
+          "reference": "docs/launch/evidence/security-hardening-deployment-2026-08-27.json",
+          "sha256": "f5d98af17cde4a71c1b22d8684812d717ad0d7d486d568caf96f5a0b9fe374e6",
+          "recorded_at": "2026-08-27T11:03:28Z",
+          "summary": "Cloudflare serves the exact current Git revision at 100 percent traffic with the production security bindings, canonical live configuration and fully applied D1 migration ledger."
         },
         {
           "type": "test_record",
-          "reference": "docs/launch/evidence/security-hardening-test-2026-07-18.json",
-          "sha256": "9d01de4bc5949cb5024ae159192c0c1abb429132c902a688d4dbba8b597d784b",
-          "recorded_at": "2026-07-18T17:28:30Z",
-          "summary": "Current production governance queries, post-deploy advisors, lint, targeted database tests, and the complete 302-test application suite passed."
+          "reference": "docs/launch/evidence/security-hardening-test-2026-08-27.json",
+          "sha256": "67f1d835456736c7ae3b4e59d44d529b2d7ebed167fe695aa5852840d6c56c0f",
+          "recorded_at": "2026-08-27T11:03:28Z",
+          "summary": "Targeted security and Worker regression tests, exact-revision live-route verification and fail-closed Turnstile probes passed for the deployed production revision."
         }
       ],
       "approved_by": null,
@@ -101,17 +102,17 @@
       "evidence": [
         {
           "type": "deployment_receipt",
-          "reference": "docs/launch/evidence/edge-functions-deployment-2026-07-18.json",
-          "sha256": "2fec968b290b47c6d1f1390f327f9a57ce6b3f49db4eb93712b6d67dd8a8c74c",
-          "recorded_at": "2026-07-18T17:19:45Z",
-          "summary": "Current production receipt for the newly deployed product-description reviewer, exact deployed source retrieval, custom authentication boundary, and contract headers."
+          "reference": "docs/launch/evidence/edge-functions-deployment-2026-08-27.json",
+          "sha256": "71d00cbb1927eb7763d829b0cafaa93cad841e82ff5934891fab0daa33cf9f83",
+          "recorded_at": "2026-08-27T11:03:28Z",
+          "summary": "The legacy edge-functions gate is now backed by the exact current Cloudflare Worker version, which owns fetch, queue and scheduled execution with production D1, R2, Queue, Images and static-asset bindings."
         },
         {
           "type": "test_record",
-          "reference": "docs/launch/evidence/edge-functions-test-2026-07-18.json",
-          "sha256": "ebfd598a100390952c29fb09c99a11c1e7035b4b7b5591aad1731548da1dc7c8",
-          "recorded_at": "2026-07-18T17:19:45Z",
-          "summary": "Current product-description reviewer denial probe, response hardening, one-product workflow review, and complete reviewer regression tests passed."
+          "reference": "docs/launch/evidence/edge-functions-test-2026-08-27.json",
+          "sha256": "0d602780cc7c95ff382fb34438b89e5c8db085ee3bb7c0bd3c83287574956953",
+          "recorded_at": "2026-08-27T11:03:28Z",
+          "summary": "Targeted Worker tests and exact-revision production-route checks passed across D1, R2, dispatch Queue, scheduled maintenance, Twilio callbacks, authentication and WebMCP boundaries."
         }
       ],
       "approved_by": null,
@@ -193,17 +194,17 @@
       "evidence": [
         {
           "type": "domain_verification",
-          "reference": "docs/launch/evidence/domain-verification-2026-07-20.json",
-          "sha256": "80f304f77cfbee602f134bec07f82bbfd517ea7129c0117050926d49774154e9",
-          "recorded_at": "2026-07-20T16:26:57.716Z",
-          "summary": "Current canonical-domain DNS, HTTPS, ten-route, security-header, robots, sitemap, manifest, service-worker, offline page, and exact-revision checks passed."
+          "reference": "docs/launch/evidence/domain-verification-2026-08-27.json",
+          "sha256": "a3aeae26fbb8eedfdfbc9721b51af774cf4d147fafe71754cf9751f5df1484db",
+          "recorded_at": "2026-08-27T11:02:19.753Z",
+          "summary": "The canonical production domain resolves over HTTPS and the exact-revision deployment verifier passed 10 live routes against the current release revision."
         },
         {
           "type": "test_record",
-          "reference": "docs/launch/evidence/domain-deployment-test-2026-07-20.json",
-          "sha256": "d3cb225ef5859451bb631880aa42c1ce6dbed4ddfd0359ea36699830057ea813",
-          "recorded_at": "2026-07-20T16:26:57.716Z",
-          "summary": "Current exact-revision production route verification passed all ten canonical live routes with no verifier errors."
+          "reference": "docs/launch/evidence/domain-deployment-test-2026-08-27.json",
+          "sha256": "d03076d67724b31f10d26fca5aceb8321d9fd623c986e8c4f6931db1a43cf4a3",
+          "recorded_at": "2026-08-27T11:02:19.753Z",
+          "summary": "The canonical live domain passed 10 live routes against the current production release revision with no verifier errors."
         }
       ],
       "approved_by": null,

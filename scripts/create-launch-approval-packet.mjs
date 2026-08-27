@@ -29,7 +29,7 @@ export function buildLaunchApprovalPacket(manifest, readinessReport = null) {
         gate: gateName,
         title: gate.title,
         owner: gate.owner,
-        reason: "release-bound evidence is stale against the current repository checkout",
+        reason: "release-bound evidence is stale against the recorded production release",
         required_action: "Rerun exact-revision live verification, refresh the domain artifacts and registry digests, then regenerate this approval packet.",
         release_revision_bindings: readiness.releaseRevisionBindings,
       });

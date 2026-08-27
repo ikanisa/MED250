@@ -21,10 +21,10 @@ test("builds an owner closure board without promoting pending gates", () => {
   assert.equal(board.production_ready, false);
   assert.equal(board.summary.gate_count, 11);
   assert.equal(board.summary.confirmed_gates, 0);
-  assert.equal(board.summary.approval_pending_gates, 2);
+  assert.equal(board.summary.approval_pending_gates, 3);
   assert.equal(board.summary.prepared_evidence_pending_gates, 8);
   assert.equal(board.summary.missing_evidence_gates, 0);
-  assert.equal(board.summary.stale_release_evidence_gates, 1);
+  assert.equal(board.summary.stale_release_evidence_gates, 0);
   assert.equal(board.summary.duplicate_register_pending_groups, 51);
   assert.equal(board.summary.physical_uat_pending_scenarios, 12);
   assert.equal(board.summary.prepared_handoff_artifacts, 11);
@@ -76,8 +76,8 @@ test("binds every gate to actionable owner commands and prepared evidence", () =
   assert.match(security.blockers.join("\n"), /owner review and approval/);
   assert.ok(security.commands.some((command) => /launch:approval:packet/.test(command)));
 
-  assert.equal(domain.readiness, "stale_release_evidence");
-  assert.match(domain.blockers.join("\n"), /Release-bound evidence is stale/);
+  assert.equal(domain.readiness, "approval_pending");
+  assert.match(domain.blockers.join("\n"), /owner review and approval/i);
   assert.ok(domain.commands.some((command) => /domain:evidence:refresh/.test(command)));
   assert.ok(domain.commands.some((command) => /launch:gate:approve -- --gate MED250_GATE_DOMAIN_DNS_VERIFIED/.test(command)));
 

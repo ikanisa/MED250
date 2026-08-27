@@ -15,6 +15,7 @@ import { validatePhysicalUat } from "./validate-physical-uat.mjs";
 import {
   currentGitRevision,
   releaseBindingsForManifest,
+  releaseRevisionForManifest,
 } from "./launch-release-bindings.mjs";
 
 async function loadJson(path) {
@@ -90,7 +91,8 @@ export async function buildGoLiveReadinessReport() {
   const launchNonStrict = validateLaunchEvidence(manifest);
   const launchStrict = validateLaunchEvidence(manifest, { strict: true });
   const physicalStrict = validatePhysicalUat(physicalUat, { strict: true });
-  const currentReleaseRevision = currentGitRevision();
+  const currentCheckoutRevision = currentGitRevision();
+  const currentReleaseRevision = releaseRevisionForManifest(manifest);
   const releaseBindings = await releaseBindingsForManifest(manifest, { currentRevision: currentReleaseRevision });
   const gates = gateRows(manifest, handoff, releaseBindings);
   const readinessCounts = gates.reduce((counts, gate) => {
@@ -104,6 +106,7 @@ export async function buildGoLiveReadinessReport() {
     productionReady: launchStrict.valid && duplicateRegister.valid && physicalStrict.valid && !(readinessCounts.stale_release_evidence ?? 0),
     sourceControl: {
       currentReleaseRevision,
+      currentCheckoutRevision,
       staleReleaseEvidenceGateCount: readinessCounts.stale_release_evidence ?? 0,
     },
     launchEvidence: {
@@ -149,7 +152,7 @@ function printText(report) {
   console.log("");
   console.log(`Launch evidence: ${report.launchEvidence.valid ? "valid" : "invalid"}; strict: ${report.launchEvidence.strictValid ? "passed" : "failed"} (${report.launchEvidence.strictErrorCount} blocker(s))`);
   console.log(`Gate readiness: ${report.gateReadiness.confirmed} confirmed, ${report.gateReadiness.approvalPending} approval pending, ${report.gateReadiness.preparedEvidencePending} prepared evidence pending, ${report.gateReadiness.missingEvidence} missing evidence`);
-  if (report.gateReadiness.staleReleaseEvidence) console.log(`Release-bound evidence: ${report.gateReadiness.staleReleaseEvidence} stale against current checkout ${report.sourceControl.currentReleaseRevision ?? "unknown"}`);
+  if (report.gateReadiness.staleReleaseEvidence) console.log(`Release-bound evidence: ${report.gateReadiness.staleReleaseEvidence} stale against recorded production release ${report.sourceControl.currentReleaseRevision ?? "unknown"}`);
   console.log(`Duplicate register: ${report.duplicateRegister.decisionCounts.pending} pending, ${report.duplicateRegister.decisionCounts.accepted_source_duplicate} accepted, ${report.duplicateRegister.decisionCounts.blocked_source_correction} blocked`);
   console.log(`Physical UAT: ${report.physicalUat.statusCounts.passed}/${report.physicalUat.scenarioCount} scenarios passed`);
   console.log(`Prepared handoff artifacts: ${report.handoff.preparedPendingArtifactCount}/${report.handoff.missingEvidenceArtifactCount}`);

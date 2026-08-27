@@ -1,0 +1,48 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_SECURITY_HARDENING_DEPLOYED",
+  "evidence_type": "deployment_receipt",
+  "status": "complete",
+  "title": "Current Cloudflare security-hardening deployment receipt",
+  "summary": "Cloudflare serves the exact current Git revision at 100 percent traffic with the production security bindings, canonical live configuration and fully applied D1 migration ledger.",
+  "recorded_at": "2026-08-27T11:03:28Z",
+  "recorded_by": "Codex automated verifier",
+  "recorded_role": "Release verification agent",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Exact-version deployment",
+      "status": "passed",
+      "detail": "Cloudflare deployment status reports version 01d853dc-39f0-4760-861a-df6f23b723ec at 100 percent traffic, and the canonical live origin reports the exact expected Git revision."
+    },
+    {
+      "name": "Production security bindings",
+      "status": "passed",
+      "detail": "The deployed version inventory contains all nine required protected bindings for administration, health probing, OTP protection, Turnstile verification and Twilio authentication."
+    },
+    {
+      "name": "Canonical live configuration",
+      "status": "passed",
+      "detail": "The deployed Worker is bound to the live worker-d1 backend, canonical HTTPS origin, public indexing mode, Cloudflare observability and Twilio provider configuration."
+    },
+    {
+      "name": "D1 migration ledger",
+      "status": "passed",
+      "detail": "The remote med250-production D1 migration inventory reports no migrations to apply for the deployed production configuration."
+    },
+    {
+      "name": "Account approval separation",
+      "status": "passed",
+      "detail": "This technical receipt does not infer infrastructure-owner approval or deployment-credential least privilege; those controls remain isolated in the Cloudflare account-verification gate."
+    }
+  ],
+  "deployed_by": "Codex release operator",
+  "deployer_role": "Automated Cloudflare release operator",
+  "deployed_at": "2026-08-27T09:36:36.006Z",
+  "environment": "MED+250 Cloudflare production Worker",
+  "release_identifier": "cloudflare-version-01d853dc-39f0-4760-861a-df6f23b723ec",
+  "expected_release_revision": "f26e28cca3729c986da802e4c7715954785eb8fa",
+  "observed_release_revision": "f26e28cca3729c986da802e4c7715954785eb8fa",
+  "release_revision_expectation": "matched"
+}

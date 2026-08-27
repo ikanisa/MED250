@@ -1,0 +1,47 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_DOMAIN_DNS_VERIFIED",
+  "evidence_type": "domain_verification",
+  "status": "complete",
+  "title": "Current canonical MED+250 production domain verification",
+  "summary": "The canonical production domain resolves over HTTPS and the exact-revision deployment verifier passed 10 live routes against the current release revision.",
+  "recorded_at": "2026-08-27T11:02:19.753Z",
+  "recorded_by": "Codex automated verifier",
+  "recorded_role": "Release verification agent",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Domain resolution",
+      "status": "passed",
+      "detail": "The canonical hostname resolved as a public Cloudflare-routed host during the live verification window."
+    },
+    {
+      "name": "TLS verification",
+      "status": "passed",
+      "detail": "The canonical origin completed over HTTPS and exposed the required strict transport security policy."
+    },
+    {
+      "name": "Route verification",
+      "status": "passed",
+      "detail": "The deployment verifier passed 10 live routes on the canonical production origin."
+    },
+    {
+      "name": "Revision binding",
+      "status": "passed",
+      "detail": "The observed live release revision matched the expected 40-character Git release revision across verified Worker routes."
+    }
+  ],
+  "verified_by": "Codex automated verifier",
+  "verifier_role": "Release verification agent",
+  "verified_at": "2026-08-27T11:02:19.753Z",
+  "hostnames": [
+    "med-250.com"
+  ],
+  "dns_passed": true,
+  "tls_passed": true,
+  "routes_passed": true,
+  "expected_release_revision": "f26e28cca3729c986da802e4c7715954785eb8fa",
+  "observed_release_revision": "f26e28cca3729c986da802e4c7715954785eb8fa",
+  "release_revision_expectation": "matched"
+}

@@ -224,17 +224,33 @@ test("confirms a gate only after all required evidence and owner approval are pr
 });
 
 test("rejects confirmation when domain evidence targets the retired hostname", async () => {
+  const rootDir = new URL("..", import.meta.url).pathname;
+  const retiredReference = "docs/launch/evidence/domain-verification-2026-07-20.json";
+  const retiredSource = await readFile(new URL(`../${retiredReference}`, import.meta.url), "utf8");
+  const retiredArtifact = JSON.parse(retiredSource);
+  const retiredManifest = structuredClone(manifest);
+  const domainGate = retiredManifest.gates.MED250_GATE_DOMAIN_DNS_VERIFIED;
+  domainGate.evidence = [
+    {
+      type: "domain_verification",
+      reference: retiredReference,
+      sha256: createHash("sha256").update(retiredSource).digest("hex"),
+      recorded_at: retiredArtifact.recorded_at,
+      summary: retiredArtifact.summary,
+    },
+    domainGate.evidence.find((entry) => entry.type === "test_record"),
+  ];
   await assert.rejects(
     () => recordLaunchEvidence({
-      manifest: structuredClone(manifest),
+      manifest: retiredManifest,
       artifactPath: "docs/launch/evidence/domain-deployment-test-2026-07-20.json",
-      rootDir: new URL("..", import.meta.url).pathname,
+      rootDir,
       confirm: true,
       replace: true,
       approvedBy: "Named infrastructure owner",
       approvedRole: "Infrastructure owner",
       approvedAt: "2026-07-20T18:00:00Z",
-      now: new Date("2026-07-21T12:00:00Z"),
+      now: new Date("2026-08-28T12:00:00Z"),
     }),
     /domain verification must include med-250\.com/,
   );

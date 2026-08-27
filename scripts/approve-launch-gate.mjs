@@ -52,7 +52,7 @@ export async function approveLaunchGate({
 
   const staleGateNames = await staleReleaseEvidenceGateNames(manifest, { rootDir });
   if (staleGateNames.has(gateName)) {
-    throw new Error(`Cannot approve ${gateName}: release-bound evidence is stale against the current repository checkout.`);
+    throw new Error(`Cannot approve ${gateName}: release-bound evidence is stale against the recorded production release.`);
   }
 
   const approval = {

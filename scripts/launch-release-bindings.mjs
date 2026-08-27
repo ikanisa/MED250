@@ -18,13 +18,23 @@ export function currentGitRevision({ rootDir = process.cwd() } = {}) {
   }
 }
 
+export function recordedReleaseRevision(manifest) {
+  const revision = String(manifest?.release_revision ?? "").trim();
+  return /^[a-f0-9]{40}$/.test(revision) ? revision : null;
+}
+
+export function releaseRevisionForManifest(manifest, { rootDir = process.cwd() } = {}) {
+  return recordedReleaseRevision(manifest) ?? currentGitRevision({ rootDir });
+}
+
 export async function releaseBindingsForManifest(
   manifest,
-  {
-    rootDir = process.cwd(),
-    currentRevision = currentGitRevision({ rootDir }),
-  } = {},
+  options = {},
 ) {
+  const rootDir = options.rootDir ?? process.cwd();
+  const currentRevision = Object.hasOwn(options, "currentRevision")
+    ? options.currentRevision
+    : releaseRevisionForManifest(manifest, { rootDir });
   const bindings = new Map();
   for (const [gateName, gate] of Object.entries(manifest.gates ?? {})) {
     const gateBindings = [];

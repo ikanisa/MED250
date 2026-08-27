@@ -79,6 +79,9 @@ export function validateLaunchEvidence(manifest, {
 
   if (manifest?.schema_version !== "2") errors.push("launch evidence schema_version must be 2");
   if (manifest?.release !== "med250-production") errors.push("launch evidence release must be med250-production");
+  if (manifest?.release_revision != null && !/^[a-f0-9]{40}$/.test(String(manifest.release_revision))) {
+    errors.push("launch evidence release_revision must be a lowercase 40-character Git SHA when present");
+  }
   for (const name of expected.filter((name) => !names.includes(name))) errors.push(`missing launch evidence gate ${name}`);
   for (const name of names.filter((name) => !expected.includes(name))) errors.push(`unexpected launch evidence gate ${name}`);
 

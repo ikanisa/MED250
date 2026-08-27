@@ -13,7 +13,7 @@ import { validateLaunchEvidence } from "../scripts/validate-launch-evidence.mjs"
 
 const manifest = JSON.parse(await readFile(new URL("../data/launch-evidence.json", import.meta.url), "utf8"));
 const releaseRevision = "6845e358122881e8fa0470f437289afbf888e3e4";
-const capturedAt = "2026-07-22T10:00:00Z";
+const capturedAt = "2026-08-28T10:00:00Z";
 
 function deploymentReceipt(overrides = {}) {
   return {
@@ -62,24 +62,25 @@ test("refreshes domain launch artifacts only from an exact-revision live receipt
     manifest,
     deploymentReceipt: deploymentReceipt(),
     expectedRevision: releaseRevision,
-    artifactDate: "2026-07-22",
-    now: new Date("2026-07-22T12:00:00Z"),
+    artifactDate: "2026-08-28",
+    now: new Date("2026-08-28T12:00:00Z"),
   });
   await writeDomainLaunchEvidenceRefresh({
     manifestPath: "data/launch-evidence.json",
     result,
     rootDir: root,
-    now: new Date("2026-07-22T12:00:00Z"),
+    now: new Date("2026-08-28T12:00:00Z"),
   });
 
   const updatedManifest = JSON.parse(await readFile(join(root, "data", "launch-evidence.json"), "utf8"));
   const domainGate = updatedManifest.gates.MED250_GATE_DOMAIN_DNS_VERIFIED;
+  assert.equal(updatedManifest.release_revision, releaseRevision);
   assert.equal(domainGate.status, "pending");
   assert.equal(domainGate.approved_by, null);
   const domainEvidence = domainGate.evidence.find((entry) => entry.type === "domain_verification");
   const testEvidence = domainGate.evidence.find((entry) => entry.type === "test_record");
-  assert.equal(domainEvidence.reference, "docs/launch/evidence/domain-verification-2026-07-22.json");
-  assert.equal(testEvidence.reference, "docs/launch/evidence/domain-deployment-test-2026-07-22.json");
+  assert.equal(domainEvidence.reference, "docs/launch/evidence/domain-verification-2026-08-28.json");
+  assert.equal(testEvidence.reference, "docs/launch/evidence/domain-deployment-test-2026-08-28.json");
 
   for (const entry of [domainEvidence, testEvidence]) {
     const source = await readFile(join(root, entry.reference), "utf8");
@@ -92,7 +93,7 @@ test("refreshes domain launch artifacts only from an exact-revision live receipt
 
   const validation = validateLaunchEvidence(updatedManifest, {
     rootDir: root,
-    now: new Date("2026-07-22T12:00:00Z"),
+    now: new Date("2026-08-28T12:00:00Z"),
   });
   assert.equal(validation.valid, true, validation.errors.join("; "));
   await rm(root, { recursive: true, force: true });
@@ -107,8 +108,8 @@ test("rejects stale or mismatched domain deployment receipts", async () => {
         releaseRevisionExpectation: "mismatched",
       }),
       expectedRevision: releaseRevision,
-      artifactDate: "2026-07-22",
-      now: new Date("2026-07-22T12:00:00Z"),
+      artifactDate: "2026-08-28",
+      now: new Date("2026-08-28T12:00:00Z"),
     }),
     /observedReleaseRevision does not match|releaseRevisionExpectation must be matched/,
   );

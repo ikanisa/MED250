@@ -1,0 +1,47 @@
+{
+  "schema_version": "1",
+  "release": "med250-production",
+  "gate": "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED",
+  "evidence_type": "test_record",
+  "status": "complete",
+  "title": "Current unified Cloudflare Worker verification",
+  "summary": "Targeted Worker tests and exact-revision production-route checks passed across D1, R2, dispatch Queue, scheduled maintenance, Twilio callbacks, authentication and WebMCP boundaries.",
+  "recorded_at": "2026-08-27T11:03:28Z",
+  "recorded_by": "Codex automated verifier",
+  "recorded_role": "Release verification agent",
+  "redactions_confirmed": true,
+  "checks": [
+    {
+      "name": "Targeted Worker regression suite",
+      "status": "passed",
+      "detail": "Eighty of eighty targeted Worker, deployment, security, Turnstile and WebMCP tests passed with no failures, skips or cancellations."
+    },
+    {
+      "name": "D1 and request contracts",
+      "status": "passed",
+      "detail": "Tests passed for the production D1 configuration, authenticated database-backed order creation, idempotency, location binding and strict production resource selection."
+    },
+    {
+      "name": "Queue and scheduler contracts",
+      "status": "passed",
+      "detail": "Tests passed for least-privilege Twilio dispatch, retry classification, delivery finality and bounded idempotent lifecycle maintenance."
+    },
+    {
+      "name": "Webhook and R2 contracts",
+      "status": "passed",
+      "detail": "Tests passed for signed inbound and status callbacks, tamper rejection, safe Twilio media retrieval, immutable R2 persistence and deterministic recovery."
+    },
+    {
+      "name": "Exact-revision route suite",
+      "status": "passed",
+      "detail": "All ten canonical production routes returned the expected live behavior and exact Git revision with no deployment-verifier errors."
+    }
+  ],
+  "executed_by": "Codex automated verifier",
+  "executor_role": "Release verification agent",
+  "started_at": "2026-08-27T11:02:20Z",
+  "completed_at": "2026-08-27T11:03:28Z",
+  "expected_release_revision": "f26e28cca3729c986da802e4c7715954785eb8fa",
+  "observed_release_revision": "f26e28cca3729c986da802e4c7715954785eb8fa",
+  "release_revision_expectation": "matched"
+}
