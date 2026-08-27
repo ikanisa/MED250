@@ -59,6 +59,18 @@ test("keeps every callable provider and deployment verifier on Worker APIs", asy
   assert.doesNotMatch(operationalScripts, /--publish/);
 });
 
+test("uses Cloudflare-supported manual redirects for outbound Worker subrequests", async () => {
+  const [authApi, operatorApi] = await Promise.all([
+    source("worker/backend/auth-api.ts"),
+    source("worker/backend/operator-api.ts"),
+  ]);
+  const outboundWorkerCalls = `${authApi}\n${operatorApi}`;
+
+  assert.doesNotMatch(outboundWorkerCalls, /redirect:\s*["']error["']/);
+  assert.match(authApi, /challenges\.cloudflare\.com[\s\S]*?redirect:\s*"manual"/);
+  assert.match(operatorApi, /places\.googleapis\.com[\s\S]*?redirect:\s*"manual"/);
+});
+
 test("binds WhatsApp media to the Worker and gives clients manual WhatsApp location instructions", async () => {
   const setup = await source("scripts/twilio-whatsapp-setup.mjs");
   const plan = buildProviderPlan({

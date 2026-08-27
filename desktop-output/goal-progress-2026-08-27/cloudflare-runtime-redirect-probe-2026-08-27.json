@@ -1,0 +1,50 @@
+{
+  "schema_version": "1",
+  "recorded_at": "2026-08-27T11:12:41+02:00",
+  "classification": "redacted_remote_preview_diagnostic",
+  "production_route_mutated": false,
+  "production_deployed": false,
+  "baseline_git_revision": "62f57474d418ca67ee2d62152d123585209f7ce5",
+  "runtime": {
+    "provider": "Cloudflare Workers",
+    "compatibility_date": "2026-08-23",
+    "wrangler_version": "4.125.0"
+  },
+  "original_probe": {
+    "redirect_mode": "error",
+    "static_abort_timeout_available": true,
+    "upstream_status": null,
+    "result": "failed_before_subrequest",
+    "error_type": "TypeError",
+    "redacted_error": "The deployed runtime rejected redirect mode error and required follow or manual."
+  },
+  "corrected_probe": {
+    "redirect_mode": "manual",
+    "static_abort_timeout_available": true,
+    "upstream_status": 400,
+    "result": "subrequest_completed",
+    "expected_reason": "The isolated probe deliberately used invalid placeholder Turnstile values."
+  },
+  "production_observation": {
+    "active_worker_version": "66d2d4d5-2338-4946-a6b7-0337d05b7238",
+    "active_release_revision": "40e9ee80ac8601be6f369eadc9f993053e3afa19",
+    "invalid_token_attempts": 3,
+    "http_status": 503,
+    "error_code": "turnstile_unavailable",
+    "worker_duration_ms": 0
+  },
+  "remediation": {
+    "files": [
+      "worker/backend/auth-api.ts",
+      "worker/backend/operator-api.ts"
+    ],
+    "change": "Use manual redirect handling for outbound Worker subrequests.",
+    "regression_test": "tests/cloudflare-only-runtime-boundary.test.mjs"
+  },
+  "privacy": {
+    "credentials_included": false,
+    "tokens_included": false,
+    "customer_identifiers_included": false,
+    "request_bodies_included": false
+  }
+}

@@ -229,7 +229,7 @@ async function verifyTurnstile(
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8", Accept: "application/json" },
       body: form,
-      redirect: "error",
+      redirect: "manual",
       signal: AbortSignal.timeout(8_000),
     });
   } catch {

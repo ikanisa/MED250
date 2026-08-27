@@ -189,7 +189,7 @@ async function googleCandidate(row: OperatorRow, apiKey: string, fetcher: typeof
         maxResultCount: 5,
         locationBias: { circle: { center: { latitude: -1.9403, longitude: 29.8739 }, radius: 250_000 } },
       }),
-      redirect: "error",
+      redirect: "manual",
       signal: AbortSignal.timeout(8_000),
     });
   } catch {
