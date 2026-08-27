@@ -86,7 +86,7 @@ function deploymentOrigin(value) {
 }
 
 function d1DatabaseId(environment, name) {
-  const value = exactEnvironmentValue(environment, name).toLowerCase();
+  const value = exactDeploymentValue(environment, {}, name).toLowerCase();
   if (!d1DatabaseIdPattern.test(value) || isLocalPlaceholderDatabaseId(value)) {
     throw new Error(`${name} must be a real Cloudflare D1 database UUID, not a local placeholder.`);
   }

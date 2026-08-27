@@ -223,6 +223,7 @@ test("keeps production as the only remotely deployable Worker target", async () 
   assert.equal(wrangler.env.production.preview_urls, false);
   assert.equal(wrangler.env.production.vars.MED250_RELEASE_MODE, "live");
   assert.equal(wrangler.env.production.vars.MED250_BACKEND_MODE, "worker-d1");
+  assert.equal(wrangler.env.production.vars.MED250_ADMIN_WHATSAPP, "250795588248");
   assert.equal(wrangler.env.production.vars.NEXT_PUBLIC_MED250_DEPLOYMENT_MODE, "live");
   assert.equal(wrangler.env.production.vars.NEXT_PUBLIC_MED250_INDEXING_MODE, "public");
   assert.equal(wrangler.env.production.vars.NEXT_PUBLIC_MED250_DEPLOYMENT_ORIGIN, "https://med-250.com");
