@@ -1,0 +1,79 @@
+[
+  {
+    "action_id": "ACT-001",
+    "captured_at": "2026-08-24T08:21:07Z",
+    "classification": "security_or_access",
+    "action": "Authorize migration of +16622220600 from Twilio messaging to direct Meta Cloud API while keeping Cloudflare as the backend.",
+    "before": "Twilio owns production message transport; Meta runtime credentials are absent from Cloudflare.",
+    "after": "Authorized, not yet executed.",
+    "actor": "MED250 product owner",
+    "rollback": "Keep Cloudflare version 912982d3-c4eb-4a81-ab93-3640523c2e79 available until provider cutover UAT passes.",
+    "remaining_gate": "Confirmed existing Meta app, least-privilege credential, signed webhook, sender registration and physical UAT."
+  },
+  {
+    "action_id": "ACT-002",
+    "captured_at": "2026-08-24T08:50:45Z",
+    "classification": "configuration",
+    "action": "Create and submit the three MED250 Meta message templates required for pharmacy image requests, catalogue orders and WhatsApp OTP.",
+    "before": "No dedicated MED250 direct-Meta template set was recorded for the production WABA.",
+    "after": "Image-request utility and OTP templates are active with quality pending; catalogue-order utility template remains in review.",
+    "actor": "Codex operator under MED250 product-owner authorization",
+    "rollback": "Do not reference the templates in the live Worker until the provider cutover gates pass; templates can remain unused in the WABA.",
+    "remaining_gate": "Catalogue-order utility approval and exact post-review content readback."
+  },
+  {
+    "action_id": "ACT-003",
+    "captured_at": "2026-08-24T08:50:45Z",
+    "classification": "implementation",
+    "action": "Implement the direct Meta Cloud API transport, signed webhook and native WhatsApp location workflow in the Cloudflare Worker source.",
+    "before": "The repository contained only the Twilio transport for live WhatsApp messages.",
+    "after": "Meta send, inbound image and location parsing, private R2 media capture, delivery receipts, client/pharmacy role enforcement, saved/new location choice and nearest-10 dispatch pass focused local tests and TypeScript checking.",
+    "actor": "Codex operator under MED250 product-owner authorization",
+    "rollback": "The current deployed Cloudflare Worker version remains unchanged and can continue serving the Twilio route.",
+    "remaining_gate": "Confirmed existing Meta app, secrets, webhook challenge, phone migration and physical UAT."
+  },
+  {
+    "action_id": "ACT-004",
+    "captured_at": "2026-08-24T08:50:45Z",
+    "classification": "access",
+    "action": "Attempt to create a dedicated portfolio-owned MED250 Meta app and inspect Business Settings ownership permissions.",
+    "before": "No dedicated MED250 app existed.",
+    "after": "No business was selectable in the app-creation ownership step; Business Settings requires administrator 2FA before the cause can be inspected.",
+    "actor": "Codex operator; administrator verification pending",
+    "rollback": "No app or credential was created, so no rollback action is required.",
+    "remaining_gate": "Account administrator must complete the newest 2FA challenge directly in Meta."
+  },
+  {
+    "action_id": "ACT-005",
+    "captured_at": "2026-08-24T11:08:05Z",
+    "classification": "security_or_access",
+    "action": "Submit the product-owner-confirmed creation of MED250 Service Center with the WhatsApp use case under Assigu.",
+    "before": "Assigu was verified and the administrator had completed 2FA; no dedicated MED250 app existed.",
+    "after": "Meta displayed a temporary account restriction and did not create an app ID or credential.",
+    "actor": "Codex operator under explicit MED250 product-owner confirmation",
+    "rollback": "No rollback is required because the provider rejected the write before asset creation.",
+    "remaining_gate": "Wait for or resolve Meta's temporary account restriction, then repeat the same controlled creation and verify ownership by visible readback."
+  },
+  {
+    "action_id": "ACT-006",
+    "captured_at": "2026-08-24T11:18:08Z",
+    "classification": "security_or_access",
+    "action": "Stop new-app creation and assess existing portfolio apps for MED250 production WhatsApp reuse.",
+    "before": "A dedicated MED250 app creation attempt had been rejected by Meta and no app ID was created.",
+    "after": "The product owner instructed Codex to reuse an existing app. IKANISA 3769557166649385 was assessed read-only and is the best-name candidate, but it is shared, has no connected assets in Business Settings, does not list the production phone, and currently posts subscribed WhatsApp messages to a Supabase callback.",
+    "actor": "Codex operator under explicit MED250 product-owner direction",
+    "rollback": "No rollback is required because no app, WABA, callback, partner, token or production route was changed.",
+    "remaining_gate": "Superseded by ACT-007 after comparison of the other existing apps."
+  },
+  {
+    "action_id": "ACT-007",
+    "captured_at": "2026-08-24T11:33:39Z",
+    "classification": "security_or_access",
+    "action": "Compare existing Assigu-owned Meta apps and select the lowest-risk WhatsApp reuse candidate.",
+    "before": "IKANISA was the preliminary name-matched candidate, but it had an active Supabase messages subscription and unrelated phone choices.",
+    "after": "Read-only comparison identified Emateli Vendor 1075514900370567 as the lowest WhatsApp blast-radius candidate: WhatsApp is installed, no connected business assets or production phone are present, and messages is unsubscribed. Its callback still points to Supabase and its login, Instagram and legal metadata remain Emateli-specific.",
+    "actor": "Codex operator under MED250 product-owner direction",
+    "rollback": "No rollback is required because no app, use case, webhook, WABA, phone, token or provider route was changed.",
+    "remaining_gate": "Product owner must confirm Emateli Vendor reuse and accept cross-product impact immediately before the first live app or access change."
+  }
+]

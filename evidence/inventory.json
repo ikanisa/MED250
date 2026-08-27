@@ -1,0 +1,89 @@
+{
+  "captured_at": "2026-08-24T08:21:07Z",
+  "scope": "MED250 production WhatsApp provider cutover from Twilio to direct Meta Cloud API",
+  "business_portfolio": {
+    "name": "Assigu",
+    "id": "386355893848401",
+    "evidence_state": "observed"
+  },
+  "whatsapp_business_account": {
+    "name": "easyMO",
+    "id": "1188521970082273",
+    "evidence_state": "observed"
+  },
+  "production_phone": {
+    "e164": "+16622220600",
+    "phone_number_id": "900256399838407",
+    "display_name": "Ikanisa Service Center",
+    "display_name_status": "in_review",
+    "connection_status": "connected",
+    "quality_rating": "high",
+    "purpose": "MED250 client and pharmacy WhatsApp ordering",
+    "evidence_state": "observed"
+  },
+  "current_provider": {
+    "name": "Twilio",
+    "account_id": "[REDACTED_TWILIO_ACCOUNT_SID]",
+    "evidence_state": "observed"
+  },
+  "target_provider": {
+    "name": "Meta Cloud API",
+    "app_strategy": "reuse_existing_app_by_product_owner_direction",
+    "candidate_app_id": "1075514900370567",
+    "candidate_app_name": "Emateli Vendor",
+    "candidate_app_connection_state": "no_connected_assets_no_production_phone_messages_unsubscribed",
+    "evidence_state": "observed"
+  },
+  "meta_templates": [
+    {
+      "id": "1773644937239346",
+      "name": "med250_pharmacy_image_request_v1",
+      "category": "utility",
+      "status": "active_quality_pending",
+      "captured_at": "2026-08-24T08:50:45Z",
+      "evidence_state": "observed"
+    },
+    {
+      "id": "1068627845813387",
+      "name": "med250_pharmacy_order_v1",
+      "category": "utility",
+      "status": "in_review",
+      "captured_at": "2026-08-24T08:50:45Z",
+      "evidence_state": "observed"
+    },
+    {
+      "id": "2206355629937444",
+      "name": "med250_whatsapp_otp_v1",
+      "category": "authentication",
+      "status": "active_quality_pending",
+      "captured_at": "2026-08-24T08:50:45Z",
+      "evidence_state": "observed"
+    }
+  ],
+  "cloudflare": {
+    "account_name": "Ikanisa",
+    "account_id": "2209b915a85b1c11cee79b7806c6e73b",
+    "worker": "med250-marketplace-gikundiro",
+    "database": "med250-production",
+    "current_version_id": "912982d3-c4eb-4a81-ab93-3640523c2e79",
+    "meta_runtime_secret_names_present": [],
+    "evidence_state": "observed"
+  },
+  "meta_apps_at_baseline": [
+    { "id": "1075514900370567", "name": "Emateli Vendor", "mode": "live" },
+    { "id": "287854867491964", "name": "ASSIGU", "mode": "not_displayed" },
+    { "id": "1416487735910675", "name": "ASSIGU", "mode": "development" },
+    { "id": "431495622649422", "name": "ASSIGU", "mode": "live", "app_type": "consumer" },
+    { "id": "2810864735968629", "name": "Icupa Bar", "mode": "development" },
+    { "id": "1345747179421556", "name": "Lifuti", "mode": "development" },
+    { "id": "430651169487592", "name": "Emateli", "mode": "live" },
+    { "id": "3298479527117404", "name": "Assigu", "mode": "live" },
+    { "id": "1170913857676602", "name": "ICUPA", "mode": "live" },
+    { "id": "3769557166649385", "name": "IKANISA", "mode": "live" }
+  ],
+  "accountable_owner": {
+    "role": "MED250 product owner and Assigu business administrator",
+    "identity": "not_recorded_in_audit_pack",
+    "evidence_state": "inferred"
+  }
+}
