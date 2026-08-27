@@ -78,6 +78,7 @@ test("publishes the MED+250 Kigali location as a crawlable contact page", async 
 });
 
 test("publishes the Rwanda trust and medicine-intent architecture without unsupported claims", async () => {
+  const sitemapSource = await readFile(new URL("../app/sitemap.ts", import.meta.url), "utf8");
   const expectations = [
     ["/about", /What the marketplace does/],
     ["/trust", /How MED\+250 separates verified facts/],
@@ -94,7 +95,10 @@ test("publishes the Rwanda trust and medicine-intent architecture without unsupp
   const sitemapResponse = await render("/sitemap.xml");
   assert.equal(sitemapResponse.status, 200);
   const sitemap = await sitemapResponse.text();
-  for (const pathname of ["/about", "/trust", "/find-medicine"]) assert.match(sitemap, new RegExp(pathname.replaceAll("-", "\\-")));
+  for (const pathname of ["/about", "/trust", "/find-medicine"]) {
+    assert.match(sitemapSource, new RegExp(`"${pathname.replaceAll("-", "\\-")}"`));
+    if (/<url>/i.test(sitemap)) assert.match(sitemap, new RegExp(pathname.replaceAll("-", "\\-")));
+  }
   assert.doesNotMatch(sitemap, /\/rw\//);
 
   const productResponse = await render("/product/rwanda-fda-hm-0001");
