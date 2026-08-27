@@ -51,6 +51,10 @@ test("server-renders the MED+250 marketplace", async () => {
   assert.match(html, /For Pharmacies/);
   assert.match(html, /og:image/);
   assert.match(html, /og-marketplace-v2\.png/);
+  assert.match(html, /"@type":"Organization"/);
+  assert.match(html, /"@type":"SearchAction"/);
+  assert.match(html, /Norrsken House Kigali/);
+  assert.match(html, /1 KN 78 St/);
   assert.match(html, /name="robots" content="(?:index, follow|noindex, nofollow, noarchive)"/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/);
 
@@ -59,6 +63,18 @@ test("server-renders the MED+250 marketplace", async () => {
   assert.equal(socialCard.readUInt32BE(16), 1200);
   assert.equal(socialCard.readUInt32BE(20), 630);
   assert.ok(socialCard.byteLength > 300_000, "social card should be a finished marketplace visual, not a tiny placeholder");
+});
+
+test("publishes the MED+250 Kigali location as a crawlable contact page", async () => {
+  const response = await render("/contact");
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /<title>MED\+250 Kigali location and contact \| MED\+250<\/title>/);
+  assert.match(html, /Norrsken House Kigali/);
+  assert.match(html, /1 KN 78 St/);
+  assert.match(html, /Serving people across Rwanda/);
+  assert.match(html, /google\.com\/maps\/search/);
+  assert.match(html, /not a pharmacy collection point/i);
 });
 
 test("adds category-aware product breadcrumbs and source-backed related products", async () => {

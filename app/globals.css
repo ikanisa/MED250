@@ -588,6 +588,8 @@ footer a,footer button { color:var(--color-white); font-size:10px; border:0; bac
 footer>small { grid-column:1/-1; border-top:1px solid var(--alpha-white-12); padding-top:20px; color:var(--color-disabled); }
 .public-contact-links { grid-column:1/-1; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
 .public-contact-links a { min-height:36px; padding:0 12px; border:1px solid var(--alpha-white-12); border-radius:999px; background:var(--alpha-white-12); font-weight:800; text-decoration:none; }
+.company-location { grid-column:1/-1; margin:0; font-style:normal; }
+.company-location a { display:inline-flex; align-items:center; min-height:36px; font-weight:800; text-decoration:underline; text-underline-offset:3px; }
 .overlay { position:fixed; inset:0; background:linear-gradient(135deg,var(--alpha-white-65),var(--alpha-violet-12) 54%,var(--alpha-white-65)); backdrop-filter:blur(5px); z-index:80; display:flex; justify-content:flex-end; }
 .drawer { width:min(480px,100vw); height:100%; background:var(--clay-surface); padding:26px 28px; overflow:auto; box-shadow:-25px 0 60px var(--alpha-ink-16); animation:slideIn .28s ease; }
 @keyframes slideIn { from{transform:translateX(100%)} }
@@ -1547,6 +1549,10 @@ body { background:var(--clay-page-cool); }
 .info-content p { max-width:800px; margin:0; color:var(--color-muted); font-size:16px; line-height:1.75; }
 .info-callout { padding:28px; border-radius:18px; background:color-mix(in srgb,var(--clay-surface-lavender) 14%,var(--color-white)); }
 .info-callout a { margin-top:18px; padding:12px 18px; display:inline-flex; border-radius:8px; color:var(--ink); background:var(--clay-surface-warm); font-weight:850; }
+.location-card address { display:grid; gap:6px; color:var(--color-muted); font-style:normal; font-size:16px; line-height:1.55; }
+.location-card address strong { color:var(--ink); font:800 20px var(--font-display),sans-serif; }
+.location-directions,.location-catalogue-link,.location-contact-links a { margin-top:18px; padding:12px 18px; display:inline-flex; align-items:center; border-radius:10px; color:var(--color-white); background:var(--brand-action-gradient); font-size:13px; font-weight:850; text-decoration:none; }
+.location-contact-links { display:flex; flex-wrap:wrap; gap:10px; }
 .state-page { min-height:100vh; padding:34px clamp(22px,8vw,110px); display:flex; flex-direction:column; background:linear-gradient(125deg,color-mix(in srgb,var(--clay-surface-mint) 13%,var(--color-white)),var(--color-white) 45%,color-mix(in srgb,var(--clay-surface-lavender) 15%,var(--color-white))); }
 .state-page>.brand { align-self:flex-start; }
 .state-page>div { max-width:680px; margin:auto 0; }

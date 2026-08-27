@@ -17,7 +17,7 @@
     },
     {
       "file": "app/info-shell.tsx",
-      "sha256": "d70572df564d3493a6697fbd18fe3d96e78409edd46c73f1ce3ed8cfbcaf9653"
+      "sha256": "52ab6a5937309cd084ab6388833355f3f76235f9d60f2d161a1250d291dc4059"
     },
     {
       "file": "app/loading.tsx",
@@ -25,7 +25,7 @@
     },
     {
       "file": "app/marketplace.tsx",
-      "sha256": "d5dd5d5cb61b4cb787cd1819c433980ee28091a6c3a0604bc324426dc97002e3"
+      "sha256": "cb85d27fbdc32ef89a30499fc2ba92d807bcf3f6055fa717ac027d4a6d863293"
     },
     {
       "file": "app/navigation-feedback.tsx",

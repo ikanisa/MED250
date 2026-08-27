@@ -54,7 +54,7 @@ const supportedRoutePatterns = [
   /^\/categories$/,
   /^\/category\/(medicines|personal-care|baby-family|wellness)$/,
   /^\/pharmacies$/,
-  /^\/(privacy|terms)$/,
+  /^\/(contact|privacy|terms)$/,
   /^\/product\/[^/]+$/,
 ];
 

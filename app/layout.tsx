@@ -5,6 +5,7 @@ import { absoluteUrl, defaultDescription, searchIndexingEnabled, siteName, siteU
 import { safeJsonLd } from "../lib/safe-json-ld";
 import { DEFAULT_MARKETPLACE_LOCALE, marketplaceAlternates, marketplaceOpenGraphLocale } from "../lib/marketplace-locale";
 import { marketplaceMessage } from "../lib/marketplace-messages";
+import { companyLocation } from "../lib/company-location";
 import NavigationFeedback from "./navigation-feedback";
 import PwaManager from "./pwa-manager";
 import { SiteWebMcpRegistrar } from "../webmcp/site-registrar";
@@ -24,7 +25,8 @@ export const metadata: Metadata = {
   creator: siteName,
   publisher: siteName,
   category: "health marketplace",
-  keywords: ["Rwanda pharmacy", "pharmacy marketplace", "medicines Rwanda", "pharmaceutical products", "Kigali pharmacy"],
+  keywords: ["Rwanda pharmacy marketplace", "pharmacy products Rwanda", "medicines Rwanda", "medicine availability Rwanda", "Kigali pharmacy products", "find pharmacies Rwanda"],
+  other: { "geo.region": "RW-01", "geo.placename": companyLocation.addressLocality },
   alternates: marketplaceAlternates("/"),
   robots: searchIndexingEnabled
     ? { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 } }
@@ -36,6 +38,36 @@ export const metadata: Metadata = {
 export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", themeColor: "#f6f8ff", colorScheme: "light" };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const organizationId = absoluteUrl("/#organization");
+  const locationId = absoluteUrl("/#kigali-location");
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": organizationId,
+    name: siteName,
+    url: siteUrl,
+    logo: { "@type": "ImageObject", url: absoluteUrl("/brand/app-icon-512.png"), width: 512, height: 512 },
+    description: defaultDescription,
+    areaServed: { "@type": "Country", name: companyLocation.countryName },
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: `${companyLocation.streetAddress}, ${companyLocation.venue}`,
+      addressLocality: companyLocation.addressLocality,
+      addressCountry: companyLocation.addressCountry,
+    },
+    location: {
+      "@type": "Place",
+      "@id": locationId,
+      name: companyLocation.venue,
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: companyLocation.streetAddress,
+        addressLocality: companyLocation.addressLocality,
+        addressCountry: companyLocation.addressCountry,
+      },
+      hasMap: companyLocation.googleMapsUrl,
+    },
+  };
   const websiteSchema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -43,7 +75,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     url: siteUrl,
     description: defaultDescription,
     inLanguage: DEFAULT_MARKETPLACE_LOCALE,
-    publisher: { "@type": "Organization", name: siteName, url: siteUrl, logo: absoluteUrl("/brand/app-icon-512.png") },
+    publisher: { "@id": organizationId },
+    potentialAction: {
+      "@type": "SearchAction",
+      target: { "@type": "EntryPoint", urlTemplate: `${siteUrl}/?search={search_term_string}` },
+      "query-input": "required name=search_term_string",
+    },
   };
   return <html lang={DEFAULT_MARKETPLACE_LOCALE}><head>
     <link rel="manifest" href="/manifest.webmanifest" />
@@ -51,5 +88,5 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <link rel="icon" href="/brand/favicon-32.png" sizes="32x32" type="image/png" />
     <link rel="icon" href="/brand/favicon-48.png" sizes="48x48" type="image/png" />
     <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png" sizes="180x180" type="image/png" />
-  </head><body className={`${display.variable} ${sans.variable}`}><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteSchema) }} /><NavigationFeedback /><PwaManager /><SiteWebMcpRegistrar />{children}</body></html>;
+  </head><body className={`${display.variable} ${sans.variable}`}><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(organizationSchema) }} /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteSchema) }} /><NavigationFeedback /><PwaManager /><SiteWebMcpRegistrar />{children}</body></html>;
 }
