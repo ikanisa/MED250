@@ -55,6 +55,8 @@ test("server-renders the MED+250 marketplace", async () => {
   assert.match(html, /"@type":"SearchAction"/);
   assert.match(html, /Norrsken House Kigali/);
   assert.match(html, /1 KN 78 St/);
+  assert.match(html, /Kiyovu/);
+  assert.match(html, /Nyarugenge/);
   assert.match(html, /name="robots" content="(?:index, follow|noindex, nofollow, noarchive)"/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/);
 
@@ -72,6 +74,8 @@ test("publishes the MED+250 Kigali location as a crawlable contact page", async 
   assert.match(html, /<title>MED\+250 Kigali location and contact \| MED\+250<\/title>/);
   assert.match(html, /Norrsken House Kigali/);
   assert.match(html, /1 KN 78 St/);
+  assert.match(html, /Kiyovu/);
+  assert.match(html, /Nyarugenge/);
   assert.match(html, /Serving people across Rwanda/);
   assert.match(html, /google\.com\/maps\/search/);
   assert.match(html, /not a pharmacy collection point/i);
@@ -104,7 +108,7 @@ test("publishes the Rwanda trust and medicine-intent architecture without unsupp
   const productResponse = await render("/product/rwanda-fda-hm-0001");
   assert.equal(productResponse.status, 200);
   const productHtml = await productResponse.text();
-  assert.match(productHtml, /"@type":"Product"/);
+  assert.doesNotMatch(productHtml, /"@type":"Product"/);
   assert.doesNotMatch(productHtml, /"@type":"AggregateOffer"/);
   assert.match(productHtml, /Product details/);
 });
@@ -241,8 +245,7 @@ test("server-renders retained canonical product metadata without a legacy provid
   assert.match(html, /<title>Ibupar caplets 400mg\/325mg \| MED\+250<\/title>/);
   assert.ok(html.includes(`rel="canonical" href="${metadataOrigin}/product/rwanda-fda-hm-0734"`));
   assert.doesNotMatch(html, /supabase\.co|storage\/v1\/object\/public\/product-images/);
-  assert.match(html, /"@type":"Product"/);
-  assert.match(html, /"alternateName":"IBUPAR CAPLETS"/);
+  assert.doesNotMatch(html, /"@type":"Product"/);
   assert.match(html, /Official catalogue name/);
   assert.match(html, /"@type":"BreadcrumbList"/);
   assert.match(html, /Manufacturer/);
@@ -838,6 +841,9 @@ test("hides field labels when their source value is absent and uses readable gra
   assert.doesNotMatch(marketplace, /Reference only|confirm availability and final price on WhatsApp/i);
   assert.match(marketplace, /<ProductDetailsList product=\{selectedProduct\} \/>/);
   assert.match(productPage, /additionalProperty:[\s\S]*\.filter\(Boolean\)/);
+  assert.match(productPage, /const productSchema = aggregateOffer \?/);
+  assert.match(productPage, /offers: aggregateOffer/);
+  assert.match(productPage, /productSchema \? <script/);
   assert.doesNotMatch(client, /Responding pharmacy|Selected pharmacy|Licensed pharmacy|Registered product/);
   assert.match(css, /--brand-shell-gradient:linear-gradient/);
   assert.match(css, /--brand-nav-gradient:linear-gradient/);

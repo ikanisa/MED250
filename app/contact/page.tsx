@@ -8,7 +8,7 @@ import { publicContactChannels } from "../../lib/public-contact-channels.mjs";
 export const metadata: Metadata = {
   title: "MED+250 Kigali location and contact",
   description:
-    "Find MED+250 at Norrsken House Kigali, 1 KN 78 St, Kigali, and use the Rwanda pharmacy marketplace online.",
+    "Find MED+250 at Norrsken House Kigali, 1 KN 78 St, Kiyovu, Nyarugenge, Kigali, and use the Rwanda pharmacy marketplace online.",
   alternates: marketplaceAlternates(companyLocation.pagePath),
   openGraph: {
     title: "MED+250 Kigali location and contact",
@@ -32,6 +32,7 @@ export default function ContactPage() {
           <strong>{companyLocation.organizationName}</strong>
           <span>{companyLocation.venue}</span>
           <span>{companyLocation.streetAddress}</span>
+          <span>{companyLocation.neighborhood}, {companyLocation.district}</span>
           <span>{companyLocation.addressLocality}, {companyLocation.countryName}</span>
         </address>
         <a

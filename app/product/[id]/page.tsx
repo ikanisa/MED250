@@ -67,7 +67,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     .slice(0, 8);
   const description = productMetadataDescription(product, product.description || (localProduct ? productSeoDescription(localProduct) : null));
   const aggregateOffer = verifiedAggregateOffer(product);
-  const productSchema = {
+  const productSchema = aggregateOffer ? {
     "@context": "https://schema.org",
     "@type": "Product",
     name: [displayName, product.strength].filter(Boolean).join(" "),
@@ -77,7 +77,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     category: product.category,
     image: product.imageUrls?.length ? product.imageUrls : product.imageUrl ? [product.imageUrl] : undefined,
     url: absoluteUrl(`/product/${encodeURIComponent(product.id)}`),
-    offers: aggregateOffer ?? undefined,
+    offers: aggregateOffer,
     additionalProperty: [
       product.generic ? { "@type": "PropertyValue", name: "Generic name", value: product.generic } : null,
       product.form ? { "@type": "PropertyValue", name: "Dosage form", value: product.form } : null,
@@ -85,7 +85,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
       product.manufacturer || product.manufacturerCountry ? { "@type": "PropertyValue", name: "Manufacturer", value: [product.manufacturer, product.manufacturerCountry].filter(Boolean).join(" · ") } : null,
       product.registrationNumber ? { "@type": "PropertyValue", name: "Rwanda FDA registration", value: product.registrationNumber } : null,
     ].filter(Boolean),
-  };
+  } : null;
   const breadcrumbs = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -95,5 +95,5 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
       { "@type": "ListItem", position: 3, name: displayName, item: absoluteUrl(`/product/${encodeURIComponent(product.id)}`) },
     ],
   };
-  return <><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(productSchema) }} /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbs) }} /><Marketplace initialProductId={id} initialProduct={product} initialProducts={relatedProducts} /></>;
+  return <>{productSchema ? <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(productSchema) }} /> : null}<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbs) }} /><Marketplace initialProductId={id} initialProduct={product} initialProducts={relatedProducts} /></>;
 }
