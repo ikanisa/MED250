@@ -1,5 +1,6 @@
 const EVENT_NAMES = new Set([
   "catalogue_search",
+  "catalogue_hierarchy_selected",
   "catalogue_view_changed",
   "product_added",
   "order_started",
@@ -54,6 +55,11 @@ function sanitizeProperties(name: string, properties: Record<string, unknown>) {
       query_length_bucket: bucket(numberValue(properties, "queryLength"), [0, 3, 10, 25]),
       result_count_bucket: bucket(numberValue(properties, "resultCount"), [0, 12, 48, 120]),
       duration_ms_bucket: bucket(numberValue(properties, "durationMs"), [100, 250, 500, 1000, 2500]),
+    };
+  }
+  if (name === "catalogue_hierarchy_selected") {
+    return {
+      category: typeof properties.category === "string" && CATEGORIES.has(properties.category) ? properties.category : "Other",
     };
   }
   if (name === "catalogue_view_changed") {

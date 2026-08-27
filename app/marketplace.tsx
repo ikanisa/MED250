@@ -1229,7 +1229,9 @@ export default function Marketplace({
       || activeModalKey === "order-status"
       || activeModalKey === "order-basket";
     document.documentElement.toggleAttribute("data-sensitive-workflow", sensitiveWorkflow);
-    return () => document.documentElement.removeAttribute("data-sensitive-workflow");
+    return () => {
+      document.documentElement.removeAttribute("data-sensitive-workflow");
+    };
   }, [activeModalKey]);
 
   function announce(message: string, tone: FeedbackToast["tone"] = "success") {
@@ -2794,7 +2796,6 @@ export default function Marketplace({
       setPharmacyContacts([]);
       setPendingContactEdits([]);
       setPortalCatalogueQuery("");
-      setPortalCataloguePage(0);
       setCentralPriceDrafts({});
       setSubmittingPriceProductId(null);
       setSelectedRequest(null);

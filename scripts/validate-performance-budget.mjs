@@ -39,12 +39,19 @@ const builtAssets = filesUnder(clientAssets);
 const javascript = builtAssets.filter((path) => extname(path) === ".js");
 const css = builtAssets.filter((path) => extname(path) === ".css");
 const marketplaceJavascript = javascript.filter((path) => /marketplace-[^/]+\.js$/.test(path));
+const webMcpJavascript = javascript.filter((path) => {
+  const source = readFileSync(path, "utf8");
+  return source.includes("defineTool:") && source.includes("registerTools");
+});
+const coreJavascript = javascript.filter((path) => !webMcpJavascript.includes(path));
 const optimizedMarketplaceImages = filesUnder(marketplaceAssets).filter((path) => extname(path) === ".webp");
 const wordmark = resolve("public/brand/med-plus-250-wordmark-220.png");
 
 const totals = {
   javascriptRawBytes: bytes(javascript),
   javascriptTransferBytes: transferBytes(javascript),
+  coreJavascriptTransferBytes: transferBytes(coreJavascript),
+  webMcpJavascriptTransferBytes: transferBytes(webMcpJavascript),
   cssRawBytes: bytes(css),
   cssTransferBytes: transferBytes(css),
   marketplaceJavascriptRawBytes: bytes(marketplaceJavascript),
@@ -53,9 +60,12 @@ const totals = {
   optimizedMarketplaceImageCount: optimizedMarketplaceImages.length,
 };
 
-// Vinext 1.0's hardened runtime adds shared routing code; keep the complete
-// browser graph capped tightly while retaining the narrower marketplace budget.
-enforce("Total browser JavaScript transfer", totals.javascriptTransferBytes, 256 * 1024);
+// Keep MED+250's browser graph within the original 256 KiB core budget while
+// measuring the capability-gated WebMCP SDK separately. The aggregate cap
+// prevents optional agent tooling from becoming an unbounded exception.
+enforce("Core browser JavaScript transfer", totals.coreJavascriptTransferBytes, 256 * 1024);
+enforce("WebMCP browser JavaScript transfer", totals.webMcpJavascriptTransferBytes, 12 * 1024);
+enforce("Total browser JavaScript transfer", totals.javascriptTransferBytes, 268 * 1024);
 enforce("Total browser CSS transfer", totals.cssTransferBytes, 40 * 1024);
 enforce("Marketplace browser JavaScript transfer", totals.marketplaceJavascriptTransferBytes, 120 * 1024);
 enforce("Optimized marketplace visuals plus header wordmark", totals.initialVisualAssetBytes, 100 * 1024);

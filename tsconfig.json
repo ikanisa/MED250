@@ -31,5 +31,14 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "archive",
+    "desktop-output",
+    "dist",
+    "examples",
+    "outputs",
+    "supabase",
+    "work"
+  ]
 }

@@ -163,7 +163,7 @@ export default function PwaManager() {
       registrationCleanup?.();
       visibilityCleanup?.();
       navigator.serviceWorker.removeEventListener("controllerchange", onControllerChange);
-      if (idleWindow.cancelIdleCallback && idleWindow.requestIdleCallback) idleWindow.cancelIdleCallback(idleHandle);
+      if (idleWindow.cancelIdleCallback) idleWindow.cancelIdleCallback(idleHandle);
       else window.clearTimeout(idleHandle);
     };
   }, []);

@@ -60,7 +60,7 @@ export default function NavigationFeedback() {
     let settledFrame: number | null = null;
     const frame = window.requestAnimationFrame(() => {
       focusNewRoute();
-      settledFrame = window.requestAnimationFrame(focusNewRoute);
+      settledFrame = window.requestAnimationFrame(() => focusNewRoute());
     });
     const focusStabilizationTimeout = window.setTimeout(focusNewRoute, ROUTE_FOCUS_STABILIZATION_MS);
     let mutationFrame: number | null = null;

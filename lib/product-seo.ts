@@ -32,7 +32,7 @@ export function productSeoDescription(product: ProductSeoRecord) {
     .filter(Boolean)
     .join(" · ");
   const productSummary = `${customerProductTitle(product.brand)}${details ? ` — ${details}` : ""}.`;
-  const mode = process.env.NEXT_PUBLIC_MED250_DEPLOYMENT_MODE || process.env.NEXT_PUBLIC_MARKETPLACE_MODE;
+  const mode = String(process.env.NEXT_PUBLIC_MED250_DEPLOYMENT_MODE || process.env.NEXT_PUBLIC_MARKETPLACE_MODE || "");
   return mode === "catalog"
     ? `${productSummary} Browse central product information and indicative pricing in the public MED+250 Rwanda pharmacy catalogue.`
     : `${productSummary} Request availability and continue on WhatsApp with a pharmacy that confirms it can help.`;

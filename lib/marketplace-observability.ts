@@ -1,5 +1,6 @@
 export type MarketplaceEventName =
   | "catalogue_search"
+  | "catalogue_hierarchy_selected"
   | "catalogue_view_changed"
   | "product_added"
   | "order_started"
@@ -18,8 +19,9 @@ type SafeMarketplaceProperties = Record<string, string | number | boolean | null
 export function trackMarketplaceEvent(name: MarketplaceEventName, properties: SafeMarketplaceProperties = {}) {
   if (typeof window === "undefined") return;
   const detail = { name, properties, occurredAt: new Date().toISOString() };
+  const observabilityMode = String(process.env.NEXT_PUBLIC_MED250_OBSERVABILITY ?? "");
   window.dispatchEvent(new CustomEvent("med250:marketplace-event", { detail }));
-  if (process.env.NEXT_PUBLIC_MED250_OBSERVABILITY === "debug") {
+  if (observabilityMode === "debug") {
     console.info("[MED+250 marketplace]", detail);
   }
   if (process.env.NEXT_PUBLIC_MED250_OBSERVABILITY === "cloud") {

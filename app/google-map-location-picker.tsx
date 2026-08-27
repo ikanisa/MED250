@@ -45,6 +45,7 @@ type GoogleMapsApi = {
 declare global {
   interface Window {
     google?: { maps: GoogleMapsApi };
+    __med250GoogleMapsReady?: () => void;
   }
 }
 
@@ -59,11 +60,10 @@ function loadGoogleMaps(apiKey: string) {
   if (googleMapsPromise) return googleMapsPromise;
 
   googleMapsPromise = new Promise<GoogleMapsApi>((resolve, reject) => {
-    const callbackWindow = window as Window & Record<string, unknown>;
-    callbackWindow[GOOGLE_MAPS_CALLBACK] = () => {
+    window.__med250GoogleMapsReady = () => {
       if (window.google?.maps) resolve(window.google.maps);
       else reject(new Error("Google Maps did not finish loading."));
-      delete callbackWindow[GOOGLE_MAPS_CALLBACK];
+      delete window.__med250GoogleMapsReady;
     };
 
     const existing = document.getElementById(GOOGLE_MAPS_SCRIPT_ID);
@@ -75,7 +75,7 @@ function loadGoogleMaps(apiKey: string) {
     script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&v=weekly&loading=async&callback=${GOOGLE_MAPS_CALLBACK}`;
     script.onerror = () => {
       googleMapsPromise = null;
-      delete callbackWindow[GOOGLE_MAPS_CALLBACK];
+      delete window.__med250GoogleMapsReady;
       reject(new Error("Google Maps could not load. Check your connection and try again."));
     };
     document.head.appendChild(script);
