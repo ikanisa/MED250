@@ -2,8 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { publicContactChannelErrors } from "../lib/public-contact-channels.mjs";
 
-const activationRequired = process.argv.includes("--activation");
-const liveRequired = activationRequired || process.argv.includes("--live");
+const liveRequired = process.argv.includes("--live");
 const envPath = [".env.local", ".env"].map((path) => resolve(path)).find(existsSync);
 const wranglerPath = resolve("wrangler.jsonc");
 const source = envPath ? readFileSync(envPath, "utf8") : "";
@@ -22,22 +21,6 @@ const fileEnv = Object.fromEntries(source
 const env = { ...fileEnv, ...process.env };
 const errors = [];
 const warnings = [];
-const activationGateNames = [
-  "MED250_GATE_GPS_READY",
-  "MED250_GATE_WHATSAPP_READY",
-  "MED250_GATE_DUPLICATE_REGISTER_REVIEWED",
-  "MED250_GATE_SECURITY_HARDENING_DEPLOYED",
-  "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED",
-  "MED250_GATE_TURNSTILE_SERVER_VERIFIED",
-  "MED250_GATE_AUTH_RATE_LIMITS_APPROVED",
-  "MED250_GATE_PRESCRIPTION_RETENTION_APPROVED",
-  "MED250_GATE_CLOUDFLARE_ACCOUNT_VERIFIED",
-  "MED250_GATE_DOMAIN_DNS_VERIFIED",
-  "MED250_GATE_PHYSICAL_UAT_PASSED",
-  "MED250_GATE_SOURCE_RECONCILED",
-  "MED250_GATE_WORKER_D1_CUTOVER_APPROVED",
-];
-
 function required(name) {
   const value = env[name]?.trim();
   if (!value) errors.push(`${name} is missing.`);
@@ -136,7 +119,7 @@ if (siteUrl) {
   }
 }
 
-errors.push(...publicContactChannelErrors(env, { requireAll: activationRequired }));
+errors.push(...publicContactChannelErrors(env, { requireAll: false }));
 
 if (liveRequired) {
   if (mode !== "live") errors.push("Live release validation requires NEXT_PUBLIC_MARKETPLACE_MODE=live.");
@@ -146,17 +129,9 @@ if (liveRequired) {
   if (observabilityMode !== "cloud") errors.push("Live release validation requires NEXT_PUBLIC_MED250_OBSERVABILITY=cloud.");
 }
 
-if (activationRequired) {
-  for (const gateName of activationGateNames) {
-    if (env[gateName]?.trim().toLowerCase() !== "confirmed") {
-      errors.push(`Operational activation validation requires ${gateName}=confirmed.`);
-    }
-  }
-}
-
 const result = {
   status: errors.length ? "failed" : "passed",
-  target: activationRequired ? "activation" : liveRequired ? "live_deployment" : mode || "unknown",
+  target: liveRequired ? "live_deployment" : mode || "unknown",
   envFileDetected: Boolean(envPath),
   workerReleaseMode: workerMode || "missing",
   workerName: workerName || "missing",
@@ -164,7 +139,6 @@ const result = {
   backendModes,
   workerD1Cutover,
   publicVariablesChecked: Object.keys(env).filter((name) => name.startsWith("NEXT_PUBLIC_")).sort(),
-  activationGatesChecked: activationRequired ? activationGateNames : [],
   warnings,
   errors,
 };

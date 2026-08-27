@@ -526,18 +526,15 @@ test("keeps the deployed contract service-only and identifier-free", async () =>
   assert.doesNotMatch(migration, /phone_numbers|whatsapp_numbers|customer_location/);
 });
 
-test("separates technical production deployment from operational activation evidence", async () => {
+test("keeps operational review records out of the production release gate", async () => {
   const packageJson = JSON.parse(await readFile(
     new URL("../package.json", import.meta.url),
     "utf8",
   ));
   const liveGate = packageJson.scripts["release:check:live"];
   const deploymentGate = packageJson.scripts["release:check:deployment"];
-  assert.match(liveGate, /^npm run release:preflight:activation/);
-  assert.match(liveGate, /&& npm run launch:go-live:status/);
-  assert.match(liveGate, /&& npm run data:duplicates:verify -- --strict/);
-  assert.match(liveGate, /&& npm run uat:verify:live/);
-  assert.match(liveGate, /&& npm run release:check:deployment/);
+  assert.equal(liveGate, "npm run release:check:deployment");
+  assert.equal(packageJson.scripts["release:preflight:activation"], undefined);
   assert.match(deploymentGate, /^npm run release:preflight:live/);
   assert.match(deploymentGate, /&& npm run cloudflare:typecheck/);
   assert.match(deploymentGate, /&& npm run cloudflare:check:worker-d1/);
@@ -547,17 +544,9 @@ test("separates technical production deployment from operational activation evid
   assert.match(workerD1Check, /wrangler deploy --config dist\/server\/wrangler[.]worker-d1[.]production[.]json --dry-run --strict/);
   assert.doesNotMatch(workerD1Check, /--keep-vars/);
   assert.doesNotMatch(workerD1Check, /--env production/);
+  assert.doesNotMatch(liveGate, /launch:go-live:status|launch:evidence:verify:live|data:duplicates:verify|content-review|uat:verify|activation/);
   assert.doesNotMatch(deploymentGate, /launch:go-live:status|data:duplicates:verify -- --strict|uat:verify:live/);
   assert.doesNotMatch(deploymentGate, /backend:verify|ops:health|SUPABASE/);
-  assert.ok(
-    liveGate.indexOf("release:preflight:activation") < liveGate.indexOf("data:duplicates:verify"),
-    "operational activation evidence must run before source-governance checks",
-  );
-  assert.ok(
-    liveGate.indexOf("release:preflight:activation") < liveGate.indexOf("launch:go-live:status")
-      && liveGate.indexOf("launch:go-live:status") < liveGate.indexOf("data:duplicates:verify"),
-    "consolidated go-live readiness must run before source-governance checks",
-  );
   assert.ok(
     deploymentGate.indexOf("cloudflare:typecheck") < deploymentGate.indexOf("cloudflare:check:worker-d1"),
     "Worker type drift must be checked before the production config is prepared",

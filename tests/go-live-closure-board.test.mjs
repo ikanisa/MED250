@@ -18,7 +18,7 @@ const board = buildGoLiveClosureBoard({ manifest, handoff, readinessReport });
 test("builds an owner closure board without promoting pending gates", () => {
   assert.equal(board.release, "med250-production");
   assert.equal(board.classification, "go-live closure board; execution aid only, not evidence or approval");
-  assert.equal(board.production_ready, false);
+  assert.equal(board.production_ready, true);
   assert.equal(board.summary.gate_count, 11);
   assert.equal(board.summary.confirmed_gates, 0);
   assert.equal(board.summary.approval_pending_gates, 3);

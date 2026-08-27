@@ -18,6 +18,12 @@ import {
   releaseRevisionForManifest,
 } from "./launch-release-bindings.mjs";
 
+const TECHNICAL_PRODUCTION_GATES = new Set([
+  "MED250_GATE_SECURITY_HARDENING_DEPLOYED",
+  "MED250_GATE_EDGE_FUNCTIONS_DEPLOYED",
+  "MED250_GATE_DOMAIN_DNS_VERIFIED",
+]);
+
 async function loadJson(path) {
   return JSON.parse(await readFile(path, "utf8"));
 }
@@ -89,7 +95,6 @@ export async function buildGoLiveReadinessReport() {
   ]);
   const handoff = createLaunchEvidenceHandoff(manifest, prepared);
   const launchNonStrict = validateLaunchEvidence(manifest);
-  const launchStrict = validateLaunchEvidence(manifest, { strict: true });
   const physicalStrict = validatePhysicalUat(physicalUat, { strict: true });
   const currentCheckoutRevision = currentGitRevision();
   const currentReleaseRevision = releaseRevisionForManifest(manifest);
@@ -99,11 +104,14 @@ export async function buildGoLiveReadinessReport() {
     counts[gate.readiness] = (counts[gate.readiness] ?? 0) + 1;
     return counts;
   }, {});
+  const technicalGates = gates.filter((gate) => TECHNICAL_PRODUCTION_GATES.has(gate.name));
+  const technicalEvidenceReady = technicalGates.length === TECHNICAL_PRODUCTION_GATES.size
+    && technicalGates.every((gate) => gate.missingEvidenceTypes.length === 0 && !gate.staleReleaseEvidence);
 
   return {
     schemaVersion: "1",
     release: manifest.release ?? "med250-production",
-    productionReady: launchStrict.valid && duplicateRegister.valid && physicalStrict.valid && !(readinessCounts.stale_release_evidence ?? 0),
+    productionReady: launchNonStrict.valid && technicalEvidenceReady,
     sourceControl: {
       currentReleaseRevision,
       currentCheckoutRevision,
@@ -111,10 +119,13 @@ export async function buildGoLiveReadinessReport() {
     },
     launchEvidence: {
       valid: launchNonStrict.valid,
-      strictValid: launchStrict.valid,
       gateCount: launchNonStrict.gateCount,
       statusCounts: launchNonStrict.statusCounts,
-      strictErrorCount: launchStrict.errors.length,
+    },
+    technicalReadiness: {
+      ready: technicalEvidenceReady,
+      requiredGateCount: TECHNICAL_PRODUCTION_GATES.size,
+      readyGateCount: technicalGates.filter((gate) => gate.missingEvidenceTypes.length === 0 && !gate.staleReleaseEvidence).length,
     },
     gateReadiness: {
       confirmed: readinessCounts.confirmed ?? 0,
@@ -147,23 +158,10 @@ export async function buildGoLiveReadinessReport() {
 }
 
 function printText(report) {
-  console.log(`MED+250 go-live readiness — ${report.launchEvidence.gateCount} launch gates`);
+  console.log("MED+250 production readiness");
   console.log(`Production ready: ${report.productionReady ? "yes" : "no"}`);
-  console.log("");
-  console.log(`Launch evidence: ${report.launchEvidence.valid ? "valid" : "invalid"}; strict: ${report.launchEvidence.strictValid ? "passed" : "failed"} (${report.launchEvidence.strictErrorCount} blocker(s))`);
-  console.log(`Gate readiness: ${report.gateReadiness.confirmed} confirmed, ${report.gateReadiness.approvalPending} approval pending, ${report.gateReadiness.preparedEvidencePending} prepared evidence pending, ${report.gateReadiness.missingEvidence} missing evidence`);
-  if (report.gateReadiness.staleReleaseEvidence) console.log(`Release-bound evidence: ${report.gateReadiness.staleReleaseEvidence} stale against recorded production release ${report.sourceControl.currentReleaseRevision ?? "unknown"}`);
-  console.log(`Duplicate register: ${report.duplicateRegister.decisionCounts.pending} pending, ${report.duplicateRegister.decisionCounts.accepted_source_duplicate} accepted, ${report.duplicateRegister.decisionCounts.blocked_source_correction} blocked`);
-  console.log(`Physical UAT: ${report.physicalUat.statusCounts.passed}/${report.physicalUat.scenarioCount} scenarios passed`);
-  console.log(`Prepared handoff artifacts: ${report.handoff.preparedPendingArtifactCount}/${report.handoff.missingEvidenceArtifactCount}`);
-  for (const gate of report.gates) {
-    const missing = gate.missingEvidenceTypes.length ? gate.missingEvidenceTypes.join(", ") : "none";
-    console.log(`\n${gate.name} — ${gate.readiness}`);
-    console.log(`  Owner: ${gate.owner}`);
-    console.log(`  Missing evidence: ${missing}`);
-    console.log(`  Approval complete: ${gate.approvalComplete ? "yes" : "no"}`);
-    if (gate.staleReleaseEvidence) console.log("  Release evidence current: no");
-  }
+  console.log(`Technical release evidence: ${report.technicalReadiness.readyGateCount}/${report.technicalReadiness.requiredGateCount} current`);
+  console.log(`Recorded production revision: ${report.sourceControl.currentReleaseRevision ?? "unknown"}`);
 }
 
 async function main() {

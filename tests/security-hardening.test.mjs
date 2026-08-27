@@ -102,8 +102,7 @@ test("binds contact imports and production automation to reviewed artifacts", as
   );
   assert.doesNotMatch(workflow, /MED250_GATE_/);
   assert.doesNotMatch(workflow, /staging|MED250_GATE_WORKER_D1_STAGING_PASSED/);
-  assert.match(workflow, /Report operational activation readiness/);
-  assert.match(workflow, /continue-on-error: true/);
+  assert.doesNotMatch(workflow, /operational activation|launch:go-live:status|continue-on-error/);
   assert.doesNotMatch(worker, /supabase\.co|legacy-supabase|neon\.tech/i);
   assert.match(worker, /connect-src 'self' https:\/\/maps\.googleapis\.com https:\/\/maps\.gstatic\.com/);
   assert.match(wrangler, /"compatibility_flags": \["nodejs_compat"\]/);

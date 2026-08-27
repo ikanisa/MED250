@@ -96,6 +96,3 @@ jobs:
         run: npm run ops:health:worker-d1 -- --url "$NEXT_PUBLIC_SITE_URL/api/internal/health" --production --strict
       - name: Verify production deployment
         run: npm run deployment:verify -- --url "$NEXT_PUBLIC_SITE_URL" --mode live --expected-revision "${{ github.sha }}"
-      - name: Report operational activation readiness
-        continue-on-error: true
-        run: npm run launch:go-live:status

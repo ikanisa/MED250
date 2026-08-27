@@ -248,8 +248,7 @@ test("keeps production as the only remotely deployable Worker target", async () 
   assert.match(packageJson.scripts["test:sites:catalog"], /NEXT_PUBLIC_MARKETPLACE_MODE=catalog/);
   assert.match(packageJson.scripts["release:check:deployment"], /npm run test:preview/);
   assert.match(packageJson.scripts["cloudflare:check:worker-d1"], /npm run test:production/);
-  assert.match(packageJson.scripts["release:check:live"], /npm run launch:go-live:status/);
-  assert.match(packageJson.scripts["release:check:live"], /npm run release:check:deployment/);
+  assert.equal(packageJson.scripts["release:check:live"], "npm run release:check:deployment");
   assert.match(packageJson.scripts["release:check:deployment"], /cloudflare:check:worker-d1/);
   assert.match(packageJson.scripts["deploy:live"], /^npm run release:check:deployment/);
   assert.match(packageJson.scripts["deploy:live"], /wrangler deploy --config dist\/server\/wrangler[.]worker-d1[.]production[.]json --strict/);
@@ -269,7 +268,7 @@ test("keeps production as the only remotely deployable Worker target", async () 
   assert.doesNotMatch(deployment.slice(deployment.indexOf("\n  production:")), /SUPABASE_URL|SUPABASE_PUBLISHABLE_KEY|SUPABASE_SECRET_KEY|MED250_ADMIN_TOKEN/);
   assert.doesNotMatch(deployment, /MED250_GATE_/);
   assert.doesNotMatch(deployment, /staging|MED250_GATE_WORKER_D1_STAGING_PASSED/);
-  assert.match(deployment, /Report operational activation readiness[\s\S]*continue-on-error: true[\s\S]*launch:go-live:status/);
+  assert.doesNotMatch(deployment, /operational activation|launch:go-live:status|continue-on-error/);
   assert.match(deployment, /cloudflare\/wrangler-action@[0-9a-f]{40}/);
   assert.match(deployment, /command: deploy --config dist\/server\/wrangler[.]worker-d1[.]production[.]json --strict/);
   assert.doesNotMatch(deployment, /--keep-vars/);

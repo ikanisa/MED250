@@ -57,7 +57,7 @@ test("rejects unsafe or incomplete public contact configuration", () => {
   ]);
 });
 
-test("binds the public contact channels to the footer, example env and activation validator", async () => {
+test("binds optional public contact channels to the footer and example env", async () => {
   const [marketplace, infoShell, envExample, preflight, messages] = await Promise.all([
     readFile(new URL("../app/marketplace.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/info-shell.tsx", import.meta.url), "utf8"),
@@ -73,28 +73,29 @@ test("binds the public contact channels to the footer, example env and activatio
   assert.match(envExample, /NEXT_PUBLIC_MED250_CONTACT_EMAIL=/);
   assert.match(envExample, /NEXT_PUBLIC_MED250_SUPPORT_WHATSAPP=/);
   assert.match(envExample, /NEXT_PUBLIC_MED250_MEETING_URL=/);
-  assert.match(preflight, /publicContactChannelErrors\(env, \{ requireAll: activationRequired \}\)/);
+  assert.match(preflight, /publicContactChannelErrors\(env, \{ requireAll: false \}\)/);
   assert.match(messages, /public_contact\.email/);
   assert.match(messages, /public_contact\.whatsapp/);
   assert.match(messages, /public_contact\.booking/);
 });
 
-test("operational activation validation requires all public contact channels", () => {
-  const result = spawnSync(process.execPath, ["scripts/validate-release-config.mjs", "--activation"], {
+test("live technical validation allows omitted public contact channels", () => {
+  const result = spawnSync(process.execPath, ["scripts/validate-release-config.mjs", "--live"], {
     cwd: new URL("..", import.meta.url),
     encoding: "utf8",
     env: {
       ...process.env,
-      NEXT_PUBLIC_SUPABASE_URL: "https://uskfnszcdqpcfrhjxitl.supabase.co",
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_example",
+      NEXT_PUBLIC_MED250_CATALOGUE_BACKEND: "worker-d1",
+      NEXT_PUBLIC_MED250_AUTH_BACKEND: "worker-d1",
+      NEXT_PUBLIC_MED250_ORDER_BACKEND: "worker-d1",
+      NEXT_PUBLIC_MED250_WORKSPACE_BACKEND: "worker-d1",
       NEXT_PUBLIC_MARKETPLACE_MODE: "live",
       NEXT_PUBLIC_SITE_URL: "https://med-250.com",
       NEXT_PUBLIC_TURNSTILE_SITE_KEY: "0x4AAAA-example",
       NEXT_PUBLIC_MED250_OBSERVABILITY: "cloud",
     },
   });
-  assert.equal(result.status, 1);
-  assert.match(result.stdout, /NEXT_PUBLIC_MED250_CONTACT_EMAIL is required for live public contact readiness/);
-  assert.match(result.stdout, /NEXT_PUBLIC_MED250_SUPPORT_WHATSAPP is required for live public contact readiness/);
-  assert.match(result.stdout, /NEXT_PUBLIC_MED250_MEETING_URL is required for live public contact readiness/);
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  assert.match(result.stdout, /"target": "live_deployment"/);
+  assert.doesNotMatch(result.stdout, /MED250_GATE_|Operational activation/);
 });

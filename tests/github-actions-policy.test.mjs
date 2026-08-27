@@ -25,6 +25,5 @@ test("keeps deployment confirmation and production environment protection", asyn
   assert.match(workflow, /DEPLOY MED250 LIVE/);
   assert.match(workflow, /environment: med250-production/);
   assert.match(workflow, /npm run release:preflight:live/);
-  assert.match(workflow, /Report operational activation readiness/);
-  assert.match(workflow, /continue-on-error: true/);
+  assert.doesNotMatch(workflow, /operational activation|launch:go-live:status|continue-on-error/);
 });

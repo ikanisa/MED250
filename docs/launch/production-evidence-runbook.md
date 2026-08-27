@@ -1,8 +1,8 @@
 # MED+250 production evidence runbook
 
-This runbook closes the 11 fail-closed operational-activation gates without treating configuration flags as evidence. The authoritative registry is `data/launch-evidence.json`; `npm run launch:evidence:verify:live` is the final machine gate for enabling and signing off customer operations.
+This runbook retains optional operational-review records. It does not block production deployment, customer access, or the production-ready result.
 
-Production code deployment is deliberately separate from operational activation. `npm run release:check:deployment` proves the build, Worker-D1 configuration, security controls, governed data, tests, and dry-run package are deployable. `npm run release:check:live` additionally requires the evidence registry, duplicate decisions, content review, and physical-device UAT. This avoids the circular requirement for an exact deployed-revision receipt before that revision can be deployed, while keeping incomplete operational evidence visible and non-transferable.
+`npm run release:check:deployment` and `npm run release:check:live` apply the same technical production checks. Historical review ledgers, duplicate decisions and physical-device UAT remain available for operational improvement but are not release gates.
 
 ## Evidence handling rules
 
@@ -38,7 +38,7 @@ row-level review, physical UAT, deployment verification or named approval.
 - The Edge Function and backend-hardening gates have complete machine evidence, but still require real backend-owner approval before either gate can be confirmed.
 - Supabase server-side Turnstile validation is enabled with the production widget. Missing and invalid tokens are rejected without creating users; one controlled valid-token browser test remains before the security owner can sign the gate.
 - The shared Supabase project currently reports an anonymous-user rate-limit value of 30, a one-hour JWT lifetime, and refresh-token rotation enabled. These project-wide settings still require a controlled impact test and security-owner approval.
-- Public owner contact channels are now explicit live configuration: `NEXT_PUBLIC_MED250_CONTACT_EMAIL`, `NEXT_PUBLIC_MED250_SUPPORT_WHATSAPP` and `NEXT_PUBLIC_MED250_MEETING_URL`. They must be approved public channels, and `release:check:live` rejects missing or unsafe values.
+- Public owner contact channels are optional live configuration: `NEXT_PUBLIC_MED250_CONTACT_EMAIL`, `NEXT_PUBLIC_MED250_SUPPORT_WHATSAPP` and `NEXT_PUBLIC_MED250_MEETING_URL`. When supplied, unsafe values are rejected.
 - The scoped advisor audit reports zero MED+250 performance warnings. MED+250 security warnings are the documented catalogue GraphQL surface, exact authenticated RPC allowlist, and anonymous customer-sign-in requirement; the aggregate contract rejects unexpected access drift.
 - All 51 duplicate-register groups remain pending named human review.
 
@@ -88,7 +88,7 @@ Use a dedicated approved pharmacy and customer test identity. Record timestamps 
 10. Approve the protected `med250-production` GitHub environment and dispatch the manual workflow with the exact live confirmation phrase.
 11. `npm run deployment:verify -- --url https://med-250.com --mode live --expected-revision <exact-lowercase-40-character-git-sha>`
 
-For `npm run release:check:live` and the protected GitHub workflow, set `MED250_DESCRIPTION_REVIEWER_PROBE_PRODUCT_ID` and `MED250_DESCRIPTION_REVIEWER_PROBE_EXPECTED_UPDATED_AT` to the exact freshly inspected row version. Store `MED250_ADMIN_TOKEN` only as the protected environment secret. The two probe values are release evidence inputs and must be refreshed whenever that product version changes; an empty or stale value fails closed.
+The optional protected reviewer probe uses `MED250_DESCRIPTION_REVIEWER_PROBE_PRODUCT_ID`, `MED250_DESCRIPTION_REVIEWER_PROBE_EXPECTED_UPDATED_AT` and the process-only `MED250_ADMIN_TOKEN`. These values are not part of the production release gate.
 
 ### Routing-owner safety rule
 

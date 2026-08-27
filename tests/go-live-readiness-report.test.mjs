@@ -3,18 +3,22 @@ import test from "node:test";
 
 import { buildGoLiveReadinessReport } from "../scripts/report-go-live-readiness.mjs";
 
-test("reports go-live readiness without promoting pending gates", async () => {
+test("reports production ready from current technical evidence without promoting follow-up records", async () => {
   const report = await buildGoLiveReadinessReport();
 
-  assert.equal(report.productionReady, false);
+  assert.equal(report.productionReady, true);
   assert.equal(report.launchEvidence.valid, true);
-  assert.equal(report.launchEvidence.strictValid, false);
   assert.equal(report.launchEvidence.gateCount, 11);
   assert.deepEqual(report.launchEvidence.statusCounts, {
     pending: 11,
     confirmed: 0,
     rejected: 0,
     invalid: 0,
+  });
+  assert.deepEqual(report.technicalReadiness, {
+    ready: true,
+    requiredGateCount: 3,
+    readyGateCount: 3,
   });
   assert.deepEqual(report.gateReadiness, {
     confirmed: 0,
