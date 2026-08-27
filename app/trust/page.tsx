@@ -17,6 +17,6 @@ export default function TrustPage() {
     <section><h2>Clinical and prescription boundaries</h2><p>Catalogue information is not medical advice. Prescription medicines require the applicable prescription and professional dispensing controls. For urgent or severe symptoms, contact qualified emergency or clinical services rather than relying on a marketplace search.</p></section>
     <section><h2>Localisation and local coverage</h2><p>English is the currently approved public source language. Kinyarwanda remains blocked until qualified translation, glossary, clinical, and legal review evidence is complete. District or pharmacy-area pages are not published without verified operational coverage and partner consent.</p></section>
     <section id="corrections"><h2>Corrections</h2><p>If a product detail, source, or marketplace statement appears wrong, use the public contact route and include the page address and the field to review. MED+250 can investigate the governed source record without treating a user report as an automatic catalogue change.</p><Link href="/contact">Contact MED+250</Link></section>
-    <p className="info-reviewed">Policy reviewed 27 August 2026.</p>
+    <p className="info-reviewed">Policy reviewed 27 August 2026. <Link href="/about">About MED+250</Link></p>
   </InfoShell>;
 }

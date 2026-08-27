@@ -1166,7 +1166,6 @@ export default function Marketplace({
   const [restoredActiveOrders, setRestoredActiveOrders] = useState<ActiveOrder[]>([]);
   const [orderSent, setOrderSent] = useState(false);
   const [offers, setOffers] = useState<OrderOffer[]>([]);
-  const confirmationTrackedOrderRef = useRef<string | null>(null);
   const [offersOpen, setOffersOpen] = useState(false);
   const [selectingOfferId, setSelectingOfferId] = useState<string | null>(null);
   const [selectedContact, setSelectedContact] = useState<SelectedContact | null>(null);
@@ -1223,9 +1222,7 @@ export default function Marketplace({
               : null;
 
   useEffect(() => {
-    if (!activeOrderId || offers.length < 1 || confirmationTrackedOrderRef.current === activeOrderId) return;
-    confirmationTrackedOrderRef.current = activeOrderId;
-    trackMarketplaceEvent("pharmacy_confirmation_received", { offerCount: offers.length });
+    if (activeOrderId && offers.length) trackMarketplaceEvent("pharmacy_confirmation_received");
   }, [activeOrderId, offers.length]);
 
   useEffect(() => {
@@ -2311,7 +2308,7 @@ export default function Marketplace({
     try {
       const result = await verifyCustomerWhatsappOtp(customerWhatsapp, customerOtpChallengeId, customerOtp);
       setVerifiedCustomerWhatsapp(result.phone);
-      trackMarketplaceEvent("availability_request_verified", { verified: true });
+      trackMarketplaceEvent("availability_request_verified");
       setCustomerOtpChallengeId("");
       setCustomerOtpExpiresAt(null);
       setCustomerOtp("");
@@ -3076,10 +3073,8 @@ export default function Marketplace({
               <p>{selectedProduct.description}</p>
               {selectedProduct.descriptionSourceName && selectedProduct.descriptionSourceUrl?.startsWith("https://") ? <a href={selectedProduct.descriptionSourceUrl} target="_blank" rel="noreferrer">{marketplaceFormatMessage("product.description_source", [selectedProduct.descriptionSourceName])}</a> : null}
             </section> : null}
-            <section className="product-trust-panel" aria-labelledby="product-trust-title">
-              <h2 id="product-trust-title"><ShieldCheck size={17} /> {marketplaceMessage("seo.product_source_title")}</h2>
-              <p>{selectedProduct.category === "Medicines" || /medicine/i.test(selectedProduct.productType) ? marketplaceMessage("seo.medicine_source_body") : marketplaceMessage("seo.consumer_source_body")}</p>
-              <div><Link href="/trust#medicine-sources">{marketplaceMessage("seo.trust_link")}</Link><Link href="/trust#corrections">{marketplaceMessage("seo.corrections_link")}</Link></div>
+            <section className="product-trust-panel">
+              <h2><Link href="/trust#medicine-sources">{marketplaceMessage("inventory.fd294f8ad383")}</Link></h2>
             </section>
             <ProductDetailsList product={selectedProduct} />
             <div className={`product-detail-buy ${hasPriceData(selectedProduct) ? "has-price" : "no-price"}`}>
@@ -3177,7 +3172,7 @@ export default function Marketplace({
       </>}
       </div>
 
-      <footer><Link className="brand footer-brand" href="/" aria-label={marketplaceMessage("inventory.b579c24fb600")}><BrandLogo /></Link><p>{marketplaceMessage("clinical.marketplace_disclaimer")}</p><nav aria-label={marketplaceMessage("inventory.26c87bb51e69")}><Link href="/categories">{marketplaceMessage("navigation.products")}</Link><Link href="/about">{marketplaceMessage("seo.about_link")}</Link><Link href="/trust">{marketplaceMessage("seo.trust_link")}</Link><Link href={companyLocation.pagePath}>{companyLocation.pageLabel}</Link><Link href="/privacy">{marketplaceMessage("navigation.privacy")}</Link><Link href="/terms">{marketplaceMessage("navigation.terms")}</Link><button onClick={openPortal}>{marketplaceMessage("navigation.pharmacies")}</button></nav>{med250PublicContactChannels.length ? <div className="public-contact-links" aria-label={marketplaceMessage("public_contact.label")}>{med250PublicContactChannels.map((channel) => <a key={channel.label} href={channel.href} target={channel.href.startsWith("http") ? "_blank" : undefined} rel={channel.href.startsWith("http") ? "noreferrer" : undefined}>{channel.label === "email" ? marketplaceMessage("public_contact.email") : channel.label === "whatsapp" ? marketplaceMessage("public_contact.whatsapp") : marketplaceMessage("public_contact.booking")}</a>)}</div> : null}<address className="company-location"><a href={companyLocation.googleMapsUrl} target="_blank" rel="noreferrer">{companyLocation.footerLabel}</a></address></footer>
+      <footer><Link className="brand footer-brand" href="/" aria-label={marketplaceMessage("inventory.b579c24fb600")}><BrandLogo /></Link><p>{marketplaceMessage("clinical.marketplace_disclaimer")}</p><nav aria-label={marketplaceMessage("inventory.26c87bb51e69")}><Link href="/categories">{marketplaceMessage("navigation.products")}</Link><Link href={companyLocation.pagePath}>{companyLocation.pageLabel}</Link><Link href="/privacy">{marketplaceMessage("navigation.privacy")}</Link><Link href="/terms">{marketplaceMessage("navigation.terms")}</Link><button onClick={openPortal}>{marketplaceMessage("navigation.pharmacies")}</button></nav>{med250PublicContactChannels.length ? <div className="public-contact-links" aria-label={marketplaceMessage("public_contact.label")}>{med250PublicContactChannels.map((channel) => <a key={channel.label} href={channel.href} target={channel.href.startsWith("http") ? "_blank" : undefined} rel={channel.href.startsWith("http") ? "noreferrer" : undefined}>{channel.label === "email" ? marketplaceMessage("public_contact.email") : channel.label === "whatsapp" ? marketplaceMessage("public_contact.whatsapp") : marketplaceMessage("public_contact.booking")}</a>)}</div> : null}<address className="company-location"><a href={companyLocation.googleMapsUrl} target="_blank" rel="noreferrer">{companyLocation.footerLabel}</a></address></footer>
 
       {filtersOpen ? <div className="filter-overlay" onMouseDown={(event) => event.target === event.currentTarget && setFiltersOpen(false)}>
         <section className="filter-dialog" role="dialog" aria-modal="true" aria-labelledby="catalogue-filter-title" aria-describedby="catalogue-filter-description" data-modal-root="catalogue-filters" tabIndex={-1}>

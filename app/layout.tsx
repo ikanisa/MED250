@@ -9,7 +9,6 @@ import { companyLocation } from "../lib/company-location";
 import NavigationFeedback from "./navigation-feedback";
 import PwaManager from "./pwa-manager";
 import { SiteWebMcpRegistrar } from "../webmcp/site-registrar";
-import SeoMeasurement from "./seo-measurement";
 import "./globals.css";
 
 const display = Manrope({ variable: "--font-display", subsets: ["latin"] });
@@ -86,10 +85,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     },
   };
   return <html lang={DEFAULT_MARKETPLACE_LOCALE}><head>
+    <script src="/seo-measurement.js" data-cloud={process.env.NEXT_PUBLIC_MED250_OBSERVABILITY === "cloud" ? "1" : "0"} defer />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/brand/favicon-16.png" sizes="16x16" type="image/png" />
     <link rel="icon" href="/brand/favicon-32.png" sizes="32x32" type="image/png" />
     <link rel="icon" href="/brand/favicon-48.png" sizes="48x48" type="image/png" />
     <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png" sizes="180x180" type="image/png" />
-  </head><body className={`${display.variable} ${sans.variable}`}><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(organizationSchema) }} /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteSchema) }} /><SeoMeasurement /><NavigationFeedback /><PwaManager /><SiteWebMcpRegistrar />{children}</body></html>;
+  </head><body className={`${display.variable} ${sans.variable}`}><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(organizationSchema) }} /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteSchema) }} /><NavigationFeedback /><PwaManager /><SiteWebMcpRegistrar />{children}</body></html>;
 }

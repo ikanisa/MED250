@@ -89,7 +89,7 @@ test("publishes the Rwanda trust and medicine-intent architecture without unsupp
     assert.equal(response.status, 200, pathname);
     const html = await response.text();
     assert.match(html, pattern);
-    assert.match(html, /Trust centre/);
+    assert.match(html, /trust centre/i);
   }
 
   const sitemapResponse = await render("/sitemap.xml");
@@ -106,7 +106,7 @@ test("publishes the Rwanda trust and medicine-intent architecture without unsupp
   const productHtml = await productResponse.text();
   assert.match(productHtml, /"@type":"Product"/);
   assert.doesNotMatch(productHtml, /"@type":"AggregateOffer"/);
-  assert.match(productHtml, /Sources and availability/);
+  assert.match(productHtml, /Product details/);
 });
 
 test("adds category-aware product breadcrumbs and source-backed related products", async () => {
