@@ -402,69 +402,16 @@ const productGallerySlides = [
   { label: marketplaceMessage("inventory.b22658f3c374"), className: "right-angle" },
 ] as const;
 
-const heroArtworkSlides = [
-  { src: "/marketplace/category-medicines.webp", alt: "Medicines and pharmacy essentials" },
-  { src: "/marketplace/category-personal-care.webp", alt: "Beauty and personal care products" },
-  { src: "/marketplace/category-baby-family.webp", alt: "Baby and family care products" },
-  { src: "/marketplace/category-wellness-devices.webp", alt: "Health, wellness and household care products" },
-] as const;
-
-function HeroArtworkCarousel() {
-  const [activeSlide, setActiveSlide] = useState(0);
-  const [autoRotate, setAutoRotate] = useState(true);
-  const touchStartX = useRef<number | null>(null);
-
-  useEffect(() => {
-    if (!autoRotate || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
-    const timer = window.setInterval(() => setActiveSlide((current) => (current + 1) % heroArtworkSlides.length), 5200);
-    return () => window.clearInterval(timer);
-  }, [autoRotate]);
-
-  function moveSlide(direction: number) {
-    setAutoRotate(false);
-    setActiveSlide((current) => (current + direction + heroArtworkSlides.length) % heroArtworkSlides.length);
-  }
-
-  function selectSlide(index: number) {
-    setAutoRotate(false);
-    setActiveSlide(index);
-  }
-
-  return <section
-    className="market-banner-art hero-art-carousel"
-    aria-label={marketplaceMessage("inventory.b56c00f55b3e")}
-    aria-roledescription="carousel"
-    tabIndex={0}
-    onKeyDown={(event) => {
-      if (event.key === "ArrowLeft") moveSlide(-1);
-      if (event.key === "ArrowRight") moveSlide(1);
-    }}
-    onTouchStart={(event) => { touchStartX.current = event.touches[0]?.clientX ?? null; }}
-    onTouchEnd={(event) => {
-      if (touchStartX.current == null) return;
-      const distance = (event.changedTouches[0]?.clientX ?? touchStartX.current) - touchStartX.current;
-      if (Math.abs(distance) > 42) moveSlide(distance > 0 ? -1 : 1);
-      touchStartX.current = null;
-    }}
-  >
-    <div className="hero-art-track" style={{ transform: `translate3d(-${activeSlide * 25}%, 0, 0)` }}>
-      {heroArtworkSlides.map((slide, index) => <figure className="hero-art-slide" aria-hidden={index !== activeSlide} key={slide.src}>
-        <Image src={slide.src} alt={slide.alt} width={760} height={340} priority={index === 0} unoptimized />
-      </figure>)}
-    </div>
-    <div className="hero-art-controls" role="group" aria-label={marketplaceMessage("inventory.166857765512")}>
-      <span aria-live="polite" aria-atomic="true">{activeSlide + 1} / {heroArtworkSlides.length}</span>
-      <div>
-        {heroArtworkSlides.map((slide, index) => <button type="button" aria-label={marketplaceFormatMessage("inventory.ce26474fba89", [slide.alt.toLowerCase()])} aria-pressed={index === activeSlide} onClick={() => selectSlide(index)} key={slide.src} />)}
-      </div>
-      <button
-        type="button"
-        className="hero-art-toggle"
-        aria-label={autoRotate ? marketplaceMessage("inventory.e6690f92c82a") : marketplaceMessage("inventory.39085a9d9671")}
-        title={autoRotate ? marketplaceMessage("inventory.0134df4b82b0") : marketplaceMessage("inventory.cac58013cda6")}
-        onClick={() => setAutoRotate((current) => !current)}
-      >{autoRotate ? <Pause size={15} /> : <Play size={15} />}</button>
-    </div>
+function HeroArtwork() {
+  return <section className="market-banner-art hero-art-static" aria-label={marketplaceMessage("inventory.b56c00f55b3e")}>
+    <Image
+      src="/marketplace/hero-pharmacy-still-life.webp"
+      alt={marketplaceMessage("inventory.b56c00f55b3e")}
+      width={760}
+      height={340}
+      priority
+      unoptimized
+    />
   </section>;
 }
 
@@ -3107,7 +3054,7 @@ export default function Marketplace({
           <Image src={pageImage ?? "/marketplace/hero-pharmacy-still-life.webp"} alt="" width={620} height={330} priority unoptimized />
         </section> : !pageTitle ? <section className="market-banner">
           <div className="market-banner-copy"><h1>{marketplaceMessage("inventory.bada83fd765c")} <em>{marketplaceMessage("inventory.a68745f09fc1")}</em></h1><p>{marketplaceMessage("inventory.f0908d3d760e")}</p><a className="shop-button" href="#marketplace">{marketplaceMessage("inventory.0b01e69b2a20")} <ArrowRight size={18} /></a></div>
-          <HeroArtworkCarousel />
+          <HeroArtwork />
         </section> : null}
 
         {(!pageTitle || showDepartments) && departmentCards.length ? <section className={`department-cards${pageTitle && showDepartments ? " category-index-departments" : ""}`} aria-label={marketplaceMessage("inventory.cd1c7049eb5c")}>
