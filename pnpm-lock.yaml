@@ -12,6 +12,9 @@ importers:
 
   .:
     dependencies:
+      '@nekuda/webmcp-sdk':
+        specifier: 0.4.0
+        version: 0.4.0
       drizzle-orm:
         specifier: 0.45.2
         version: 0.45.2(@cloudflare/workers-types@5.20260823.1)(@electric-sql/pglite@0.5.5)(@types/pg@8.23.1)(pg@8.23.0)
@@ -1125,6 +1128,14 @@ packages:
     peerDependencies:
       '@emnapi/core': ^1.7.1 || ^2.0.0-alpha.4
       '@emnapi/runtime': ^1.7.1 || ^2.0.0-alpha.4
+
+  '@nekuda/webmcp-sdk@0.4.0':
+    resolution: {integrity: sha512-j/ZfluKs1U3Ln6CLD4Y+cDhwh52TiZwg/Un5gJeL0c5tsR72vgamy8h3m0v1xeiZPMMpwX+h8Mv6w2hlsAnwYQ==}
+    peerDependencies:
+      '@opentelemetry/api-logs': '>=0.50.0'
+    peerDependenciesMeta:
+      '@opentelemetry/api-logs':
+        optional: true
 
   '@next/env@16.3.2':
     resolution: {integrity: sha512-8k4YoG8cM7LWlkfzGNYCRBbFNlernLiMw4s0btVl+CmmWqn3VpYypA72/5Feb1UWdxe6tHqr5KHP4p4Y4m9luA==}
@@ -4485,6 +4496,8 @@ snapshots:
       '@emnapi/runtime': 1.10.0
       '@tybys/wasm-util': 0.10.3
     optional: true
+
+  '@nekuda/webmcp-sdk@0.4.0': {}
 
   '@next/env@16.3.2': {}
 

@@ -128,6 +128,7 @@
     "deploy:live": "npm run release:check:live && wrangler deploy --config dist/server/wrangler.worker-d1.production.json --strict"
   },
   "dependencies": {
+    "@nekuda/webmcp-sdk": "0.4.0",
     "drizzle-orm": "0.45.2",
     "libphonenumber-js": "1.13.8",
     "lucide-react": "0.468.0",

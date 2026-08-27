@@ -130,6 +130,8 @@ import { marketplaceDate, marketplaceNumber, marketplaceRegionName } from "../li
 import { marketplaceFormatMessage, marketplaceMessage } from "../lib/marketplace-messages";
 import { publicContactChannels } from "../lib/public-contact-channels.mjs";
 import { readExpiringStorage, writeExpiringStorage } from "../lib/expiring-storage.mjs";
+import { MarketplaceWebMcpRegistrar } from "../webmcp/marketplace-registrar";
+import type { MarketplaceBasketSummary, MarketplaceToolRuntime } from "../webmcp/marketplace-runtime";
 
 const Turnstile = lazy(() => import("./turnstile"));
 const GoogleMapLocationPicker = lazy(() => import("./google-map-location-picker"));
@@ -165,6 +167,19 @@ type CustomerPreferences = {
   coordinates: Coordinates | null;
   locationLabel: string;
 };
+
+function webMcpBasketSummary(items: CartItem[]): MarketplaceBasketSummary {
+  return {
+    itemKinds: items.length,
+    itemCount: items.reduce((sum, item) => sum + item.quantity, 0),
+    items: items.map((item) => ({
+      productId: item.id,
+      name: customerProductTitle(item.brand),
+      quantity: item.quantity,
+      substitutesAllowed: item.substitutesAllowed,
+    })),
+  };
+}
 
 const MED250_ADMIN_WHATSAPP = "250795588248";
 const CART_STORAGE_KEY = "med250-order-basket-v1";
@@ -1062,6 +1077,7 @@ export default function Marketplace({
   initialTaxonomy = [],
   initialTrustMetrics = null,
 }: MarketplaceProps = {}) {
+  const router = useRouter();
   const previewMode = marketplaceMode !== "live";
   const publicCatalogMode = marketplaceMode === "catalog";
   const orderingEnabled = !previewMode && orderingBackendConfigured;
@@ -1103,6 +1119,7 @@ export default function Marketplace({
   const productLoadPendingRef = useRef(false);
   const restoredPositionRef = useRef<string | null>(null);
   const previousFilterStateRef = useRef<string | null>(null);
+  const webMcpRuntimeRef = useRef<MarketplaceToolRuntime | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartHydrated, setCartHydrated] = useState(false);
   const cartProductIdsKey = useMemo(() => [...new Set(cart.map((item) => item.id))].sort().join("|"), [cart]);
@@ -2903,8 +2920,96 @@ export default function Marketplace({
     }
   }
 
+  webMcpRuntimeRef.current = {
+    searchPreview(input) {
+      setServerCatalogueAvailable(false);
+      setCatalogueError("");
+      const matches = catalogue
+        .map((product) => searchCatalogueProduct(indexCatalogueProduct(product), input.query))
+        .filter((match): match is NonNullable<typeof match> => Boolean(match))
+        .filter((match) => {
+          const product = match.product;
+          if (!productMatchesCategory(product, input.category || "All products")) return false;
+          if (input.prescriptionStatus && input.prescriptionStatus !== "all" && product.prescriptionStatus !== input.prescriptionStatus) return false;
+          if (input.formGroup && input.formGroup !== "all" && catalogueFormGroup(product) !== input.formGroup) return false;
+          return true;
+        })
+        .toSorted((left, right) => right.score - left.score || left.product.brand.localeCompare(right.product.brand));
+      const visibleMatches = matches.slice(0, input.limit);
+      return {
+        products: visibleMatches.map((match) => match.product),
+        total: matches.length,
+        explanations: new Map(visibleMatches.map((match) => [match.product.id, match.explanation])),
+      };
+    },
+    showSearch(input) {
+      if (initialProductId) {
+        const parameters = new URLSearchParams();
+        if (input.query) parameters.set("search", input.query);
+        if (input.category && input.category !== "All products") parameters.set("category", input.category);
+        if (input.prescriptionStatus && input.prescriptionStatus !== "all") parameters.set("prescription", input.prescriptionStatus);
+        if (input.formGroup && input.formGroup !== "all") parameters.set("form", input.formGroup);
+        router.push(`/${parameters.size ? `?${parameters.toString()}` : ""}`);
+        return;
+      }
+      setQuery(input.query);
+      setCategory(input.category || "All products");
+      setPrescriptionFilter(input.prescriptionStatus || "all");
+      setFormFilter(input.formGroup || "all");
+      setAvailabilityFilter("all");
+      setSort("relevance");
+      setSuggestionsOpen(false);
+      setVisibleCount(INITIAL_PRODUCT_COUNT);
+      window.requestAnimationFrame(() => document.querySelector("#marketplace")?.scrollIntoView({ behavior: "smooth", block: "start" }));
+    },
+    showProduct(productId) {
+      router.push(`/product/${encodeURIComponent(productId)}`);
+    },
+    addToBasket(product, quantity, substitutesAllowed) {
+      if (requestLocked) throw new Error("The current MED+250 request is locked while submission state is being reconciled.");
+      const existing = cart.find((item) => item.id === product.id);
+      const nextQuantity = (existing?.quantity ?? 0) + quantity;
+      if (nextQuantity > 99) throw new Error("A MED+250 request-basket product quantity cannot exceed 99.");
+      const next = existing
+        ? cart.map((item) => item.id === product.id ? { ...item, quantity: nextQuantity, substitutesAllowed } : item)
+        : [...cart, { ...product, quantity, substitutesAllowed }];
+      setCart(next);
+      setCheckoutStep(1);
+      setShowAllCartItems(false);
+      setRecentlyAddedBrand(product.brand);
+      setCartOpen(true);
+      trackMarketplaceEvent("product_added", { category: product.category, hasPrice: product.min > 0 });
+      return webMcpBasketSummary(next);
+    },
+    updateBasket(productId, quantity, substitutesAllowed) {
+      if (requestLocked) throw new Error("The current MED+250 request is locked while submission state is being reconciled.");
+      if (!cart.some((item) => item.id === productId)) throw new Error("That product is not present in the MED+250 request basket.");
+      const next = cart
+        .map((item) => item.id === productId ? { ...item, quantity, substitutesAllowed } : item)
+        .filter((item) => item.quantity > 0);
+      setCart(next);
+      setCheckoutStep(1);
+      setShowAllCartItems(true);
+      setRecentlyAddedBrand("");
+      setCartOpen(true);
+      return webMcpBasketSummary(next);
+    },
+    prepareRequest() {
+      if (requestLocked) throw new Error("The current MED+250 request is locked while submission state is being reconciled.");
+      if (!cart.length) throw new Error("Add at least one product before preparing a MED+250 availability request.");
+      setCheckoutError("");
+      setCheckoutStep(2);
+      setShowAllCartItems(true);
+      setRecentlyAddedBrand("");
+      setOffersOpen(false);
+      setCartOpen(true);
+      return webMcpBasketSummary(cart);
+    },
+  };
+
   return (
     <main id="main-content">
+      <MarketplaceWebMcpRegistrar basketCount={basketCount} runtimeRef={webMcpRuntimeRef} />
       <a className="skip-link" href="#marketplace-content">{marketplaceMessage("accessibility.skip_marketplace")}</a>
       <header className="site-header">
         <Link className="brand" href="/" aria-label={marketplaceMessage("inventory.b579c24fb600")}><BrandLogo /></Link>

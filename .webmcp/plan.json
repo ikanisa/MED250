@@ -1,0 +1,129 @@
+{
+  "journey": "A visitor finds an approved medicine or health product, understands its current public details, builds a reversible request basket, and hands off to MED+250's existing location and WhatsApp verification flow before any pharmacy is contacted.",
+  "site": "MED+250 pharmacy marketplace",
+  "suggestions": [
+    {
+      "id": "ask-site",
+      "name": "ask_site",
+      "description": "Find MED+250 visitor information about catalogue use, pharmacy requests, privacy, terms, prescriptions, delivery and indicative prices. Use when a visitor asks how the marketplace works or needs policy guidance. Returns matching site-authored sections and source paths without changing the page.",
+      "why": "Visitors need trustworthy answers from MED+250's own guidance instead of scraped page fragments.",
+      "status": "review",
+      "params": [
+        {
+          "name": "question",
+          "type": "string",
+          "description": "The visitor's question, up to 300 characters."
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "description": "Maximum matching sections to return, from 1 to 8."
+        }
+      ]
+    },
+    {
+      "id": "search-products",
+      "name": "search_products",
+      "description": "Search MED+250's public catalogue by product name, active ingredient, symptom term, category, prescription status or dosage form. Use when a visitor wants to find suitable catalogue entries. Returns approved product summaries and displays the same filtered results in the marketplace.",
+      "why": "Catalogue discovery is the first step in the MED+250 request journey.",
+      "status": "review",
+      "params": [
+        {
+          "name": "query",
+          "type": "string",
+          "description": "Product, ingredient or supported symptom term, up to 160 characters."
+        },
+        {
+          "name": "category",
+          "type": "string",
+          "description": "Optional MED+250 catalogue category."
+        },
+        {
+          "name": "prescription_status",
+          "type": "string",
+          "description": "Optional prescription status filter."
+        },
+        {
+          "name": "form_group",
+          "type": "string",
+          "description": "Optional dosage-form group."
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "description": "Maximum results to return, from 1 to 24."
+        }
+      ]
+    },
+    {
+      "id": "product-details",
+      "name": "get_product_details",
+      "description": "Get current public details for one MED+250 catalogue product and open its visible product page. Use after search when a visitor wants strength, form, pack size, manufacturer, prescription status, indicative price or requestability. Returns the product summary and product-page path.",
+      "why": "Visitors must be able to inspect a product before adding it to a request.",
+      "status": "review",
+      "params": [
+        {
+          "name": "product_id",
+          "type": "string",
+          "description": "The MED+250 catalogue product identifier."
+        }
+      ]
+    },
+    {
+      "id": "add-to-basket",
+      "name": "add_to_order_basket",
+      "description": "Add an approved, orderable MED+250 product to the visitor's local request basket. Use when the visitor chooses a product and quantity. Returns the updated basket summary and opens the visible basket. This changes only reversible local basket state and does not contact a pharmacy.",
+      "why": "Visitors need an agent-safe way to build the same basket shown in the marketplace.",
+      "status": "review",
+      "params": [
+        {
+          "name": "product_id",
+          "type": "string",
+          "description": "The approved MED+250 product identifier."
+        },
+        {
+          "name": "quantity",
+          "type": "integer",
+          "description": "Quantity to add, from 1 to 99."
+        },
+        {
+          "name": "substitutes_allowed",
+          "type": "boolean",
+          "description": "Whether the visitor permits a pharmacy-proposed substitute."
+        }
+      ]
+    },
+    {
+      "id": "update-basket",
+      "name": "update_order_basket",
+      "description": "Set a product quantity in the visitor's MED+250 request basket, or remove it by setting quantity to zero. Use when the visitor changes a reversible basket choice. Returns the updated basket summary and keeps the visible basket in sync. No pharmacy is contacted.",
+      "why": "Agents should be able to correct basket choices without restarting the request.",
+      "status": "review",
+      "params": [
+        {
+          "name": "product_id",
+          "type": "string",
+          "description": "A product already present in the basket."
+        },
+        {
+          "name": "quantity",
+          "type": "integer",
+          "description": "New quantity from 0 to 99; zero removes the product."
+        },
+        {
+          "name": "substitutes_allowed",
+          "type": "boolean",
+          "description": "Whether substitutes remain permitted for this item."
+        }
+      ]
+    },
+    {
+      "id": "prepare-request",
+      "name": "prepare_order_request",
+      "description": "Prepare the current MED+250 basket for a pharmacy request and open the visible request-details step. Use when the visitor is ready to continue. Returns the basket and required next steps, then stops before location sharing, WhatsApp verification and submission, so no pharmacy is contacted.",
+      "why": "The agent can complete the reversible checkout preparation while the visitor retains control of identity, location and dispatch.",
+      "status": "review",
+      "params": []
+    }
+  ]
+}

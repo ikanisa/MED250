@@ -1,0 +1,6 @@
+
+{"event_id":"a2ecd59b-d798-4d0a-9d82-183250c0af25","run_id":"df14f919-bdaa-493b-a2d9-dfc5970360a7","order":1,"type":"submit","ts":"2026-08-27T06:15:34.707Z","payload":{"picks":[{"suggestion":"ask-site","note":""},{"suggestion":"search-products","note":""},{"suggestion":"product-details","note":""},{"suggestion":"add-to-basket","note":""},{"suggestion":"update-basket","note":""},{"suggestion":"prepare-request","note":""}]}}
+
+{"event_id":"b4572d88-361f-4815-bbf3-d5f95a39f8ec","run_id":"df14f919-bdaa-493b-a2d9-dfc5970360a7","order":2,"type":"approve","ts":"2026-08-27T06:36:08.590Z","payload":{}}
+
+{"event_id":"8d5707c8-e88d-49fb-98d2-8ab0faffbc3e","run_id":"df14f919-bdaa-493b-a2d9-dfc5970360a7","order":3,"type":"feedback","ts":"2026-08-27T06:37:12.816Z","payload":{"suggestion":null,"text":"Approved. Proceed with the narrow local-preview catalogue fallback exactly as described."}}

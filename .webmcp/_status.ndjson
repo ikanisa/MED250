@@ -1,0 +1,40 @@
+{"ts":"2026-08-27T06:14:11Z","phase":"propose"}
+{"ts":"2026-08-27T06:17:30Z","phase":"build"}
+{"ts":"2026-08-27T06:18:54Z","phase":"build"}
+{"ts":"2026-08-27T06:21:00Z","suggestion":"ask-site","step":"code","state":"start"}
+{"ts":"2026-08-27T06:22:00Z","suggestion":"ask-site","step":"code","state":"done"}
+{"ts":"2026-08-27T06:22:05Z","suggestion":"ask-site","step":"verify","state":"start"}
+{"ts":"2026-08-27T06:22:10Z","suggestion":"ask-site","step":"verify","state":"done","outcome":"verified"}
+{"ts":"2026-08-27T06:23:00Z","suggestion":"search-products","step":"code","state":"start"}
+{"ts":"2026-08-27T06:23:30Z","suggestion":"search-products","step":"code","state":"done"}
+{"ts":"2026-08-27T06:23:35Z","suggestion":"search-products","step":"verify","state":"start"}
+{"ts":"2026-08-27T06:23:40Z","suggestion":"search-products","step":"verify","state":"done","outcome":"verified"}
+{"ts":"2026-08-27T06:24:00Z","suggestion":"product-details","step":"code","state":"start"}
+{"ts":"2026-08-27T06:24:30Z","suggestion":"product-details","step":"code","state":"done"}
+{"ts":"2026-08-27T06:24:35Z","suggestion":"product-details","step":"verify","state":"start"}
+{"ts":"2026-08-27T06:24:40Z","suggestion":"product-details","step":"verify","state":"done","outcome":"verified"}
+{"ts":"2026-08-27T06:25:00Z","suggestion":"add-to-basket","step":"code","state":"start"}
+{"ts":"2026-08-27T06:25:30Z","suggestion":"add-to-basket","step":"code","state":"done"}
+{"ts":"2026-08-27T06:25:35Z","suggestion":"add-to-basket","step":"verify","state":"start"}
+{"ts":"2026-08-27T06:25:40Z","suggestion":"add-to-basket","step":"verify","state":"done","outcome":"verified"}
+{"ts":"2026-08-27T06:26:00Z","suggestion":"update-basket","step":"code","state":"start"}
+{"ts":"2026-08-27T06:26:30Z","suggestion":"update-basket","step":"code","state":"done"}
+{"ts":"2026-08-27T06:26:35Z","suggestion":"update-basket","step":"verify","state":"start"}
+{"ts":"2026-08-27T06:26:40Z","suggestion":"update-basket","step":"verify","state":"done","outcome":"verified"}
+{"ts":"2026-08-27T06:27:00Z","suggestion":"prepare-request","step":"code","state":"start"}
+{"ts":"2026-08-27T06:27:30Z","suggestion":"prepare-request","step":"code","state":"done"}
+{"ts":"2026-08-27T06:27:35Z","suggestion":"prepare-request","step":"verify","state":"start"}
+{"ts":"2026-08-27T06:27:40Z","suggestion":"prepare-request","step":"verify","state":"done","outcome":"verified"}
+{"ts":"2026-08-27T06:27:45Z","phase":"review"}
+{"ts":"2026-08-27T06:37:20Z","phase":"verify","approval_event":"b4572d88-361f-4815-bbf3-d5f95a39f8ec"}
+{"ts":"2026-08-27T06:37:25Z","suggestion":"search-products","step":"code","state":"start","reason":"approved_local_preview_fallback"}
+{"ts":"2026-08-27T06:42:10Z","suggestion":"search-products","step":"code","state":"done"}
+{"ts":"2026-08-27T06:42:15Z","suggestion":"search-products","step":"verify","state":"start"}
+{"ts":"2026-08-27T06:43:05Z","suggestion":"search-products","step":"verify","state":"done","outcome":"verified","evidence":"local preview returned 2 results and visibly rendered the same 2 filtered products"}
+{"ts":"2026-08-27T06:48:10Z","suggestion":"ask-site","step":"verify","state":"done","outcome":"verified","evidence":"returned site-authored prescription and location privacy sections"}
+{"ts":"2026-08-27T06:48:20Z","suggestion":"search-products","step":"verify","state":"done","outcome":"verified","evidence":"Worker-backed search returned 32 matches and displayed the filtered catalogue"}
+{"ts":"2026-08-27T06:48:30Z","suggestion":"product-details","step":"verify","state":"done","outcome":"verified","evidence":"returned Physiodose details and opened its visible product page"}
+{"ts":"2026-08-27T06:48:40Z","suggestion":"add-to-basket","step":"verify","state":"done","outcome":"verified","evidence":"added quantity 2 to local basket and opened the visible review dialog"}
+{"ts":"2026-08-27T06:48:50Z","suggestion":"update-basket","step":"verify","state":"done","outcome":"verified","evidence":"updated quantity and substitute choice, then removed the item and unregistered basket-only tools"}
+{"ts":"2026-08-27T06:49:00Z","suggestion":"prepare-request","step":"verify","state":"done","outcome":"verified","evidence":"opened contact and fulfilment details and stopped before location, OTP, prescription and submission"}
+{"ts":"2026-08-27T06:49:10Z","phase":"review"}

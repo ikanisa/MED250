@@ -7,6 +7,7 @@ import { DEFAULT_MARKETPLACE_LOCALE, marketplaceAlternates, marketplaceOpenGraph
 import { marketplaceMessage } from "../lib/marketplace-messages";
 import NavigationFeedback from "./navigation-feedback";
 import PwaManager from "./pwa-manager";
+import { SiteWebMcpRegistrar } from "../webmcp/site-registrar";
 import "./globals.css";
 
 const display = Manrope({ variable: "--font-display", subsets: ["latin"] });
@@ -50,5 +51,5 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <link rel="icon" href="/brand/favicon-32.png" sizes="32x32" type="image/png" />
     <link rel="icon" href="/brand/favicon-48.png" sizes="48x48" type="image/png" />
     <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png" sizes="180x180" type="image/png" />
-  </head><body className={`${display.variable} ${sans.variable}`}><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteSchema) }} /><NavigationFeedback /><PwaManager />{children}</body></html>;
+  </head><body className={`${display.variable} ${sans.variable}`}><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteSchema) }} /><NavigationFeedback /><PwaManager /><SiteWebMcpRegistrar />{children}</body></html>;
 }
