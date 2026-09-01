@@ -150,6 +150,32 @@ test("decrypts a durable OTP only while composing its audience-specific Twilio t
   assert.deepEqual(message.variables, { "1": "123456" });
 });
 
+test("uses the governed staff template for encrypted admin OTP delivery", async () => {
+  const challengeId = "00000000-0000-4000-8000-000000000019";
+  const recipientE164 = "250788700000";
+  const encrypted = await encryptOtpCode(
+    "654321",
+    { challengeId, e164: recipientE164, actorType: "admin" },
+    runtime.otpEncryptionSecret,
+  );
+  const message = await composeOutboxMessage(delivery({
+    kind: "otp",
+    requestId: null,
+    pharmacyId: null,
+    recipientE164,
+    r2Key: null,
+    customerE164: null,
+    payload: {
+      challenge_id: challengeId,
+      actor_type: "admin",
+      ...encrypted,
+    },
+  }), runtime, null);
+  assert.equal(message.kind, "content");
+  assert.equal(message.contentSid, runtime.pharmacyOtpContentSid);
+  assert.deepEqual(message.variables, { "1": "654321" });
+});
+
 test("composes a database-backed web order summary with medicine quantities, media and direct client WhatsApp", async () => {
   const message = await composeOutboxMessage(delivery({
     kind: "web_catalogue_order",

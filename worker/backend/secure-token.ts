@@ -43,7 +43,9 @@ async function aesKey(secret: string): Promise<CryptoKey> {
   return crypto.subtle.importKey("raw", material, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
 }
 
-function otpAdditionalData(input: { challengeId: string; e164: string; actorType: "client" | "pharmacy" }): Uint8Array<ArrayBuffer> {
+export type OtpActorType = "client" | "pharmacy" | "admin";
+
+function otpAdditionalData(input: { challengeId: string; e164: string; actorType: OtpActorType }): Uint8Array<ArrayBuffer> {
   if (!UUID.test(input.challengeId) || !/^[1-9][0-9]{7,14}$/.test(input.e164)) {
     throw new Error("OTP encryption context is invalid.");
   }
@@ -68,7 +70,7 @@ export async function hmacSha256Hex(secret: string, value: string): Promise<stri
 }
 
 export async function hashOtpCode(
-  input: { challengeId: string; e164: string; actorType: "client" | "pharmacy"; code: string },
+  input: { challengeId: string; e164: string; actorType: OtpActorType; code: string },
   secret: string,
 ): Promise<string> {
   if (!/^\d{6}$/.test(input.code)) throw new Error("OTP code is invalid.");
@@ -78,7 +80,7 @@ export async function hashOtpCode(
 
 export async function encryptOtpCode(
   code: string,
-  input: { challengeId: string; e164: string; actorType: "client" | "pharmacy" },
+  input: { challengeId: string; e164: string; actorType: OtpActorType },
   secret: string,
 ): Promise<{ ciphertext: string; nonce: string }> {
   if (!/^\d{6}$/.test(code)) throw new Error("OTP code is invalid.");
@@ -94,7 +96,7 @@ export async function encryptOtpCode(
 
 export async function decryptOtpCode(
   encrypted: { ciphertext: string; nonce: string },
-  input: { challengeId: string; e164: string; actorType: "client" | "pharmacy" },
+  input: { challengeId: string; e164: string; actorType: OtpActorType },
   secret: string,
 ): Promise<string> {
   const nonce = new Uint8Array(base64UrlDecode(encrypted.nonce));

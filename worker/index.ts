@@ -1,6 +1,7 @@
 /** Cloudflare Worker entry point for the vinext-starter template. */
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
+import { adminResponse } from "./backend/admin-api.ts";
 import { authResponse } from "./backend/auth-api.ts";
 import { catalogueResponse } from "./backend/catalogue-api.ts";
 import { marketplaceResponse, pharmacyPrescriptionResponse } from "./backend/marketplace-api.ts";
@@ -176,7 +177,12 @@ const worker = {
     let response: Response;
 
     try {
-      if (url.pathname === "/api/internal/health") {
+      if (url.pathname.startsWith("/api/auth/admin/") || url.pathname.startsWith("/api/admin/")) {
+        response = env
+          ? await adminResponse(request, env) ?? new Response("Not found", { status: 404, headers: { "Cache-Control": "no-store" } })
+          : new Response("Service temporarily unavailable", { status: 503, headers: { "Cache-Control": "no-store" } });
+        if (env && response.ok && url.pathname === "/api/auth/admin/otp/request") scheduleOutboxSweep(ctx, env);
+      } else if (url.pathname === "/api/internal/health") {
         response = env
           ? await operationalHealthResponse(request, env) ?? new Response("Not found", { status: 404, headers: { "Cache-Control": "no-store" } })
           : new Response("Service temporarily unavailable", { status: 503, headers: { "Cache-Control": "no-store" } });

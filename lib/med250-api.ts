@@ -2,6 +2,7 @@ const API_RESPONSE_LIMIT = 4 * 1024 * 1024;
 const API_TIMEOUT_MS = 10_000;
 const CLIENT_CSRF_COOKIE = "__Host-med250-client-csrf";
 const PHARMACY_CSRF_COOKIE = "__Host-med250-pharmacy-csrf";
+const ADMIN_CSRF_COOKIE = "__Host-med250-admin-csrf";
 
 function browserCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
@@ -48,9 +49,11 @@ export async function med250ApiJson(path: string, init: RequestInit = {}): Promi
   headers.set("Accept", "application/json");
   const method = (init.method ?? "GET").toUpperCase();
   if (!["GET", "HEAD", "OPTIONS"].includes(method) && !headers.has("X-MED250-CSRF")) {
-    const cookieName = path.startsWith("/api/auth/pharmacy/")
-      ? PHARMACY_CSRF_COOKIE
-      : CLIENT_CSRF_COOKIE;
+    const cookieName = path.startsWith("/api/auth/admin/") || path.startsWith("/api/admin/")
+      ? ADMIN_CSRF_COOKIE
+      : path.startsWith("/api/auth/pharmacy/")
+        ? PHARMACY_CSRF_COOKIE
+        : CLIENT_CSRF_COOKIE;
     const csrf = browserCookie(cookieName);
     if (csrf) headers.set("X-MED250-CSRF", csrf);
   }

@@ -36,8 +36,10 @@ verify_jwt = true
 [functions.dawanear-customer-verify-otp]
 verify_jwt = true
 
-# Cron authentication and Meta webhook signatures are verified inside these
-# handlers, so neither endpoint relies on a browser JWT.
+# Historical direct-Meta recovery functions. Cron authentication and Meta
+# signatures are verified inside the handlers, so neither endpoint relies on a
+# browser JWT. Independent MED250_META_* feature gates default false and must
+# remain false while Twilio/Cloudflare is the canonical production route.
 [functions.dispatch-whatsapp-notifications]
 verify_jwt = false
 

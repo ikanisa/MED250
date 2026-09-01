@@ -81,10 +81,17 @@ test("notification functions are configured with the intended public and private
   assert.match(config, /\[functions\.dispatch-whatsapp-notifications\][\s\S]*verify_jwt = false/);
   assert.match(config, /\[functions\.whatsapp-webhook\][\s\S]*verify_jwt = false/);
   assert.match(dispatch, /X-DawaNear-Cron-Token/);
-  assert.match(dispatch, /WHATSAPP_PHARMACY_REQUEST_TEMPLATE_NAME/);
-  assert.match(dispatch, /WHATSAPP_CUSTOMER_OFFER_TEMPLATE_NAME/);
+  assert.match(dispatch, /MED250_META_NOTIFICATION_SEND_ENABLED/);
+  assert.match(dispatch, /MED250_META_PHARMACY_REQUEST_TEMPLATE_NAME/);
+  assert.match(dispatch, /MED250_META_CUSTOMER_OFFER_TEMPLATE_NAME/);
+  assert.match(dispatch, /MED250_META_ALLOWED_COUNTRY_CODES/);
+  assert.doesNotMatch(dispatch, /WHATSAPP_ACCESS_TOKEN|WABA_ACCESS_TOKEN/);
   assert.match(webhook, /x-hub-signature-256/);
-  assert.match(webhook, /HMAC/);
+  assert.match(webhook, /validateMetaSignature/);
+  assert.match(webhook, /MED250_META_WEBHOOK_ENABLED/);
+  assert.match(webhook, /MED250_META_WABA_ID/);
+  assert.match(webhook, /MED250_META_PHONE_NUMBER_ID/);
+  assert.match(webhook, /dawanear_claim_meta_webhook_event/);
 });
 
 test("the migration blocks unverified orders and enqueues price-free complete responses", async () => {

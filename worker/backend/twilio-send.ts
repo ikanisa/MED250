@@ -73,7 +73,7 @@ export async function composeOutboxMessage(
   if (delivery.kind === "otp") {
     const challengeId = payloadUuid(delivery.payload, "challenge_id");
     const actorType = payloadString(delivery.payload, "actor_type");
-    if (actorType !== "client" && actorType !== "pharmacy") {
+    if (actorType !== "client" && actorType !== "pharmacy" && actorType !== "admin") {
       throw new Error("OTP actor type is invalid.");
     }
     const code = await decryptOtpCode(
@@ -87,7 +87,7 @@ export async function composeOutboxMessage(
     return {
       kind: "content",
       toE164: delivery.recipientE164,
-      contentSid: actorType === "pharmacy" ? runtime.pharmacyOtpContentSid : runtime.customerOtpContentSid,
+      contentSid: actorType === "client" ? runtime.customerOtpContentSid : runtime.pharmacyOtpContentSid,
       variables: { "1": code },
     };
   }

@@ -19,10 +19,16 @@ const SCRIPT_URL = "https://challenges.cloudflare.com/turnstile/v0/api.js?render
 
 export default function Turnstile({
   siteKey,
+  action = "customer_order",
+  expiredMessage = "The security check expired. Complete it again before placing your order.",
+  errorMessage = "The security check could not load. Check your connection and try again.",
   onToken,
   onError,
 }: {
   siteKey: string;
+  action?: string;
+  expiredMessage?: string;
+  errorMessage?: string;
   onToken(token: string): void;
   onError(message: string): void;
 }) {
@@ -44,7 +50,7 @@ export default function Turnstile({
       if (cancelled || !containerRef.current || !window.turnstile || widgetRef.current) return;
       widgetRef.current = window.turnstile.render(containerRef.current, {
         sitekey: siteKey,
-        action: "customer_order",
+        action,
         theme: "auto",
         size: "flexible",
         retry: "auto",
@@ -55,12 +61,12 @@ export default function Turnstile({
         },
         "expired-callback": () => {
           onTokenRef.current("");
-          onErrorRef.current("The security check expired. Complete it again before placing your order.");
+          onErrorRef.current(expiredMessage);
         },
         "error-callback": () => {
           setLoading(false);
           onTokenRef.current("");
-          onErrorRef.current("The security check could not load. Check your connection and try again.");
+          onErrorRef.current(errorMessage);
         },
       });
       setLoading(false);
@@ -81,7 +87,7 @@ export default function Turnstile({
       script.addEventListener("error", () => {
         if (!cancelled) {
           setLoading(false);
-          onErrorRef.current("The security check could not load. Check your connection and try again.");
+          onErrorRef.current(errorMessage);
         }
       }, { once: true });
       document.head.appendChild(script);
@@ -93,7 +99,7 @@ export default function Turnstile({
       if (widgetRef.current && window.turnstile) window.turnstile.remove(widgetRef.current);
       widgetRef.current = null;
     };
-  }, [siteKey]);
+  }, [action, errorMessage, expiredMessage, siteKey]);
 
   return <div className="turnstile-check" aria-label={marketplaceMessage("inventory.147bf977ab0a")}>
     <div ref={containerRef} />

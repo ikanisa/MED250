@@ -1127,7 +1127,7 @@ test("protects new anonymous customer sessions with Turnstile in live mode", asy
   assert.match(preflight, /NEXT_PUBLIC_MED250_OBSERVABILITY=cloud/);
 });
 
-test("uses Twilio WhatsApp OTP only for pharmacy portal access", async () => {
+test("uses Twilio WhatsApp OTP only for governed customer, pharmacy, and admin access", async () => {
   const [marketplace, authApi, authRepository, twilioSend, setup, d1Schema, contactManifest] = await Promise.all([
     readFile(new URL("../app/marketplace.tsx", import.meta.url), "utf8"),
     readFile(new URL("../worker/backend/auth-api.ts", import.meta.url), "utf8"),
@@ -1162,7 +1162,8 @@ test("uses Twilio WhatsApp OTP only for pharmacy portal access", async () => {
   assert.match(authRepository, /med250_otp_redemptions/);
   assert.match(authRepository, /atomicBatch\(this\.database, statements\)/);
   assert.match(twilioSend, /runtime\.pharmacyOtpContentSid/);
-  assert.match(twilioSend, /actorType === "pharmacy"/);
+  assert.match(twilioSend, /actorType !== "client" && actorType !== "pharmacy" && actorType !== "admin"/);
+  assert.match(twilioSend, /actorType === "client" \? runtime\.customerOtpContentSid : runtime\.pharmacyOtpContentSid/);
   assert.match(setup, /TWILIO_PHARMACY_OTP_CONTENT_SID/);
   assert.match(setup, /med250_whatsapp_otp_v1/);
   const manifest = JSON.parse(contactManifest);

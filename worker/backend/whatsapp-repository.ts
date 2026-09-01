@@ -702,7 +702,7 @@ export class WhatsAppRepository {
 
   async recordProviderAcceptance(outboxId: string, messageSid: string): Promise<boolean> {
     const at = nowIso();
-    const row = await firstRow<D1Row>(this.database, "SELECT request_id, otp_challenge_id FROM med250_dispatch_outbox WHERE id = ?", [outboxId]);
+    const row = await firstRow<D1Row>(this.database, "SELECT request_id, otp_challenge_id, admin_otp_challenge_id FROM med250_dispatch_outbox WHERE id = ?", [outboxId]);
     if (!row) return false;
     const result = await runStatement(this.database, `
       UPDATE med250_dispatch_outbox SET status = 'sent', provider_message_sid = ?, sent_at = coalesce(sent_at, ?), updated_at = ?
@@ -716,6 +716,8 @@ export class WhatsAppRepository {
     `).bind(row.request_id ?? null, outboxId, at, outboxId)];
     if (row.otp_challenge_id) statements.push(this.database.prepare("UPDATE med250_otp_challenges SET delivery_status = 'sent', provider_message_sid = ? WHERE id = ?")
       .bind(messageSid, row.otp_challenge_id));
+    if (row.admin_otp_challenge_id) statements.push(this.database.prepare("UPDATE med250_admin_otp_challenges SET delivery_status = 'sent', provider_message_sid = ? WHERE id = ?")
+      .bind(messageSid, row.admin_otp_challenge_id));
     await atomicBatch(this.database, statements);
     return true;
   }
@@ -724,7 +726,7 @@ export class WhatsAppRepository {
     outboxId: string; queueDeliveryId: string; errorCode: string; retryable: boolean; retryDelaySeconds: number;
   }): Promise<boolean> {
     const row = await firstRow<D1Row>(this.database, `
-      SELECT request_id, kind, otp_challenge_id, provider_attempts, max_provider_attempts
+      SELECT request_id, kind, otp_challenge_id, admin_otp_challenge_id, provider_attempts, max_provider_attempts
       FROM med250_dispatch_outbox WHERE id = ? AND queue_delivery_id = ?
     `, [input.outboxId, input.queueDeliveryId]);
     if (!row) throw new Error("outbox delivery lease not found");
@@ -744,6 +746,7 @@ export class WhatsAppRepository {
           nullableNumber(row, "provider_attempts") ?? 0, input.retryable ? 1 : 0, at),
     ]);
     if (!retry && row.otp_challenge_id) await runStatement(this.database, "UPDATE med250_otp_challenges SET delivery_status = 'failed', failed_at = coalesce(failed_at, ?) WHERE id = ?", [at, row.otp_challenge_id]);
+    if (!retry && row.admin_otp_challenge_id) await runStatement(this.database, "UPDATE med250_admin_otp_challenges SET delivery_status = 'failed', failed_at = coalesce(failed_at, ?) WHERE id = ?", [at, row.admin_otp_challenge_id]);
     if (!retry && stringValue(row, "kind") === "client_media_request" && row.request_id) {
       await this.finalizeClientMediaRequest(stringValue(row, "request_id"));
     }
@@ -767,7 +770,7 @@ export class WhatsAppRepository {
     eventKey: string; messageSid: string; providerStatus: string; errorCode: string | null; occurredAt: Date;
   }): Promise<boolean> {
     const outbox = await firstRow<D1Row>(this.database, `
-      SELECT id, kind, request_id, otp_challenge_id, status FROM med250_dispatch_outbox WHERE provider_message_sid = ?
+      SELECT id, kind, request_id, otp_challenge_id, admin_otp_challenge_id, status FROM med250_dispatch_outbox WHERE provider_message_sid = ?
     `, [input.messageSid]);
     if (!outbox) return false;
     const mapped = ["accepted", "queued", "sending", "sent"].includes(input.providerStatus) ? "sent"
@@ -805,6 +808,10 @@ export class WhatsAppRepository {
       UPDATE med250_otp_challenges SET delivery_status = ?, provider_message_sid = coalesce(provider_message_sid, ?),
         failed_at = CASE WHEN ? = 'failed' THEN coalesce(failed_at, ?) ELSE failed_at END WHERE id = ?
     `).bind(resulting, input.messageSid, resulting, occurred, outbox.otp_challenge_id));
+    if (outbox.admin_otp_challenge_id) statements.push(this.database.prepare(`
+      UPDATE med250_admin_otp_challenges SET delivery_status = ?, provider_message_sid = coalesce(provider_message_sid, ?),
+        failed_at = CASE WHEN ? = 'failed' THEN coalesce(failed_at, ?) ELSE failed_at END WHERE id = ?
+    `).bind(resulting, input.messageSid, resulting, occurred, outbox.admin_otp_challenge_id));
     await atomicBatch(this.database, statements);
     if (stringValue(outbox, "kind") === "client_media_request" && outbox.request_id) {
       // "Dispatched" means WhatsApp delivered the request to at least one
