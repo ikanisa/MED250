@@ -91,3 +91,13 @@ test("publishes live robots directives and the complete source-backed sitemap", 
   assert.match(sitemap, /https:\/\/med-250\.com\/product\/rwanda-fda-hm-/);
   assert.match(sitemap, /https:\/\/med-250\.com\/product\/AMZ-/);
 });
+
+test("renders owner-approved WhatsApp-only support on the contact page", async () => {
+  const response = await render("/contact");
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /href="https:\/\/wa\.me\/250795588248"/);
+  assert.match(html, /WhatsApp support:/);
+  assert.match(html, /\+250 795 588 248/);
+  assert.doesNotMatch(html, /href="mailto:/i);
+});

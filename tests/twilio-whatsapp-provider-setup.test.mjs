@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { SERVICE_CONTENT,serviceDefinition } from "../worker/backend/whatsapp-content.ts";
 
 import {
   buildProviderPlan,
@@ -34,9 +35,10 @@ function fixture({
   driftIndex = -1,
   senderStatus = "ONLINE",
   senderPresent = true,
+  providerAnnotations = false,
 } = {}) {
   const plan = buildProviderPlan({ target: "production", env: credentials });
-  const sids = plan.templates.map((_, index) => `HX${String(index + 1).repeat(32)}`);
+  const sids = plan.templates.map((_, index) => `HX${(index + 1).toString(16).padStart(32,'0')}`);
   const posts = [];
   const requests = [];
   const fetchImpl = async (rawUrl, init = {}) => {
@@ -78,12 +80,23 @@ function fixture({
     const contentIndex = sids.findIndex((sid) => url.pathname === `/v1/Content/${sid}`);
     if (contentIndex >= 0 && method === "GET") {
       const content = structuredClone(plan.templates[contentIndex].content);
+      if(providerAnnotations) {
+        const card=content.types['twilio/card'];
+        if(card) {
+          Object.assign(card,{body:null,subtitle:null,height:'TALL',orientation:'VERTICAL',thumbnailImageAlignment:'LEFT'});
+          card.actions.forEach(action=>Object.assign(action,{index:0,chip_list:null}));
+        }
+        const auth=content.types['whatsapp/authentication'];
+        if(auth) auth.body='{{1}} is your verification code.';
+        content.types['twilio/call-to-action']?.actions.forEach(action=>action.id=null);
+        content.types['twilio/quick-reply']?.actions.forEach(action=>action.type='QUICK_REPLY');
+      }
       if (contentIndex === driftIndex) content.variables["1"] = "DRIFTED";
       return json({ account_sid: ACCOUNT_SID, sid: sids[contentIndex], ...content });
     }
     const approvalIndex = sids.findIndex((sid) => url.pathname === `/v1/Content/${sid}/ApprovalRequests`);
     if (approvalIndex >= 0 && method === "GET") {
-      const status = approvalStatuses[approvalIndex];
+      const status = approvalStatuses[approvalIndex] ?? "unsubmitted";
       return json(status === "unsubmitted" ? {
         account_sid: ACCOUNT_SID,
         sid: sids[approvalIndex],
@@ -109,7 +122,7 @@ test("builds one deterministic Cloudflare production plan with separate provider
   assert.equal(first.plan_sha256, second.plan_sha256);
   assert.match(first.plan_sha256, /^[0-9a-f]{64}$/);
   assert.equal(first.worker_origin, "https://med-250.com");
-  assert.equal(first.templates.length, 6);
+  assert.equal(first.templates.length, 8 + Object.keys(SERVICE_CONTENT).length);
   assert.ok(first.templates.every((template) => (
     template.content.friendly_name.startsWith("med250_")
     && !template.content.friendly_name.startsWith("med250_staging_")
@@ -138,19 +151,16 @@ test("builds one deterministic Cloudflare production plan with separate provider
     first.templates[3].content.types["twilio/quick-reply"].actions.map(({ title }) => title),
     ["Use saved", "Share new"],
   );
-  assert.equal(first.templates[4].content.friendly_name, "med250_client_dispatch_share_v1");
-  assert.equal(
-    first.templates[4].content.types["twilio/call-to-action"].body,
-    "Your request was dispatched to {{1}} nearby pharmacies. They will reply to you directly on WhatsApp.",
-  );
-  assert.deepEqual(first.templates[4].content.types["twilio/call-to-action"].actions.map(({ type, title }) => ({ type, title })), [
-    { type: "URL", title: "Share Med+250" },
+  assert.deepEqual(first.templates[4].content,serviceDefinition('delivered'));
+  for(const index of [0,5]) assert.deepEqual(first.templates[index].content.types['twilio/card'].actions.map(a=>a.title),['Available','Not Available']);
+  const supportTemplates = first.templates.filter(({ content }) => content.friendly_name === "med250_service_help_v2");
+  assert.equal(supportTemplates.length, 1);
+  assert.deepEqual(supportTemplates[0].content.types["twilio/call-to-action"].actions, [
+    { type: "URL", title: "Chat with support", url: "https://wa.me/250795588248" },
   ]);
-  const shareUrl = new URL(first.templates[4].content.types["twilio/call-to-action"].actions[0].url);
-  assert.equal(shareUrl.origin, "https://wa.me");
-  assert.equal(
-    shareUrl.searchParams.get("text"),
-    "Order medicines and prescriptions from nearby pharmacies with MED+250 on WhatsApp: https://wa.me/16622220600",
+  assert.doesNotMatch(
+    JSON.stringify(first.templates.filter(({ content }) => content.friendly_name !== "med250_service_help_v2")),
+    /https:\/\/wa\.me/,
   );
   assert.doesNotMatch(JSON.stringify(first.templates[2].content), /button|action|url|google maps/i);
   assert.equal(parseArguments([]).mode, "plan");
@@ -181,6 +191,13 @@ test("builds one deterministic Cloudflare production plan with separate provider
   assert.doesNotMatch(output, new RegExp(API_KEY));
   assert.match(output, /MED250_TWILIO_APPLY_PRODUCTION/);
   assert.match(output, /MED250_TWILIO_SUBMIT_PRODUCTION/);
+});
+
+test('provider annotations do not fail exact-content verification',async()=>{
+  const f=fixture({providerAnnotations:true,approvalStatuses:Array(30).fill('approved')});
+  const result=await executeProviderSetup({argv:['--mode=verify','--target=production'],env:credentials,fetchImpl:f.fetchImpl,stdout:()=>{}});
+  assert.equal(result.exitCode,0);
+  assert.equal(f.posts.length,0);
 });
 
 test("requires both the exact production confirmation and reviewed plan checksum before mutation", async () => {
@@ -221,7 +238,7 @@ test("requires both the exact production confirmation and reviewed plan checksum
 
 test("read-only verification proves sender, WABA, exact templates, approvals, and a non-secret Cloudflare manifest", async () => {
   const { fetchImpl } = fixture({
-    approvalStatuses: ["approved", "approved", "unsubmitted", "unsubmitted", "unsubmitted", "approved"],
+    approvalStatuses: ["approved", "approved", "unsubmitted", "unsubmitted", "unsubmitted", "approved", "approved", "approved", "approved"],
   });
   let output = "";
   const result = await executeProviderSetup({
@@ -258,12 +275,15 @@ test("submission is idempotent and posts only exact unsubmitted templates", asyn
     stdout: () => {},
   });
   assert.equal(result.exitCode, 0);
-  assert.equal(posts.length, 2);
+  assert.equal(posts.length, 5);
   assert.deepEqual(posts.map((post) => post.body.name), [
-    "med250_pharmacy_request_v3",
-    "med250_pharmacy_client_media_request_v2",
+    "med250_pharmacy_request_v4",
+    "med250_pharmacy_client_media_request_v5",
+    "med250_partner_first_image_v1",
+    "med250_partner_first_web_v1",
+    "med250_partner_location_confirmation_v1",
   ]);
-  assert.equal(result.output.templates.filter((template) => template.submitted).length, 2);
+  assert.equal(result.output.templates.filter((template) => template.submitted).length, 5);
 });
 
 test("template drift aborts before any approval submission", async () => {

@@ -110,9 +110,9 @@ test("uses a manual WhatsApp location prompt, saved/new choices and a dispatch c
     customerE164: null,
     payload: { recipient_count: 10 },
   }), runtime, null);
-  assert.equal(confirmation.kind, "content");
-  assert.equal(confirmation.contentSid, runtime.clientDispatchConfirmationContentSid);
-  assert.deepEqual(confirmation.variables, { "1": "10" });
+  assert.equal(confirmation.kind, "service");
+  assert.equal(confirmation.serviceKey, "delivered");
+  assert.deepEqual(confirmation.variables, { "1": "10", "2": delivery().requestId });
 });
 
 test("accepts the location quick-reply payload and rejects malformed request IDs", () => {
@@ -215,6 +215,17 @@ test("sends via least-privilege Twilio API credentials with a status callback", 
   assert.equal(capturedForm.get("To"), "whatsapp:+250780000000");
   assert.equal(capturedForm.get("From"), "whatsapp:+16622220600");
   assert.equal(capturedForm.get("StatusCallback"), runtime.statusCallbackUrl);
+});
+
+test('shares the native service contact without an unsupported vCard caption',async()=>{
+  const message=await composeOutboxMessage(delivery({kind:'client_guidance',payload:{guidance:'share_contact'}}),runtime,null);
+  assert.equal(message.kind,'media');assert.equal(message.body,'');
+  await sendTwilioMessage(message,runtime,async(url,init)=>{
+    const form=new URLSearchParams(init.body);
+    assert.equal(form.has('Body'),false);
+    assert.equal(form.get('MediaUrl'),'https://med-250.com/whatsapp/med250.vcf');
+    return Response.json({sid:'MM00000000000000000000000000000009',status:'queued'});
+  });
 });
 
 test("falls back to the proven account credential only after a definitive key authorization rejection", async () => {

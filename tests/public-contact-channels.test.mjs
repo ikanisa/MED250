@@ -9,6 +9,7 @@ import {
   parsePublicWhatsApp,
   publicContactChannelErrors,
   publicContactChannels,
+  SUPPORT_WHATSAPP_URL,
 } from "../lib/public-contact-channels.mjs";
 
 const validEnv = {
@@ -33,7 +34,7 @@ test("normalizes safe public MED+250 contact channels", () => {
     href: "https://calendar.example/med250?slot=intake",
     display: "calendar.example",
   });
-  assert.deepEqual(publicContactChannels(validEnv).map((channel) => channel.label), ["email", "whatsapp", "booking"]);
+  assert.deepEqual(publicContactChannels(validEnv), [{ label: "whatsapp", href: SUPPORT_WHATSAPP_URL, display: "+250 795 588 248" }]);
 });
 
 test("rejects unsafe or incomplete public contact configuration", () => {
@@ -41,23 +42,21 @@ test("rejects unsafe or incomplete public contact configuration", () => {
   assert.equal(parsePublicWhatsApp("token=unsafe"), null);
   assert.equal(parsePublicBookingUrl("http://calendar.example/med250"), null);
   assert.equal(parsePublicBookingUrl("https://localhost/med250"), null);
-  assert.deepEqual(publicContactChannelErrors({}, { requireAll: true }), [
-    "NEXT_PUBLIC_MED250_CONTACT_EMAIL is required for live public contact readiness.",
-    "NEXT_PUBLIC_MED250_SUPPORT_WHATSAPP is required for live public contact readiness.",
-    "NEXT_PUBLIC_MED250_MEETING_URL is required for live public contact readiness.",
-  ]);
+  assert.deepEqual(publicContactChannelErrors({}, { requireAll: true }), []);
   assert.deepEqual(publicContactChannelErrors({
     NEXT_PUBLIC_MED250_CONTACT_EMAIL: "unsafe",
     NEXT_PUBLIC_MED250_SUPPORT_WHATSAPP: "not-a-number",
     NEXT_PUBLIC_MED250_MEETING_URL: "http://example.com",
   }), [
-    "NEXT_PUBLIC_MED250_CONTACT_EMAIL is not a safe public contact value.",
     "NEXT_PUBLIC_MED250_SUPPORT_WHATSAPP is not a safe public contact value.",
-    "NEXT_PUBLIC_MED250_MEETING_URL is not a safe public contact value.",
+  ]);
+  assert.deepEqual(publicContactChannelErrors({ NEXT_PUBLIC_MED250_SUPPORT_WHATSAPP: "+250 795 588 248" }), []);
+  assert.deepEqual(publicContactChannelErrors(validEnv), [
+    "NEXT_PUBLIC_MED250_SUPPORT_WHATSAPP must match the owner-approved WhatsApp support number.",
   ]);
 });
 
-test("binds optional public contact channels to the footer and example env", async () => {
+test("binds WhatsApp-only public support to the footer and example env", async () => {
   const [marketplace, infoShell, envExample, preflight, messages] = await Promise.all([
     readFile(new URL("../app/marketplace.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/info-shell.tsx", import.meta.url), "utf8"),
@@ -70,9 +69,9 @@ test("binds optional public contact channels to the footer and example env", asy
   assert.match(marketplace, /public-contact-links/);
   assert.match(infoShell, /publicContactChannels\(\)/);
   assert.match(infoShell, /public-contact-links/);
-  assert.match(envExample, /NEXT_PUBLIC_MED250_CONTACT_EMAIL=/);
-  assert.match(envExample, /NEXT_PUBLIC_MED250_SUPPORT_WHATSAPP=/);
-  assert.match(envExample, /NEXT_PUBLIC_MED250_MEETING_URL=/);
+  assert.doesNotMatch(envExample, /NEXT_PUBLIC_MED250_CONTACT_EMAIL=/);
+  assert.match(envExample, /NEXT_PUBLIC_MED250_SUPPORT_WHATSAPP=\+250795588248/);
+  assert.doesNotMatch(envExample, /NEXT_PUBLIC_MED250_MEETING_URL=/);
   assert.match(preflight, /publicContactChannelErrors\(env, \{ requireAll: false \}\)/);
   assert.match(messages, /public_contact\.email/);
   assert.match(messages, /public_contact\.whatsapp/);

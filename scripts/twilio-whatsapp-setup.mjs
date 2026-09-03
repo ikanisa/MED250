@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { writeFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
+import { BUSINESS_CONTENT, SERVICE_CONTENT, serviceDefinition } from "../worker/backend/whatsapp-content.ts";
 
 const EXPECTED_SENDER = "whatsapp:+16622220600";
 const EXPECTED_WABA_ID = "1188521970082273";
@@ -25,8 +26,6 @@ const TARGETS = Object.freeze({
 
 const SAMPLE_ORDER_ID = "00000000-0000-4000-8000-000000000001";
 const SAMPLE_PHARMACY_ID = "00000000-0000-4000-8000-000000000002";
-const CLIENT_INVITE_MESSAGE = "Order medicines and prescriptions from nearby pharmacies with MED+250 on WhatsApp: https://wa.me/16622220600";
-const CLIENT_INVITE_SHARE_URL = `https://wa.me/?text=${encodeURIComponent(CLIENT_INVITE_MESSAGE)}`;
 
 function stableValue(value) {
   if (Array.isArray(value)) return value.map(stableValue);
@@ -158,138 +157,31 @@ export function buildProviderPlan({ target = "production", env = process.env } =
     origin,
     "{{7}}",
   );
+  if(clientMediaUrl!==BUSINESS_CONTENT.image.content.types["twilio/card"].media[0]
+    || orderMediaUrl!==BUSINESS_CONTENT.web.content.types["twilio/card"].media[0]) {
+    throw new Error("Version the shared WhatsApp media contract before changing its URL.");
+  }
   const templates = [
-    {
-      envNames: ["TWILIO_PHARMACY_REQUEST_CONTENT_SID"],
-      approvalCategory: "UTILITY",
-      approvalRequired: true,
-      content: {
-        friendly_name: "med250_pharmacy_request_v3",
-        language: "en",
-        variables: {
-          "1": "MED250-TEST-001",
-          "2": "2x Amoxicillin 500 mg; 1x Paracetamol 500 mg",
-          "3": "3",
-          "4": "+250788000000",
-          "5": "Approx. 1.2 km away",
-          "6": "pickup or delivery",
-          "7": "sample",
-          "8": `med250:can:${SAMPLE_ORDER_ID}:${SAMPLE_PHARMACY_ID}`,
-          "9": `med250:cannot:${SAMPLE_ORDER_ID}:${SAMPLE_PHARMACY_ID}`,
-        },
-        types: {
-          "twilio/card": {
-            title: "New MED+250 request {{1}}. Medicines: {{2}}. Total units: {{3}}. Customer WhatsApp: {{4}}. Routing: {{5}}. Fulfilment: {{6}}. Confirm below; this request is also available in the pharmacy web portal.",
-            media: [orderMediaUrl],
-            actions: [
-              { type: "QUICK_REPLY", title: "Can fulfil", id: "{{8}}" },
-              { type: "QUICK_REPLY", title: "Cannot fulfil", id: "{{9}}" },
-            ],
-          },
-        },
-      },
-    },
-    {
-      envNames: ["TWILIO_PHARMACY_OTP_CONTENT_SID", "TWILIO_CUSTOMER_OTP_CONTENT_SID", "TWILIO_OTP_CONTENT_SID"],
-      approvalCategory: "AUTHENTICATION",
-      approvalRequired: true,
-      content: {
-        friendly_name: "med250_whatsapp_otp_v1",
-        language: "en",
-        variables: { "1": "123456" },
-        types: {
-          "whatsapp/authentication": {
-            add_security_recommendation: true,
-            code_expiration_minutes: 5,
-            actions: [{ type: "COPY_CODE", copy_code_text: "Copy Code" }],
-          },
-        },
-      },
-    },
-    {
-      envNames: ["TWILIO_CLIENT_LOCATION_CAPTURE_CONTENT_SID"],
-      approvalCategory: "UTILITY",
-      approvalRequired: false,
-      content: {
-        friendly_name: "med250_client_manual_location_v3",
-        language: "en",
-        variables: {},
-        types: {
-          "twilio/text": {
-            body: "We received your requests, please share your current location in WhatsApp:\nTap + or 📎 → Location → Send your current location",
-          },
-        },
-      },
-    },
-    {
-      envNames: ["TWILIO_CLIENT_LOCATION_CHOICE_CONTENT_SID"],
-      approvalCategory: "UTILITY",
-      approvalRequired: false,
-      content: {
-        friendly_name: "med250_client_location_choice_manual_v2",
-        language: "en",
-        variables: {
-          "1": `med250:loc:saved:${SAMPLE_ORDER_ID}:${SAMPLE_PHARMACY_ID}`,
-          "2": `med250:loc:new:${SAMPLE_ORDER_ID}`,
-        },
-        types: {
-          "twilio/quick-reply": {
-            body: "We received your requests, please use your saved location or share a new one",
-            actions: [
-              { type: "QUICK_REPLY", title: "Use saved", id: "{{1}}" },
-              { type: "QUICK_REPLY", title: "Share new", id: "{{2}}" },
-            ],
-          },
-        },
-      },
-    },
-    {
-      envNames: ["TWILIO_CLIENT_DISPATCH_CONFIRMATION_CONTENT_SID"],
-      approvalCategory: "UTILITY",
-      approvalRequired: false,
-      content: {
-        friendly_name: "med250_client_dispatch_share_v1",
-        language: "en",
-        variables: { "1": "10" },
-        types: {
-          "twilio/call-to-action": {
-            body: "Your request was dispatched to {{1}} nearby pharmacies. They will reply to you directly on WhatsApp.",
-            actions: [
-              { type: "URL", title: "Share Med+250", url: CLIENT_INVITE_SHARE_URL },
-            ],
-          },
-        },
-      },
-    },
-    {
-      envNames: ["TWILIO_PHARMACY_CLIENT_MEDIA_REQUEST_CONTENT_SID"],
-      approvalCategory: "UTILITY",
-      approvalRequired: true,
-      content: {
-        friendly_name: "med250_pharmacy_client_media_request_v2",
-        language: "en",
-        variables: {
-          "1": "WA-TEST-001",
-          "2": "1 of 2",
-          "3": "+250788000000",
-          "4": "Approx. 1.2 km away",
-          "5": "sample",
-          "6": `med250:media:can:${SAMPLE_ORDER_ID}:${SAMPLE_PHARMACY_ID}`,
-          "7": `med250:media:cannot:${SAMPLE_ORDER_ID}:${SAMPLE_PHARMACY_ID}`,
-        },
-        types: {
-          "twilio/card": {
-            title: "New MED+250 request {{1}}. Image {{2}}.\nCustomer WhatsApp: {{3}}. Routing: {{4}}.\nReply directly to the customer or confirm below.",
-            media: [clientMediaUrl],
-            actions: [
-              { type: "QUICK_REPLY", title: "Can fulfil", id: "{{6}}" },
-              { type: "QUICK_REPLY", title: "Cannot fulfil", id: "{{7}}" },
-            ],
-          },
-        },
-      },
-    },
+    {envNames:["TWILIO_PHARMACY_REQUEST_CONTENT_SID"],approvalCategory:BUSINESS_CONTENT.web.category,approvalRequired:true,content:BUSINESS_CONTENT.web.content},
+    {envNames:["TWILIO_PHARMACY_OTP_CONTENT_SID","TWILIO_CUSTOMER_OTP_CONTENT_SID","TWILIO_OTP_CONTENT_SID"],
+      approvalCategory:BUSINESS_CONTENT.otp.category,approvalRequired:true,content:BUSINESS_CONTENT.otp.content},
+    {envNames:["TWILIO_CLIENT_LOCATION_CAPTURE_CONTENT_SID"],approvalCategory:"UTILITY",approvalRequired:false,
+      content:{friendly_name:"med250_client_manual_location_v3",language:"en",variables:{},
+        types:{"twilio/text":{body:"We received your requests, please share your current location in WhatsApp:\nTap + or 📎 → Location → Send your current location"}}}},
+    {envNames:["TWILIO_CLIENT_LOCATION_CHOICE_CONTENT_SID"],approvalCategory:"UTILITY",approvalRequired:false,
+      content:{friendly_name:"med250_client_location_choice_manual_v2",language:"en",
+        variables:{"1":`med250:loc:saved:${SAMPLE_ORDER_ID}:${SAMPLE_PHARMACY_ID}`,"2":`med250:loc:new:${SAMPLE_ORDER_ID}`},
+        types:{"twilio/quick-reply":{body:"We received your requests, please use your saved location or share a new one",
+          actions:[{title:"Use saved",id:"{{1}}"},{title:"Share new",id:"{{2}}"}]}}}},
+    {envNames:["TWILIO_CLIENT_DISPATCH_CONFIRMATION_CONTENT_SID"],approvalCategory:"UTILITY",approvalRequired:false,content:serviceDefinition("delivered")},
+    {envNames:["TWILIO_PHARMACY_CLIENT_MEDIA_REQUEST_CONTENT_SID"],approvalCategory:BUSINESS_CONTENT.image.category,approvalRequired:true,content:BUSINESS_CONTENT.image.content},
   ];
+  for (const key of ["image_initial", "web_initial", "location_initial"]) templates.push({
+    envNames: [], approvalCategory: BUSINESS_CONTENT[key].category, approvalRequired: true, content: BUSINESS_CONTENT[key].content,
+  });
+  for (const key of Object.keys(SERVICE_CONTENT).filter(key=>key!=="delivered")) templates.push({
+    envNames: [], approvalCategory:"UTILITY",approvalRequired:false,content:serviceDefinition(key),
+  });
   const specification = {
     schema_version: 1,
     target,
@@ -431,16 +323,37 @@ async function fetchSender(client) {
 }
 
 function contentShape(value) {
-  return {
+  const shape = structuredClone({
     friendly_name: value.friendly_name,
     language: value.language,
     variables: value.variables ?? {},
     types: value.types ?? {},
-  };
+  });
+  // Mirror the Worker's strict readback comparison: ignore only documented
+  // optional/provider-generated fields, not text, media or action semantics.
+  const auth=shape.types["whatsapp/authentication"];
+  if(auth && typeof auth.body==='string') delete auth.body;
+  for(const action of shape.types['twilio/call-to-action']?.actions??[]) {
+    const id=action.id;
+    if(action.type==='URL' && (id===null || (typeof id==='string' && id.length<=200) || Number.isSafeInteger(id))) delete action.id;
+  }
+  const card=shape.types["twilio/card"];
+  if(card) {
+    for(const key of ['body','subtitle','orientation','thumbnailImageAlignment','height']) if(card[key]===null) delete card[key];
+    for(const [key,allowed] of Object.entries({orientation:['VERTICAL','HORIZONTAL'],thumbnailImageAlignment:['LEFT','RIGHT'],height:['SHORT','MEDIUM','TALL']})) {
+      if(allowed.includes(card[key])) delete card[key];
+    }
+    for(const action of card.actions??[]) {
+      if(action.chip_list===null || typeof action.chip_list==='boolean') delete action.chip_list;
+      if(action.index===null || /^\d$/.test(String(action.index))) delete action.index;
+    }
+  }
+  for(const action of shape.types['twilio/quick-reply']?.actions??[]) if(action.type==='QUICK_REPLY') delete action.type;
+  return shape;
 }
 
 function assertExactContent(actual, template) {
-  if (stableJson(contentShape(actual)) !== stableJson(template.content)) {
+  if (stableJson(contentShape(actual)) !== stableJson(contentShape(template.content))) {
     throw new Error(`Existing Twilio content ${template.content.friendly_name} differs from the checksum-bound MED250 specification.`);
   }
 }

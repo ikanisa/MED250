@@ -2,6 +2,9 @@ import { createOpaqueToken, sha256Hex } from "./secure-token.ts";
 import { d1Database, dispatchQueue, twilioSendRuntime } from "./runtime-env.ts";
 import { composeOutboxMessage, sendTwilioMessage, TwilioSendError } from "./twilio-send.ts";
 import { WhatsAppRepository } from "./whatsapp-repository.ts";
+import { ensureServiceContent, ensureBusinessContent, readApproval, verifyPharmacyContent, verifyBusinessDefinition } from "./twilio-content-runtime.ts";
+import { businessContentKey } from "./whatsapp-content.ts";
+import { partnerLocationEligibility, PARTNER_LOCATION_GUIDANCE } from './partner-location-outreach.ts';
 
 export type DispatchQueueBody = {
   version: 1;
@@ -58,6 +61,8 @@ async function deliveryPreparation(
   mediaToken: string | null;
 } | null> {
   return withRepository(env, async (repository) => {
+    const eligible = await partnerLocationEligibility(d1Database(env),outboxId) ?? await repository.checkOutboundEligibility(outboxId);
+    if (!eligible) return null;
     const begun = await repository.beginProviderSend(outboxId, queueDeliveryId);
     if (!begun) return null;
     const delivery = await repository.loadOutboxDelivery(outboxId);
@@ -96,11 +101,11 @@ async function recordSendFailure(
   retryDelaySeconds: number,
 ): Promise<boolean> {
   return withRepository(env, async (repository) => {
-    await repository.revokeMediaGrants(outboxId);
     if (error.outcomeUnknown) {
       await repository.recordProviderUnknown(outboxId, queueDeliveryId, error.code);
       return false;
     }
+    await repository.revokeMediaGrants(outboxId);
     return repository.recordProviderFailure({
       outboxId,
       queueDeliveryId,
@@ -140,8 +145,27 @@ export async function processDispatchMessage(message: Message<unknown>, env: Env
   let providerAccepted = false;
   try {
     const runtime = twilioSendRuntime(env);
+    let outbound = await composeOutboxMessage(prepared.delivery, runtime, prepared.mediaToken);
+    if(prepared.delivery.kind==='client_guidance' && prepared.delivery.payload.guidance===PARTNER_LOCATION_GUIDANCE) {
+      const contentSid=await ensureBusinessContent(d1Database(env),runtime,'location_initial');
+      if(await readApproval(d1Database(env),runtime,contentSid)!=='approved') throw new TwilioSendError('template_not_approved','Location outreach template is not approved.',{retryable:false});
+      await verifyBusinessDefinition(runtime,contentSid,'location_initial');
+      outbound={kind:'content',toE164:prepared.delivery.recipientE164,contentSid,variables:{}};
+    } else if(outbound.kind === "service") {
+      const contentSid=await ensureServiceContent(d1Database(env),runtime,outbound.serviceKey);
+      outbound={kind:"content",toE164:outbound.toE164,contentSid,variables:outbound.variables};
+    } else if(outbound.kind === "content" && ["otp","web_catalogue_order","client_media_request"].includes(prepared.delivery.kind)) {
+      const key=businessContentKey(prepared.delivery.kind,prepared.delivery.payload);
+      outbound={...outbound,contentSid:await ensureBusinessContent(d1Database(env),runtime,key)};
+      if(await readApproval(d1Database(env),runtime,outbound.contentSid)!=="approved") {
+        throw new TwilioSendError("template_not_approved","This business-initiated template is not approved.",{retryable:false});
+      }
+      if(prepared.delivery.kind!=='otp') await verifyPharmacyContent(runtime,outbound.contentSid,prepared.delivery.kind,outbound.variables,fetch,
+        prepared.delivery.payload.permission_basis==='owner_attested_initial');
+    }
+    if(!(await partnerLocationEligibility(d1Database(env),body.outboxId) ?? await withRepository(env,repository=>repository.checkOutboundEligibility(body.outboxId)))) {message.ack();return;}
     const receipt = await sendTwilioMessage(
-      await composeOutboxMessage(prepared.delivery, runtime, prepared.mediaToken),
+      outbound,
       runtime,
     );
     providerAccepted = true;

@@ -10,6 +10,9 @@ import {
   type TwilioInboundMessage,
 } from "./twilio-webhook.ts";
 import { WhatsAppRepository, type InboundReceipt } from "./whatsapp-repository.ts";
+import { WhatsAppConversation, ConversationError } from "./whatsapp-conversation.ts";
+import { syncWhatsAppContent } from "./twilio-content-runtime.ts";
+import { capturePartnerLocation, enqueuePartnerLocationOutreach } from './partner-location-outreach.ts';
 
 const EMPTY_TWIML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response></Response>";
 
@@ -47,6 +50,11 @@ async function handleAction(
     await withRepository(env, (repository) => repository.completeInbound(event.eventId, "unrecognized_button_payload"));
     return true;
   }
+  const conversation = new WhatsAppConversation(d1Database(env));
+  if (action.kind === "service") {
+    await conversation.service(event,inbound.fromE164,action.action);
+    return true;
+  }
   if (action.kind === "pharmacy_response") {
     if (event.actorType !== "pharmacy" || event.pharmacyId !== action.pharmacyId) {
       await withRepository(env, (repository) => repository.completeInbound(event.eventId, "unauthorized_pharmacy_response", "actor_mismatch"));
@@ -64,6 +72,13 @@ async function handleAction(
   }
   if (event.actorType !== "client") {
     await withRepository(env, (repository) => repository.completeInbound(event.eventId, "pharmacy_client_action_rejected", "actor_mismatch"));
+    return true;
+  }
+  if (action.kind === "draft") {
+    if (action.action === "ready") await conversation.ready(event.actorId,action.requestId,event.eventId);
+    else if (action.action === "cancel") await conversation.cancel(event.actorId,event.eventId,action.requestId);
+    else if (action.action === "status") await conversation.status(event.actorId,action.requestId,event.eventId);
+    else await conversation.send(event.actorId,action.requestId,event.eventId,action.action === "send_save");
     return true;
   }
   if (action.kind === "guidance") {
@@ -94,6 +109,8 @@ async function handleAction(
 async function handleNativeLocation(env: Env, event: InboundReceipt, inbound: TwilioInboundMessage): Promise<boolean> {
   if (inbound.latitude === null || inbound.longitude === null) return false;
   if (event.actorType !== "client") {
+    if(await capturePartnerLocation(d1Database(env),event,{e164:inbound.fromE164,latitude:inbound.latitude,
+      longitude:inbound.longitude,address:inbound.address,label:inbound.label})) return true;
     await withRepository(env, (repository) => repository.completeInbound(event.eventId, "pharmacy_location_ignored"));
     return true;
   }
@@ -217,14 +234,22 @@ export async function twilioInboundResponse(request: Request, env: Env): Promise
     });
     const event = await beginInbound(env, inbound);
     if (event.alreadyProcessed) return twiml();
-    if (await handleAction(env, event, inbound)) return twiml();
-    if (await handleNativeLocation(env, event, inbound)) return twiml();
-    if (await handleSharedGoogleMapsLocation(env, event, inbound)) return twiml();
-    if (await handleClientImage(env, event, inbound)) return twiml();
-    if (event.actorType === "client") {
-      await withRepository(env, (repository) => repository.queueClientGuidance(event, inbound.fromE164, "send_image"));
-    } else {
-      await withRepository(env, (repository) => repository.completeInbound(event.eventId, "pharmacy_message_no_action"));
+    const conversation = new WhatsAppConversation(d1Database(env));
+    try {
+      const command = inbound.body.trim().toUpperCase();
+      if (["STOP","UNSUBSCRIBE","CANCEL","HELP","PRIVACY","START","RESUME"].includes(command)) {
+        await conversation.service(event,inbound.fromE164,command === "UNSUBSCRIBE"?"stop":command === "RESUME"?"start":command.toLowerCase());
+        return twiml();
+      }
+      if (await handleAction(env, event, inbound)) return twiml();
+      if (await handleNativeLocation(env, event, inbound)) return twiml();
+      if (await handleSharedGoogleMapsLocation(env, event, inbound)) return twiml();
+      if (await handleClientImage(env, event, inbound)) return twiml();
+      await conversation.service(event,inbound.fromE164,"new");
+    } catch(error) {
+      if (!(error instanceof ConversationError)) throw error;
+      await conversation.queue(inbound.fromE164,error.guidance,`conversation-error:${event.eventId}`,event.requestId);
+      await conversation.complete(event.eventId,`conversation_${error.guidance}`);
     }
     return twiml();
   } catch (error) {
@@ -281,5 +306,7 @@ export async function twilioStatusResponse(request: Request, env: Env): Promise<
 
 export async function sweepWhatsAppOperationalState(env: Env): Promise<void> {
   const receipt = await withRepository(env, (repository) => repository.reconcileOperationalState());
+  await syncWhatsAppContent(env);
+  await enqueuePartnerLocationOutreach(d1Database(env));
   console.log(JSON.stringify({ event: "whatsapp_operational_state_reconciled", ...receipt }));
 }

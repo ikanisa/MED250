@@ -99,7 +99,8 @@ test("keeps the active Worker and deployment path independent of Meta access tok
     source("scripts/prepare-worker-d1-config.mjs"),
     source(".env.example"),
   ]);
-  const active = activeFiles.join("\n");
+  // Historical recovery instructions in dotenv comments are not runtime bindings.
+  const active = activeFiles.map(text=>text.split('\n').filter(line=>!line.trimStart().startsWith('#')).join('\n')).join("\n");
   assert.doesNotMatch(active, /WHATSAPP_ACCESS_TOKEN|META_APP_SECRET|metaWhatsAppRuntime|sendMetaMessage/);
   assert.match(active, /MED250_WHATSAPP_PROVIDER["']?:?\s*["']twilio/);
 });

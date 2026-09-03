@@ -3,6 +3,7 @@ import { sha256BytesHex } from "./secure-token.ts";
 type ImageContentType = "image/jpeg" | "image/png" | "image/webp";
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
 const MAX_MEDIA_REDIRECTS = 3;
+export const WHATSAPP_IMAGE_MAX_BYTES = 5_000_000;
 
 export class MediaIngestError extends Error {
   readonly code: string;
@@ -168,11 +169,12 @@ async function recoverExistingObject(
 }
 
 export async function ingestTwilioImage(input: IngestTwilioImageInput): Promise<IngestedMedia> {
-  const maxBytes = input.maxBytes ?? 16 * 1024 * 1024;
-  if (!Number.isInteger(maxBytes) || maxBytes < 1024 || maxBytes > 16 * 1024 * 1024) {
+  const maxBytes = input.maxBytes ?? WHATSAPP_IMAGE_MAX_BYTES;
+  if (!Number.isInteger(maxBytes) || maxBytes < 1024 || maxBytes > WHATSAPP_IMAGE_MAX_BYTES) {
     throw new MediaIngestError("invalid_size_limit", "Media byte limit is invalid.");
   }
   if (!input.authToken) throw new MediaIngestError("missing_auth_token", "Twilio media credential is missing.");
+  if (input.contentType === "image/webp") throw new MediaIngestError("unsupported_image_type", "Send a JPG or PNG image, not a sticker.");
 
   const key = immutableObjectKey(input);
   const existing = await recoverExistingObject(input, key, maxBytes);

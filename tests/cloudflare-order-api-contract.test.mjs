@@ -39,8 +39,8 @@ test("keeps order creation database-backed, idempotent and location-bound", asyn
   assert.match(repository, /med250_client_requests/);
   assert.match(repository, /atomicBatch\(this\.database, statements\)/);
   assert.match(repository, /dispatchToNearestPharmacies/);
-  assert.match(client, /orderBackendConfigured = true/);
-  assert.doesNotMatch(client, /NEXT_PUBLIC_MED250_ORDER_BACKEND|Supabase|supabase|\.rpc\(/);
+  assert.match(client, /orderBackendConfigured =\s*process\.env\.NEXT_PUBLIC_MED250_ORDER_BACKEND === "worker-d1"/);
+  assert.doesNotMatch(client, /Supabase|supabase|\.rpc\(/);
   assert.match(client, /\/api\/orders\/prescription/);
   assert.match(client, /prescription_media_id: prescriptionPath/);
   assert.match(client, /med250ApiJson\("\/api\/orders"/);

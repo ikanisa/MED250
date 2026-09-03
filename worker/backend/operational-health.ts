@@ -1,6 +1,7 @@
 import { firstRow, type D1Row } from "../../db/index.ts";
 import { constantTimeEqualHex, sha256Hex } from "./secure-token.ts";
 import { d1Database, healthProbeToken } from "./runtime-env.ts";
+import { BUSINESS_CONTENT } from "./whatsapp-content.ts";
 
 const HEALTH_PATH = "/api/internal/health";
 const HEALTH_CONTRACT = "med250-worker-d1-health-v1";
@@ -97,11 +98,22 @@ export class OperationalHealthRepository {
       this.count("med250_pharmacies WHERE licence_status = 'current'"),
       this.count("med250_pharmacies WHERE licence_status = 'current' AND latitude IS NOT NULL AND longitude IS NOT NULL"),
       this.count(`med250_pharmacies pharmacy WHERE licence_status = 'current' AND licence_expires_on >= ?
-        AND marketplace_approved = 1 AND dispatch_enabled = 1 AND latitude IS NOT NULL AND longitude IS NOT NULL
+        AND marketplace_approved = 1 AND dispatch_enabled = 1 AND geocode_status='verified'
+        AND latitude BETWEEN -3 AND -0.8 AND longitude BETWEEN 28.7 AND 30.9
         AND EXISTS (SELECT 1 FROM med250_pharmacy_contacts contact WHERE contact.pharmacy_id = pharmacy.id
-          AND contact.channel = 'whatsapp' AND contact.verified_at IS NOT NULL AND contact.active = 1 AND contact.dispatch_enabled = 1)`, [today]),
+          AND contact.channel = 'whatsapp' AND contact.verified_at IS NOT NULL AND contact.active = 1 AND contact.dispatch_enabled = 1
+          AND (contact.messaging_opt_in_at IS NOT NULL OR EXISTS (
+            SELECT 1 FROM med250_partner_initial_permissions permission
+            WHERE permission.contact_id=contact.id AND permission.pharmacy_id=pharmacy.id AND permission.e164=contact.e164
+              AND permission.revoked_at IS NULL AND permission.claimed_request_id IS NULL
+              AND (SELECT count(*) FROM med250_twilio_content_registry WHERE definition_key IN (?,?)
+                AND state='ready' AND approval_status='approved')=2
+          ))
+          AND NOT EXISTS (SELECT 1 FROM med250_actors a WHERE a.e164=contact.e164 AND a.whatsapp_opted_out_at IS NOT NULL))`,
+        [today,`business:${BUSINESS_CONTENT.image_initial.content.friendly_name}`,`business:${BUSINESS_CONTENT.web_initial.content.friendly_name}`]),
       this.count("med250_pharmacy_contacts WHERE channel = 'whatsapp' AND verified_at IS NOT NULL AND active = 1 AND login_enabled = 1"),
-      this.count("med250_pharmacy_contacts WHERE channel = 'whatsapp' AND verified_at IS NOT NULL AND active = 1 AND dispatch_enabled = 1"),
+      this.count(`med250_pharmacy_contacts c WHERE channel='whatsapp' AND verified_at IS NOT NULL AND active=1 AND dispatch_enabled=1
+        AND messaging_opt_in_at IS NOT NULL AND NOT EXISTS (SELECT 1 FROM med250_actors a WHERE a.e164=c.e164 AND a.whatsapp_opted_out_at IS NOT NULL)`),
       this.count("med250_known_pharmacy_numbers WHERE resolution_status = 'resolved'"),
       this.count("med250_known_pharmacy_numbers WHERE resolution_status = 'ambiguous'"),
       this.count("med250_known_pharmacy_numbers WHERE resolution_status = 'retired'"),
@@ -145,6 +157,11 @@ export class OperationalHealthRepository {
       this.count("med250_product_images WHERE rights_verified = 0"),
       this.count("med250_product_images WHERE approved = 1 AND rights_verified = 0"),
     ]);
+    const initialPermissions = await firstRow<D1Row>(this.database, `SELECT count(*) AS recorded,
+      coalesce(sum(claimed_request_id IS NOT NULL),0) AS claimed,
+      coalesce(sum(revoked_at IS NOT NULL),0) AS revoked,
+      coalesce(sum(claimed_request_id IS NULL AND revoked_at IS NULL),0) AS unused
+      FROM med250_partner_initial_permissions`);
     const staleWork = stalePending + staleClaimed + staleEnqueued + staleSending;
     const expiredNotDeleted = expiredRequestMedia + expiredPrescriptionMedia;
     const staleProcessing = staleRequestMedia + stalePrescriptionMedia;
@@ -158,6 +175,10 @@ export class OperationalHealthRepository {
       database: { expected_migration: expectedMigration, current_migration: currentMigration, applied_migration_count: appliedCount, baseline_checksums_valid: migrationsCurrent, migrations_current: migrationsCurrent },
       pharmacies: { current: currentPharmacies, gps_ready: gpsReady, dispatch_ready: dispatchReady, verified_login_contacts: verifiedLogin, verified_dispatch_contacts: verifiedDispatch, known_numbers_resolved: resolvedNumbers, known_numbers_ambiguous: ambiguousNumbers, known_numbers_retired: retiredNumbers },
       users: { clients, pharmacy_actors: pharmacyActors, saved_current_locations: savedLocations },
+      partner_permissions: { basis: 'owner_attested_initial_request',
+        recorded: integer(initialPermissions,'recorded'), claimed: integer(initialPermissions,'claimed'),
+        revoked: integer(initialPermissions,'revoked'), unused: integer(initialPermissions,'unused'),
+        recurring_opted_in_contacts: verifiedDispatch },
       dispatch: { pending, claimed, enqueued, sending, retry, provider_send_unknown: providerUnknown, failed, failed_24h: failed24h, dead_letter: deadLetter, stale_work: staleWork, provider_callback_failures_24h: callbackFailures24h },
       inbound: { stale_unprocessed: staleInbound },
       orders: { active: activeOrders, waiting_without_confirmation_over_30m: waitingOrders },

@@ -1,0 +1,22 @@
+Hello Mary,
+
+We have now diagnosed and corrected the technical rejection. The Twilio ApprovalRequests API returned this exact reason for V4 (HX4c2a1289aeeaf9b7d75782f3ff617aa9):
+"Problem: Failed to create template, Reason: Illegal character in path at index 42: https://med-250.com/whatsapp-client-media/{{5}}.png"
+
+The Console duplicate was missing its media-variable sample. We created the replacements through the Content API with explicit sample defaults, and verified that the resolved non-patient PNG samples are publicly reachable by GET and HEAD. We also verified Available / Not Available and the unchanged action payload meanings.
+
+Submitted replacements (2 September 2026):
+- med250_pharmacy_client_media_request_v5 — HXbe5008c1475d4d5027a81a7ab0e4b59e — Utility — submission acknowledged at 08:23:44 UTC / 10:23:44 Kigali; PENDING review confirmed at 08:26:43 UTC.
+- med250_pharmacy_request_v4 — HX8099a8e5bc862bf0ecf5818362c0c3e8 — Utility — submission acknowledged at 08:24:43 UTC / 10:24:43 Kigali; PENDING review confirmed at 08:27:43 UTC.
+- med250_whatsapp_otp_v2 — HXcd1480a6674edf378f48a5ba6088161a — Authentication — already reported APPROVED by your API at 08:22:42 UTC.
+
+The earlier V3 (HXc40fbd759da820c338972f0f0e8c4a09) is also now approved, but has the old button labels. We have preserved it and the sender. No sender deletion, deregistration or WABA change was made.
+
+Please track the two newly submitted Utility templates on the Meta backend, confirm their registration and review state, and provide the exact code/reason if either encounters a further rejection. The exact workflow is messaging-only: clients provide medicine/prescription photos, explicitly authorize sharing their request and WhatsApp number with up to ten opted-in licensed pharmacies, and pharmacies respond directly. There are no WhatsApp catalogues, product-list messages or in-chat payments. Please flag any category or specific use-case issue against that actual flow rather than treating the diagnosed URL-format error as a policy rejection.
+
+WABA: 1188521970082273
+Sender: +1 662-222-0600
+We are enforcing live approval checks before business-initiated sending and are not claiming successful pharmacy delivery from submission alone.
+
+Thank you,
+Ikanisa / MED+250

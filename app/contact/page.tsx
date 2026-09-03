@@ -60,7 +60,7 @@ export default function ContactPage() {
         </p>
         {publicChannels.length ? <div className="location-contact-links">{publicChannels.map((channel) => (
           <a key={channel.label} href={channel.href} target={channel.href.startsWith("http") ? "_blank" : undefined} rel={channel.href.startsWith("http") ? "noreferrer" : undefined}>
-            {channel.label === "email" ? "Email MED+250" : channel.label === "whatsapp" ? "WhatsApp MED+250" : "Book a meeting"}
+            WhatsApp support: {channel.display}
           </a>
         ))}</div> : null}
       </section>

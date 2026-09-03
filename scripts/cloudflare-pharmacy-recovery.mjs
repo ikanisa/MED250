@@ -893,6 +893,16 @@ async function remotePreflight(bundle) {
   return { receipt_count: receiptCount, seeded_pharmacies: seededPharmacies };
 }
 
+// This historical source pack joined December contact row numbers to May
+// pharmacy row numbers. Keep it readable for forensic comparison, but never
+// replay it over the reviewed production register or newly researched points.
+export function assertRecoveryApplySafe(bundle) {
+  if (bundle.schema_version === 'med250.cloudflare-pharmacy-recovery.v2') {
+    throw new PharmacyRecoveryError('legacy_register_epoch_mismatch',
+      'Legacy v2 pharmacy recovery apply is disabled: December contact serials are not May registry IDs. Use the audited exact-name/locality association repair and targeted coordinate research scripts.');
+  }
+}
+
 async function runCli() {
   const command = process.argv[2];
   if (command === "build") {
@@ -918,6 +928,7 @@ async function runCli() {
     if (argument("--confirm") !== confirmation) {
       throw new PharmacyRecoveryError("confirmation_required", `Apply requires --confirm '${confirmation}'.`);
     }
+    assertRecoveryApplySafe(loaded.bundle);
     const preflight = await remotePreflight(loaded.bundle);
     if (preflight.receipt_count === 0) {
       await wranglerCommand([

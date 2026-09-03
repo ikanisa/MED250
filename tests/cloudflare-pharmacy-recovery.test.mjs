@@ -8,6 +8,7 @@ import { promisify } from "node:util";
 
 import {
   PharmacyRecoveryError,
+  assertRecoveryApplySafe,
   buildPharmacyRecoveryBundle,
   readPharmacyRecoveryBundle,
   verifyPharmacyRecoveryBundle,
@@ -19,6 +20,11 @@ const root = new URL("../", import.meta.url).pathname;
 const workRoot = new URL("../work/", import.meta.url).pathname;
 const importedAt = "2026-08-23T18:00:00.000Z";
 let builtPromise;
+
+test('blocks replaying the legacy register-epoch mismatch even with an apply confirmation', () => {
+  assert.throws(() => assertRecoveryApplySafe({schema_version:'med250.cloudflare-pharmacy-recovery.v2'}),
+    error => error instanceof PharmacyRecoveryError && error.code === 'legacy_register_epoch_mismatch');
+});
 
 function built() {
   builtPromise ??= buildPharmacyRecoveryBundle({ target: "staging", importedAt });

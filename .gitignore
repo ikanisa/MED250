@@ -41,6 +41,8 @@ next-env.d.ts
 /dist/
 /.wrangler/
 /outputs/
+# Owner-attestation snapshots contain partner contact details; never commit them.
+/private-outputs/whatsapp-activation-2026-09-02/
 /work/
 /tmp/
 /archive/

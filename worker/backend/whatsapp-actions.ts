@@ -2,6 +2,8 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-
 const PHARMACY_ID = /^(?:[a-z0-9]+(?:-[a-z0-9]+)*)$/i;
 
 export type WhatsAppAction =
+  | { kind: "draft"; action: "ready" | "cancel" | "send_save" | "send_once" | "status"; requestId: string }
+  | { kind: "service"; action: "help" | "privacy" | "share" | "new" | "cancel" | "start" | "stop" | "forget" }
   | { kind: "use_saved"; requestId: string; locationId: string }
   | { kind: "share_location"; requestId: string }
   | { kind: "share_new"; requestId: string }
@@ -10,6 +12,14 @@ export type WhatsAppAction =
 
 export function parseClientAction(payload: string): WhatsAppAction | null {
   const parts = payload.trim().toLowerCase().split(":");
+  if (parts.length === 4 && parts[0] === "med250" && parts[1] === "draft" && UUID.test(parts[3])
+    && ["ready","cancel","send_save","send_once","status"].includes(parts[2])) {
+    return {kind:"draft",action:parts[2] as Extract<WhatsAppAction,{kind:"draft"}>["action"],requestId:parts[3]};
+  }
+  if (parts.length === 3 && parts[0] === "med250" && parts[1] === "service"
+    && ["help","privacy","share","new","cancel","start","stop","forget"].includes(parts[2])) {
+    return {kind:"service",action:parts[2] as Extract<WhatsAppAction,{kind:"service"}>["action"]};
+  }
   if (parts.length === 3 && parts[0] === "med250" && parts[1] === "guide" && (parts[2] === "send_image" || parts[2] === "ack")) {
     return { kind: "guidance", action: parts[2] };
   }

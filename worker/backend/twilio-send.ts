@@ -2,6 +2,7 @@ import { readResponseText } from "./bounded-body.ts";
 import type { TwilioSendRuntime } from "./runtime-env.ts";
 import { decryptOtpCode } from "./secure-token.ts";
 import type { OutboxDelivery } from "./whatsapp-repository.ts";
+import { SERVICE_CONTENT } from "./whatsapp-content.ts";
 
 const MESSAGE_SID = /^(?:SM|MM)[0-9a-f]{32}$/i;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -25,6 +26,8 @@ export class TwilioSendError extends Error {
 }
 
 export type TwilioOutboundMessage =
+  | { kind: "service"; toE164: string; serviceKey: string; variables: Record<string,string> }
+  | { kind: "media"; toE164: string; mediaUrl: string; body: string }
   | { kind: "content"; toE164: string; contentSid: string; variables: Record<string, string> }
   | { kind: "text"; toE164: string; body: string };
 
@@ -106,7 +109,7 @@ export async function composeOutboxMessage(
       contentSid: runtime.pharmacyRequestContentSid,
       variables: {
         "1": compact(delivery.requestReference ?? "MED250 request", 80),
-        "2": compact(payloadString(delivery.payload, "item_summary"), 900),
+        "2": safeItemSummary(payloadString(delivery.payload, "item_summary")),
         "3": String(positiveInteger(delivery.payload, "total_units", 990)),
         "4": `+${delivery.customerE164}`,
         "5": approximateDistance(delivery.distanceM),
@@ -156,8 +159,8 @@ export async function composeOutboxMessage(
       || delivery.pharmacyId.length > 64
       || !PHARMACY_ID.test(delivery.pharmacyId)
     ) throw new Error("Client-media delivery context is incomplete.");
-    const imageIndex = Math.max(1, (delivery.mediaIndex ?? 0) + 1);
-    const mediaCount = Math.max(imageIndex, delivery.mediaCount ?? imageIndex);
+    const imageIndex = Math.max(1, Number(delivery.payload.image_index ?? delivery.mediaIndex ?? 0) + 1);
+    const mediaCount = Math.max(imageIndex, Number(delivery.payload.image_count ?? delivery.mediaCount ?? imageIndex));
     return {
       kind: "content",
       toE164: delivery.recipientE164,
@@ -178,26 +181,32 @@ export async function composeOutboxMessage(
     const count = recipientCount(delivery.payload);
     return count > 0
       ? {
-          kind: "content",
+          kind: "service",
           toE164: delivery.recipientE164,
-          contentSid: runtime.clientDispatchConfirmationContentSid,
-          variables: { "1": String(count) },
+          serviceKey: "delivered",
+          variables: { "1": String(count), "2": delivery.requestId ?? payloadUuid(delivery.payload,"request_id") },
         }
       : {
-          kind: "text",
+          kind: "service",
           toE164: delivery.recipientE164,
-          body: "Your location was saved. No verified pharmacy could be assigned yet, so your image was not shared. Please try again later.",
+          serviceKey: "no_pharmacy", variables: {},
         };
   }
 
   if (delivery.kind === "client_guidance") {
     const guidance = typeof delivery.payload.guidance === "string" ? delivery.payload.guidance : "send_image";
-    const body = guidance === "media_failed"
-      ? "We could not securely save that file. Please send one clear JPG, PNG or WebP image of the medicine or prescription, maximum 16 MB."
-      : guidance === "location_saved"
-        ? "Your location was saved for your next request. Now send one clear image of the medicine or prescription you need—no WhatsApp catalogue or typed medicine list is required."
-        : "Send one clear image of the medicine or prescription you need. MED+250 does not require a WhatsApp catalogue or typed medicine list. We will then ask for your delivery location.";
-    return { kind: "text", toE164: delivery.recipientE164, body };
+    if(guidance==='partner_location_outreach') return {kind:'content',toE164:delivery.recipientE164,
+      contentSid:runtime.pharmacyRequestContentSid,variables:{}}; // Resolved to the exact business definition before send.
+    if (guidance === "share_contact") return {kind:"media",toE164:delivery.recipientE164,
+      mediaUrl:"https://med-250.com/whatsapp/med250.vcf",body:""};
+    if (!SERVICE_CONTENT[guidance]) throw new Error("Unrecognized service message.");
+    const raw=delivery.payload.variables;
+    const variables:Record<string,string>={};
+    if(raw && typeof raw==="object" && !Array.isArray(raw)) for(const [key,value] of Object.entries(raw)) {
+      if(typeof value!=="string" || value.length>240) throw new Error("Invalid service message variable.");
+      variables[key]=value;
+    }
+    return {kind:"service",toE164:delivery.recipientE164,serviceKey:guidance,variables};
   }
 
   throw new TwilioSendError("unsupported_outbox_kind", "This outbox delivery kind is not implemented.", { retryable: false });
@@ -240,8 +249,11 @@ export async function sendTwilioMessage(
   if (message.kind === "content") {
     form.set("ContentSid", message.contentSid);
     form.set("ContentVariables", JSON.stringify(message.variables));
+  } else if (message.kind === "service") {
+    throw new Error("Service content must be resolved before sending.");
   } else {
-    form.set("Body", message.body);
+    if(message.body) form.set("Body", message.body);
+    if(message.kind === "media") form.set("MediaUrl",message.mediaUrl);
   }
 
   const request = async (username: string, password: string): Promise<Response> => {
@@ -323,4 +335,14 @@ export async function sendTwilioMessage(
       { retryable: false, outcomeUnknown: true },
     );
   }
+}
+
+export function safeItemSummary(value:string):string {
+  const items=value.replace(/[\r\n]+/g,"; ").split(";").map(item=>item.trim()).filter(Boolean);
+  const kept:string[]=[];
+  for(const item of items) {
+    if([...kept,item].join("; ").length>480) break;
+    kept.push(item);
+  }
+  return kept.length===items.length ? kept.join("; ") : `${kept.length?kept.join("; ")+"; ":""}Full list in pharmacy portal`;
 }
